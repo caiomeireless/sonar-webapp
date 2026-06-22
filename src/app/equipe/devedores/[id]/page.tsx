@@ -130,6 +130,18 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
             </p>
           ) : null}
 
+          {/* Link discreto pro dashboard analitico — atalho no topo do dossie.
+              Cor signal pra ficar levemente acima do ruido sem competir com
+              os CTAs dourados mais abaixo. */}
+          <div className="mt-4">
+            <Link
+              href={`/equipe/devedores/${devedor.id}/dashboard${linkBase}`}
+              className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-[0.18em] text-[var(--color-signal)] transition hover:text-[var(--color-tip-glow)]"
+            >
+              Ver dashboard analitico →
+            </Link>
+          </div>
+
           {/* 3 cards de numero grande */}
           <div className="mt-10 grid gap-4 sm:grid-cols-3">
             <CardNumero rotulo="Total de bens" valor={String(total_bens)} />

@@ -1,4 +1,4 @@
-// Templates de pecas juridicas geradas pelo Sonar.
+// Templates de pecas jurídicas geradas pelo Sonar.
 // Cada template recebe dossie + caso + opcoes (Set<string>) e devolve {título, secoes}.
 //
 // REDESENHO 2026-06-22 (instrucao Caio): os docx do escritório sao referencia
@@ -8,7 +8,7 @@
 // processo) e descreve cada um com os dados especificos (matrícula, placa,
 // CNPJ, area, etc.). Onde a fonte e Cat A (ARISP/SICAR/ONR/Junta), cita-se
 // "(documento ora juntado, Doc. NN)"; onde e Cat B (BigDataCorp, Assertiva,
-// minhareceita, DataJud), pede-se ofício ao orgao competente.
+// minhareceita, DataJud), pede-se ofício ao órgão competente.
 //
 // Os 2 templates "modelares" (penhora-faturamento, bloqueio-sisbajud) ficam
 // intactos — refletem pecas reais do escritório (MARIA PANEBIANCHI + FACEBOOK).
@@ -107,7 +107,7 @@ export const TEMPLATES: ReadonlyArray<TemplateMeta> = [
     categoria: "penhora",
     nome: "Penhora de Imóvel",
     descricao:
-      "Requer penhora dos imóveis localizados pelo Sonar (urbanos via ARISP/eDossie e rurais via SICAR). Cita matrícula, area e localização de cada bem, e pede averbação na matrícula.",
+      "Requer penhora dos imóveis localizados pelo Sonar (urbanos via ARISP/eDossie e rurais via SICAR). Cita matrícula, área e localização de cada bem, e pede averbação na matrícula.",
     emoji: "🏠",
     opcoes: [
       { id: "gratuidade", label: "Gratuidade judicial", default: false },
@@ -155,7 +155,7 @@ export const TEMPLATES: ReadonlyArray<TemplateMeta> = [
       { id: "gratuidade", label: "Gratuidade judicial", default: false },
       {
         id: "pedir-certidao-junta",
-        label: "Pedir ofício a Junta pra certidão",
+        label: "Pedir ofício à Junta pra certidão",
         default: true,
       },
       {
@@ -186,7 +186,7 @@ export const TEMPLATES: ReadonlyArray<TemplateMeta> = [
     categoria: "penhora",
     nome: "Penhora de Faturamento (art. 866 CPC)",
     descricao:
-      "Apos esgotadas as diligências ordinarias (SISBAJUD, INFOJUD, RENAJUD, ARISP negativos), requer-se medida atípica de penhora sobre faturamento da empresa do executado.",
+      "Após esgotadas as diligências ordinárias (SISBAJUD, INFOJUD, RENAJUD, ARISP negativos), requer-se medida atípica de penhora sobre faturamento da empresa do executado.",
     emoji: "🏭",
     opcoes: [
       { id: "sigiloso", label: "Pedido sigiloso", default: true },
@@ -210,9 +210,9 @@ export const TEMPLATES: ReadonlyArray<TemplateMeta> = [
   {
     id: "bloqueio-sisbajud",
     categoria: "bloqueio",
-    nome: "Bloqueio SISBAJUD (pos-decurso CPC 523)",
+    nome: "Bloqueio SISBAJUD (pós-decurso CPC 523)",
     descricao:
-      "Apos o decurso do prazo de pagamento estabelecido pela decisão, requer-se bloqueio SISBAJUD com acréscimo de multa e honorários (CPC 523) sobre o valor atualizado.",
+      "Após o decurso do prazo de pagamento estabelecido pela decisão, requer-se bloqueio SISBAJUD com acréscimo de multa e honorários (CPC 523) sobre o valor atualizado.",
     emoji: "🏦",
     opcoes: [
       {
@@ -222,7 +222,7 @@ export const TEMPLATES: ReadonlyArray<TemplateMeta> = [
       },
       {
         id: "multa-cpc-523",
-        label: "Acrescimo multa 10% + honorários 10% (CPC 523)",
+        label: "Acréscimo multa 10% + honorários 10% (CPC 523)",
         default: true,
       },
       {
@@ -242,7 +242,7 @@ export const TEMPLATES: ReadonlyArray<TemplateMeta> = [
     categoria: "penhora",
     nome: "Penhora Consolidada",
     descricao:
-      "Peticao unica reunindo TODOS os bens encontrados (imóveis + veículos + cotas + processos) em um so requerimento, com pedidos a/b/c/d enumerados no final.",
+      "Petição única reunindo TODOS os bens encontrados (imóveis + veículos + cotas + processos) em um só requerimento, com pedidos a/b/c/d enumerados no final.",
     emoji: "⚖",
     opcoes: [
       { id: "gratuidade", label: "Gratuidade judicial", default: false },
@@ -255,14 +255,14 @@ export const TEMPLATES: ReadonlyArray<TemplateMeta> = [
       { id: "pedir-renajud", label: "Pedir ofício RENAJUD (veículos)", default: true },
       { id: "pedir-certidao-junta", label: "Pedir certidão Junta (cotas)", default: true },
       { id: "incluir-bloqueio-sisbajud", label: "Pedido subsidiário SISBAJUD", default: false },
-      { id: "mencionar-ma-fe", label: "Mencionar ma-fe do executado", default: false },
+      { id: "mencionar-ma-fe", label: "Mencionar má-fé do executado", default: false },
       { id: "multa-cpc-523", label: "Multa + honorários CPC 523 (10%+10%)", default: false },
     ],
   },
 ];
 
 // ============================================================
-// CLASSIFICACAO DOS BENS (fonte -> tem prova anexa?)
+// CLASSIFICAÇÃO DOS BENS (fonte -> tem prova anexa?)
 // ============================================================
 
 // Fontes Cat A (geram doc oficial): ARISP, SICAR, ONR, Junta.
@@ -272,13 +272,13 @@ function temProvaAnexa(bem: Bem): boolean {
   return ["arisp", "sicar", "onr", "junta"].some((f) => fonte.includes(f));
 }
 
-// Pra bens da Cat B, qual orgao oficiar pra obter prova.
+// Pra bens da Cat B, qual órgão oficiar pra obter prova.
 function oficioParaBem(bem: Bem): string {
   if (bem.tipo === "veiculo") return "DETRAN via Sistema RENAJUD";
   if (bem.tipo === "imovel") return "Cartório de Registro de Imóveis competente";
   if (bem.tipo === "empresa") return "Junta Comercial competente";
   if (bem.tipo === "processo_credito") return "juízo da causa";
-  return "orgao competente";
+  return "órgão competente";
 }
 
 // Filtra os bens do dossie pelo tipo solicitado. Se `bensSelecionados` vier
@@ -316,8 +316,8 @@ function detalheArr(bem: Bem, chave: string): string[] {
   return v.filter((x): x is string => typeof x === "string" && x.length > 0);
 }
 
-// Descreve um imóvel em prosa juridica. Ex.:
-// "imóvel rural denominado Fazenda Boa Vista, com area de 8 hectares,
+// Descreve um imóvel em prosa jurídica. Ex.:
+// "imóvel rural denominado Fazenda Boa Vista, com área de 8 hectares,
 //  localizado em Itaberai/GO, matrícula nº 12.345 perante o CRI Itaberai"
 function descricaoJuridicaImovel(bem: Bem): string {
   const tipo = detalheStr(bem, "tipo"); // 'rural' | 'urbano'
@@ -335,16 +335,16 @@ function descricaoJuridicaImovel(bem: Bem): string {
 
   if (tipo === "rural") {
     partes.push(`o imóvel rural denominado **${denominacao}**`);
-    if (areaHa !== null) partes.push(`com area de ${areaHa} hectares`);
+    if (areaHa !== null) partes.push(`com área de ${areaHa} hectares`);
   } else if (tipo === "urbano") {
     partes.push(`o imóvel urbano denominado **${denominacao}**`);
-    if (areaM2 !== null) partes.push(`com area de ${areaM2} m²`);
-    if (logradouro) partes.push(`situado a ${logradouro}`);
+    if (areaM2 !== null) partes.push(`com área de ${areaM2} m²`);
+    if (logradouro) partes.push(`situado à ${logradouro}`);
   } else {
     partes.push(`o imóvel denominado **${denominacao}**`);
-    if (areaHa !== null) partes.push(`com area de ${areaHa} hectares`);
-    else if (areaM2 !== null) partes.push(`com area de ${areaM2} m²`);
-    if (logradouro) partes.push(`situado a ${logradouro}`);
+    if (areaHa !== null) partes.push(`com área de ${areaHa} hectares`);
+    else if (areaM2 !== null) partes.push(`com área de ${areaM2} m²`);
+    if (logradouro) partes.push(`situado à ${logradouro}`);
   }
 
   if (cidade && uf) {
@@ -362,7 +362,7 @@ function descricaoJuridicaImovel(bem: Bem): string {
   return partes.join(", ");
 }
 
-// Descreve um veículo em prosa juridica. Ex.:
+// Descreve um veículo em prosa jurídica. Ex.:
 // "Honda Civic EXL, ano/modelo 2019, cor Prata, placa **ABC1D23**, Renavam 01234567890"
 function descricaoJuridicaVeiculo(bem: Bem): string {
   const marca = detalheStr(bem, "marca");
@@ -384,14 +384,14 @@ function descricaoJuridicaVeiculo(bem: Bem): string {
   return partes.join(", ");
 }
 
-// Descreve uma empresa em prosa juridica. Ex.:
+// Descreve uma empresa em prosa jurídica. Ex.:
 // "Albuquerque Consultoria LTDA, inscrita no CNPJ nº 33.444.555/0001-66,
 //  da qual o executado figura como Sócio-Administrador, titular de 30% do
 //  capital social (R$ 100.000,00)"
 function descricaoJuridicaEmpresa(bem: Bem): string {
   const razao = detalheStr(bem, "razao_social") ?? bem.titulo;
   const cnpj = detalheStr(bem, "cnpj");
-  const percent = detalheNum(bem, "percent_participação");
+  const percent = detalheNum(bem, "percent_participacao");
   const capital = detalheNum(bem, "capital_social");
   const qual = detalheStr(bem, "qual");
   const situacao = detalheStr(bem, "situacao");
@@ -413,7 +413,7 @@ function descricaoJuridicaEmpresa(bem: Bem): string {
   return partes.join(", ");
 }
 
-// Descreve um crédito/processo em prosa juridica. Ex.:
+// Descreve um crédito/processo em prosa jurídica. Ex.:
 // "processo nº 0123456-12.2024.8.26.0100, em trâmite perante o TJSP,
 //  classe Cumprimento de sentença, no qual o executado figura no polo
 //  ativo, com crédito estimado de R$ 45.000,00"
@@ -436,13 +436,13 @@ function descricaoJuridicaProcessoCredito(bem: Bem): string {
 }
 
 // Helper que devolve texto "(documento ora juntado, Doc. NN)" se Cat A,
-// ou "(requer-se a expedição de ofício a {orgao})" se Cat B.
+// ou "(requer-se a expedição de ofício ao {órgão})" se Cat B.
 function complementoProva(bem: Bem, ordemAnexo: number): string {
   if (temProvaAnexa(bem)) {
     const numStr = String(ordemAnexo).padStart(2, "0");
     return `, conforme documento ora juntado (Doc. ${numStr})`;
   }
-  return `, sendo necessaria a expedição de ofício a${
+  return `, sendo necessária a expedição de ofício a${
     bem.tipo === "veiculo" ? "o " : " "
   }${oficioParaBem(bem)} para confirmação oficial`;
 }
@@ -493,7 +493,7 @@ function encerramentoPadrao(): string[] {
 }
 
 // Cria a "fala" de abertura padrao da peca: "FULANO, já qualificada..."
-// O texto principal apos o vocativo varia por peca, por isso retorna so
+// O texto principal após o vocativo varia por peca, por isso retorna so
 // o credor + devedor formatados.
 function aberturaPartes(
   credorNome: string,
@@ -517,7 +517,7 @@ const UNIDADES = [
   "",
   "um",
   "dois",
-  "tres",
+  "três",
   "quatro",
   "cinco",
   "seis",
@@ -679,10 +679,10 @@ function gerarPecaAusenciaBem(opts: {
       ],
     },
     {
-      titulo: "I) DA AUSENCIA DE BEM LOCALIZADO",
+      titulo: "I) DA AUSÊNCIA DE BEM LOCALIZADO",
       paragrafos: [
         `A diligência realizada pelo sistema interno de busca patrimonial via Inteligência Artificial do presente escritório (SONAR) não identificou, no momento, ${tipoNomeSingular} em nome do executado **${devedor.toUpperCase()}** que viabilize a presente medida.`,
-        `Diante disso, **REQUER-SE** a manutenção da diligência patrimonial em curso, com nova consulta agendada, bem como o prosseguimento das demais medidas constritivas cabiveis nos autos.`,
+        `Diante disso, **REQUER-SE** a manutenção da diligência patrimonial em curso, com nova consulta agendada, bem como o prosseguimento das demais medidas constritivas cabíveis nos autos.`,
       ],
     },
     { paragrafos: encerramentoPadrao() },
@@ -700,7 +700,7 @@ function gerarPecaAusenciaBem(opts: {
 }
 
 // ------------------------------------------------------------
-// 1) PENHORA DE IMOVEL
+// 1) PENHORA DE IMÓVEL
 // ------------------------------------------------------------
 function gerarPenhoraImovel(
   dossie: Dossie,
@@ -716,7 +716,7 @@ function gerarPenhoraImovel(
   if (imoveis.length === 0) {
     return gerarPecaAusenciaBem({
       templateId: "penhora-imovel",
-      titulo: "PENHORA DE IMOVEL",
+      titulo: "PENHORA DE IMÓVEL",
       tipoNomeSingular: "imóvel",
       dossie,
       caso,
@@ -755,7 +755,7 @@ function gerarPenhoraImovel(
     const descricao = descricaoJuridicaImovel(bem);
     const complemento = complementoProva(bem, ordemAnexoImovel);
     paragrafosBusca.push(
-      `Verificou-se que o executado e titular d${descricao}${complemento}.`,
+      `Verificou-se que o executado é titular d${descricao}${complemento}.`,
     );
     if (temProvaAnexa(bem)) {
       const numStr = String(ordemAnexoImovel).padStart(2, "0");
@@ -777,15 +777,15 @@ function gerarPenhoraImovel(
     titulo: "II) DO FUNDAMENTO LEGAL",
     paragrafos: [
       `A penhora de bens imóveis encontra fundamento expresso no **art. 835, V, do CPC**, que arrola o imóvel entre os bens primários da ordem legal de preferência da constrição executiva, prestigiando a efetividade do título e o direito do credor à satisfação do crédito.`,
-      `Identificado o bem e localizada a matrícula, impoe-se a **averbação da penhora no respectivo registro imobiliário**, em homenagem a publicidade erga omnes e a higidez de eventual aquisição por terceiros, na exata dicção do **art. 844 do CPC**, sem prejuízo da formalização por mandado, nos moldes do **art. 845 do CPC**, e da avaliação a cargo do oficial de justiça ou perito do juízo (**art. 870 e art. 871 do CPC**).`,
-      { tipo: "citacao", texto: "Art. 844. Para presuncao absoluta de conhecimento por terceiros, cabe ao exequente providenciar a averbação do arresto ou da penhora no registro competente, mediante apresentação de copia do auto ou do termo, independentemente de mandado judicial." },
-      `Por fim, conforme entendimento consolidado pelo **Superior Tribunal de Justiça na Súmula 84** — que admite embargos de terceiro fundados em posse decorrente de compromisso de compra e venda não registrado —, a publicidade conferida pela averbação da penhora e a unica salvaguarda apta a evitar disputas posteriores sobre a higidez da constrição, razão pela qual a medida deve ser deferida sem delongas.`,
+      `Identificado o bem e localizada a matrícula, impõe-se a **averbação da penhora no respectivo registro imobiliário**, em homenagem à publicidade erga omnes e à higidez de eventual aquisição por terceiros, na exata dicção do **art. 844 do CPC**, sem prejuízo da formalização por mandado, nos moldes do **art. 845 do CPC**, e da avaliação a cargo do oficial de justiça ou perito do juízo (**art. 870 e art. 871 do CPC**).`,
+      { tipo: "citacao", texto: "Art. 844. Para presunção absoluta de conhecimento por terceiros, cabe ao exequente providenciar a averbação do arresto ou da penhora no registro competente, mediante apresentação de cópia do auto ou do termo, independentemente de mandado judicial." },
+      `Por fim, conforme entendimento consolidado pelo **Superior Tribunal de Justiça na Súmula 84** — que admite embargos de terceiro fundados em posse decorrente de compromisso de compra e venda não registrado —, a publicidade conferida pela averbação da penhora é a única salvaguarda apta a evitar disputas posteriores sobre a higidez da constrição, razão pela qual a medida deve ser deferida sem delongas.`,
     ],
   });
 
   // III) Pedidos
   const pedidos: ParagrafoEntry[] = [
-    `Diante do exposto, **REQUER-SE** a Vossa Excelencia:`,
+    `Diante do exposto, **REQUER-SE** a Vossa Excelência:`,
   ];
   let letra = "a";
   const next = () => {
@@ -805,7 +805,7 @@ function gerarPenhoraImovel(
       new Set(
         imoveisSemProva.map((b) => {
           const cidade = detalheStr(b, "cidade") ?? "comarca local";
-          return `Cartório de Registro de Imoveis de ${cidade}`;
+          return `Cartório de Registro de Imóveis de ${cidade}`;
         }),
       ),
     );
@@ -830,7 +830,7 @@ function gerarPenhoraImovel(
   }
   if (usaGratuidade) {
     pedidos.push(
-      `${next()}. seja recebida sem recolhimento de custas em razão da concessão dos benefícios da **GRATUIDADE JUDICIAL** ja formalizada nos autos.`,
+      `${next()}. seja recebida sem recolhimento de custas em razão da concessão dos benefícios da **GRATUIDADE JUDICIAL** já formalizada nos autos.`,
     );
   }
   secoes.push({ titulo: "III) DOS PEDIDOS", paragrafos: pedidos });
@@ -925,13 +925,13 @@ function gerarPenhoraVeiculo(
       `A penhora de veículos automotores encontra fundamento expresso no **art. 835, IV, do CPC**, que arrola os veículos de via terrestre entre os bens preferenciais da ordem legal de constrição patrimonial, viabilizando a satisfação célere do crédito exequendo.`,
       `A efetivação da medida pelo **Sistema RENAJUD**, instituído pela **Resolução CNJ nº 89/2009**, dispensa diligência prévia por oficial de justiça em razão da integração direta entre o Poder Judiciário e a base do DENATRAN, bastando a determinação judicial para imediata anotação da restrição de transferência e circulação, com efeito constitutivo da publicidade da penhora — sem prejuízo da formalização por mandado em outras comarcas (**art. 845, § 1º, do CPC**).`,
       { tipo: "citacao", texto: "Art. 845. § 1º A penhora de imóveis, independentemente de onde se localizem, quando apresentada certidão da respectiva matrícula, e a penhora de veículos automotores, quando apresentada certidão que ateste a sua existência, serão realizadas por termo nos autos." },
-      `Eventual alienação fiduciária do bem não constitui óbice a constrição: conforme entendimento pacificado pelo **Superior Tribunal de Justiça (REsp 1.498.737/SP)** e à luz do **art. 1.361 do Código Civil**, a propriedade fiduciária atribuída ao credor fiduciario não impede a penhora dos **direitos do executado-fiduciante** sobre o veículo financiado, os quais sao plenamente penhoráveis enquanto direito patrimonial (art. 835, XIII, CPC).`,
+      `Eventual alienação fiduciária do bem não constitui óbice à constrição: conforme entendimento pacificado pelo **Superior Tribunal de Justiça (REsp 1.498.737/SP)** e à luz do **art. 1.361 do Código Civil**, a propriedade fiduciária atribuída ao credor fiduciário não impede a penhora dos **direitos do executado-fiduciante** sobre o veículo financiado, os quais são plenamente penhoráveis enquanto direito patrimonial (art. 835, XIII, CPC).`,
     ],
   });
 
   // III) Pedidos
   const pedidos: ParagrafoEntry[] = [
-    `Diante do exposto, **REQUER-SE** a Vossa Excelencia:`,
+    `Diante do exposto, **REQUER-SE** a Vossa Excelência:`,
   ];
   let letra = "a";
   const next = () => {
@@ -943,7 +943,7 @@ function gerarPenhoraVeiculo(
   pedidos.push(
     `${next()}. a **expedição de ofício ao DETRAN, via Sistema RENAJUD**, para confirmação da titularidade ${
       veiculos.length === 1 ? "do veículo acima indicado" : "dos veículos acima indicados"
-    } e, em ato continuo, o **bloqueio de transferência e circulação via RENAJUD** ate a integral satisfação do crédito exequendo, nos termos do art. 854 e seguintes do CPC;`,
+    } e, em ato contínuo, o **bloqueio de transferência e circulação via RENAJUD** até a integral satisfação do crédito exequendo, nos termos do art. 854 e seguintes do CPC;`,
   );
   pedidos.push(
     `${next()}. a **penhora** ${
@@ -952,14 +952,14 @@ function gerarPenhoraVeiculo(
   );
   if (pedirBuscaApreensao) {
     pedidos.push(
-      `${next()}. subsidiáriamente, a **expedição de mandado de busca e apreensão** ${
+      `${next()}. subsidiariamente, a **expedição de mandado de busca e apreensão** ${
         veiculos.length === 1 ? "do bem" : "dos bens"
-      } para garantia da execução, com indicação dos endereços constantes do dossie de busca patrimonial;`,
+      } para garantia da execução, com indicação dos endereços constantes do dossiê de busca patrimonial;`,
     );
   }
   if (usaGratuidade) {
     pedidos.push(
-      `${next()}. seja recebida sem recolhimento de custas em razão da concessão dos benefícios da **GRATUIDADE JUDICIAL** ja formalizada nos autos.`,
+      `${next()}. seja recebida sem recolhimento de custas em razão da concessão dos benefícios da **GRATUIDADE JUDICIAL** já formalizada nos autos.`,
     );
   }
   secoes.push({ titulo: "III) DOS PEDIDOS", paragrafos: pedidos });
@@ -1041,7 +1041,7 @@ function gerarPenhoraCotas(
     if (temProvaAnexa(bem)) {
       const numStr = String(ordemAnexoEmpresa).padStart(2, "0");
       anexos.push({
-        titulo: `Doc. ${numStr} — Certidao simplificada da Junta — ${bem.titulo}`,
+        titulo: `Doc. ${numStr} — Certidão simplificada da Junta — ${bem.titulo}`,
         fonte: bem.fonte,
       });
       ordemAnexoEmpresa += 1;
@@ -1059,14 +1059,14 @@ function gerarPenhoraCotas(
     paragrafos: [
       `A penhora de quotas e ações de sociedades empresárias tem assento no **art. 835, IX, do CPC**, que arrola os direitos sociais entre os bens penhoráveis, e procedimento delineado no **art. 861 do CPC**, o qual disciplina a intimação da sociedade, a oferta das quotas aos demais sócios em sede de preferência legal e, no insucesso desta, a liquidação em favor do exequente.`,
       `Em reforço, o **art. 1.026 do Código Civil** assenta que os credores particulares do sócio podem recair sobre o quinhão que a este caiba na sociedade, ao passo que o **art. 1.027** disciplina o concurso com os demais sócios da limitada, garantindo a higidez do affectio societatis sem prejuízo da efetividade da execução.`,
-      { tipo: "citacao", texto: "Art. 861. Penhoradas as quotas ou as ações de sócio em sociedade simples ou empresária, o juiz assinara prazo razoável, não superior a 3 (tres) meses, para que a sociedade: I - apresente balanço especial; II - ofereça as quotas ou as ações aos demais sócios, observado o direito de preferência legal ou contratual; III - não havendo interesse dos sócios, proceda a liquidação das quotas ou das ações, depositando em juízo o valor apurado." },
-      `Nao se desconhece eventual insurgencia fundada em afastamento da penhorabilidade em sociedades fechadas — argumento ja superado pelo **Superior Tribunal de Justiça (REsp 1.284.988/RS)**, que admite a penhora de cotas mesmo em sociedade limitada de cunho personalista, prestigiando a efetividade do título executivo em detrimento da blindagem patrimonial pretendida pelo executado.`,
+      { tipo: "citacao", texto: "Art. 861. Penhoradas as quotas ou as ações de sócio em sociedade simples ou empresária, o juiz assinará prazo razoável, não superior a 3 (três) meses, para que a sociedade: I - apresente balanço especial; II - ofereça as quotas ou as ações aos demais sócios, observado o direito de preferência legal ou contratual; III - não havendo interesse dos sócios, proceda a liquidação das quotas ou das ações, depositando em juízo o valor apurado." },
+      `Não se desconhece eventual insurgência fundada em afastamento da penhorabilidade em sociedades fechadas — argumento já superado pelo **Superior Tribunal de Justiça (REsp 1.284.988/RS)**, que admite a penhora de cotas mesmo em sociedade limitada de cunho personalista, prestigiando a efetividade do título executivo em detrimento da blindagem patrimonial pretendida pelo executado.`,
     ],
   });
 
   // III) Pedidos
   const pedidos: ParagrafoEntry[] = [
-    `Diante do exposto, **REQUER-SE** a Vossa Excelencia:`,
+    `Diante do exposto, **REQUER-SE** a Vossa Excelência:`,
   ];
   let letra = "a";
   const next = () => {
@@ -1079,11 +1079,11 @@ function gerarPenhoraCotas(
     `${next()}. a **penhora das cotas representativas** da participação societária do executado n${empresas.length === 1 ? "a sociedade" : "as sociedades"} indicada${empresas.length === 1 ? "" : "s"} no item I, nos termos do art. 835, IX, e art. 861 do CPC, com a respectiva avaliação;`,
   );
 
-  // Para empresas Cat B, sugere ofício a Junta se a opcao tiver marcada.
+  // Para empresas Cat B, sugere ofício à Junta se a opcao tiver marcada.
   const empresasSemProva = empresas.filter((b) => !temProvaAnexa(b));
   if (pedirCertidaoJunta && empresasSemProva.length > 0) {
     pedidos.push(
-      `${next()}. a **expedição de ofício a Junta Comercial competente** para emissao de certidão simplificada atualizada${
+      `${next()}. a **expedição de ofício à Junta Comercial competente** para emissão de certidão simplificada atualizada${
         empresasSemProva.length === 1
           ? " da sociedade indicada"
           : " de cada uma das sociedades indicadas"
@@ -1093,17 +1093,17 @@ function gerarPenhoraCotas(
 
   if (pedirAverbacaoContrato) {
     pedidos.push(
-      `${next()}. a **expedição de ofício a Junta Comercial competente para averbação da penhora no contrato social** d${empresas.length === 1 ? "a sociedade" : "as sociedades"} acima indicada${empresas.length === 1 ? "" : "s"};`,
+      `${next()}. a **expedição de ofício à Junta Comercial competente para averbação da penhora no contrato social** d${empresas.length === 1 ? "a sociedade" : "as sociedades"} acima indicada${empresas.length === 1 ? "" : "s"};`,
     );
   }
 
   pedidos.push(
-    `${next()}. a **intimação d${empresas.length === 1 ? "a sociedade" : "as sociedades"}** para que apresente${empresas.length === 1 ? "" : "m"}, no prazo de 3 (tres) meses, balanço especial e oferte${empresas.length === 1 ? "" : "m"} as cotas aos demais sócios (preferência legal, art. 861, I, CPC) ou, na recusa, proceda a liquidação em favor da exequente;`,
+    `${next()}. a **intimação d${empresas.length === 1 ? "a sociedade" : "as sociedades"}** para que apresente${empresas.length === 1 ? "" : "m"}, no prazo de 3 (três) meses, balanço especial e oferte${empresas.length === 1 ? "" : "m"} as cotas aos demais sócios (preferência legal, art. 861, I, CPC) ou, na recusa, proceda a liquidação em favor da exequente;`,
   );
 
   if (usaGratuidade) {
     pedidos.push(
-      `${next()}. seja recebida sem recolhimento de custas em razão da concessão dos benefícios da **GRATUIDADE JUDICIAL** ja formalizada nos autos.`,
+      `${next()}. seja recebida sem recolhimento de custas em razão da concessão dos benefícios da **GRATUIDADE JUDICIAL** já formalizada nos autos.`,
     );
   }
   secoes.push({ titulo: "III) DOS PEDIDOS", paragrafos: pedidos });
@@ -1178,7 +1178,7 @@ function gerarPenhoraRostoAutos(
   processos.forEach((bem) => {
     const descricao = descricaoJuridicaProcessoCredito(bem);
     paragrafosBusca.push(
-      `Verificou-se a existência d${descricao}, dado obtido junto ao DataJud (Conselho Nacional de Justiça), conforme dossie patrimonial em anexo.`,
+      `Verificou-se a existência d${descricao}, dado obtido junto ao DataJud (Conselho Nacional de Justiça), conforme dossiê patrimonial em anexo.`,
     );
   });
 
@@ -1189,7 +1189,7 @@ function gerarPenhoraRostoAutos(
 
   // II) Fundamento legal — sempre presente; art. 860 in verbis condicional
   const paragrafosFund: ParagrafoEntry[] = [
-    `O crédito que o executado titula em outro processo constitui **direito patrimonial penhorável**, na exata dicção do **art. 835, IX, do CPC**, sendo a constrição no rosto dos autos a técnica processual específica para sua afetação a presente execução, conforme procedimento estatuído no **art. 860 do CPC**.`,
+    `O crédito que o executado titula em outro processo constitui **direito patrimonial penhorável**, na exata dicção do **art. 835, IX, do CPC**, sendo a constrição no rosto dos autos a técnica processual específica para sua afetação à presente execução, conforme procedimento estatuído no **art. 860 do CPC**.`,
   ];
   if (incluirArt860) {
     paragrafosFund.push(
@@ -1197,18 +1197,18 @@ function gerarPenhoraRostoAutos(
     );
     paragrafosFund.push({
       texto:
-        "Art. 860. Quando o direito estiver sendo pleiteado em juízo, a penhora que recair sobre ele será averbada, com destaque, nos autos pertinentes ao direito e na ciência do juiz a que estiver afeto o feito, a fim de que a importancia que vier a ser paga ou os bens que vierem a ser entregues sejam considerados depositados, ficando vinculados ao juízo da execução em que se procedeu a penhora.",
+        "Art. 860. Quando o direito estiver sendo pleiteado em juízo, a penhora que recair sobre ele será averbada, com destaque, nos autos pertinentes ao direito e na ciência do juiz a que estiver afeto o feito, a fim de que a importância que vier a ser paga ou os bens que vierem a ser entregues sejam considerados depositados, ficando vinculados ao juízo da execução em que se procedeu a penhora.",
       tipo: "citacao",
     });
   }
   paragrafosFund.push(
-    `Em reforço, o **Superior Tribunal de Justiça** ha muito firmou, através de sua **Súmula 308**, a viabilidade da penhora de créditos do devedor em poder de terceiros, e a doutrina e jurisprudência convergem no sentido de que a medida produz efeitos imediatos: deferida a constrição, cumpre ao juízo da causa receptora **reservar o valor correspondente** ate o limite do crédito exequendo, conferindo plena efetividade ao título aqui exequido.`,
+    `Em reforço, o **Superior Tribunal de Justiça** há muito firmou, através de sua **Súmula 308**, a viabilidade da penhora de créditos do devedor em poder de terceiros, e a doutrina e jurisprudência convergem no sentido de que a medida produz efeitos imediatos: deferida a constrição, cumpre ao juízo da causa receptora **reservar o valor correspondente** até o limite do crédito exequendo, conferindo plena efetividade ao título aqui exequido.`,
   );
   secoes.push({ titulo: "II) DO FUNDAMENTO LEGAL", paragrafos: paragrafosFund });
 
   // III) Pedidos
   const pedidos: ParagrafoEntry[] = [
-    `Diante do exposto, **REQUER-SE** a Vossa Excelencia:`,
+    `Diante do exposto, **REQUER-SE** a Vossa Excelência:`,
   ];
   let letra = "a";
   const next = () => {
@@ -1223,11 +1223,11 @@ function gerarPenhoraRostoAutos(
     } indicado${processos.length === 1 ? "" : "s"} no item I, na forma do art. 860 do CPC;`,
   );
   pedidos.push(
-    `${next()}. a **expedição de ofício** ao(s) juízo(s) da(s) causa(s), com cota do escrivao, para a competente averbação da constrição e retenção dos valores eventualmente apurados ate o limite do crédito exequendo, com posterior remessa a este juízo;`,
+    `${next()}. a **expedição de ofício** ao(s) juízo(s) da(s) causa(s), com cota do escrivão, para a competente averbação da constrição e retenção dos valores eventualmente apurados até o limite do crédito exequendo, com posterior remessa a este juízo;`,
   );
   if (usaGratuidade) {
     pedidos.push(
-      `${next()}. seja recebida sem recolhimento de custas em razão da concessão dos benefícios da **GRATUIDADE JUDICIAL** ja formalizada nos autos.`,
+      `${next()}. seja recebida sem recolhimento de custas em razão da concessão dos benefícios da **GRATUIDADE JUDICIAL** já formalizada nos autos.`,
     );
   }
   secoes.push({
@@ -1310,14 +1310,14 @@ function gerarPenhoraFaturamento(
       { texto: "2- INFOJUD: negativo", tipo: "item" },
       { texto: "3- RENAJUD: negativo", tipo: "item" },
       { texto: "4- ARISP: negativo", tipo: "item" },
-      `Neste sentido, resta claro a ma-fe da EXECUTADA, em se esquivar do cumprimento e adimplemento da obrigação tida junto a Exequente, fato este que não merece perdurar.`,
+      `Neste sentido, resta claro a má-fé da EXECUTADA, em se esquivar do cumprimento e adimplemento da obrigação tida junto à Exequente, fato este que não merece perdurar.`,
     ],
   });
 
-  // Bloco "fundamento legal" — vem antes da medida atípica (que contem o pedido).
+  // Bloco "fundamento legal" — vem antes da medida atípica (que contém o pedido).
   const paragrafosFundFat: ParagrafoEntry[] = [
-    `A penhora sobre percentual do faturamento da empresa em que figura o executado encontra fundamento expresso no **art. 866 do CPC**, instituto de natureza subsidiária que pressupoe a inexistência de outros bens penhoráveis — ou a insuficiência/dificuldade de alienação destes —, hipotese plenamente configurada nos autos, conforme demonstrado no item I.`,
-    `Trata-se, ademais, de instrumento legitimo de **medidas executivas atípicas** previstas no **art. 139, IV, do CPC**, o qual confere ao magistrado poderes para determinar todas as medidas indutivas, coercitivas, mandamentais ou sub-rogatorias necessarias a assegurar o cumprimento de ordem judicial e a satisfação do crédito exequendo, sem prejuízo da observancia dos parametros do art. 866 (percentual razoável + administrador-depositário).`,
+    `A penhora sobre percentual do faturamento da empresa em que figura o executado encontra fundamento expresso no **art. 866 do CPC**, instituto de natureza subsidiária que pressupõe a inexistência de outros bens penhoráveis — ou a insuficiência/dificuldade de alienação destes —, hipótese plenamente configurada nos autos, conforme demonstrado no item I.`,
+    `Trata-se, ademais, de instrumento legítimo de **medidas executivas atípicas** previstas no **art. 139, IV, do CPC**, o qual confere ao magistrado poderes para determinar todas as medidas indutivas, coercitivas, mandamentais ou sub-rogatórias necessárias a assegurar o cumprimento de ordem judicial e a satisfação do crédito exequendo, sem prejuízo da observância dos parâmetros do art. 866 (percentual razoável + administrador-depositário).`,
   ];
   if (incluirArt866) {
     paragrafosFundFat.push(
@@ -1325,22 +1325,22 @@ function gerarPenhoraFaturamento(
     );
     paragrafosFundFat.push({
       texto:
-        "Art. 866. Se o executado não tiver outros bens penhoráveis ou se, tendo-os, esses forem de dificil alienação ou insuficientes para saldar o crédito executado, o juiz podera ordenar a penhora de percentual de faturamento de empresa.",
+        "Art. 866. Se o executado não tiver outros bens penhoráveis ou se, tendo-os, esses forem de difícil alienação ou insuficientes para saldar o crédito executado, o juiz poderá ordenar a penhora de percentual de faturamento de empresa.",
       tipo: "citacao",
     });
     paragrafosFundFat.push({
       texto:
-        "§ 1º O juiz fixara percentual que propicie a satisfação do crédito exequendo em tempo razoável, mas que não torne inviavel o exercício da atividade empresarial.",
+        "§ 1º O juiz fixará percentual que propicie a satisfação do crédito exequendo em tempo razoável, mas que não torne inviável o exercício da atividade empresarial.",
       tipo: "citacao",
     });
     paragrafosFundFat.push({
       texto:
-        "§ 2º O juiz nomeara administrador-depositário, o qual submetera a aprovação judicial a forma de sua atuação e prestara contas mensalmente, entregando em juízo as quantias recebidas, com os respectivos balancetes mensais, afim de serem imputadas no pagamento da divida.",
+        "§ 2º O juiz nomeará administrador-depositário, o qual submeterá a aprovação judicial a forma de sua atuação e prestará contas mensalmente, entregando em juízo as quantias recebidas, com os respectivos balancetes mensais, a fim de serem imputadas no pagamento da dívida.",
       tipo: "citacao",
     });
     paragrafosFundFat.push({
       texto:
-        "§ 3º Na penhora de percentual de faturamento de empresa, observar-se-a, no que couber, o disposto quanto ao regime de penhora de frutos e rendimentos de coisa movel e imóvel. **(GRIFO NOSSO)**",
+        "§ 3º Na penhora de percentual de faturamento de empresa, observar-se-á, no que couber, o disposto quanto ao regime de penhora de frutos e rendimentos de coisa móvel e imóvel. **(GRIFO NOSSO)**",
       tipo: "citacao",
     });
   }
@@ -1349,30 +1349,30 @@ function gerarPenhoraFaturamento(
     paragrafos: paragrafosFundFat,
   });
 
-  // Bloco "medidas atípicas" (contem o pedido principal).
+  // Bloco "medidas atípicas" (contém o pedido principal).
   const corpoAtipico: ParagrafoEntry[] = [
-    `Posto isso, a EXEQUENTE esclarece que, a partir do presente momento processual, imprescindível será a adocao de **MEDIDAS ATÍPICAS** de constrição de bens, de modo que esgotadas todas as alternativas corriqueiras para a localização de bens.`,
+    `Posto isso, a EXEQUENTE esclarece que, a partir do presente momento processual, imprescindível será a adoção de **MEDIDAS ATÍPICAS** de constrição de bens, de modo que esgotadas todas as alternativas corriqueiras para a localização de bens.`,
   ];
   if (razaoEmpresa && cnpjEmpresa) {
     corpoAtipico.push(
-      `Nesse cenario, apos empregada algumas diligências internas, a EXEQUENTE constatou que a EXECUTADA e titular d**a sociedade ${razaoEmpresa}**, inscrita sob o **CNPJ nº ${cnpjEmpresa}**, conforme ficha JUCESP em anexo.`,
+      `Nesse cenário, após empregada algumas diligências internas, a EXEQUENTE constatou que a EXECUTADA é titular da sociedade **${razaoEmpresa}**, inscrita sob o **CNPJ nº ${cnpjEmpresa}**, conforme ficha JUCESP em anexo.`,
     );
   } else if (cnpjEmpresa) {
     corpoAtipico.push(
-      `Nesse cenario, apos empregada algumas diligências internas, a EXEQUENTE constatou que a EXECUTADA e titular de pessoa juridica inscrita sob o **CNPJ nº ${cnpjEmpresa}**, conforme ficha JUCESP em anexo.`,
+      `Nesse cenário, após empregada algumas diligências internas, a EXEQUENTE constatou que a EXECUTADA é titular de pessoa jurídica inscrita sob o **CNPJ nº ${cnpjEmpresa}**, conforme ficha JUCESP em anexo.`,
     );
   } else {
     corpoAtipico.push(
-      `Nesse cenario, apos empregada algumas diligências internas, a EXEQUENTE constatou que a EXECUTADA mantem atividade empresarial em pessoa juridica em seu nome, conforme documentos em anexo.`,
+      `Nesse cenário, após empregada algumas diligências internas, a EXEQUENTE constatou que a EXECUTADA mantém atividade empresarial em pessoa jurídica em seu nome, conforme documentos em anexo.`,
     );
   }
   if (incluirRedeSocial) {
     corpoAtipico.push(
-      `Reforca-se ainda que a EXECUTADA mantem ativa divulgação das atividades de sua empresa em **redes sociais** (Instagram e TikTok), prova inequivoca do exercício regular da atividade economica e da existência de faturamento corrente.`,
+      `Reforça-se ainda que a EXECUTADA mantém ativa divulgação das atividades de sua empresa em **redes sociais** (Instagram e TikTok), prova inequívoca do exercício regular da atividade econômica e da existência de faturamento corrente.`,
     );
   }
   corpoAtipico.push(
-    `Assim, sem mais alternativas e verificado o status de atividade da Executada em documentos oficiais, requer-se seja **penhorado o faturamento da empresa re** no percentual que entender V. Exa., nos termos do artigo 866 do CPC.`,
+    `Assim, sem mais alternativas e verificado o status de atividade da Executada em documentos oficiais, requer-se seja **penhorado o faturamento da empresa ré** no percentual que entender V. Exa., nos termos do artigo 866 do CPC.`,
   );
   secoes.push({
     titulo: "III) DAS MEDIDAS ATÍPICAS — PENHORA DE FATURAMENTO",
@@ -1383,7 +1383,7 @@ function gerarPenhoraFaturamento(
   if (usaGratuidade) {
     secoes.push({
       paragrafos: [
-        `A EXEQUENTE esclarece que deixa de recolher as custas judiciais em vista da concessão dos benefícios da **GRATUIDADE JUDICIAL** ja formalizada nos autos.`,
+        `A EXEQUENTE esclarece que deixa de recolher as custas judiciais em vista da concessão dos benefícios da **GRATUIDADE JUDICIAL** já formalizada nos autos.`,
       ],
     });
   }
@@ -1423,7 +1423,7 @@ function gerarPenhoraFaturamento(
 }
 
 // ------------------------------------------------------------
-// 6) BLOQUEIO SISBAJUD (pos-decurso CPC 523)
+// 6) BLOQUEIO SISBAJUD (pós-decurso CPC 523)
 // (modelo: peca FACEBOOK SERVICOS — 3ª Vara Civel Sorocaba)
 // ------------------------------------------------------------
 function gerarBloqueioSisbajud(
@@ -1450,7 +1450,7 @@ function gerarBloqueioSisbajud(
   const secoes: Secao[] = [];
 
   // Abertura — atenção ao DECURSO do prazo.
-  const classeAcaoBloqueio = classeAcaoDoCaso(caso, "ACAO");
+  const classeAcaoBloqueio = classeAcaoDoCaso(caso, "AÇÃO");
   secoes.push({
     paragrafos: [
       `**${credor.toUpperCase()}**, já qualificada nos autos do **${classeAcaoBloqueio}** em epígrafe, ` +
@@ -1463,15 +1463,15 @@ function gerarBloqueioSisbajud(
   if (usaMulta523) {
     secoes.push({
       paragrafos: [
-        `Considerando a inércia do EXECUTADO quanto ao pagamento do valor em execução, imprescindível o **acréscimo automatico do valor de multa de 10% (dez por cento), e de honorários advocatícios** relativos a fase de cumprimento, no mesmo percentual, nos termos do art. 523, §§ 1º e 2º, do CPC, in verbis:`,
+        `Considerando a inércia do EXECUTADO quanto ao pagamento do valor em execução, imprescindível o **acréscimo automático do valor de multa de 10% (dez por cento), e de honorários advocatícios** relativos à fase de cumprimento, no mesmo percentual, nos termos do art. 523, §§ 1º e 2º, do CPC, in verbis:`,
         {
           texto:
-            "§ 1º Nao ocorrendo pagamento voluntario no prazo do caput, o débito será acrescido de multa de dez por cento e, tambem, de honorários de advogado de dez por cento.",
+            "§ 1º Não ocorrendo pagamento voluntário no prazo do caput, o débito será acrescido de multa de dez por cento e, também, de honorários de advogado de dez por cento.",
           tipo: "citacao",
         },
         {
           texto:
-            "§ 2º Efetuado o pagamento parcial no prazo previsto no caput, a multa e os honorários previstos no § 1º incidirao sobre o restante.",
+            "§ 2º Efetuado o pagamento parcial no prazo previsto no caput, a multa e os honorários previstos no § 1º incidirão sobre o restante.",
           tipo: "citacao",
         },
       ],
@@ -1485,7 +1485,7 @@ function gerarBloqueioSisbajud(
       : `o valor de **${valor}**`;
     secoes.push({
       paragrafos: [
-        `A credora pleiteia tambem pela juntada da planilha de cálculos atualizada, em que o débito total em execução equivale a ${trechoValor}.`,
+        `A credora pleiteia também pela juntada da planilha de cálculos atualizada, em que o débito total em execução equivale a ${trechoValor}.`,
       ],
     });
   }
@@ -1494,11 +1494,11 @@ function gerarBloqueioSisbajud(
   secoes.push({
     titulo: "DO FUNDAMENTO LEGAL",
     paragrafos: [
-      `A medida de bloqueio de ativos financeiros encontra fundamento expresso no **art. 854 do CPC**, dispositivo que disciplina a indisponibilidade eletrônica de valores em instituições financeiras por meio do **Sistema SISBAJUD** (antigo BACENJUD), instituído pelas **Resolucoes CNJ nº 61/2008 e nº 232/2016**.`,
+      `A medida de bloqueio de ativos financeiros encontra fundamento expresso no **art. 854 do CPC**, dispositivo que disciplina a indisponibilidade eletrônica de valores em instituições financeiras por meio do **Sistema SISBAJUD** (antigo BACENJUD), instituído pelas **Resoluções CNJ nº 61/2008 e nº 232/2016**.`,
       { tipo: "citacao", texto: "Art. 854. Para possibilitar a penhora de dinheiro em depósito ou em aplicação financeira, o juiz, a requerimento do exequente, sem dar ciência prévia do ato ao executado, determinará as instituições financeiras, por meio de sistema eletrônico gerido pela autoridade supervisora do sistema financeiro nacional, que tornem indisponíveis ativos financeiros existentes em nome do executado, limitando-se a indisponibilidade ao valor indicado na execução." },
       { tipo: "citacao", texto: "§ 1º No prazo de 24 (vinte e quatro) horas a contar da resposta, de modo a tornar efetiva a penhora, o juiz determinará as instituições financeiras que sejam transferidos os ativos para conta vinculada ao juízo da execução." },
       { tipo: "citacao", texto: "§ 2º Tornados indisponíveis os ativos, o executado será intimado na pessoa de seu advogado ou, não o tendo, pessoalmente." },
-      `Cumpre ressaltar que, na esteira do entendimento firmado pelo **Superior Tribunal de Justiça no julgamento do REsp 1.184.765/PA, submetido a sistematica dos recursos repetitivos (Tema 425)**, o bloqueio eletrônico via sistema do Banco Central constitui **medida preferencial** em sede executiva, **não se exigindo do exequente o previo exaurimento de outras vias de pesquisa patrimonial** — providência que, no caso, ate ja se esgotaram, robustecendo o pleito ora deduzido.`,
+      `Cumpre ressaltar que, na esteira do entendimento firmado pelo **Superior Tribunal de Justiça no julgamento do REsp 1.184.765/PA, submetido a sistemática dos recursos repetitivos (Tema 425)**, o bloqueio eletrônico via sistema do Banco Central constitui **medida preferencial** em sede executiva, **não se exigindo do exequente o prévio exaurimento de outras vias de pesquisa patrimonial** — providência que, no caso, até já se esgotaram, robustecendo o pleito ora deduzido.`,
     ],
   });
 
@@ -1535,7 +1535,7 @@ function gerarBloqueioSisbajud(
 
 // ------------------------------------------------------------
 // 7) PENHORA CONSOLIDADA — reune TODOS os tipos de bens encontrados
-// em uma unica peticao, com pedidos enumerados a/b/c/d no final.
+// em uma única petição, com pedidos enumerados a/b/c/d no final.
 // Util quando o dossie tem 2+ tipos (imóvel + veículo + cotas + processos)
 // e o BP quer evitar protocolar 4 pecas separadas.
 // ------------------------------------------------------------
@@ -1622,7 +1622,7 @@ function gerarPenhoraConsolidada(
     paragrafos: [
       `A diligência realizada pelo **sistema interno de busca patrimonial via Inteligência Artificial do presente escritório (SONAR)** identificou, em nome do executado **${devedor.nome.toUpperCase()}**, os seguintes bens penhoráveis: ${tiposEncontrados.join(
         ", ",
-      )}, conforme se discrimina nos topicos seguintes.`,
+      )}, conforme se discrimina nos tópicos seguintes.`,
     ],
   });
 
@@ -1634,7 +1634,7 @@ function gerarPenhoraConsolidada(
       const descricao = descricaoJuridicaImovel(bem);
       const complemento = complementoProva(bem, ordemAnexo);
       paragrafosImoveis.push(
-        `Verificou-se que o executado e titular d${descricao}${complemento}.`,
+        `Verificou-se que o executado é titular d${descricao}${complemento}.`,
       );
       if (temProvaAnexa(bem)) {
         const numStr = String(ordemAnexo).padStart(2, "0");
@@ -1646,7 +1646,7 @@ function gerarPenhoraConsolidada(
       }
     });
     secoes.push({
-      titulo: "I.1) DOS IMOVEIS LOCALIZADOS",
+      titulo: "I.1) DOS IMÓVEIS LOCALIZADOS",
       paragrafos: paragrafosImoveis,
     });
   }
@@ -1666,7 +1666,7 @@ function gerarPenhoraConsolidada(
       );
     });
     secoes.push({
-      titulo: "I.2) DOS VEICULOS LOCALIZADOS",
+      titulo: "I.2) DOS VEÍCULOS LOCALIZADOS",
       paragrafos: paragrafosVeiculos,
     });
   }
@@ -1683,14 +1683,14 @@ function gerarPenhoraConsolidada(
       if (temProvaAnexa(bem)) {
         const numStr = String(ordemAnexo).padStart(2, "0");
         anexos.push({
-          titulo: `Doc. ${numStr} — Certidao simplificada da Junta — ${bem.titulo}`,
+          titulo: `Doc. ${numStr} — Certidão simplificada da Junta — ${bem.titulo}`,
           fonte: bem.fonte,
         });
         ordemAnexo += 1;
       }
     });
     secoes.push({
-      titulo: "I.3) DAS COTAS SOCIETARIAS",
+      titulo: "I.3) DAS COTAS SOCIETÁRIAS",
       paragrafos: paragrafosCotas,
     });
   }
@@ -1701,7 +1701,7 @@ function gerarPenhoraConsolidada(
     processos.forEach((bem) => {
       const descricao = descricaoJuridicaProcessoCredito(bem);
       paragrafosProcessos.push(
-        `Verificou-se a existência d${descricao}, dado obtido junto ao DataJud (Conselho Nacional de Justiça), conforme dossie patrimonial em anexo.`,
+        `Verificou-se a existência d${descricao}, dado obtido junto ao DataJud (Conselho Nacional de Justiça), conforme dossiê patrimonial em anexo.`,
       );
     });
     secoes.push({
@@ -1713,7 +1713,7 @@ function gerarPenhoraConsolidada(
   // II) Fundamento legal — subdividido por tipo de bem, fecha com art. 139, IV
   // e CF/88 art. 5º, XXXV.
   const paragrafosFundCons: ParagrafoEntry[] = [
-    `As medidas constritivas ora postuladas encontram solido amparo no ordenamento juridico patrio, observada a especificidade de cada categoria de bem identificada no item I, conforme se passa a fundamentar.`,
+    `As medidas constritivas ora postuladas encontram sólido amparo no ordenamento jurídico pátrio, observada a especificidade de cada categoria de bem identificada no item I, conforme se passa a fundamentar.`,
   ];
   if (imoveis.length > 0) {
     paragrafosFundCons.push(
@@ -1727,16 +1727,16 @@ function gerarPenhoraConsolidada(
   }
   if (empresas.length > 0) {
     paragrafosFundCons.push(
-      `**II.3) Quanto as cotas societárias**: incidem o **art. 835, IX, e o art. 861, ambos do CPC**, e os **arts. 1.026 e 1.027 do CC**, sendo pacifica no **STJ (REsp 1.284.988/RS)** a penhorabilidade das cotas mesmo em sociedade limitada de feicao personalista.`,
+      `**II.3) Quanto às cotas societárias**: incidem o **art. 835, IX, e o art. 861, ambos do CPC**, e os **arts. 1.026 e 1.027 do CC**, sendo pacífica no **STJ (REsp 1.284.988/RS)** a penhorabilidade das cotas mesmo em sociedade limitada de feição personalista.`,
     );
   }
   if (processos.length > 0) {
     paragrafosFundCons.push(
-      `**II.4) Quanto aos créditos processuais**: a constrição no rosto dos autos esta disciplinada no **art. 860 do CPC**, tratando-se de direito patrimonial penhorável (**art. 835, IX, do CPC**), conforme **Súmula 308 do STJ**, com efeito imediato de reserva pelo juízo da causa receptora.`,
+      `**II.4) Quanto aos créditos processuais**: a constrição no rosto dos autos está disciplinada no **art. 860 do CPC**, tratando-se de direito patrimonial penhorável (**art. 835, IX, do CPC**), conforme **Súmula 308 do STJ**, com efeito imediato de reserva pelo juízo da causa receptora.`,
     );
   }
   paragrafosFundCons.push(
-    `Em remate, o **art. 139, IV, do CPC** autoriza o magistrado a determinar todas as medidas indutivas, coercitivas, mandamentais ou sub-rogatorias necessarias a assegurar o cumprimento de ordem judicial, conferindo ao juiz amplos poderes para emprestar efetividade ao título executivo, em consonancia com o principio constitucional do **acesso a justiça efetivo (art. 5º, XXXV, da Constituição Federal)** — postulado que reclama não apenas o ingresso em juízo, mas tambem a **tutela jurisdicional util**, materializada na satisfação concreta do crédito.`,
+    `Em remate, o **art. 139, IV, do CPC** autoriza o magistrado a determinar todas as medidas indutivas, coercitivas, mandamentais ou sub-rogatórias necessárias a assegurar o cumprimento de ordem judicial, conferindo ao juiz amplos poderes para emprestar efetividade ao título executivo, em consonância com o princípio constitucional do **acesso à justiça efetivo (art. 5º, XXXV, da Constituição Federal)** — postulado que reclama não apenas o ingresso em juízo, mas também a **tutela jurisdicional útil**, materializada na satisfação concreta do crédito.`,
   );
   secoes.push({
     titulo: "II) DO FUNDAMENTO LEGAL",
@@ -1746,9 +1746,9 @@ function gerarPenhoraConsolidada(
   // III) Ma-fe do executado (opcional).
   if (mencionarMaFe) {
     secoes.push({
-      titulo: "III) DA MA-FE DO EXECUTADO",
+      titulo: "III) DA MÁ-FÉ DO EXECUTADO",
       paragrafos: [
-        `Resta evidente, no caso em tela, a **ma-fe do EXECUTADO** em se esquivar do cumprimento e adimplemento da obrigação tida junto a EXEQUENTE, valendo-se da pulverização de seu patrimônio em diferentes naturezas (imóveis, veículos, participações societárias e créditos processuais) para dificultar a satisfação do crédito, conduta que não merece prosperar e que reforca a necessidade das constrições ora pleiteadas.`,
+        `Resta evidente, no caso em tela, a **má-fé do EXECUTADO** em se esquivar do cumprimento e adimplemento da obrigação tida junto à EXEQUENTE, valendo-se da pulverização de seu patrimônio em diferentes naturezas (imóveis, veículos, participações societárias e créditos processuais) para dificultar a satisfação do crédito, conduta que não merece prosperar e que reforça a necessidade das constrições ora pleiteadas.`,
       ],
     });
   }
@@ -1756,7 +1756,7 @@ function gerarPenhoraConsolidada(
   // IV) Pedidos — enumerados a/b/c/d/...
   const numTitulo = mencionarMaFe ? "IV" : "III";
   const pedidos: ParagrafoEntry[] = [
-    `Diante de todo o exposto, **REQUER-SE** a Vossa Excelencia:`,
+    `Diante de todo o exposto, **REQUER-SE** a Vossa Excelência:`,
   ];
   let letra = "a";
   const next = () => {
@@ -1801,7 +1801,7 @@ function gerarPenhoraConsolidada(
     );
     if (pedirCertidaoJunta) {
       partesCotas.push(
-        `a **expedição de ofício a Junta Comercial competente** para emissao de certidão simplificada atualizada e averbação da penhora no contrato social`,
+        `a **expedição de ofício à Junta Comercial competente** para emissão de certidão simplificada atualizada e averbação da penhora no contrato social`,
       );
     }
     pedidos.push(`${next()}. ${partesCotas.join(", ")};`);
@@ -1810,28 +1810,28 @@ function gerarPenhoraConsolidada(
   // d) Rosto dos autos
   if (processos.length > 0) {
     pedidos.push(
-      `${next()}. a **penhora no rosto dos autos** ${processos.length === 1 ? "do processo" : "dos processos"} descrito${processos.length === 1 ? "" : "s"} no item I.4, na forma do art. 860 do CPC, com a expedição de ofício ao(s) juízo(s) da(s) causa(s) para a competente averbação e retenção dos valores eventualmente apurados ate o limite do crédito exequendo;`,
+      `${next()}. a **penhora no rosto dos autos** ${processos.length === 1 ? "do processo" : "dos processos"} descrito${processos.length === 1 ? "" : "s"} no item I.4, na forma do art. 860 do CPC, com a expedição de ofício ao(s) juízo(s) da(s) causa(s) para a competente averbação e retenção dos valores eventualmente apurados até o limite do crédito exequendo;`,
     );
   }
 
   // e) Multa CPC 523 (opcional)
   if (usaMulta523) {
     pedidos.push(
-      `${next()}. o **acréscimo automatico da multa de 10% (dez por cento), e de honorários advocatícios** no mesmo percentual, nos termos do art. 523, §§ 1º e 2º, do CPC, sobre o valor atualizado do débito;`,
+      `${next()}. o **acréscimo automático da multa de 10% (dez por cento), e de honorários advocatícios** no mesmo percentual, nos termos do art. 523, §§ 1º e 2º, do CPC, sobre o valor atualizado do débito;`,
     );
   }
 
   // f) SISBAJUD subsidiário (opcional)
   if (incluirBloqueioSisbajud) {
     pedidos.push(
-      `${next()}. subsidiáriamente, e em carater complementar, a **realização de pesquisa/bloqueio via sistema SISBAJUD** sobre eventuais ativos financeiros do executado, ate o limite do crédito exequendo;`,
+      `${next()}. subsidiariamente, e em caráter complementar, a **realização de pesquisa/bloqueio via sistema SISBAJUD** sobre eventuais ativos financeiros do executado, até o limite do crédito exequendo;`,
     );
   }
 
   // g) Gratuidade (sempre por ultimo)
   if (usaGratuidade) {
     pedidos.push(
-      `${next()}. seja recebida sem recolhimento de custas em razão da concessão dos benefícios da **GRATUIDADE JUDICIAL** ja formalizada nos autos.`,
+      `${next()}. seja recebida sem recolhimento de custas em razão da concessão dos benefícios da **GRATUIDADE JUDICIAL** já formalizada nos autos.`,
     );
   }
 
