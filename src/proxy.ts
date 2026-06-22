@@ -8,7 +8,8 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Exclui /api (auth proprio por rota) e assets estaticos
-    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    // Exclui /api (auth proprio por rota) e assets estaticos.
+    // .js incluso pra liberar scripts hospedados em /public/lib/ (ex.: particles.min.js).
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|js|css|woff|woff2|ttf|otf|ico|txt|xml|json|map)$).*)",
   ],
 };
