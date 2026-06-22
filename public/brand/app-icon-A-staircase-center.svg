@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" aria-label="Sonar app icon (variant A — staircase)">
+  <defs>
+    <radialGradient id="bgShine" cx="30%" cy="20%" r="80%">
+      <stop offset="0%" stop-color="#E8E4D6" stop-opacity="0.06"></stop>
+      <stop offset="60%" stop-color="#0A0C0B" stop-opacity="0"></stop>
+    </radialGradient>
+    <radialGradient id="sweep" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#3CFF8A" stop-opacity="0.45"></stop>
+      <stop offset="80%" stop-color="#3CFF8A" stop-opacity="0.08"></stop>
+      <stop offset="100%" stop-color="#3CFF8A" stop-opacity="0"></stop>
+    </radialGradient>
+    <radialGradient id="tipGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#E8FFEE" stop-opacity="1"></stop>
+      <stop offset="60%" stop-color="#3CFF8A" stop-opacity="0.6"></stop>
+      <stop offset="100%" stop-color="#3CFF8A" stop-opacity="0"></stop>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="216" fill="#0A0C0B"></rect>
+  <rect width="1024" height="1024" rx="216" fill="url(#bgShine)"></rect>
+  <rect x="1" y="1" width="1022" height="1022" rx="215" fill="none" stroke="#E8E4D6" stroke-opacity="0.1" stroke-width="2"></rect>
+  <g transform="translate(154 154) scale(7.16)">
+    <circle cx="50" cy="50" r="46" fill="none" stroke="#3CFF8A" stroke-width="0.9"></circle>
+    <circle cx="50" cy="50" r="44.5" fill="none" stroke="#3CFF8A" stroke-width="3" stroke-dasharray="0.45 11.2" stroke-opacity="0.75"></circle>
+    <line x1="50" y1="1" x2="50" y2="6" stroke="#3CFF8A" stroke-width="0.9"></line>
+    <line x1="50" y1="94" x2="50" y2="99" stroke="#3CFF8A" stroke-width="0.9"></line>
+    <line x1="1" y1="50" x2="6" y2="50" stroke="#3CFF8A" stroke-width="0.9"></line>
+    <line x1="94" y1="50" x2="99" y2="50" stroke="#3CFF8A" stroke-width="0.9"></line>
+    <circle cx="50" cy="50" r="36" fill="none" stroke="#3CFF8A" stroke-width="0.4" stroke-opacity="0.5"></circle>
+    <circle cx="50" cy="50" r="26" fill="none" stroke="#3CFF8A" stroke-width="0.4" stroke-opacity="0.5"></circle>
+    <circle cx="50" cy="50" r="16" fill="none" stroke="#3CFF8A" stroke-width="0.4" stroke-opacity="0.5"></circle>
+    <line x1="6" y1="50" x2="94" y2="50" stroke="#3CFF8A" stroke-width="0.3" stroke-opacity="0.28"></line>
+    <line x1="50" y1="6" x2="50" y2="94" stroke="#3CFF8A" stroke-width="0.3" stroke-opacity="0.28"></line>
+    <path d="M 50 50 L 50 4 A 46 46 0 0 1 92.5 31 Z" fill="url(#sweep)"></path>
+    <line x1="50" y1="50" x2="50" y2="4" stroke="#3CFF8A" stroke-width="1.1"></line>
+    <circle cx="50" cy="4" r="3.5" fill="url(#tipGlow)"></circle>
+    <circle cx="50" cy="4" r="0.9" fill="#FFFFFF"></circle>
+    <circle cx="72" cy="34" r="3.5" fill="#C9A24A" fill-opacity="0.2"></circle>
+    <circle cx="72" cy="34" r="1.8" fill="#C9A24A"></circle>
+    <circle cx="62" cy="22" r="1" fill="#C9A24A" fill-opacity="0.85"></circle>
+    <circle cx="80" cy="44" r="0.85" fill="#C9A24A" fill-opacity="0.7"></circle>
+    <g aria-label="BP staircase">
+      <rect x="44.15" y="54.15" width="1.7" height="1.7" fill="#C9A24A" fill-opacity="1"></rect>
+      <rect x="46.15" y="54.15" width="1.7" height="1.7" fill="#C9A24A" fill-opacity="0.45"></rect>
+      <rect x="46.15" y="52.15" width="1.7" height="1.7" fill="#C9A24A" fill-opacity="1"></rect>
+      <rect x="48.15" y="54.15" width="1.7" height="1.7" fill="#C9A24A" fill-opacity="0.45"></rect>
+      <rect x="48.15" y="52.15" width="1.7" height="1.7" fill="#C9A24A" fill-opacity="0.72"></rect>
+      <rect x="48.15" y="50.15" width="1.7" height="1.7" fill="#C9A24A" fill-opacity="1"></rect>
+      <rect x="50.15" y="54.15" width="1.7" height="1.7" fill="#C9A24A" fill-opacity="0.45"></rect>
+      <rect x="50.15" y="52.15" width="1.7" height="1.7" fill="#C9A24A" fill-opacity="0.63"></rect>
+      <rect x="50.15" y="50.15" width="1.7" height="1.7" fill="#C9A24A" fill-opacity="0.82"></rect>
+      <rect x="50.15" y="48.15" width="1.7" height="1.7" fill="#C9A24A" fill-opacity="1"></rect>
+      <rect x="52.15" y="54.15" width="1.7" height="1.7" fill="#C9A24A" fill-opacity="0.45"></rect>
+      <rect x="52.15" y="52.15" width="1.7" height="1.7" fill="#C9A24A" fill-opacity="0.59"></rect>
+      <rect x="52.15" y="50.15" width="1.7" height="1.7" fill="#C9A24A" fill-opacity="0.72"></rect>
+      <rect x="52.15" y="48.15" width="1.7" height="1.7" fill="#C9A24A" fill-opacity="0.86"></rect>
+      <rect x="52.15" y="46.15" width="1.7" height="1.7" fill="#C9A24A" fill-opacity="1"></rect>
+      <rect x="54.15" y="54.15" width="1.7" height="1.7" fill="#C9A24A" fill-opacity="0.45"></rect>
+      <rect x="54.15" y="52.15" width="1.7" height="1.7" fill="#C9A24A" fill-opacity="0.56"></rect>
+      <rect x="54.15" y="50.15" width="1.7" height="1.7" fill="#C9A24A" fill-opacity="0.67"></rect>
+      <rect x="54.15" y="48.15" width="1.7" height="1.7" fill="#C9A24A" fill-opacity="0.78"></rect>
+      <rect x="54.15" y="46.15" width="1.7" height="1.7" fill="#C9A24A" fill-opacity="0.89"></rect>
+      <rect x="54.15" y="44.15" width="1.7" height="1.7" fill="#C9A24A" fill-opacity="1"></rect>
+    </g>
+  </g>
+</svg>

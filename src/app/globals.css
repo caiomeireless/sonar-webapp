@@ -1,0 +1,291 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Sonar — Design Tokens
+   Identidade do handoff Claude Design (variante B)
+   ============================================================ */
+:root {
+  /* Brand colors */
+  --color-onyx:        #0A0C0B;  /* page background */
+  --color-carbon:      #050706;  /* card surface */
+  --color-ivory:       #E8E4D6;  /* primary text + wordmark */
+  --color-signal:      #3CFF8A;  /* sonar accent */
+  --color-gold:        #C9A24A;  /* firm accent / targets */
+  --color-gold-soft:   #A77A2E;  /* gold on light backgrounds */
+  --color-tip-glow:    #E8FFEE;  /* sweep tip highlight */
+
+  /* Alpha variants */
+  --color-ivory-12:    rgba(232, 228, 214, 0.07);
+  --color-ivory-22:    rgba(232, 228, 214, 0.13);
+  --color-ivory-66:    rgba(232, 228, 214, 0.40);
+  --color-ivory-88:    rgba(232, 228, 214, 0.53);
+  --color-signal-06:   rgba(60, 255, 138, 0.024);
+  --color-signal-12:   rgba(60, 255, 138, 0.07);
+
+  /* Spacing (8pt) */
+  --space-1: 4px;  --space-2: 8px;   --space-3: 12px;  --space-4: 16px;
+  --space-5: 20px; --space-6: 24px;  --space-8: 32px;  --space-10: 40px;
+  --space-12: 48px; --space-16: 64px; --space-20: 80px;
+
+  /* Radii */
+  --radius-sm:   4px;  --radius-md:  6px;  --radius-lg: 8px;
+  --radius-xl: 16px;   --radius-app: 38px;
+
+  /* Type scale */
+  --type-display-xl: 148px;
+  --type-display-l:   76px;
+  --type-h1:          44px;
+  --type-h2:          28px;
+  --type-h3:          20px;
+  --type-body-l:      16px;
+  --type-body:        14px;
+  --type-caption:     12px;
+  --type-eyebrow:     11px;
+
+  /* Tracking */
+  --tracking-wordmark: -0.05em;
+  --tracking-tight:    -0.025em;
+  --tracking-eyebrow:   0.32em;
+  --tracking-mono:      0.06em;
+
+  /* Borders */
+  --border-hairline: 1px solid var(--color-ivory-12);
+  --border-divider:  1px solid var(--color-ivory-22);
+}
+
+/* Tailwind v4 — bridge dos tokens para utilitarios (bg-onyx, text-ivory, etc.) */
+@theme inline {
+  --color-onyx:       var(--color-onyx);
+  --color-carbon:     var(--color-carbon);
+  --color-ivory:      var(--color-ivory);
+  --color-signal:     var(--color-signal);
+  --color-gold:       var(--color-gold);
+  --color-gold-soft:  var(--color-gold-soft);
+  --color-tip-glow:   var(--color-tip-glow);
+
+  --font-sans:  var(--font-manrope), system-ui, -apple-system, sans-serif;
+  --font-serif: var(--font-cormorant), Georgia, serif;
+  --font-mono:  var(--font-jetbrains), ui-monospace, monospace;
+
+  --radius-sm:  var(--radius-sm);
+  --radius-md:  var(--radius-md);
+  --radius-lg:  var(--radius-lg);
+  --radius-xl:  var(--radius-xl);
+  --radius-app: var(--radius-app);
+}
+
+/* Base */
+html, body {
+  background: var(--color-onyx);
+  color: var(--color-ivory);
+  font-family: var(--font-manrope), system-ui, -apple-system, sans-serif;
+  font-size: var(--type-body);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Brand utilities (do handoff) */
+.sonar-wordmark {
+  font-family: var(--font-manrope), sans-serif;
+  font-weight: 500;
+  letter-spacing: var(--tracking-wordmark);
+  line-height: 0.88;
+  color: var(--color-ivory);
+}
+
+.firm-name {
+  font-family: var(--font-cormorant), Georgia, serif;
+  font-weight: 400;
+  color: var(--color-gold);
+}
+.firm-name em { font-style: italic; }
+
+.firm-suffix {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-ivory);
+}
+
+.eyebrow {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: var(--type-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-ivory-66);
+}
+
+.signal-dash {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.signal-dash::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-signal);
+  box-shadow: 0 0 12px rgba(60, 255, 138, 0.6);
+}
+.signal-dash::after {
+  content: '';
+  height: 1.5px;
+  flex: 1;
+  background: linear-gradient(90deg, var(--color-signal), rgba(60, 255, 138, 0.2));
+}
+
+/* Divisor entre faixas — mesma pegada do signal-dash mas full-width */
+.divider-signal {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 6px;
+}
+.divider-signal::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-signal);
+  box-shadow: 0 0 12px rgba(60, 255, 138, 0.6);
+  flex: none;
+}
+.divider-signal::after {
+  content: '';
+  height: 1.5px;
+  flex: 1;
+  background: linear-gradient(90deg, var(--color-signal), rgba(60, 255, 138, 0.15) 60%, transparent);
+}
+
+/* Selecao */
+::selection {
+  background: var(--color-signal-12);
+  color: var(--color-ivory);
+}
+
+/* Faux-grid decorativo de fundo (do handoff) */
+.bg-grid {
+  background-image:
+    linear-gradient(var(--color-signal-06) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-signal-06) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Variante realcada — usada SO no header da landing */
+.bg-grid-strong {
+  background-image:
+    linear-gradient(rgba(60, 255, 138, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(60, 255, 138, 0.08) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Pulso sutil das linhas verdes do grid a cada 10s — anima filter:brightness
+   intensificando brevemente as linhas + leve afterglow. */
+@keyframes grid-pulse {
+  0%, 86%, 100% {
+    filter: brightness(1);
+  }
+  90% {
+    filter: brightness(1.55);
+  }
+  94% {
+    filter: brightness(1.2);
+  }
+}
+.animate-grid-pulse {
+  animation: grid-pulse 10s ease-in-out infinite;
+}
+
+/* Slider horizontal infinito — usado na faixa PROPÓSITO pra rolar fotos do
+   escritorio. O conteudo é duplicado no JSX e a animacao translada -50% pra
+   emendar sem costura. */
+@keyframes scroll-right {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-scroll-right {
+  animation: scroll-right 28s linear infinite;
+}
+.image-strip-mask {
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%);
+}
+
+/* LampLight — luz "holofote" dourada acima de uma section. As keyframes animam
+   a entrada: glow expande, linha e cones crescem do 50% -> 100% da largura. */
+@keyframes lamp-glow-grow {
+  from { width: 8rem; }
+  to   { width: 16rem; }
+}
+@keyframes lamp-line-grow {
+  from { width: 45rem; }
+  to   { width: 90rem; }
+}
+@keyframes lamp-cone-grow {
+  from { opacity: 0.5; width: 60rem; }
+  to   { opacity: 1;   width: 120rem; }
+}
+.lamp-anim-glow {
+  width: 16rem;
+  animation: lamp-glow-grow 0.8s 0.3s ease-in-out backwards;
+}
+.lamp-anim-line {
+  width: 90rem;
+  animation: lamp-line-grow 0.8s 0.3s ease-in-out backwards;
+}
+.lamp-anim-cone {
+  width: 120rem;
+  opacity: 1;
+  animation: lamp-cone-grow 0.8s 0.3s ease-in-out backwards;
+}
+
+/* SpotlightCard — anel de luz colorido + nucleo branco que seguem o cursor.
+   Base styles e CSS vars sao inline no componente SpotlightCard. */
+[data-spotlight]::before,
+[data-spotlight]::after {
+  pointer-events: none;
+  content: "";
+  position: absolute;
+  inset: calc(var(--border-size) * -1);
+  border: var(--border-size) solid transparent;
+  border-radius: calc(var(--radius) * 1px);
+  background-attachment: fixed;
+  background-size:
+    calc(100% + (2 * var(--border-size))) calc(100% + (2 * var(--border-size)));
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  -webkit-mask:
+    linear-gradient(transparent, transparent),
+    linear-gradient(white, white);
+  -webkit-mask-clip: padding-box, border-box;
+  -webkit-mask-composite: source-in;
+  mask:
+    linear-gradient(transparent, transparent),
+    linear-gradient(white, white);
+  mask-clip: padding-box, border-box;
+  mask-composite: intersect;
+}
+
+/* Anel colorido (signal green) */
+[data-spotlight]::before {
+  background-image: radial-gradient(
+    calc(var(--spotlight-size) * 0.75) calc(var(--spotlight-size) * 0.75)
+    at calc(var(--x, 0) * 1px) calc(var(--y, 0) * 1px),
+    hsl(var(--hue) 100% 55% / 0.95),
+    transparent 100%
+  );
+  filter: brightness(1.8);
+}
+
+/* Nucleo branco quente */
+[data-spotlight]::after {
+  background-image: radial-gradient(
+    calc(var(--spotlight-size) * 0.5) calc(var(--spotlight-size) * 0.5)
+    at calc(var(--x, 0) * 1px) calc(var(--y, 0) * 1px),
+    hsl(0 100% 100% / 0.95),
+    transparent 100%
+  );
+}
