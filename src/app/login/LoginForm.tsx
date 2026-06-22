@@ -46,7 +46,7 @@ export function LoginForm() {
     setCarregando(true);
     const { error } = await supabase.auth.verifyOtp({
       email: email.trim().toLowerCase(),
-      token: codigo.trim(),
+      token: codigo.replace(/\s/g, ""),
       type: "email",
     });
     setCarregando(false);
@@ -100,9 +100,12 @@ export function LoginForm() {
             required
             autoFocus
             value={codigo}
-            onChange={(e) => setCodigo(e.target.value)}
-            placeholder="000000"
-            maxLength={6}
+            onChange={(e) => {
+              const digitos = e.target.value.replace(/\D/g, "").slice(0, 6);
+              setCodigo(digitos.length <= 3 ? digitos : `${digitos.slice(0, 3)} ${digitos.slice(3)}`);
+            }}
+            placeholder="000 000"
+            maxLength={7}
             className={`${inputBase} text-center text-xl tracking-[0.4em]`}
           />
           <button type="submit" disabled={carregando} className={btnBase}>
