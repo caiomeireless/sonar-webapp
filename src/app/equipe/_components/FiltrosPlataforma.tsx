@@ -92,7 +92,7 @@ export default function FiltrosPlataforma({
       <div className="flex flex-wrap items-center gap-3">
         {/* Período */}
         <div className="flex items-center gap-1">
-          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory)]">
+          <span className="font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-ivory)]">
             Período
           </span>
           <div className="flex flex-wrap items-center gap-1">
@@ -143,7 +143,7 @@ export default function FiltrosPlataforma({
 
         {/* Status */}
         <div className="flex items-center gap-1">
-          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory)]">
+          <span className="font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-ivory)]">
             Status
           </span>
           <div className="flex flex-wrap items-center gap-1">
@@ -207,7 +207,7 @@ function DropdownMulti({
 
   return (
     <div className="relative flex items-center gap-1">
-      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory)]">
+      <span className="font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-ivory)]">
         {rotulo}
       </span>
       <button
@@ -238,7 +238,7 @@ function DropdownMulti({
               <button
                 type="button"
                 onClick={() => onMudar([])}
-                className="mb-1 w-full rounded px-2 py-1 text-left text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)] hover:bg-white/5"
+                className="mb-1 w-full rounded px-2 py-1 text-left text-[12px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)] hover:bg-white/5"
               >
                 Limpar
               </button>
