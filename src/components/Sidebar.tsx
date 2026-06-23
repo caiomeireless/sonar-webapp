@@ -162,15 +162,12 @@ function SidebarPanel({
 
   const isDrawer = variant === "drawer";
 
-  // Classes de container — sticky no desktop, fixed na esquerda no drawer.
-  // Usa .glass-side (definida em globals.css) pra vidro fume + gradient
-  // border-right signal -> gold.
-  const baseShell =
-    "glass-side flex h-svh w-[280px] shrink-0 flex-col gap-6 px-4 py-6";
-
+  // Sidebar SEMPRE estica até o final da página. No desktop, self-stretch
+  // dentro do flex parent (que tem min-h-svh + conteúdo) garante isso.
+  // No drawer mobile, mantém h-dvh fixed na viewport.
   const shellClass = isDrawer
-    ? `absolute left-0 top-0 z-10 ${baseShell} animate-[slideIn_180ms_ease-out]`
-    : `sticky top-0 hidden ${baseShell} md:flex`;
+    ? "glass-side absolute left-0 top-0 z-10 flex h-dvh w-[280px] shrink-0 flex-col gap-6 px-4 py-6 animate-[slideIn_180ms_ease-out]"
+    : "glass-side hidden w-[280px] shrink-0 self-stretch md:flex md:flex-col md:gap-6 md:px-4 md:py-6";
 
   return (
     <aside className={shellClass} aria-label="Navegação principal">

@@ -32,7 +32,7 @@ type Particula = {
 };
 
 export function AetherBackground({
-  densidade = 11000,
+  densidade = 6500,
   raioMouse = 180,
   intensidade = 1,
 }: Props) {
