@@ -78,17 +78,19 @@ export default async function ThemisPage({ searchParams }: Props) {
       />
 
       {/* Cabeçalho */}
-      <div className="relative">
+      <header className="title-shield relative">
         <div className="flex items-center gap-3">
-          <span className="eyebrow">Themis</span>
-          <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-signal)]">
-            Fila do escritório
+          <span className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-fg-muted)]">
+            Themis
+          </span>
+          <span className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-signal)]">
+            Fila do Escritório
           </span>
         </div>
-        <h1 className="mt-4 font-serif text-[clamp(28px,4vw,44px)] font-medium leading-[1.15] tracking-tight text-ivory">
-          Processos a rastrear
+        <h1 className="mt-4 font-serif text-[clamp(34px,5vw,52px)] font-medium leading-[1.1] tracking-tight text-ivory">
+          Processos a Rastrear
         </h1>
-        <p className="mt-6 max-w-[680px] font-mono text-sm text-[var(--color-ivory-66)]">
+        <p className="mt-6 max-w-[680px] font-mono text-base text-[var(--color-ivory-66)]">
           {totalProcessos === 0
             ? q
               ? `Nenhum processo encontrado para "${q}".`
@@ -107,7 +109,7 @@ export default async function ThemisPage({ searchParams }: Props) {
           <FiltroThemis />
           <ToggleVisao atual={visao} />
         </div>
-      </div>
+      </header>
 
       {/* Lista */}
       {processos.length === 0 ? (

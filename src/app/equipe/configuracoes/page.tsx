@@ -23,13 +23,13 @@ export default async function ConfiguracoesPage() {
   return (
     <main className="mx-auto max-w-[1400px] px-6 py-10 sm:px-10">
       <header className="title-shield mb-6 flex items-center gap-3">
-        <Settings className="h-6 w-6 text-[var(--color-signal)]" />
+        <Settings className="h-7 w-7 text-[var(--color-signal)]" />
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+          <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-fg-muted)]">
             Configurações
           </p>
-          <h1 className="mt-1 text-3xl font-medium tracking-tight text-ivory sm:text-4xl">
-            Administração da plataforma
+          <h1 className="mt-1 text-[clamp(34px,5vw,52px)] font-medium tracking-tight text-ivory">
+            Administração da Plataforma
           </h1>
         </div>
       </header>

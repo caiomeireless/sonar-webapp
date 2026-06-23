@@ -24,17 +24,19 @@ export default async function CasosClientePage({ searchParams }: Props) {
 
   return (
     <main className="relative mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
-      <span className="eyebrow">Casos rastreados</span>
-      <h1 className="mt-4 font-serif text-[clamp(28px,4vw,44px)] font-medium leading-[1.15] tracking-tight text-ivory">
-        Devedores em busca
-      </h1>
-      <p className="mt-6 max-w-[600px] text-base leading-relaxed text-[var(--color-ivory-88)]">
-        {casos.length === 0
-          ? "Nenhum devedor sob monitoramento até o momento."
-          : `${casos.length} ${
-              casos.length === 1 ? "devedor monitorado" : "devedores monitorados"
-            } pelo escritório.`}
-      </p>
+      <header className="title-shield">
+        <span className="eyebrow">Casos Rastreados</span>
+        <h1 className="mt-4 font-serif text-[clamp(28px,4vw,44px)] font-medium leading-[1.15] tracking-tight text-ivory">
+          Devedores em Busca
+        </h1>
+        <p className="mt-6 max-w-[600px] text-base leading-relaxed text-[var(--color-ivory-88)]">
+          {casos.length === 0
+            ? "Nenhum devedor sob monitoramento até o momento."
+            : `${casos.length} ${
+                casos.length === 1 ? "devedor monitorado" : "devedores monitorados"
+              } pelo escritório.`}
+        </p>
+      </header>
 
       {casos.length === 0 ? (
         <div className="mt-12 grid place-items-center">

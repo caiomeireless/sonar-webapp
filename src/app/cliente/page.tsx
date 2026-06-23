@@ -48,13 +48,13 @@ export default async function DashboardClientePage({ searchParams }: Props) {
   return (
     <main className="mx-auto max-w-[1400px] px-6 py-10 sm:px-10">
       <header className="title-shield mb-8">
-        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+        <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
           Dashboard
         </p>
         <h1 className="mt-2 text-3xl font-medium tracking-tight text-ivory sm:text-4xl">
-          Visão geral dos seus processos
+          Visão Geral dos Seus Processos
         </h1>
-        <p className="mt-3 max-w-[680px] text-sm text-[var(--color-ivory-88)]">
+        <p className="mt-3 max-w-[680px] text-base text-[var(--color-ivory-88)]">
           Acompanhamento patrimonial dos devedores nos processos em que você é credor.
         </p>
       </header>

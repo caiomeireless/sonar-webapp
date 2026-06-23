@@ -15,10 +15,10 @@ export default async function CustosPage() {
   return (
     <main className="mx-auto max-w-[1400px] px-6 py-10 sm:px-10">
       <header className="title-shield mb-6">
-        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
-          Monitor de custos
+        <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-fg-muted)]">
+          Monitor de Custos
         </p>
-        <h1 className="mt-2 text-3xl font-medium tracking-tight text-ivory sm:text-4xl">
+        <h1 className="mt-2 text-[clamp(34px,5vw,52px)] font-medium tracking-tight text-ivory">
           Gastos com APIs
         </h1>
       </header>

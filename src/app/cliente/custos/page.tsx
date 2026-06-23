@@ -39,11 +39,11 @@ export default async function CustosClientePage({ searchParams }: Props) {
           <DollarSign className="h-5 w-5" />
         </span>
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
-            Monitor de custos
+          <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+            Monitor de Custos
           </p>
           <h1 className="mt-1 text-3xl font-medium tracking-tight text-ivory sm:text-4xl">
-            Quanto está sendo investido no seu portfólio
+            Quanto Está Sendo Investido no Seu Portfólio
           </h1>
         </div>
       </header>

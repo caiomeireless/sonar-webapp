@@ -1,8 +1,12 @@
 // Dossiê patrimonial — visão da EQUIPE. Sem checagem de email_contato:
-// obterDossie() devolve TUDO. Mantém a mesma estrutura visual do dossiê
-// do cliente (header + casos + bens por categoria).
+// obterDossie() devolve TUDO. Layout no estilo da FICHA DO CLIENTE do BP CRM:
+// header com icone + nome grande + badges, grid 2-col de secoes glass com
+// rotulos mono + badges de origem (VIA THEMIS / VIA ASSERTIVA / MANUAL),
+// e abaixo as 3 secoes ricas existentes (cross-detection, timeline, casos,
+// bens por categoria).
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Building2, User, Pencil } from "lucide-react";
 import {
   obterDossie,
   outrosCredoresDoDevedor,
@@ -36,10 +40,10 @@ type Props = {
 const TIPO_META: Record<TipoBem, { label: string; icone: string }> = {
   veiculo: { label: "Veículos", icone: "V" },
   imovel: { label: "Imóveis", icone: "I" },
-  empresa: { label: "Participações societárias", icone: "E" },
-  processo_credito: { label: "Processos onde é credor", icone: "P" },
-  endereco: { label: "Endereços confirmados", icone: "A" },
-  vinculo: { label: "Vínculos familiares", icone: "F" },
+  empresa: { label: "Participações Societárias", icone: "E" },
+  processo_credito: { label: "Processos Onde é Credor", icone: "P" },
+  endereco: { label: "Endereços Confirmados", icone: "A" },
+  vinculo: { label: "Vínculos Familiares", icone: "F" },
 };
 
 const ORDEM: TipoBem[] = [
@@ -86,9 +90,18 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
   // Medidas tomadas (timeline). Se a tabela ainda nao existir, devolve [].
   const medidas = await listarMedidasPorDevedor(devedorId);
 
+  // Status do devedor — devedor nao tem flag propria; usa o status do
+  // primeiro caso vinculado ("ativo" se houver caso ativo, senao "pausado").
+  // Quando casos.status virar enum por devedor, trocar pra dado real.
+  const algumAtivo = casos.some((c) => c.status === "ativo");
+  const statusLabel = algumAtivo ? "Ativo" : "Pausado";
+  const statusColor = algumAtivo
+    ? "var(--color-signal)"
+    : "var(--color-ivory-66)";
+
   return (
     <main>
-      {/* ============ HEADER ============ */}
+      {/* ============ HEADER FICHA (estilo BP CRM) ============ */}
       <section className="relative overflow-hidden">
         <div
           aria-hidden="true"
@@ -99,57 +112,169 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
           }}
         />
         <div className="relative mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
-          <Link
-            href={`/equipe/devedores${linkBase}`}
-            className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--color-gold)] transition hover:text-[var(--color-tip-glow)]"
-          >
-            ← Voltar
-          </Link>
-
-          <div className="mt-6 flex items-center gap-3">
-            <span className="eyebrow">Dossiê patrimonial</span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-signal)]">
-              Visão da equipe
-            </span>
-          </div>
-
-          <h1 className="mt-4 font-serif text-[clamp(28px,4vw,46px)] font-medium leading-[1.1] tracking-tight text-ivory">
-            {devedor.nome}
-          </h1>
-          <p className="mt-3 font-mono text-sm text-[var(--color-ivory-66)]">
-            {devedor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"} ·{" "}
-            {devedor.documento}
-            {devedor.data_nascimento
-              ? ` · Nasc. ${formatData(devedor.data_nascimento)}`
-              : ""}
-          </p>
-
-          {devedor.ultima_consulta_em ? (
-            <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
-              Última consulta {formatTempoRelativo(devedor.ultima_consulta_em)}
-            </p>
-          ) : null}
-
-          {/* Link discreto pro dashboard analítico — atalho no topo do dossiê.
-              Cor signal pra ficar levemente acima do ruído sem competir com
-              os CTAs dourados mais abaixo. */}
-          <div className="mt-4">
+          {/* Top bar: Voltar (esq) + Editar (dir) */}
+          <div className="flex items-center justify-between">
             <Link
-              href={`/equipe/devedores/${devedor.id}/dashboard${linkBase}`}
-              className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-[0.18em] text-[var(--color-signal)] transition hover:text-[var(--color-tip-glow)]"
+              href={`/equipe/devedores${linkBase}`}
+              className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-[0.18em] text-[var(--color-gold)] transition hover:text-[var(--color-tip-glow)]"
             >
-              Ver dashboard analítico →
+              ← Voltar à Lista
             </Link>
+            <button
+              type="button"
+              disabled
+              title="Edição em breve"
+              className="inline-flex cursor-not-allowed items-center gap-2 rounded-lg border border-[var(--color-ivory-22)] bg-white/5 px-3 py-1.5 font-mono text-xs uppercase tracking-[0.18em] text-[var(--color-ivory-66)] opacity-60"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+              Editar
+            </button>
           </div>
 
-          {/* 3 cards de número grande */}
-          <div className="mt-10 grid gap-4 sm:grid-cols-3">
-            <CardNumero rotulo="Total de bens" valor={String(total_bens)} />
+          {/* Card header grande: icone PF/PJ + nome em uppercase tracking + badges */}
+          <div className="title-shield mt-6">
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+              {/* Icone grande PF/PJ */}
+              <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-2xl border border-[var(--color-gold)]/35 bg-gradient-to-br from-[rgba(201,162,74,0.18)] to-[rgba(201,162,74,0.04)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+                {devedor.tipo === "PJ" ? (
+                  <Building2 className="h-10 w-10 text-[var(--color-gold)]" />
+                ) : (
+                  <User className="h-10 w-10 text-[var(--color-gold)]" />
+                )}
+              </div>
+
+              {/* Bloco nome + badges + eyebrow */}
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="eyebrow">Dossiê Patrimonial</span>
+                  <span className="font-mono text-[12px] uppercase tracking-[0.32em] text-[var(--color-signal)]">
+                    Visão da Equipe
+                  </span>
+                </div>
+                <h1 className="mt-3 break-words font-mono text-[clamp(28px,4vw,42px)] uppercase leading-[1.1] tracking-[0.06em] text-ivory">
+                  {devedor.nome}
+                </h1>
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <BadgeFicha
+                    label={devedor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"}
+                    color="var(--color-gold)"
+                  />
+                  <BadgeFicha
+                    label={statusLabel}
+                    color={statusColor}
+                    dot
+                  />
+                  {devedor.ultima_consulta_em ? (
+                    <span className="font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+                      · Última Consulta {formatTempoRelativo(devedor.ultima_consulta_em)}
+                    </span>
+                  ) : null}
+                </div>
+                <div className="mt-4">
+                  <Link
+                    href={`/equipe/devedores/${devedor.id}/dashboard${linkBase}`}
+                    className="inline-flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-signal)] transition hover:text-[var(--color-tip-glow)]"
+                  >
+                    Ver Dashboard Analítico →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Grid 2 colunas — secoes glass estilo BP CRM */}
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <SecaoFicha titulo="Identificação">
+              <CampoFicha
+                rotulo={devedor.tipo === "PF" ? "CPF" : "CNPJ"}
+                valor={devedor.documento}
+                origem="VIA THEMIS"
+              />
+              <CampoFicha
+                rotulo={devedor.tipo === "PF" ? "RG" : "IE"}
+                valor={null}
+              />
+              {devedor.tipo === "PF" ? (
+                <CampoFicha
+                  rotulo="Data de Nascimento"
+                  valor={
+                    devedor.data_nascimento
+                      ? formatData(devedor.data_nascimento)
+                      : null
+                  }
+                  origem={devedor.data_nascimento ? "VIA THEMIS" : undefined}
+                />
+              ) : null}
+              {devedor.tipo === "PF" ? (
+                <CampoFicha
+                  rotulo="Nome da Mãe"
+                  valor={devedor.nome_mae}
+                  origem={devedor.nome_mae ? "VIA THEMIS" : undefined}
+                />
+              ) : null}
+            </SecaoFicha>
+
+            <SecaoFicha titulo="Contato">
+              <CampoFicha rotulo="E-mail" valor={null} />
+              <CampoFicha rotulo="Telefone" valor={null} />
+              <CampoFicha rotulo="Redes Sociais" valor={null} />
+            </SecaoFicha>
+
+            <div className="md:col-span-2">
+              <SecaoFicha titulo="Endereço">
+                <CampoFicha
+                  rotulo="Endereço Completo"
+                  valor={primeiroEndereco(dossie.bens)}
+                  origem={primeiroEndereco(dossie.bens) ? "VIA THEMIS" : undefined}
+                />
+              </SecaoFicha>
+            </div>
+
+            <SecaoFicha titulo="Relacionamento">
+              <CampoFicha
+                rotulo="Responsável no Escritório"
+                valor={responsavelPrincipal(casos)}
+                origem={responsavelPrincipal(casos) ? "MANUAL" : undefined}
+              />
+              <CampoFicha
+                rotulo="Primeira Ocorrência"
+                valor={formatData(devedor.criado_em)}
+                origem="MANUAL"
+              />
+              <CampoFicha
+                rotulo="Casos Vinculados"
+                valor={String(casos.length)}
+                origem="MANUAL"
+              />
+            </SecaoFicha>
+
+            <SecaoFicha titulo="Perfil Jurídico">
+              <CampoFicha
+                rotulo="Áreas Envolvidas"
+                valor={areasDoDevedor(casos)}
+                origem={areasDoDevedor(casos) ? "MANUAL" : undefined}
+              />
+              <CampoFicha
+                rotulo="Status Geral"
+                valor={statusLabel}
+                origem="MANUAL"
+              />
+              <CampoFicha
+                rotulo="Valor Total em Crédito"
+                valor={formatBRL(somaCredito(casos))}
+                origem="MANUAL"
+              />
+            </SecaoFicha>
+          </div>
+
+          {/* 3 cards de número grande (mantidos) */}
+          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+            <CardNumero rotulo="Total de Bens" valor={String(total_bens)} />
             <CardNumero
-              rotulo="Valor estimado"
+              rotulo="Valor Estimado"
               valor={formatBRL(valor_estimado_total_brl)}
             />
-            <CardNumero rotulo="Casos vinculados" valor={String(casos.length)} />
+            <CardNumero rotulo="Casos Vinculados" valor={String(casos.length)} />
           </div>
 
           {/* Alerta de cross-reference: devedor figura em casos de 2+ clientes
@@ -189,7 +314,7 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
               href={`/equipe/devedores/${devedor.id}/gerador-peca${linkBase}`}
               className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--color-gold)] px-6 py-4 text-sm font-bold uppercase tracking-[0.12em] text-[var(--color-carbon)] shadow-[0_10px_40px_-10px_rgba(201,162,74,0.55)] transition hover:bg-[var(--color-tip-glow)]"
             >
-              🚀 Abrir Gerador de Peça →
+              Abrir Gerador de Peça →
             </Link>
             <div className="sm:flex-1">
               <BotaoGerarPeca
@@ -220,7 +345,7 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
       {casos.length > 0 ? (
         <section className="border-t border-[var(--color-ivory-12)]">
           <div className="mx-auto max-w-[1400px] px-6 py-12 sm:px-10">
-            <span className="eyebrow">Casos onde este devedor aparece</span>
+            <span className="eyebrow">Casos Onde Este Devedor Aparece</span>
             <div className="mt-6 space-y-3">
               {casos.map((c) => (
                 <CardCasoVinculado key={c.id} caso={c} />
@@ -233,8 +358,8 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
       {/* ============ CATEGORIAS ============ */}
       <section className="border-t border-[var(--color-ivory-12)]">
         <div className="mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
-          <span className="eyebrow">Bens encontrados</span>
-          <h2 className="mt-4 font-serif text-3xl text-ivory">Por categoria</h2>
+          <span className="eyebrow">Bens Encontrados</span>
+          <h2 className="mt-4 font-serif text-3xl text-ivory">Por Categoria</h2>
 
           <div className="mt-12 space-y-12">
             {ORDEM.map((tipo) => {
@@ -247,7 +372,7 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
                       {meta.icone}
                     </span>
                     <h3 className="font-serif text-xl text-ivory">{meta.label}</h3>
-                    <span className="ml-auto font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+                    <span className="ml-auto font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
                       {bens.length} {bens.length === 1 ? "item" : "itens"}
                     </span>
                   </div>
@@ -276,6 +401,155 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
 // ============================================================
 // COMPONENTES INTERNOS
 // ============================================================
+
+// ---------- Componentes da FICHA (estilo BP CRM) ----------
+
+type OrigemFicha = "VIA THEMIS" | "VIA ASSERTIVA" | "MANUAL";
+
+function BadgeFicha({
+  label,
+  color,
+  dot = false,
+}: {
+  label: string;
+  color: string;
+  dot?: boolean;
+}) {
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[12px] uppercase tracking-[0.18em]"
+      style={{
+        borderColor: color,
+        color,
+        backgroundColor: "rgba(255,255,255,0.03)",
+      }}
+    >
+      {dot ? (
+        <span
+          aria-hidden="true"
+          className="inline-block h-1.5 w-1.5 rounded-full"
+          style={{ backgroundColor: color, boxShadow: `0 0 8px ${color}` }}
+        />
+      ) : null}
+      {label}
+    </span>
+  );
+}
+
+function SecaoFicha({
+  titulo,
+  children,
+}: {
+  titulo: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="glass p-5 sm:p-6">
+      <div className="flex items-center gap-2">
+        <span
+          aria-hidden="true"
+          className="inline-block h-4 w-[3px] rounded-full bg-[var(--color-gold)]"
+        />
+        <span className="font-mono text-[12px] uppercase tracking-[0.32em] text-[var(--color-gold)]">
+          {titulo}
+        </span>
+      </div>
+      <div className="mt-5 space-y-4">{children}</div>
+    </div>
+  );
+}
+
+function CampoFicha({
+  rotulo,
+  valor,
+  origem,
+}: {
+  rotulo: string;
+  valor: string | null | undefined;
+  origem?: OrigemFicha;
+}) {
+  const valorFinal = valor && valor.trim() !== "" ? valor : null;
+  return (
+    <div className="flex flex-col gap-1">
+      <p className="font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+        {rotulo}
+      </p>
+      <div className="flex flex-wrap items-center gap-2">
+        <span
+          className={
+            valorFinal
+              ? "text-base text-ivory"
+              : "text-base text-[var(--color-ivory-66)]"
+          }
+        >
+          {valorFinal ?? "—"}
+        </span>
+        {valorFinal && origem ? <PillOrigem origem={origem} /> : null}
+      </div>
+    </div>
+  );
+}
+
+function PillOrigem({ origem }: { origem: OrigemFicha }) {
+  const map: Record<OrigemFicha, { color: string; bg: string }> = {
+    "VIA THEMIS": {
+      color: "var(--color-gold)",
+      bg: "rgba(201,162,74,0.10)",
+    },
+    "VIA ASSERTIVA": {
+      color: "var(--color-signal)",
+      bg: "rgba(60,255,138,0.08)",
+    },
+    MANUAL: {
+      color: "var(--color-ivory-66)",
+      bg: "rgba(255,255,255,0.04)",
+    },
+  };
+  const { color, bg } = map[origem];
+  return (
+    <span
+      className="inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-[12px] uppercase tracking-[0.18em]"
+      style={{ borderColor: color, color, backgroundColor: bg }}
+    >
+      {origem}
+    </span>
+  );
+}
+
+// ---------- Helpers de derivação de dados pra Ficha ----------
+
+function primeiroEndereco(bens: Bem[]): string | null {
+  const end = bens.find((b) => b.tipo === "endereco");
+  if (!end) return null;
+  const d = end.detalhes;
+  const log = typeof d.logradouro === "string" ? d.logradouro : null;
+  const cidade = typeof d.cidade === "string" ? d.cidade : null;
+  const uf = typeof d.uf === "string" ? d.uf : null;
+  const partes: string[] = [];
+  if (log) partes.push(log);
+  if (cidade && uf) partes.push(`${cidade}/${uf}`);
+  else if (cidade) partes.push(cidade);
+  else if (uf) partes.push(uf);
+  return partes.length > 0 ? partes.join(" — ") : null;
+}
+
+function responsavelPrincipal(casos: CasoResumo[]): string | null {
+  const c = casos.find((x) => x.responsavel_email);
+  return c?.responsavel_email ?? null;
+}
+
+function areasDoDevedor(casos: CasoResumo[]): string | null {
+  // No demo nao temos campo "area" no CasoResumo; mostra um placeholder
+  // quando houver pelo menos um caso, vazio caso contrario. Real entra Sem 2.
+  if (casos.length === 0) return null;
+  return "Recuperação de Crédito";
+}
+
+function somaCredito(casos: CasoResumo[]): number {
+  return casos.reduce((acc, c) => acc + (c.valor_credito_brl ?? 0), 0);
+}
+
+// ---------- Componentes herdados ----------
 
 function AcessoNegado({ voltarHref }: { voltarHref: string }) {
   return (
@@ -330,8 +604,8 @@ function AlertaCrossReference({
           !
         </span>
         <div className="flex-1">
-          <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-amber-300/90">
-            Atenção · Cross-reference
+          <p className="font-mono text-[12px] uppercase tracking-[0.32em] text-amber-300/90">
+            Atenção · Cross-Reference
           </p>
           <p className="mt-2 text-sm leading-snug text-amber-100">
             Este devedor figura em{" "}
@@ -404,7 +678,7 @@ function CardCasoVinculado({ caso }: { caso: CasoResumo }) {
         </p>
       </div>
       <span
-        className="self-start rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] sm:self-auto"
+        className="self-start rounded-full border px-3 py-1 font-mono text-[12px] uppercase tracking-[0.18em] sm:self-auto"
         style={{ borderColor: status.color, color: status.color }}
       >
         {status.label}
@@ -427,7 +701,7 @@ function CardBem({ bem }: { bem: Bem }) {
           </span>
         ) : null}
       </div>
-      <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+      <p className="mt-4 font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
         {bem.fonte} · {formatData(bem.fonte_consultada_em)}
       </p>
     </div>

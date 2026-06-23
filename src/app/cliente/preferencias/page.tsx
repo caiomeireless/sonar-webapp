@@ -49,15 +49,17 @@ export default async function PreferenciasPage({ searchParams }: Props) {
 
   return (
     <main className="relative mx-auto max-w-[920px] px-6 py-16 sm:px-10">
-      <span className="eyebrow">Preferências</span>
-      <h1 className="mt-4 font-serif text-[clamp(28px,4vw,44px)] font-medium leading-[1.15] tracking-tight text-ivory">
-        Preferências
-      </h1>
-      <p className="mt-6 max-w-[640px] text-base leading-relaxed text-[var(--color-ivory-88)]">
-        Defina o limite mensal de gasto com pesquisas patrimoniais. O
-        escritório respeita esse teto ao rodar consultas pagas no nome
-        dos seus devedores.
-      </p>
+      <header className="title-shield">
+        <span className="eyebrow">Preferências</span>
+        <h1 className="mt-4 font-serif text-[clamp(28px,4vw,44px)] font-medium leading-[1.15] tracking-tight text-ivory">
+          Preferências
+        </h1>
+        <p className="mt-6 max-w-[640px] text-base leading-relaxed text-[var(--color-ivory-88)]">
+          Defina o limite mensal de gasto com pesquisas patrimoniais. O
+          escritório respeita esse teto ao rodar consultas pagas no nome
+          dos seus devedores.
+        </p>
+      </header>
 
       {credorId === null ? (
         <div className="mt-12 rounded-2xl border border-[var(--color-ivory-22)] bg-white/[0.02] p-10 text-center">
