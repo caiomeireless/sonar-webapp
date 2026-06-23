@@ -9,13 +9,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  ChevronRight,
-  type LucideIcon,
-  Menu,
-  X,
-} from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { ChevronRight, Menu, X } from "lucide-react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { Logo } from "./Logo";
 import { ThemeToggle } from "./ThemeToggle";
@@ -27,7 +22,11 @@ import { ThemeToggle } from "./ThemeToggle";
 export type SidebarItem = {
   href: string;
   label: string;
-  icon: LucideIcon;
+  /**
+   * Icone ja renderizado (JSX). RSC nao permite passar funcoes como prop
+   * de Server -> Client, entao a navegacao serve o React element direto.
+   */
+  icon: ReactNode;
   /** Numero exibido em badge circular signal a direita; oculto se ausente ou 0. */
   badge?: number;
   /** Prefixos extras que marcam o item como ativo (alem do proprio href). */
@@ -221,7 +220,6 @@ function SidebarPanel({
 
 function NavLinkItem({ item }: { item: SidebarItem }) {
   const pathname = usePathname();
-  const Icon = item.icon;
 
   const prefixes = item.matchPrefixes ?? [item.href];
   const ativo = prefixes.some((p) => {
@@ -258,11 +256,9 @@ function NavLinkItem({ item }: { item: SidebarItem }) {
         }
       />
 
-      <Icon
-        className="h-[18px] w-[18px] shrink-0"
-        strokeWidth={ativo ? 2.25 : 2}
-        aria-hidden="true"
-      />
+      <span className="inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center">
+        {item.icon}
+      </span>
 
       <span className="truncate">{item.label}</span>
 
