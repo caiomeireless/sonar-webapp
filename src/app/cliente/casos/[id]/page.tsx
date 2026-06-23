@@ -84,7 +84,7 @@ export default async function DossieClientePage({ params, searchParams }: Props)
             <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
               Dossiê Patrimonial
             </p>
-            <p className="mt-3 font-mono text-sm text-[var(--color-ivory-66)]">
+            <p className="mt-3 font-mono text-sm text-[var(--color-signal)]">
               {devedor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"} ·{" "}
               {devedor.documento}
               {devedor.data_nascimento

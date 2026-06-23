@@ -79,7 +79,7 @@ export default async function ThemisPage({ searchParams }: Props) {
         <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
           Themis · Fila do Escritório
         </p>
-        <p className="mx-auto mt-3 max-w-[680px] font-mono text-[13px] text-[var(--color-ivory-66)]">
+        <p className="mx-auto mt-3 max-w-[680px] font-mono text-[13px] text-[var(--color-signal)]">
           {totalProcessos === 0
             ? q
               ? `Nenhum processo encontrado para "${q}".`

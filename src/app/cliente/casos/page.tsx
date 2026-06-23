@@ -32,7 +32,7 @@ export default async function CasosClientePage({ searchParams }: Props) {
         <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
           Casos Rastreados
         </p>
-        <p className="mx-auto mt-3 max-w-[600px] text-base leading-relaxed text-[var(--color-ivory-88)]">
+        <p className="mx-auto mt-3 max-w-[600px] text-base leading-relaxed text-[var(--color-signal)]">
           {casos.length === 0
             ? "Nenhum devedor sob monitoramento até o momento."
             : `${casos.length} ${

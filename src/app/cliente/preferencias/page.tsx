@@ -56,7 +56,7 @@ export default async function PreferenciasPage({ searchParams }: Props) {
         <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
           Preferências
         </p>
-        <p className="mx-auto mt-3 max-w-[640px] text-base leading-relaxed text-[var(--color-ivory-88)]">
+        <p className="mx-auto mt-3 max-w-[640px] text-base leading-relaxed text-[var(--color-signal)]">
           Defina o limite mensal de gasto com pesquisas patrimoniais. O
           escritório respeita esse teto ao rodar consultas pagas no nome
           dos seus devedores.

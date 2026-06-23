@@ -77,7 +77,7 @@ export default async function DevedoresEquipePage({ searchParams }: Props) {
         <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
           Banco de Devedores
         </p>
-        <p className="mt-3 font-mono text-[13px] text-[var(--color-ivory-88)]">
+        <p className="mt-3 font-mono text-[13px] text-[var(--color-signal)]">
           {credores.length === 0
             ? q
               ? `Nenhum resultado para "${q}".`

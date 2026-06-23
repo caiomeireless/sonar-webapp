@@ -68,7 +68,7 @@ export default async function CredorDrilldownPage({
             <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
               Cliente · Visão da Equipe
             </p>
-            <p className="mt-3 font-mono text-sm text-[var(--color-ivory-66)]">
+            <p className="mt-3 font-mono text-sm text-[var(--color-signal)]">
               {credor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"} ·{" "}
               {docLabel} {credor.documento}
             </p>
