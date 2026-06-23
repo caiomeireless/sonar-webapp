@@ -111,13 +111,14 @@ export function TopBar({
       />
       </div>
       {/* Luz signal radial no canto esquerdo — funde com o bg-grid da
-          sidebar e dá o "ponto de brilho" na junção sidebar+topbar. */}
+          sidebar e dá o "ponto de brilho" na junção sidebar+topbar.
+          Alpha reduzido em 50% (0.20 -> 0.10). */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 480px 220px at 12% 50%, rgba(60,255,138,0.20), transparent 70%)",
+            "radial-gradient(ellipse 480px 220px at 12% 50%, rgba(60,255,138,0.10), transparent 70%)",
         }}
       />
       {/* Vinheta lateral: SÓ escurece a borda DIREITA (onde o quadriculado
