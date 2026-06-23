@@ -72,7 +72,7 @@ export default function CustosPorAPI({ dados }: Props) {
             <span className="eyebrow text-[var(--color-ivory-66)]">
               Total acumulado
             </span>
-            <span className="font-mono text-lg font-medium tabular-nums text-[var(--color-gold)]">
+            <span className="font-mono text-2xl font-medium tabular-nums text-[var(--color-gold)]">
               {formatBRL(total)}
             </span>
           </footer>

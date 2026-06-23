@@ -74,7 +74,7 @@ function CardCaso({ caso }: { caso: CasoListagem }) {
           <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-ivory-66)]">
             Processo
           </span>
-          <span className="font-mono text-[10px] tracking-[0.32em] text-[var(--color-gold)]">
+          <span className="font-mono text-[14px] tracking-[0.32em] text-[var(--color-gold)]">
             #{caso.caso_id}
           </span>
         </div>

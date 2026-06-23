@@ -254,7 +254,7 @@ function ListaCasos({
               <Td>
                 <Link
                   href={`/equipe/devedores/${c.devedor.id}${euQuery}`}
-                  className="block font-serif text-lg leading-tight text-[var(--color-gold)] hover:underline"
+                  className="block font-serif text-2xl leading-tight text-[var(--color-gold)] hover:underline"
                 >
                   {c.devedor.nome}
                 </Link>
@@ -270,7 +270,7 @@ function ListaCasos({
               <Td>
                 <Link
                   href={`/equipe/devedores/${c.devedor.id}${euQuery}`}
-                  className="block break-all font-mono text-base text-[var(--color-gold)] hover:underline"
+                  className="block break-all font-mono text-2xl text-[var(--color-gold)] hover:underline"
                 >
                   {c.numero_processo ?? "—"}
                 </Link>
@@ -292,7 +292,7 @@ function ListaCasos({
                 )}
               </Td>
               <Td align="right">
-                <span className="font-serif text-2xl text-[var(--color-gold)]">
+                <span className="font-serif text-3xl text-[var(--color-gold)]">
                   {c.total_bens}
                 </span>
               </Td>

@@ -136,7 +136,7 @@ export default async function ThemisPage({ searchParams }: Props) {
                       (i % 2 === 1 ? "bg-[var(--color-surface-2)]/30" : "")
                     }
                   >
-                    <td className="px-5 py-5 font-mono text-base text-[var(--color-gold)]">
+                    <td className="px-5 py-5 font-mono text-2xl text-[var(--color-gold)]">
                       {p.numero_processo ?? "—"}
                     </td>
                     <td className="px-5 py-5">
@@ -145,7 +145,7 @@ export default async function ThemisPage({ searchParams }: Props) {
                         {p.devedor.tipo === "PF" ? "PF" : "PJ"} · {p.devedor.documento}
                       </div>
                     </td>
-                    <td className="px-5 py-5 font-mono text-xl text-[var(--color-gold)]">
+                    <td className="px-5 py-5 font-mono text-3xl text-[var(--color-gold)]">
                       {p.valor_credito_brl !== null ? formatBRL(p.valor_credito_brl) : "—"}
                     </td>
                     <td className="px-5 py-5">
@@ -210,7 +210,7 @@ function CardProcesso({
       </div>
 
       {/* Número processo */}
-      <p className="mt-4 font-mono text-sm text-[var(--color-gold)]">
+      <p className="mt-4 font-mono text-xl text-[var(--color-gold)]">
         {processo.numero_processo ?? "Sem número de processo"}
       </p>
 
@@ -229,7 +229,7 @@ function CardProcesso({
           <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-ivory-66)]">
             Crédito
           </span>
-          <p className="mt-1 font-serif text-xl text-[var(--color-gold)]">
+          <p className="mt-1 font-serif text-3xl text-[var(--color-gold)]">
             {processo.valor_credito_brl !== null
               ? formatBRL(processo.valor_credito_brl)
               : "—"}

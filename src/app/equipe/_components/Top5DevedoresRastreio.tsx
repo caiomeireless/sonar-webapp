@@ -46,31 +46,31 @@ export default function Top5DevedoresRastreio({ dados }: Props) {
                     className="group border-b border-[var(--color-ivory-12)] last:border-b-0 transition hover:bg-[var(--color-ivory-12)]/20"
                   >
                     <Td>
-                      <span className="font-mono text-[11px] text-[var(--color-ivory-66)] tabular-nums">
+                      <span className="font-mono text-[16px] text-[var(--color-ivory-66)] tabular-nums">
                         {rank}
                       </span>
                     </Td>
                     <Td>
                       <Link
                         href={`/equipe/devedores/${item.devedorId}`}
-                        className="block truncate font-serif text-[14px] leading-tight text-[var(--color-gold)] transition group-hover:underline"
+                        className="block truncate font-serif text-[21px] leading-tight text-[var(--color-gold)] transition group-hover:underline"
                         title={item.devedorNome}
                       >
                         {item.devedorNome}
                       </Link>
                     </Td>
                     <Td align="right">
-                      <span className="font-mono text-[12px] tabular-nums text-ivory">
+                      <span className="font-mono text-[18px] tabular-nums text-ivory">
                         {formatBRL(item.valorEstimadoBens)}
                       </span>
                     </Td>
                     <Td align="right">
-                      <span className="font-mono text-[12px] tabular-nums text-[var(--color-ivory-88)]">
+                      <span className="font-mono text-[18px] tabular-nums text-[var(--color-ivory-88)]">
                         {item.qtdCasos}
                       </span>
                     </Td>
                     <Td align="right">
-                      <span className="font-mono text-[12px] tabular-nums text-[var(--color-ivory-88)]">
+                      <span className="font-mono text-[18px] tabular-nums text-[var(--color-ivory-88)]">
                         {item.qtdMedidas}
                       </span>
                     </Td>

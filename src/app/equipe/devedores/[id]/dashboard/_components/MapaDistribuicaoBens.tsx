@@ -212,7 +212,7 @@ export default function MapaDistribuicaoBens({ distribuicao }: Props) {
                   ? ` · ${((detalhe.qtdBens / totalGeral) * 100).toFixed(1)}% do total`
                   : ""}
               </p>
-              <p className="mt-1.5 text-xs tabular-nums text-[var(--color-gold)]">
+              <p className="mt-1.5 text-base tabular-nums text-[var(--color-gold)]">
                 {formatBRL(detalhe.valorBrl)}
               </p>
               {detalhe.cidades.length > 0 && (
@@ -250,7 +250,7 @@ export default function MapaDistribuicaoBens({ distribuicao }: Props) {
                 </div>
                 <div>
                   <p className="text-[var(--color-ivory-66)]">Valor estimado</p>
-                  <p className="text-base font-medium text-[var(--color-gold)] tabular-nums">
+                  <p className="text-2xl font-medium text-[var(--color-gold)] tabular-nums">
                     {formatBRL(valorGeral)}
                   </p>
                 </div>

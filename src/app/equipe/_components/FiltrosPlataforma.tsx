@@ -7,6 +7,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import type { PeriodoChave, StatusCaso } from "@/lib/dashboard-plataforma";
+import { SelectorChips } from "@/components/ui/SelectorChips";
 
 type AdvogadoOpcao = { email: string; nome: string };
 type CredorOpcao = { id: number; nome: string };
@@ -91,30 +92,19 @@ export default function FiltrosPlataforma({
     >
       <div className="flex flex-wrap items-center gap-3">
         {/* Período */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <span className="font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-ivory)]">
             Período
           </span>
-          <div className="flex flex-wrap items-center gap-1">
-            {PERIODOS.map((p) => {
-              const sel = atual.periodo === p.chave;
-              return (
-                <button
-                  key={p.chave}
-                  type="button"
-                  onClick={() => aplicar({ periodo: p.chave })}
-                  className={
-                    "rounded-md px-2.5 py-1 text-xs transition " +
-                    (sel
-                      ? "bg-[var(--color-signal)] text-onyx"
-                      : "border border-[var(--color-ivory-22)] bg-transparent text-[var(--color-ivory-88)] hover:bg-white/5")
-                  }
-                >
-                  {p.rotulo}
-                </button>
-              );
-            })}
-          </div>
+          <SelectorChips
+            opcoes={PERIODOS.map((p) => ({ valor: p.chave, rotulo: p.rotulo }))}
+            selecionados={[atual.periodo]}
+            mode="single"
+            accent="gold"
+            onChange={(novos) =>
+              aplicar({ periodo: (novos[0] ?? "tudo") as PeriodoChave })
+            }
+          />
         </div>
 
         {/* Advogado */}
@@ -142,30 +132,17 @@ export default function FiltrosPlataforma({
         />
 
         {/* Status */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <span className="font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-ivory)]">
             Status
           </span>
-          <div className="flex flex-wrap items-center gap-1">
-            {STATUS.map((s) => {
-              const sel = atual.status.includes(s.chave);
-              return (
-                <button
-                  key={s.chave}
-                  type="button"
-                  onClick={() => aplicar({ status: toggle(atual.status, s.chave) })}
-                  className={
-                    "rounded-md px-2.5 py-1 text-xs transition " +
-                    (sel
-                      ? "bg-[var(--color-signal)] text-onyx"
-                      : "border border-[var(--color-ivory-22)] bg-transparent text-[var(--color-ivory-88)] hover:bg-white/5")
-                  }
-                >
-                  {s.rotulo}
-                </button>
-              );
-            })}
-          </div>
+          <SelectorChips
+            opcoes={STATUS.map((s) => ({ valor: s.chave, rotulo: s.rotulo }))}
+            selecionados={atual.status}
+            mode="multi"
+            accent="signal"
+            onChange={(novos) => aplicar({ status: novos as StatusCaso[] })}
+          />
         </div>
 
         {filtrosAtivos && (

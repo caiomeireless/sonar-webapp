@@ -165,7 +165,7 @@ export default function BensComRestricao({ dados }: Props) {
         <span className="eyebrow text-[var(--color-ivory-66)]">
           Valor em risco
         </span>
-        <span className="font-mono text-lg font-medium tabular-nums text-[var(--color-gold)]">
+        <span className="font-mono text-2xl font-medium tabular-nums text-[var(--color-gold)]">
           {formatBRL(totalValor)}
         </span>
       </footer>

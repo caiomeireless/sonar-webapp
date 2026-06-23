@@ -102,7 +102,7 @@ export default async function DashboardClientePage({ searchParams }: Props) {
             <p className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
               Patrimônio / Crédito
             </p>
-            <p className="mt-1 font-mono text-xs text-[var(--color-gold)]">
+            <p className="mt-1 font-mono text-base text-[var(--color-gold)]">
               {formatBRL(patrimonioLocalizado)} / {formatBRL(totalCobranca)}
             </p>
           </div>
@@ -145,7 +145,7 @@ export default async function DashboardClientePage({ searchParams }: Props) {
                 <h3 className="mt-1 font-serif text-lg text-ivory">
                   {c.devedor.nome}
                 </h3>
-                <div className="mt-3 flex items-center justify-between text-xs">
+                <div className="mt-3 flex items-center justify-between text-base">
                   <span className="text-[var(--color-ivory-88)]">
                     {c.total_bens} {c.total_bens === 1 ? "bem" : "bens"}
                   </span>

@@ -126,7 +126,7 @@ function FeedItem({ item, ehUltimo }: FeedItemProps) {
 
         {/* Coluna 2 — texto principal + linha secundária */}
         <div className="flex min-w-0 flex-col gap-0.5">
-          <p className="truncate text-sm leading-snug text-[var(--color-ivory)]">
+          <p className="truncate text-xl leading-snug text-[var(--color-ivory)]">
             <span className="font-medium text-[var(--color-ivory)]">
               {advogado}
             </span>{" "}

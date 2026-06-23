@@ -251,7 +251,7 @@ function ListaCredores({
               <Td>
                 <Link
                   href={`/equipe/devedores/credor/${c.id}${euQuery}`}
-                  className="block font-serif text-[14px] leading-tight text-[var(--color-gold)]"
+                  className="block font-serif text-[21px] leading-tight text-[var(--color-gold)]"
                 >
                   {c.nome}
                 </Link>
@@ -277,7 +277,7 @@ function ListaCredores({
                 </span>
               </Td>
               <Td align="right">
-                <span className="font-mono text-[12px] text-[var(--color-gold)]">
+                <span className="font-mono text-[18px] text-[var(--color-gold)]">
                   {c.total_bens}
                 </span>
               </Td>

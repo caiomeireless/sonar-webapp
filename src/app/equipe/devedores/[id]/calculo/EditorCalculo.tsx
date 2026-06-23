@@ -398,7 +398,7 @@ export function EditorCalculo({ devedorId: _devedorId, imprimirHref }: Props) {
                       className="block w-full rounded-md border border-[var(--color-ivory-12)] bg-[rgba(0,0,0,0.4)] px-2 py-1.5 text-right font-mono text-xs text-ivory placeholder:text-[var(--color-ivory-66)] focus:border-[var(--color-gold)] focus:outline-none"
                     />
                   </td>
-                  <td className="px-3 py-2 text-right font-mono text-xs text-[var(--color-gold)]">
+                  <td className="px-3 py-2 text-right font-mono text-base text-[var(--color-gold)]">
                     {Number.isFinite(l.valorNum) && l.valorNum > 0
                       ? formatBRL(l.corrigido)
                       : "—"}
@@ -725,10 +725,10 @@ function ResultadoTabela({
               <ResumoLinha label="Custas processuais" valor={custas} />
             ) : null}
             <tr className="bg-[rgba(201,162,74,0.1)]">
-              <td className="px-4 py-3 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--color-gold)]">
+              <td className="px-4 py-3 font-mono text-base uppercase tracking-[0.24em] text-[var(--color-gold)]">
                 Total devido
               </td>
-              <td className="px-4 py-3 text-right font-mono text-base font-semibold text-[var(--color-gold)]">
+              <td className="px-4 py-3 text-right font-mono text-2xl font-semibold text-[var(--color-gold)]">
                 {formatBRL(total)}
               </td>
             </tr>

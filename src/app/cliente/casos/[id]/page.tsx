@@ -211,10 +211,10 @@ function CardCasoVinculado({ caso }: { caso: CasoResumo }) {
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.5)] p-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <p className="font-mono text-xs text-[var(--color-ivory-66)]">
+        <p className="font-mono text-base text-[var(--color-ivory-66)]">
           {caso.numero_processo || "Sem processo cadastrado"}
         </p>
-        <p className="mt-1 text-sm text-ivory">
+        <p className="mt-1 text-xl text-ivory">
           Crédito:{" "}
           <span className="text-[var(--color-gold)]">
             {formatBRL(caso.valor_credito_brl)}
@@ -240,7 +240,7 @@ function CardBem({ bem }: { bem: Bem }) {
           <DetalhesRender tipo={bem.tipo} detalhes={bem.detalhes} />
         </div>
         {bem.valor_estimado_brl !== null ? (
-          <span className="whitespace-nowrap font-mono text-sm text-[var(--color-gold)]">
+          <span className="whitespace-nowrap font-mono text-xl text-[var(--color-gold)]">
             {formatBRL(bem.valor_estimado_brl)}
           </span>
         ) : null}

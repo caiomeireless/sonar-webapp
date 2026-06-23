@@ -37,17 +37,17 @@ export default function Top5ClientesPorPatrimonio({ itens }: Props) {
               >
                 <span
                   aria-hidden
-                  className="text-xs font-mono tabular-nums text-[var(--color-ivory-66)] group-hover:text-[var(--color-gold)]"
+                  className="text-base font-mono tabular-nums text-[var(--color-ivory-66)] group-hover:text-[var(--color-gold)]"
                 >
                   {idx + 1}
                 </span>
-                <span className="truncate text-sm text-[var(--color-ivory)]">
+                <span className="truncate text-xl text-[var(--color-ivory)]">
                   {item.credorNome}
                 </span>
-                <span className="text-sm font-medium tabular-nums text-[var(--color-ivory)]">
+                <span className="text-xl font-medium tabular-nums text-[var(--color-ivory)]">
                   {formatBRL(item.valorPatrimonioLocalizado)}
                 </span>
-                <span className="text-xs tabular-nums text-[var(--color-ivory-66)] min-w-[3.5rem] text-right">
+                <span className="text-base tabular-nums text-[var(--color-ivory-66)] min-w-[4rem] text-right">
                   {item.qtdCasos} {item.qtdCasos === 1 ? "caso" : "casos"}
                 </span>
               </Link>

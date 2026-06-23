@@ -60,7 +60,7 @@ export default async function CustosClientePage({ searchParams }: Props) {
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
               Limite mensal
             </p>
-            <p className="mt-1 font-mono text-lg text-[var(--color-gold)]">
+            <p className="mt-1 font-mono text-2xl text-[var(--color-gold)]">
               {formatBRL(limiteMes)}
             </p>
           </div>

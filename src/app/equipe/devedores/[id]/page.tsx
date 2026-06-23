@@ -613,15 +613,15 @@ function AlertaCrossReference({
                   className="group flex flex-col gap-1 rounded-lg border border-amber-500/20 bg-[rgba(5,7,6,0.45)] px-3 py-2 transition hover:border-amber-400/60 hover:bg-[rgba(5,7,6,0.65)] sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-sm text-[var(--color-gold)] group-hover:text-[var(--color-tip-glow)]">
+                    <p className="truncate text-xl text-[var(--color-gold)] group-hover:text-[var(--color-tip-glow)]">
                       {o.credor.nome}
                     </p>
-                    <p className="mt-0.5 font-mono text-[11px] text-[var(--color-ivory-66)]">
+                    <p className="mt-0.5 font-mono text-[15px] text-[var(--color-ivory-66)]">
                       {o.numero_processo ?? "Sem processo cadastrado"}
                     </p>
                   </div>
                   <div className="flex items-center gap-3 sm:flex-shrink-0">
-                    <span className="font-mono text-xs text-[var(--color-ivory-88)]">
+                    <span className="font-mono text-base text-[var(--color-ivory-88)]">
                       {formatBRL(o.valor_credito_brl)}
                     </span>
                     <span className="rounded-full border border-amber-500/30 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] text-amber-200/80">
@@ -643,20 +643,20 @@ function CardCasoVinculado({ caso }: { caso: CasoResumo }) {
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.5)] p-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <p className="font-mono text-xs text-[var(--color-ivory-66)]">
+        <p className="font-mono text-base text-[var(--color-ivory-66)]">
           {caso.numero_processo || "Sem processo cadastrado"}
         </p>
-        <p className="mt-1 text-sm text-ivory">
+        <p className="mt-1 text-xl text-ivory">
           Credor:{" "}
           <span className="text-[var(--color-gold)]">{caso.credor.nome}</span>
         </p>
-        <p className="mt-1 text-sm text-ivory">
+        <p className="mt-1 text-xl text-ivory">
           Crédito:{" "}
           <span className="text-[var(--color-gold)]">
             {formatBRL(caso.valor_credito_brl)}
           </span>
         </p>
-        <p className="mt-1 font-mono text-[11px] text-[var(--color-ivory-66)]">
+        <p className="mt-1 font-mono text-[15px] text-[var(--color-ivory-66)]">
           Advogado responsável:{" "}
           <span className="text-ivory">
             {caso.responsavel_email ?? "—"}
@@ -682,7 +682,7 @@ function CardBem({ bem }: { bem: Bem }) {
           <DetalhesRender tipo={bem.tipo} detalhes={bem.detalhes} />
         </div>
         {bem.valor_estimado_brl !== null ? (
-          <span className="whitespace-nowrap font-mono text-sm text-[var(--color-gold)]">
+          <span className="whitespace-nowrap font-mono text-xl text-[var(--color-gold)]">
             {formatBRL(bem.valor_estimado_brl)}
           </span>
         ) : null}
