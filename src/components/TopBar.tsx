@@ -86,15 +86,15 @@ export function TopBar({
   const inicial = (usuario.email[0] || "?").toUpperCase();
 
   return (
-    <header className="sticky top-0 z-20 border-b border-[var(--color-line)] bg-[var(--color-bg-2)]/85 backdrop-blur-xl">
+    <header className="sticky top-0 z-20 border-b border-[var(--color-line)] bg-[var(--color-bg-2)]/70 backdrop-blur-xl">
       <div className="flex items-center justify-between gap-6 px-6 py-4 sm:px-10">
         {/* Esquerda: título da página */}
         <div className="min-w-0">
-          <h1 className="font-serif text-2xl font-medium uppercase tracking-[0.06em] text-[var(--color-ivory)] sm:text-[28px]">
+          <h1 className="font-serif text-2xl font-medium uppercase tracking-[0.06em] text-[var(--color-fg)] sm:text-[28px]">
             {titulo}
           </h1>
           {subtitulo ? (
-            <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+            <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-fg-muted)]">
               {subtitulo}
             </p>
           ) : null}
@@ -153,8 +153,8 @@ function BotaoSino() {
       aria-label="Notificações"
       className="
         relative inline-flex h-9 w-9 items-center justify-center rounded-lg
-        border border-[var(--color-line)] bg-[var(--color-surface-2)] text-[var(--color-ivory-88)]
-        transition hover:border-[var(--color-signal-soft-2)] hover:text-[var(--color-ivory)]
+        border border-[var(--color-line)] bg-[var(--color-surface-2)] text-[var(--color-fg-muted)]
+        transition hover:border-[var(--color-signal-soft-2)] hover:text-[var(--color-fg)]
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-signal-soft-2)]
       "
     >
@@ -208,7 +208,7 @@ function AvatarMenu({
           {inicial}
         </span>
         <ChevronDown
-          className={`h-3.5 w-3.5 text-[var(--color-ivory-66)] transition ${aberto ? "rotate-180" : ""}`}
+          className={`h-3.5 w-3.5 text-[var(--color-fg-muted)] transition ${aberto ? "rotate-180" : ""}`}
           aria-hidden="true"
         />
       </button>
@@ -221,7 +221,7 @@ function AvatarMenu({
           "
         >
           <div className="border-b border-[var(--color-line)] px-4 py-3">
-            <p className="truncate text-[13px] text-[var(--color-ivory)]" title={usuario.email}>
+            <p className="truncate text-[13px] text-[var(--color-fg)]" title={usuario.email}>
               {usuario.email}
             </p>
             <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-signal)]">
@@ -236,7 +236,7 @@ function AvatarMenu({
               href="/cliente/casos?eu=cliente.demo@battaglia.com.br"
               className="
                 flex items-center gap-2 border-b border-[var(--color-line)]
-                px-4 py-2.5 text-sm text-[var(--color-ivory-88)] transition
+                px-4 py-2.5 text-sm text-[var(--color-fg-muted)] transition
                 hover:bg-[var(--color-surface-2)] hover:text-[var(--color-signal)]
               "
               onClick={() => setAberto(false)}
@@ -251,8 +251,8 @@ function AvatarMenu({
               type="submit"
               className="
                 flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm
-                text-[var(--color-ivory-88)] transition
-                hover:bg-[var(--color-surface-2)] hover:text-[var(--color-ivory)]
+                text-[var(--color-fg-muted)] transition
+                hover:bg-[var(--color-surface-2)] hover:text-[var(--color-fg)]
               "
             >
               <LogOut className="h-4 w-4" aria-hidden="true" />

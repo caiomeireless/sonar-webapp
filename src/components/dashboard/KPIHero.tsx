@@ -43,10 +43,11 @@ const DIRECTION_ARROW: Record<KPIDelta["direction"], string> = {
 };
 
 // Cor do número por accent — verde signal é default (substituiu o gold do BP).
+// Brand literais nos accents; neutral usa o token semântico fg.
 const VALUE_COLOR: Record<DashboardCardAccent, string> = {
   green: "var(--color-signal)",
   gold: "var(--color-gold)",
-  neutral: "var(--color-ivory)",
+  neutral: "var(--color-fg)",
 };
 
 export function KPIHero({
@@ -94,7 +95,7 @@ export function KPIHero({
         {valor}
       </p>
       {subtitulo ? (
-        <p className="mt-2 text-xs text-[var(--color-ivory-40)]">{subtitulo}</p>
+        <p className="mt-2 text-xs text-fg-faint">{subtitulo}</p>
       ) : null}
       {delta ? (
         <div
@@ -106,7 +107,7 @@ export function KPIHero({
           </span>
           <span className="font-medium tabular-nums">{delta.value}</span>
           {delta.label ? (
-            <span className="text-[var(--color-ivory-66)]">{delta.label}</span>
+            <span className="text-fg-muted">{delta.label}</span>
           ) : null}
         </div>
       ) : null}

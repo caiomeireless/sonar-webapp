@@ -5,7 +5,7 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 
-import { InteractiveGrid } from "@/components/InteractiveGrid";
+import { AetherBackground } from "@/components/AetherBackground";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
 import { NAV_EQUIPE } from "@/lib/nav-equipe";
@@ -34,13 +34,21 @@ export default async function EquipeLayout({ children }: { children: ReactNode }
         portal="equipe"
       />
       <div className="relative flex min-w-0 flex-1 flex-col">
-        {/* Grade interativa verde signal — pano de fundo MUITO discreto
-            (alpha 0.05–0.20). Confinado ao fundo, sem vazar nos cards. */}
+        {/* AetherFlow — partículas signal+gold com conectores, bem discreto. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-0 overflow-hidden opacity-60"
+          className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
         >
-          <InteractiveGrid />
+          <AetherBackground intensidade={0.55} />
+          {/* Vinheta radial escura ao centro: protege a leitura dos
+              títulos/parágrafos que ficam sobre o canvas. */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(ellipse at center, rgba(10,12,11,0.55) 0%, rgba(10,12,11,0.25) 35%, transparent 75%)",
+            }}
+          />
         </div>
         <div className="relative z-10 flex min-w-0 flex-1 flex-col">
           <TopBar usuario={{ email, papel }} portal="equipe" />

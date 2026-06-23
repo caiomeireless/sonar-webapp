@@ -6,7 +6,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Eye } from "lucide-react";
 
-import { InteractiveGrid } from "@/components/InteractiveGrid";
+import { AetherBackground } from "@/components/AetherBackground";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
 import { NAV_CLIENTE } from "@/lib/nav-cliente";
@@ -33,12 +33,19 @@ export default async function ClienteLayout({ children }: { children: ReactNode 
         portal="cliente"
       />
       <div className="relative flex min-w-0 flex-1 flex-col">
-        {/* Grade interativa verde signal — pano de fundo MUITO discreto. */}
+        {/* AetherFlow — partículas signal+gold com conectores, bem discreto. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-0 overflow-hidden opacity-60"
+          className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
         >
-          <InteractiveGrid />
+          <AetherBackground intensidade={0.55} />
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(ellipse at center, rgba(10,12,11,0.55) 0%, rgba(10,12,11,0.25) 35%, transparent 75%)",
+            }}
+          />
         </div>
         <div className="relative z-10 flex min-w-0 flex-1 flex-col">
         {ehVisualizacao && (

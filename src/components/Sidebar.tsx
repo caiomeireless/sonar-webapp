@@ -209,7 +209,7 @@ function SidebarPanel({
               aria-label="Fechar menu"
               className="inline-flex h-9 w-9 items-center justify-center rounded-lg
                          border border-[var(--color-line)] bg-[var(--color-surface-2)]
-                         text-[var(--color-ivory)] transition
+                         text-[var(--color-fg)] transition
                          hover:bg-[var(--color-line)]"
             >
               <X className="h-4 w-4" aria-hidden="true" />
@@ -250,8 +250,8 @@ function NavLinkItem({ item }: { item: SidebarItem }) {
     "focus-visible:ring-[var(--color-signal)]";
 
   const inativo =
-    "text-[var(--color-ivory-88)] hover:bg-[var(--color-surface-2)] " +
-    "hover:text-[var(--color-ivory)]";
+    "text-[var(--color-fg-muted)] hover:bg-[var(--color-surface-2)] " +
+    "hover:text-[var(--color-fg)]";
 
   const ativoCls =
     "font-medium text-[var(--color-signal)] " +
@@ -281,7 +281,7 @@ function NavLinkItem({ item }: { item: SidebarItem }) {
           "border backdrop-blur-md transition " +
           (ativo
             ? "border-[var(--color-signal-soft-2)] bg-[var(--color-signal-soft)] text-[var(--color-signal)] shadow-[0_0_12px_rgba(60,255,138,0.25)]"
-            : "border-[var(--color-line)] bg-[var(--color-surface-2)] text-[var(--color-ivory-88)] group-hover:border-[var(--color-signal-soft-2)] group-hover:text-[var(--color-ivory)]")
+            : "border-[var(--color-line)] bg-[var(--color-surface-2)] text-[var(--color-fg-muted)] group-hover:border-[var(--color-signal-soft-2)] group-hover:text-[var(--color-fg)]")
         }
       >
         {item.icon}
@@ -323,7 +323,7 @@ function SidebarFooter({
                    bg-[var(--color-surface-2)] px-3 py-2.5"
       >
         <span
-          className="truncate text-[13px] text-[var(--color-ivory)]"
+          className="truncate text-[13px] text-[var(--color-fg)]"
           title={usuario.email}
         >
           {usuario.email}
@@ -342,9 +342,9 @@ function SidebarFooter({
             type="submit"
             className="flex w-full items-center justify-between gap-2 rounded-xl
                        border border-[var(--color-line)] bg-[var(--color-surface-2)]
-                       px-3 py-2 text-[13px] text-[var(--color-ivory-88)]
+                       px-3 py-2 text-[13px] text-[var(--color-fg-muted)]
                        transition hover:bg-[var(--color-line)]
-                       hover:text-[var(--color-ivory)]
+                       hover:text-[var(--color-fg)]
                        focus-visible:outline-none focus-visible:ring-2
                        focus-visible:ring-[var(--color-signal)]"
           >

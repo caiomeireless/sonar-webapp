@@ -209,12 +209,15 @@
   --color-line:            var(--color-line);
   --color-line-strong:     var(--color-line-strong);
 
-  /* Semanticos — preferir bg-bg / text-fg / text-fg-muted daqui pra frente */
+  /* Semanticos — preferir bg-bg / text-fg / text-fg-muted daqui pra frente.
+     Expostos como utilitarios Tailwind: bg-bg, bg-bg-2, bg-surface, bg-surface-2,
+     text-fg, text-fg-muted, text-fg-faint, border-line, border-line-strong. */
   --color-bg:        var(--color-onyx);
   --color-bg-2:      var(--color-onyx-2);
   --color-fg:        var(--color-ivory);
   --color-fg-muted:  var(--color-ivory-66);
   --color-fg-faint:  var(--color-ivory-40);
+  --color-surface:   var(--color-surface-1);
 
   --font-sans:  var(--font-manrope), system-ui, -apple-system, sans-serif;
   --font-serif: var(--font-cormorant), Georgia, serif;
@@ -238,13 +241,15 @@ html, body {
 }
 
 /* Body — 2 manchas radiais signal sutis (espelho ambient gold do BP).
-   `background-attachment: fixed` mantem o ambient parado no scroll. */
+   `background-attachment: fixed` mantem o ambient parado no scroll.
+   Opacidades 0.04 + 0.02 (vide --color-signal-ambient-1/2 nos tokens). */
 body {
-  background:
-    radial-gradient(circle at 18% 12%, var(--color-signal-ambient-1), transparent 45%),
-    radial-gradient(circle at 82% 88%, var(--color-signal-ambient-2), transparent 50%),
-    var(--color-onyx);
+  background-color: var(--color-bg);
+  background-image:
+    radial-gradient(48rem 48rem at 100% -12%, var(--color-signal-ambient-1), transparent 60%),
+    radial-gradient(42rem 42rem at -12% 112%, var(--color-signal-ambient-2), transparent 60%);
   background-attachment: fixed;
+  background-repeat: no-repeat;
 }
 
 /* Brand utilities (do handoff) */
@@ -649,4 +654,209 @@ body {
     hsl(180 6% 10% / 0.92),
     transparent 100%
   );
+}
+
+/* ============================================================
+   Design system — classes globais unificadas
+   Inspiradas no padrao do BP Customer Office. Sao layers de
+   conveniencia sobre os tokens semanticos; nao substituem
+   .glass / .glass-side existentes (que ficam intactos).
+   ============================================================ */
+
+/* .glass-card — atalho pro padrao "<section class='glass p-5 rounded-2xl'>".
+   Mesmo blur/borda/sombra do .glass + padding 20px + radius 16px.
+   Variantes: --compact (p-3.5, radius-lg) e --feature (p-7, radius-app). */
+.glass-card {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 35%),
+    var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-xl); /* 16px */
+  padding: 1.25rem;                /* 20px = p-5 */
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+  box-shadow:
+    0 10px 30px -16px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+[data-theme="light"] .glass-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.55), transparent 40%),
+    var(--color-surface);
+  box-shadow:
+    0 10px 30px -16px rgba(10, 12, 11, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+.glass-card--compact { padding: 0.875rem; border-radius: var(--radius-lg); }
+.glass-card--feature { padding: 1.75rem;  border-radius: var(--radius-app); }
+
+/* .input — input/textarea/select unificado. Centraliza o padrao
+   "border-line bg-surface-2 px-3 py-2 text-sm" repetido nos forms. */
+.input {
+  width: 100%;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-line);
+  background-color: var(--color-surface-2);
+  padding: 0.5rem 0.75rem; /* py-2 px-3 */
+  font-family: var(--font-manrope), system-ui, -apple-system, sans-serif;
+  font-size: 0.875rem;
+  color: var(--color-fg);
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+.input::placeholder { color: var(--color-fg-faint); }
+.input:focus {
+  border-color: rgba(60, 255, 138, 0.50);
+  box-shadow: 0 0 0 1px rgba(60, 255, 138, 0.30);
+}
+[data-theme="light"] .input:focus {
+  border-color: rgba(23, 138, 72, 0.55);
+  box-shadow: 0 0 0 1px rgba(23, 138, 72, 0.35);
+}
+.input:disabled { opacity: 0.5; cursor: not-allowed; }
+.input--invalid { border-color: #FF5B5B; }
+.input--invalid:focus { box-shadow: 0 0 0 1px #FF5B5B; }
+
+/* Label que acompanha o .input */
+.label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-fg-faint);
+}
+
+/* .btn-signal — botao primario (verde). Equivalente ao .btn-gold do BP. */
+.btn-signal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-xl); /* 16px */
+  border: 1px solid rgba(60, 255, 138, 0.30);
+  background-color: var(--color-signal-soft);
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-signal);
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+.btn-signal:hover {
+  background-color: rgba(60, 255, 138, 0.16);
+  border-color: rgba(60, 255, 138, 0.45);
+}
+.btn-signal:disabled { opacity: 0.5; cursor: not-allowed; }
+[data-theme="light"] .btn-signal {
+  border-color: rgba(23, 138, 72, 0.35);
+  color: var(--color-signal-strong);
+}
+[data-theme="light"] .btn-signal:hover {
+  background-color: rgba(23, 138, 72, 0.16);
+  border-color: rgba(23, 138, 72, 0.50);
+}
+
+/* .btn-gold — variante para acoes de firm (Themis, pecas). */
+.btn-gold {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(201, 162, 74, 0.30);
+  background-color: rgba(201, 162, 74, 0.12);
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-gold);
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+.btn-gold:hover {
+  background-color: rgba(201, 162, 74, 0.18);
+  border-color: rgba(201, 162, 74, 0.45);
+}
+.btn-gold:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* .btn-ghost — botao secundario sem fill, usado pra acoes de menos peso. */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-xl);
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  color: var(--color-fg-muted);
+  background-color: transparent;
+  border: 1px solid transparent;
+  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+}
+.btn-ghost:hover {
+  color: var(--color-fg);
+  background-color: var(--color-surface-2);
+}
+.btn-ghost:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* .selo — badge/pill generico com variantes. Substitui as strings repetidas
+   `rounded-full border px-1.5 py-0.5 text-[9px] uppercase tracking-wide`. */
+.selo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 9999px;
+  border: 1px solid var(--color-line);
+  background-color: var(--color-surface-2);
+  padding: 2px 6px;
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 9px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-fg-muted);
+  white-space: nowrap;
+}
+.selo--signal {
+  border-color: rgba(60, 255, 138, 0.30);
+  background-color: var(--color-signal-soft);
+  color: var(--color-signal);
+}
+[data-theme="light"] .selo--signal { color: var(--color-signal-strong); }
+.selo--gold {
+  border-color: rgba(201, 162, 74, 0.30);
+  background-color: rgba(201, 162, 74, 0.12);
+  color: var(--color-gold);
+}
+[data-theme="light"] .selo--gold { color: var(--color-gold-soft); }
+.selo--danger {
+  border-color: rgba(255, 91, 91, 0.30);
+  background-color: rgba(255, 91, 91, 0.12);
+  color: #FF5B5B;
+}
+.selo--warn {
+  border-color: rgba(244, 197, 66, 0.30);
+  background-color: rgba(244, 197, 66, 0.10);
+  color: #F4C542;
+}
+.selo--beta {
+  border-color: rgba(60, 255, 138, 0.30);
+  background-color: var(--color-signal-soft);
+  color: var(--color-signal);
+}
+
+/* .linha-campo — label em cima, valor embaixo, divisor por baixo.
+   Padrao pra fichas de cliente / detalhes de caso. */
+.linha-campo {
+  border-bottom: 1px solid var(--color-line);
+  padding: 0.625rem 0;
+}
+.linha-campo:last-child { border-bottom: 0; }
+.linha-campo dt {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-fg-faint);
+}
+.linha-campo dd {
+  margin-top: 2px;
+  font-size: 0.875rem;
+  color: var(--color-fg);
 }
