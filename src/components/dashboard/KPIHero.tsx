@@ -1,8 +1,15 @@
 // KPI Hero — card destaque de metrica numerica grande.
 // Usado nas 4 a 8 metricas principais no topo do dashboard.
 // Valor ja vem formatado (string) pra evitar acoplamento com Intl.
+//
+// Padrao tipografico: numero `text-4xl md:text-5xl font-medium tabular-nums
+// tracking-tight` na cor do `accent` (signal/gold/ivory). Espelho do "número
+// gigante dourado" do BP CRM, adaptado pra paleta Sonar (gold→signal).
 
-import { DashboardCard, type DashboardCardAccent } from "@/components/dashboard/DashboardCard";
+import {
+  DashboardCard,
+  type DashboardCardAccent,
+} from "@/components/dashboard/DashboardCard";
 
 export type KPIDelta = {
   value: string;
@@ -17,6 +24,9 @@ type Props = {
   delta?: KPIDelta;
   accent?: DashboardCardAccent;
   info?: string;
+  // Ativa o "blob de luz" signal no canto + ring 1px de destaque.
+  // Replicar o card destacado do Painel2 do BP.
+  destaque?: boolean;
 };
 
 const DIRECTION_COLOR: Record<KPIDelta["direction"], string> = {
@@ -31,6 +41,13 @@ const DIRECTION_ARROW: Record<KPIDelta["direction"], string> = {
   neutral: "→",
 };
 
+// Cor do numero por accent — verde signal e default (substituiu o gold do BP).
+const VALUE_COLOR: Record<DashboardCardAccent, string> = {
+  green: "var(--color-signal)",
+  gold: "var(--color-gold)",
+  neutral: "var(--color-ivory)",
+};
+
 export function KPIHero({
   titulo,
   valor,
@@ -38,33 +55,60 @@ export function KPIHero({
   delta,
   accent = "green",
   info,
+  destaque = false,
 }: Props) {
+  const valueColor = VALUE_COLOR[accent];
   return (
-    <DashboardCard titulo={titulo} accent={accent} info={info}>
-      <div className="flex flex-col gap-2">
-        <div className="text-4xl font-medium leading-none tracking-tight text-[var(--color-ivory)]">
-          {valor}
+    <DashboardCard
+      titulo={titulo}
+      accent={accent}
+      info={info}
+      className={[
+        "relative overflow-hidden",
+        destaque
+          ? accent === "gold"
+            ? "ring-1 ring-[rgba(201,162,74,0.20)]"
+            : "ring-1 ring-[rgba(60,255,138,0.20)]"
+          : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      {destaque ? (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -right-8 -top-12 h-32 w-32 rounded-full blur-2xl"
+          style={{
+            background:
+              accent === "gold"
+                ? "rgba(201, 162, 74, 0.12)"
+                : "rgba(60, 255, 138, 0.10)",
+          }}
+        />
+      ) : null}
+      <p
+        className="mt-3 text-4xl font-medium leading-none tabular-nums tracking-tight md:text-5xl"
+        style={{ color: valueColor }}
+      >
+        {valor}
+      </p>
+      {subtitulo ? (
+        <p className="mt-2 text-xs text-[var(--color-ivory-40)]">{subtitulo}</p>
+      ) : null}
+      {delta ? (
+        <div
+          className="mt-2 inline-flex items-center gap-1.5 text-xs"
+          style={{ color: DIRECTION_COLOR[delta.direction] }}
+        >
+          <span aria-hidden className="text-xs leading-none">
+            {DIRECTION_ARROW[delta.direction]}
+          </span>
+          <span className="font-medium tabular-nums">{delta.value}</span>
+          {delta.label ? (
+            <span className="text-[var(--color-ivory-66)]">{delta.label}</span>
+          ) : null}
         </div>
-        {subtitulo ? (
-          <p className="text-xs text-[var(--color-ivory-66)]">{subtitulo}</p>
-        ) : null}
-        {delta ? (
-          <div
-            className="mt-1 inline-flex items-center gap-1.5 text-xs"
-            style={{ color: DIRECTION_COLOR[delta.direction] }}
-          >
-            <span aria-hidden className="text-sm leading-none">
-              {DIRECTION_ARROW[delta.direction]}
-            </span>
-            <span className="font-medium">{delta.value}</span>
-            {delta.label ? (
-              <span className="text-[var(--color-ivory-66)]">
-                {delta.label}
-              </span>
-            ) : null}
-          </div>
-        ) : null}
-      </div>
+      ) : null}
     </DashboardCard>
   );
 }

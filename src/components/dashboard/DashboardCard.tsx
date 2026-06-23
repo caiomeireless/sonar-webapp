@@ -1,14 +1,28 @@
 // Card base do Dashboard do Caso — wrapper visual reutilizavel.
 // Toda secao do dashboard (KPI, grafico, lista) entra dentro de um destes.
 // Mantem padding, borda e tipografia consistentes; o conteudo varia.
+//
+// Padrao visual: glass nivel 1 (surface-1 + blur 18px + sombra dirigida -16px)
+// + borda var(--color-line) + rounded-2xl. Espelho do `.glass` do BP CRM.
+//
+// SSR-safe: o componente em si é server. O efeito GlowCard (cursor-follow)
+// fica num sub-componente client (`./GlowSpot`) montado so quando interactive=true.
 import type { ReactNode } from "react";
+import { GlowSpot } from "./GlowSpot";
 
 export type DashboardCardAccent = "green" | "gold" | "neutral";
+export type DashboardCardVariant = "default" | "premium";
 
 const ACCENT_COLOR: Record<DashboardCardAccent, string> = {
   green: "var(--color-signal)",
   gold: "var(--color-gold)",
   neutral: "var(--color-ivory-66)",
+};
+
+const ACCENT_GLOW: Record<DashboardCardAccent, string> = {
+  green: "0 0 10px rgba(60, 255, 138, 0.55)",
+  gold: "0 0 10px rgba(201, 162, 74, 0.5)",
+  neutral: "none",
 };
 
 type Props = {
@@ -20,6 +34,11 @@ type Props = {
   // Texto opcional que aparece num popover ao passar mouse no "?" ao lado
   // do titulo. CSS-only via group-hover (sem JS).
   info?: string;
+  // Ativa o efeito GlowCard: spot signal que segue o cursor + hover border signal.
+  interactive?: boolean;
+  // `default` = eyebrow JetBrains uppercase tracking 0.32em.
+  // `premium` = header serif (Cormorant) — usar em 1-2 cards "hero" do dashboard.
+  variant?: DashboardCardVariant;
 };
 
 export function DashboardCard({
@@ -29,34 +48,39 @@ export function DashboardCard({
   accent = "neutral",
   className,
   info,
+  interactive = false,
+  variant = "default",
 }: Props) {
   const accentColor = ACCENT_COLOR[accent];
+  const accentGlow = ACCENT_GLOW[accent];
+
   return (
     <section
       className={[
-        "rounded-xl border bg-[var(--color-carbon)] p-5",
-        "border-[var(--color-ivory-12)]",
+        "glass p-5 text-[var(--color-ivory)]",
+        interactive ? "glow-card" : "",
         className ?? "",
       ]
         .filter(Boolean)
         .join(" ")}
     >
-      <header className="mb-4">
+      {interactive ? <GlowSpot /> : null}
+      <header className="relative mb-4">
         <div
-          className="eyebrow flex items-center gap-2"
-          style={{ color: accentColor }}
+          className={[
+            "flex items-center gap-2",
+            variant === "premium"
+              ? "font-serif text-base font-medium tracking-[0.02em]"
+              : "eyebrow",
+          ].join(" ")}
+          style={variant === "premium" ? undefined : { color: accentColor }}
         >
           <span
             aria-hidden
-            className="inline-block h-1.5 w-1.5 rounded-full"
+            className="inline-block h-2 w-2 rounded-full"
             style={{
               background: accentColor,
-              boxShadow:
-                accent === "green"
-                  ? "0 0 8px rgba(60, 255, 138, 0.6)"
-                  : accent === "gold"
-                    ? "0 0 8px rgba(201, 162, 74, 0.5)"
-                    : "none",
+              boxShadow: accentGlow,
             }}
           />
           {titulo}
@@ -68,19 +92,19 @@ export function DashboardCard({
               >
                 ?
               </span>
-              <span className="pointer-events-none invisible absolute left-0 top-full z-50 mt-2 w-72 whitespace-pre-line rounded-lg border border-[var(--color-ivory-22)] bg-[var(--color-onyx)] p-3 text-[11px] normal-case leading-relaxed tracking-normal text-[var(--color-ivory)] opacity-0 shadow-2xl transition group-hover:visible group-hover:opacity-100">
+              <span className="pointer-events-none invisible absolute left-0 top-full z-50 mt-2 w-72 whitespace-pre-line rounded-lg border border-[var(--color-line-strong)] bg-[var(--color-surface-solid)] p-3 text-[11px] normal-case leading-relaxed tracking-normal text-[var(--color-ivory)] opacity-0 shadow-2xl transition group-hover:visible group-hover:opacity-100">
                 {info}
               </span>
             </span>
           ) : null}
         </div>
         {descricao ? (
-          <p className="mt-1.5 text-xs text-[var(--color-ivory-66)]">
+          <p className="mt-1 text-xs text-[var(--color-ivory-66)]">
             {descricao}
           </p>
         ) : null}
       </header>
-      <div className="text-[var(--color-ivory)]">{children}</div>
+      <div className="relative text-[var(--color-ivory)]">{children}</div>
     </section>
   );
 }

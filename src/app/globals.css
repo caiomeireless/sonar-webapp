@@ -7,20 +7,38 @@
 :root {
   /* Brand colors */
   --color-onyx:        #0A0C0B;  /* page background */
-  --color-carbon:      #050706;  /* card surface */
+  --color-onyx-2:      #0F1311;  /* topbar/popover opaco (espelho --bg-2 do BP) */
+  --color-carbon:      #050706;  /* card surface (legado — preservado) */
   --color-ivory:       #E8E4D6;  /* primary text + wordmark */
   --color-signal:      #3CFF8A;  /* sonar accent */
+  --color-signal-strong: #7CFFB0;  /* hover/active do signal (espelho gold-strong do BP) */
   --color-gold:        #C9A24A;  /* firm accent / targets */
   --color-gold-soft:   #A77A2E;  /* gold on light backgrounds */
   --color-tip-glow:    #E8FFEE;  /* sweep tip highlight */
 
+  /* Surfaces (3 niveis — espelho do BP) */
+  --color-surface-1:      rgba(232, 228, 214, 0.045);  /* glass nivel 1 — card primario */
+  --color-surface-2:      rgba(232, 228, 214, 0.07);   /* glass nivel 2 — sub-card/chip */
+  --color-surface-solid:  #0E1110;                     /* opaco — modal/select sem blur */
+
+  /* Linhas (espelho --line/--line-strong do BP) */
+  --color-line:           rgba(232, 228, 214, 0.09);
+  --color-line-strong:    rgba(232, 228, 214, 0.14);
+
+  /* Ambient signal (body — 2 manchas radiais sutis, espelho ambient gold BP) */
+  --color-signal-ambient-1: rgba(60, 255, 138, 0.04);
+  --color-signal-ambient-2: rgba(60, 255, 138, 0.02);
+
   /* Alpha variants */
   --color-ivory-12:    rgba(232, 228, 214, 0.07);
   --color-ivory-22:    rgba(232, 228, 214, 0.13);
+  --color-ivory-40:    rgba(232, 228, 214, 0.30);  /* terciario — caption/meta */
   --color-ivory-66:    rgba(232, 228, 214, 0.40);
   --color-ivory-88:    rgba(232, 228, 214, 0.53);
   --color-signal-06:   rgba(60, 255, 138, 0.024);
   --color-signal-12:   rgba(60, 255, 138, 0.07);
+  --color-signal-soft:   rgba(60, 255, 138, 0.10);  /* highlight/badge */
+  --color-signal-soft-2: rgba(60, 255, 138, 0.18);  /* glow card interativo */
 
   /* Spacing (8pt) */
   --space-1: 4px;  --space-2: 8px;   --space-3: 12px;  --space-4: 16px;
@@ -55,13 +73,22 @@
 
 /* Tailwind v4 — bridge dos tokens para utilitarios (bg-onyx, text-ivory, etc.) */
 @theme inline {
-  --color-onyx:       var(--color-onyx);
-  --color-carbon:     var(--color-carbon);
-  --color-ivory:      var(--color-ivory);
-  --color-signal:     var(--color-signal);
-  --color-gold:       var(--color-gold);
-  --color-gold-soft:  var(--color-gold-soft);
-  --color-tip-glow:   var(--color-tip-glow);
+  --color-onyx:          var(--color-onyx);
+  --color-onyx-2:        var(--color-onyx-2);
+  --color-carbon:        var(--color-carbon);
+  --color-ivory:         var(--color-ivory);
+  --color-ivory-40:      var(--color-ivory-40);
+  --color-signal:        var(--color-signal);
+  --color-signal-strong: var(--color-signal-strong);
+  --color-signal-soft:   var(--color-signal-soft);
+  --color-gold:          var(--color-gold);
+  --color-gold-soft:     var(--color-gold-soft);
+  --color-tip-glow:      var(--color-tip-glow);
+  --color-surface-1:     var(--color-surface-1);
+  --color-surface-2:     var(--color-surface-2);
+  --color-surface-solid: var(--color-surface-solid);
+  --color-line:          var(--color-line);
+  --color-line-strong:   var(--color-line-strong);
 
   --font-sans:  var(--font-manrope), system-ui, -apple-system, sans-serif;
   --font-serif: var(--font-cormorant), Georgia, serif;
@@ -82,6 +109,16 @@ html, body {
   font-size: var(--type-body);
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Body — 2 manchas radiais signal sutis (espelho ambient gold do BP).
+   `background-attachment: fixed` mantem o ambient parado no scroll. */
+body {
+  background:
+    radial-gradient(circle at 18% 12%, var(--color-signal-ambient-1), transparent 45%),
+    radial-gradient(circle at 82% 88%, var(--color-signal-ambient-2), transparent 50%),
+    var(--color-onyx);
+  background-attachment: fixed;
 }
 
 /* Brand utilities (do handoff) */
@@ -114,6 +151,82 @@ html, body {
   letter-spacing: var(--tracking-eyebrow);
   text-transform: uppercase;
   color: var(--color-ivory-66);
+}
+
+/* Eyebrow-card — variante usada em header de DashboardCard.
+   Bullet signal antes do texto, glow signal, ícone Lucide opcional `h-4 w-4`
+   à esquerda (renderizado inline pelo componente). Espelho do padrão Painel2
+   do BP, adaptado pra paleta Sonar. */
+.eyebrow-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: var(--type-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-ivory-66);
+}
+.eyebrow-card::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-signal);
+  box-shadow: 0 0 10px rgba(60, 255, 138, 0.55);
+}
+.eyebrow-card[data-accent="gold"]::before {
+  background: var(--color-gold);
+  box-shadow: 0 0 10px rgba(201, 162, 74, 0.5);
+}
+.eyebrow-card[data-accent="neutral"]::before {
+  background: var(--color-ivory-66);
+  box-shadow: none;
+}
+
+/* Glass nivel 1 — card primario (espelho do .glass do BP) */
+.glass {
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-line);
+  backdrop-filter: blur(18px) saturate(135%);
+  -webkit-backdrop-filter: blur(18px) saturate(135%);
+  box-shadow: 0 10px 30px -16px rgba(0, 0, 0, 0.55);
+  border-radius: 16px;
+}
+
+/* Glass nivel 2 — sub-card sem sombra */
+.glass-2 {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-line);
+  backdrop-filter: blur(18px) saturate(135%);
+  -webkit-backdrop-filter: blur(18px) saturate(135%);
+  border-radius: 12px;
+}
+
+/* GlowCard — segue cursor com spot signal (versao Sonar do GlowCard BP).
+   Componente set `--mx`/`--my` (0-100) via mouse move. */
+.glow-card {
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+.glow-card:hover {
+  border-color: rgba(60, 255, 138, 0.35);
+}
+.glow-card__spot {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  background: radial-gradient(
+    220px circle at calc(var(--mx, 50) * 1%) calc(var(--my, 50) * 1%),
+    var(--color-signal-soft-2),
+    transparent 60%
+  );
+}
+.glow-card:hover .glow-card__spot {
+  opacity: 1;
 }
 
 .signal-dash {
