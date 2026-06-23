@@ -162,15 +162,25 @@ function SidebarPanel({
 
   const isDrawer = variant === "drawer";
 
-  // Sidebar SEMPRE estica até o final da página. No desktop, self-stretch
-  // dentro do flex parent (que tem min-h-svh + conteúdo) garante isso.
-  // No drawer mobile, mantém h-dvh fixed na viewport.
+  // Sidebar SEMPRE estica até o final (aside self-stretch) MAS o conteúdo
+  // da nav (logo + items + footer) vive num inner sticky top-0 h-dvh —
+  // assim o usuário sempre vê o nav inteiro ao rolar, e o background da
+  // sidebar continua até o rodapé da página.
   const shellClass = isDrawer
     ? "glass-side absolute left-0 top-0 z-10 flex h-dvh w-[280px] shrink-0 flex-col gap-6 px-4 py-6 animate-[slideIn_180ms_ease-out]"
-    : "glass-side hidden w-[280px] shrink-0 self-stretch md:flex md:flex-col md:gap-6 md:px-4 md:py-6";
+    : "glass-side hidden w-[280px] shrink-0 self-stretch md:block";
+
+  const Wrapper = isDrawer
+    ? ({ children }: { children: React.ReactNode }) => <>{children}</>
+    : ({ children }: { children: React.ReactNode }) => (
+        <div className="sticky top-0 flex h-dvh flex-col gap-6 px-4 py-6">
+          {children}
+        </div>
+      );
 
   return (
     <aside className={shellClass} aria-label="Navegação principal">
+      <Wrapper>
       {/* Header: faixa de grid quadriculado verde com logo sobreposto.
           A faixa "sangra" pras laterais (negative margin) pra cobrir o
           padding interno do shell. */}
@@ -224,6 +234,7 @@ function SidebarPanel({
 
       {/* Footer: usuario + acoes */}
       <SidebarFooter usuario={usuario} portal={portal} />
+      </Wrapper>
     </aside>
   );
 }
