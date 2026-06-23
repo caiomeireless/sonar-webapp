@@ -54,10 +54,7 @@ export default async function CredorDrilldownPage({
       <section className="relative overflow-hidden">
         {/* Glow gold removido — fundo unico (AetherBackground do layout). */}
         <div className="relative mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
-          <Link
-            href={`/equipe/devedores${linkBase}`}
-            className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--color-gold)] transition hover:text-[var(--color-tip-glow)]"
-          >
+          <Link href={`/equipe/devedores${linkBase}`} className="btn-neon-gold">
             ← Carteira do Escritório
           </Link>
 
@@ -160,10 +157,7 @@ function NaoEncontrado({ voltarHref }: { voltarHref: string }) {
         <p className="mt-3 text-sm text-[var(--color-ivory-88)]">
           O cliente solicitado não existe ou foi removido da carteira.
         </p>
-        <Link
-          href={voltarHref}
-          className="mt-6 inline-block rounded-lg border border-[var(--color-gold)]/50 bg-[var(--color-gold)]/10 px-4 py-2 text-xs font-medium text-[var(--color-gold)] transition hover:bg-[var(--color-gold)]/20"
-        >
+        <Link href={voltarHref} className="btn-neon-gold mt-6">
           ← Voltar para a carteira
         </Link>
       </SpotlightCard>

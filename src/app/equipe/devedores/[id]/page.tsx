@@ -1,12 +1,13 @@
-// Dossiê patrimonial — visão da EQUIPE. Sem checagem de email_contato:
-// obterDossie() devolve TUDO. Layout no estilo da FICHA DO CLIENTE do BP CRM:
-// header com icone + nome grande + badges, grid 2-col de secoes glass com
-// rotulos mono + badges de origem (VIA THEMIS / VIA ASSERTIVA / MANUAL),
-// e abaixo as 3 secoes ricas existentes (cross-detection, timeline, casos,
-// bens por categoria).
+// Dossie patrimonial — visao da EQUIPE. Sem checagem de email_contato:
+// obterDossie() devolve TUDO. Layout reorganizado (jun/2026):
+// 1) header com eyebrow "DOSSIE PATRIMONIAL" gigante acima do nome,
+// 2) estatisticas, 3) acoes de busca, 4) gerar peca, 5) calculo judicial,
+// 6) dados cadastrais com chips de origem por campo (THEMIS/ASSERTIVA/MANUAL),
+// 7) casos vinculados, 8) bens por categoria, 9) timeline,
+// 10) banner cross-detection.
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Building2, User, Pencil } from "lucide-react";
+import { Building2, User, Pencil, ArrowRight } from "lucide-react";
 import {
   obterDossie,
   outrosCredoresDoDevedor,
@@ -101,10 +102,9 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
 
   return (
     <main>
-      {/* ============ HEADER FICHA (estilo BP CRM) ============ */}
+      {/* ============ HEADER + AÇÕES ============ */}
       <section className="relative overflow-hidden">
-        {/* Glow gold removido — fundo unico (AetherBackground do layout). */}
-        <div className="relative mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
+        <div className="relative mx-auto max-w-[1400px] px-6 py-14 sm:px-10">
           {/* Top bar: Voltar (esq) + Editar (dir) */}
           <div className="flex items-center justify-between">
             <Link
@@ -124,205 +124,151 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
             </button>
           </div>
 
-          {/* Card header grande: icone PF/PJ centralizado + nome em gold serif uppercase + badges */}
-          <header className="title-shield mt-6 text-center">
-            {/* Icone PF/PJ acima, centralizado */}
-            <div className="mx-auto mb-3 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-[var(--color-gold)]/35 bg-gradient-to-br from-[rgba(201,162,74,0.18)] to-[rgba(201,162,74,0.04)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-              {devedor.tipo === "PJ" ? (
-                <Building2 className="h-5 w-5 text-[var(--color-gold)]" />
-              ) : (
-                <User className="h-5 w-5 text-[var(--color-gold)]" />
-              )}
-            </div>
+          {/* ============ HEADER DOSSIÊ ============ */}
+          <HeaderDossie
+            devedor={devedor}
+            statusLabel={statusLabel}
+            statusColor={statusColor}
+            dashboardHref={`/equipe/devedores/${devedor.id}/dashboard${linkBase}`}
+          />
 
-            <h1 className="break-words font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
-              {devedor.nome}
-            </h1>
-            <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
-              Dossiê Patrimonial · Visão da Equipe
-            </p>
+          {/* ============ ESTATÍSTICAS ============ */}
+          <EstatisticasGrid
+            totalBens={total_bens}
+            valorEstimado={valor_estimado_total_brl}
+            casosVinculados={casos.length}
+          />
 
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-              <BadgeFicha
-                label={devedor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"}
-                color="var(--color-gold)"
-              />
-              <BadgeFicha
-                label={statusLabel}
-                color={statusColor}
-                dot
-              />
-              {devedor.ultima_consulta_em ? (
-                <span className="font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
-                  · Última Consulta {formatTempoRelativo(devedor.ultima_consulta_em)}
-                </span>
-              ) : null}
-            </div>
-            <div className="mt-4">
-              <Link
-                href={`/equipe/devedores/${devedor.id}/dashboard${linkBase}`}
-                className="inline-flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-signal)] transition hover:text-[var(--color-tip-glow)]"
-              >
-                Ver Dashboard Analítico →
-              </Link>
-            </div>
-          </header>
+          {/* ============ AÇÕES DE BUSCA ============ */}
+          <div className="mt-10">
+            <BlocoAcao titulo="Ações de Busca">
+              <AcoesBuscaMockadas devedorNome={devedor.nome} />
+            </BlocoAcao>
+          </div>
 
-          {/* Grid 2 colunas — secoes glass estilo BP CRM */}
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            <SecaoFicha titulo="Identificação">
-              <CampoFicha
-                rotulo={devedor.tipo === "PF" ? "CPF" : "CNPJ"}
-                valor={devedor.documento}
-                origem="VIA THEMIS"
-              />
-              <CampoFicha
-                rotulo={devedor.tipo === "PF" ? "RG" : "IE"}
-                valor={null}
-              />
-              {devedor.tipo === "PF" ? (
+          {/* ============ GERAR PEÇA ============ */}
+          <div className="mt-6">
+            <BlocoAcao titulo="Gerar Peça">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
+                <Link
+                  href={`/equipe/devedores/${devedor.id}/gerador-peca${linkBase}`}
+                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--color-gold)] px-6 py-4 text-sm font-bold uppercase tracking-[0.12em] text-[var(--color-carbon)] shadow-[0_10px_40px_-10px_rgba(201,162,74,0.55)] transition hover:bg-[var(--color-tip-glow)]"
+                >
+                  Abrir Gerador de Peça
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <div className="sm:flex-1">
+                  <BotaoGerarPeca
+                    devedorId={devedor.id}
+                    euQuery={linkBase}
+                    sugeridos={templatesSugeridos({
+                      devedor,
+                      casos,
+                      bens: dossie.bens,
+                      total_bens,
+                      valor_estimado_total_brl,
+                      por_tipo,
+                    })}
+                  />
+                </div>
+              </div>
+            </BlocoAcao>
+          </div>
+
+          {/* ============ CÁLCULO JUDICIAL ============ */}
+          <div className="mt-6">
+            <BlocoAcao titulo="Cálculo Judicial">
+              <AtualizadorCalculo devedorId={devedor.id} euQuery={linkBase} />
+            </BlocoAcao>
+          </div>
+
+          {/* ============ DADOS CADASTRAIS ============ */}
+          <div className="mt-12">
+            <SectionTitle texto="Dados Cadastrais" />
+
+            <div className="mt-6 grid gap-5 md:grid-cols-2">
+              <SecaoFicha titulo="Identificação">
                 <CampoFicha
-                  rotulo="Data de Nascimento"
-                  valor={
-                    devedor.data_nascimento
-                      ? formatData(devedor.data_nascimento)
-                      : null
-                  }
-                  origem={devedor.data_nascimento ? "VIA THEMIS" : undefined}
+                  rotulo={devedor.tipo === "PF" ? "CPF" : "CNPJ"}
+                  valor={devedor.documento}
+                  origem="VIA THEMIS"
                 />
-              ) : null}
-              {devedor.tipo === "PF" ? (
                 <CampoFicha
-                  rotulo="Nome da Mãe"
-                  valor={devedor.nome_mae}
-                  origem={devedor.nome_mae ? "VIA THEMIS" : undefined}
+                  rotulo={devedor.tipo === "PF" ? "RG" : "IE"}
+                  valor={null}
                 />
-              ) : null}
-            </SecaoFicha>
+                {devedor.tipo === "PF" ? (
+                  <CampoFicha
+                    rotulo="Data de Nascimento"
+                    valor={
+                      devedor.data_nascimento
+                        ? formatData(devedor.data_nascimento)
+                        : null
+                    }
+                    origem={devedor.data_nascimento ? "VIA THEMIS" : undefined}
+                  />
+                ) : null}
+                {devedor.tipo === "PF" ? (
+                  <CampoFicha
+                    rotulo="Nome da Mãe"
+                    valor={devedor.nome_mae}
+                    origem={devedor.nome_mae ? "VIA THEMIS" : undefined}
+                  />
+                ) : null}
+              </SecaoFicha>
 
-            <SecaoFicha titulo="Contato">
-              <CampoFicha rotulo="E-mail" valor={null} />
-              <CampoFicha rotulo="Telefone" valor={null} />
-              <CampoFicha rotulo="Redes Sociais" valor={null} />
-            </SecaoFicha>
+              <SecaoFicha titulo="Contato">
+                <CampoFicha rotulo="E-mail" valor={null} />
+                <CampoFicha rotulo="Telefone" valor={null} />
+                <CampoFicha rotulo="Redes Sociais" valor={null} />
+              </SecaoFicha>
 
-            <div className="md:col-span-2">
-              <SecaoFicha titulo="Endereço">
+              <div className="md:col-span-2">
+                <SecaoFicha titulo="Endereço">
+                  <CampoFicha
+                    rotulo="Endereço Completo"
+                    valor={primeiroEndereco(dossie.bens)}
+                    origem={primeiroEndereco(dossie.bens) ? "VIA THEMIS" : undefined}
+                  />
+                </SecaoFicha>
+              </div>
+
+              <SecaoFicha titulo="Relacionamento">
                 <CampoFicha
-                  rotulo="Endereço Completo"
-                  valor={primeiroEndereco(dossie.bens)}
-                  origem={primeiroEndereco(dossie.bens) ? "VIA THEMIS" : undefined}
+                  rotulo="Responsável no Escritório"
+                  valor={responsavelPrincipal(casos)}
+                  origem={responsavelPrincipal(casos) ? "MANUAL" : undefined}
+                />
+                <CampoFicha
+                  rotulo="Primeira Ocorrência"
+                  valor={formatData(devedor.criado_em)}
+                  origem="MANUAL"
+                />
+                <CampoFicha
+                  rotulo="Casos Vinculados"
+                  valor={String(casos.length)}
+                  origem="MANUAL"
+                />
+              </SecaoFicha>
+
+              <SecaoFicha titulo="Perfil Jurídico">
+                <CampoFicha
+                  rotulo="Áreas Envolvidas"
+                  valor={areasDoDevedor(casos)}
+                  origem={areasDoDevedor(casos) ? "MANUAL" : undefined}
+                />
+                <CampoFicha
+                  rotulo="Status Geral"
+                  valor={statusLabel}
+                  origem="MANUAL"
+                />
+                <CampoFicha
+                  rotulo="Valor Total em Crédito"
+                  valor={formatBRL(somaCredito(casos))}
+                  origem="MANUAL"
                 />
               </SecaoFicha>
             </div>
-
-            <SecaoFicha titulo="Relacionamento">
-              <CampoFicha
-                rotulo="Responsável no Escritório"
-                valor={responsavelPrincipal(casos)}
-                origem={responsavelPrincipal(casos) ? "MANUAL" : undefined}
-              />
-              <CampoFicha
-                rotulo="Primeira Ocorrência"
-                valor={formatData(devedor.criado_em)}
-                origem="MANUAL"
-              />
-              <CampoFicha
-                rotulo="Casos Vinculados"
-                valor={String(casos.length)}
-                origem="MANUAL"
-              />
-            </SecaoFicha>
-
-            <SecaoFicha titulo="Perfil Jurídico">
-              <CampoFicha
-                rotulo="Áreas Envolvidas"
-                valor={areasDoDevedor(casos)}
-                origem={areasDoDevedor(casos) ? "MANUAL" : undefined}
-              />
-              <CampoFicha
-                rotulo="Status Geral"
-                valor={statusLabel}
-                origem="MANUAL"
-              />
-              <CampoFicha
-                rotulo="Valor Total em Crédito"
-                valor={formatBRL(somaCredito(casos))}
-                origem="MANUAL"
-              />
-            </SecaoFicha>
-          </div>
-
-          {/* 3 cards de número grande (mantidos) */}
-          <div className="mt-6 grid gap-4 sm:grid-cols-3">
-            <CardNumero rotulo="Total de Bens" valor={String(total_bens)} />
-            <CardNumero
-              rotulo="Valor Estimado"
-              valor={formatBRL(valor_estimado_total_brl)}
-            />
-            <CardNumero rotulo="Casos Vinculados" valor={String(casos.length)} />
-          </div>
-
-          {/* Alerta de cross-reference: devedor figura em casos de 2+ clientes
-              diferentes do escritório. Aumenta o valor estratégico do dossiê. */}
-          {mostrarAlertaCross ? (
-            <div className="mt-8">
-              <AlertaCrossReference
-                outros={outros}
-                totalCredores={credoresUnicos.size}
-                euQuery={linkBase}
-              />
-            </div>
-          ) : null}
-
-          {/* Histórico de medidas tomadas — timeline horizontal logo após
-              o banner cross-detection. Quebra o padding lateral do header
-              com -mx-* pra o scroll-x ocupar toda a largura. */}
-          <div className="mt-8 -mx-6 sm:-mx-10">
-            <TimelineMedidas
-              medidas={medidas}
-              casos={casos}
-              advogadoEmail={eu}
-            />
-          </div>
-
-          {/* Barra de ações de busca paga (MOCK Dia 4 — ver memória
-              sonar-consultas-pagas-sob-demanda; real entra Sem 2) */}
-          <div className="mt-8">
-            <AcoesBuscaMockadas devedorNome={devedor.nome} />
-          </div>
-
-          {/* Gerador de peças — CTA principal (página dedicada) + atalho rápido
-              (modal antigo). O botão dourado abaixo é a entrada destacada agora;
-              o BotaoGerarPeca permanece como atalho pra quem prefere o modal. */}
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-stretch">
-            <Link
-              href={`/equipe/devedores/${devedor.id}/gerador-peca${linkBase}`}
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--color-gold)] px-6 py-4 text-sm font-bold uppercase tracking-[0.12em] text-[var(--color-carbon)] shadow-[0_10px_40px_-10px_rgba(201,162,74,0.55)] transition hover:bg-[var(--color-tip-glow)]"
-            >
-              Abrir Gerador de Peça →
-            </Link>
-            <div className="sm:flex-1">
-              <BotaoGerarPeca
-                devedorId={devedor.id}
-                euQuery={linkBase}
-                sugeridos={templatesSugeridos({
-                  devedor,
-                  casos,
-                  bens: dossie.bens,
-                  total_bens,
-                  valor_estimado_total_brl,
-                  por_tipo,
-                })}
-              />
-            </div>
-          </div>
-
-          {/* Atualizador de cálculo do débito (MOCK Dia 5; real na Sem 5+:
-              OCR + tabela TJSP + Lei 14.905/2024 via Debit) — card slim;
-              editor completo + impressão vive em /calculo */}
-          <div className="mt-6">
-            <AtualizadorCalculo devedorId={devedor.id} euQuery={linkBase} />
           </div>
         </div>
       </section>
@@ -331,7 +277,7 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
       {casos.length > 0 ? (
         <section className="border-t border-[var(--color-ivory-12)]">
           <div className="mx-auto max-w-[1400px] px-6 py-12 sm:px-10">
-            <span className="eyebrow">Casos Onde Este Devedor Aparece</span>
+            <SectionTitle texto="Casos Vinculados" eyebrow="Casos Onde Este Devedor Aparece" />
             <div className="mt-6 space-y-3">
               {casos.map((c) => (
                 <CardCasoVinculado key={c.id} caso={c} />
@@ -344,8 +290,7 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
       {/* ============ CATEGORIAS ============ */}
       <section className="border-t border-[var(--color-ivory-12)]">
         <div className="mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
-          <span className="eyebrow">Bens Encontrados</span>
-          <h2 className="mt-4 font-serif text-3xl text-ivory">Por Categoria</h2>
+          <SectionTitle texto="Bens Encontrados por Categoria" eyebrow="Bens Encontrados" />
 
           <div className="mt-12 space-y-12">
             {ORDEM.map((tipo) => {
@@ -380,6 +325,40 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
           </div>
         </div>
       </section>
+
+      {/* ============ TIMELINE ============ */}
+      <section className="border-t border-[var(--color-ivory-12)]">
+        <div className="mx-auto max-w-[1400px] px-6 py-12 sm:px-10">
+          <SectionTitle texto="Cronologia de Medidas" eyebrow="Linha do Tempo" />
+          <div className="mt-6 -mx-6 sm:-mx-10">
+            <TimelineMedidas
+              medidas={medidas}
+              casos={casos}
+              advogadoEmail={eu}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ============ CROSS-REFERENCE (no fim, banner de contexto estrategico) ============ */}
+      {mostrarAlertaCross ? (
+        <section className="border-t border-[var(--color-ivory-12)]">
+          <div className="mx-auto max-w-[1400px] px-6 py-12 sm:px-10">
+            <SectionTitle
+              texto="Cross-Reference Detectado"
+              eyebrow="Atenção · Sinergia entre Carteiras"
+              eyebrowColor="var(--color-gold)"
+            />
+            <div className="mt-6">
+              <AlertaCrossReference
+                outros={outros}
+                totalCredores={credoresUnicos.size}
+                euQuery={linkBase}
+              />
+            </div>
+          </div>
+        </section>
+      ) : null}
     </main>
   );
 }
@@ -388,9 +367,168 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
 // COMPONENTES INTERNOS
 // ============================================================
 
-// ---------- Componentes da FICHA (estilo BP CRM) ----------
+// ---------- Tipos ----------
 
 type OrigemFicha = "VIA THEMIS" | "VIA ASSERTIVA" | "MANUAL";
+
+type DevedorBasico = {
+  id: number;
+  nome: string;
+  tipo: "PF" | "PJ";
+  documento: string;
+  data_nascimento?: string | null;
+  nome_mae?: string | null;
+  criado_em: string;
+  ultima_consulta_em?: string | null;
+};
+
+// ---------- HeaderDossie ----------
+
+function HeaderDossie({
+  devedor,
+  statusLabel,
+  statusColor,
+  dashboardHref,
+}: {
+  devedor: DevedorBasico;
+  statusLabel: string;
+  statusColor: string;
+  dashboardHref: string;
+}) {
+  return (
+    <header className="mt-10">
+      {/* Eyebrow gigante DOSSIÊ PATRIMONIAL */}
+      <div className="flex flex-col items-center text-center">
+        <div className="inline-flex items-center gap-3">
+          <span
+            aria-hidden="true"
+            className="inline-block h-px w-10 bg-[var(--color-signal)] opacity-70"
+          />
+          <span className="font-mono text-[14px] uppercase tracking-[0.32em] text-[var(--color-signal)]">
+            Dossiê Patrimonial
+          </span>
+          <span
+            aria-hidden="true"
+            className="inline-block h-px w-10 bg-[var(--color-signal)] opacity-70"
+          />
+        </div>
+
+        {/* Icone PF/PJ + nome serif gold uppercase */}
+        <div className="mt-6 inline-flex h-14 w-14 items-center justify-center rounded-xl border border-[var(--color-gold)]/35 bg-gradient-to-br from-[rgba(201,162,74,0.18)] to-[rgba(201,162,74,0.04)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+          {devedor.tipo === "PJ" ? (
+            <Building2 className="h-6 w-6 text-[var(--color-gold)]" />
+          ) : (
+            <User className="h-6 w-6 text-[var(--color-gold)]" />
+          )}
+        </div>
+
+        <h1 className="mt-5 break-words font-serif text-[clamp(24px,3.5vw,44px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
+          {devedor.nome}
+        </h1>
+
+        {/* Linha de status: badges + ultima consulta */}
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+          <BadgeFicha
+            label={devedor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"}
+            color="var(--color-gold)"
+          />
+          <BadgeFicha label={statusLabel} color={statusColor} dot />
+          {devedor.ultima_consulta_em ? (
+            <BadgeFicha
+              label={`Última Consulta ${formatTempoRelativo(devedor.ultima_consulta_em)}`}
+              color="var(--color-ivory-66)"
+            />
+          ) : null}
+        </div>
+
+        {/* Atalho Dashboard Analítico */}
+        <Link
+          href={dashboardHref}
+          className="group mt-6 inline-flex items-center gap-2 rounded-xl border border-[var(--color-gold)]/45 bg-[rgba(201,162,74,0.06)] px-5 py-2.5 font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-gold)] transition hover:border-[var(--color-tip-glow)] hover:bg-[rgba(201,162,74,0.12)] hover:text-[var(--color-tip-glow)]"
+        >
+          Dashboard Analítico
+          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+        </Link>
+      </div>
+    </header>
+  );
+}
+
+// ---------- EstatisticasGrid ----------
+
+function EstatisticasGrid({
+  totalBens,
+  valorEstimado,
+  casosVinculados,
+}: {
+  totalBens: number;
+  valorEstimado: number;
+  casosVinculados: number;
+}) {
+  return (
+    <div className="mt-10 grid gap-4 sm:grid-cols-3">
+      <CardNumero rotulo="Total de Bens" valor={String(totalBens)} />
+      <CardNumero
+        rotulo="Valor Estimado Total"
+        valor={formatBRL(valorEstimado)}
+      />
+      <CardNumero rotulo="Casos Vinculados" valor={String(casosVinculados)} />
+    </div>
+  );
+}
+
+// ---------- BlocoAcao (wrapper com barra vertical signal) ----------
+
+function BlocoAcao({
+  titulo,
+  children,
+}: {
+  titulo: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-2xl border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.45)] p-6 sm:p-7">
+      <div className="relative pl-4">
+        <span
+          aria-hidden="true"
+          className="absolute left-0 top-0 h-6 w-1 rounded-full bg-[var(--color-signal)]"
+        />
+        <h3 className="font-mono text-[13px] uppercase tracking-[0.32em] text-[var(--color-signal)]">
+          {titulo}
+        </h3>
+      </div>
+      <div className="mt-5">{children}</div>
+    </div>
+  );
+}
+
+// ---------- SectionTitle (titulos de blocos grandes) ----------
+
+function SectionTitle({
+  texto,
+  eyebrow,
+  eyebrowColor = "var(--color-signal)",
+}: {
+  texto: string;
+  eyebrow?: string;
+  eyebrowColor?: string;
+}) {
+  return (
+    <div>
+      {eyebrow ? (
+        <span
+          className="font-mono text-[12px] uppercase tracking-[0.32em]"
+          style={{ color: eyebrowColor }}
+        >
+          {eyebrow}
+        </span>
+      ) : null}
+      <h2 className="mt-2 font-serif text-3xl text-ivory">{texto}</h2>
+    </div>
+  );
+}
+
+// ---------- BadgeFicha ----------
 
 function BadgeFicha({
   label,
@@ -403,7 +541,7 @@ function BadgeFicha({
 }) {
   return (
     <span
-      className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[12px] uppercase tracking-[0.18em]"
+      className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[12px] uppercase tracking-[0.22em]"
       style={{
         borderColor: color,
         color,
@@ -422,28 +560,38 @@ function BadgeFicha({
   );
 }
 
+// ---------- SecaoFicha (card glass com eyebrow vertical signal) ----------
+
 function SecaoFicha({
   titulo,
   children,
+  eyebrowColor = "var(--color-signal)",
 }: {
   titulo: string;
   children: React.ReactNode;
+  eyebrowColor?: string;
 }) {
   return (
-    <div className="glass p-5 sm:p-6">
-      <div className="flex items-center gap-2">
+    <div className="rounded-2xl border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.6)] p-6 sm:p-7">
+      <div className="relative pl-4">
         <span
           aria-hidden="true"
-          className="inline-block h-4 w-[3px] rounded-full bg-[var(--color-gold)]"
+          className="absolute left-0 top-0 h-6 w-1 rounded-full"
+          style={{ backgroundColor: eyebrowColor }}
         />
-        <span className="font-mono text-[12px] uppercase tracking-[0.32em] text-[var(--color-gold)]">
+        <h3
+          className="font-mono text-[13px] uppercase tracking-[0.32em]"
+          style={{ color: eyebrowColor }}
+        >
           {titulo}
-        </span>
+        </h3>
       </div>
-      <div className="mt-5 space-y-4">{children}</div>
+      <div className="mt-5 space-y-5">{children}</div>
     </div>
   );
 }
+
+// ---------- CampoFicha + ChipOrigem ----------
 
 function CampoFicha({
   rotulo,
@@ -456,46 +604,52 @@ function CampoFicha({
 }) {
   const valorFinal = valor && valor.trim() !== "" ? valor : null;
   return (
-    <div className="flex flex-col gap-1">
-      <p className="font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+    <div>
+      <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
         {rotulo}
       </p>
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="mt-2 flex flex-wrap items-center gap-2">
         <span
           className={
             valorFinal
-              ? "text-base text-ivory"
-              : "text-base text-[var(--color-ivory-66)]"
+              ? "text-lg text-ivory"
+              : "text-lg text-[var(--color-ivory-66)]"
           }
         >
           {valorFinal ?? "—"}
         </span>
-        {valorFinal && origem ? <PillOrigem origem={origem} /> : null}
+        {valorFinal && origem ? <ChipOrigem origem={origem} /> : null}
       </div>
     </div>
   );
 }
 
-function PillOrigem({ origem }: { origem: OrigemFicha }) {
-  const map: Record<OrigemFicha, { color: string; bg: string }> = {
+function ChipOrigem({ origem }: { origem: OrigemFicha }) {
+  const map: Record<
+    OrigemFicha,
+    { color: string; bg: string; border: string }
+  > = {
     "VIA THEMIS": {
-      color: "var(--color-gold)",
-      bg: "rgba(201,162,74,0.10)",
+      color: "rgb(244,197,66)",
+      bg: "rgba(244,197,66,0.15)",
+      border: "rgba(244,197,66,0.45)",
     },
     "VIA ASSERTIVA": {
       color: "var(--color-signal)",
-      bg: "rgba(60,255,138,0.08)",
+      bg: "rgba(60,255,138,0.10)",
+      border: "rgba(60,255,138,0.45)",
     },
     MANUAL: {
-      color: "var(--color-ivory-66)",
-      bg: "rgba(255,255,255,0.04)",
+      color: "var(--color-gold)",
+      bg: "rgba(201,162,74,0.10)",
+      border: "rgba(201,162,74,0.45)",
     },
   };
-  const { color, bg } = map[origem];
+  const { color, bg, border } = map[origem];
   return (
     <span
-      className="inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-[12px] uppercase tracking-[0.18em]"
-      style={{ borderColor: color, color, backgroundColor: bg }}
+      className="inline-flex items-center rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em]"
+      style={{ borderColor: border, color, backgroundColor: bg }}
     >
       {origem}
     </span>
@@ -564,9 +718,11 @@ function AcessoNegado({ voltarHref }: { voltarHref: string }) {
 
 function CardNumero({ rotulo, valor }: { rotulo: string; valor: string }) {
   return (
-    <SpotlightCard className="p-6">
-      <span className="eyebrow">{rotulo}</span>
-      <p className="mt-3 font-serif text-3xl text-[var(--color-gold)]">{valor}</p>
+    <SpotlightCard className="p-8">
+      <span className="font-mono text-[13px] uppercase tracking-[0.28em] text-[var(--color-ivory-66)]">
+        {rotulo}
+      </span>
+      <p className="mt-3 font-serif text-4xl text-[var(--color-gold)]">{valor}</p>
     </SpotlightCard>
   );
 }
