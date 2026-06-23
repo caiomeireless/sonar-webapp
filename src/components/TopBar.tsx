@@ -97,10 +97,12 @@ export function TopBar({
         className="bg-grid-strong animate-grid-pulse absolute inset-0"
         style={{
           backgroundAttachment: "fixed",
+          // Fade horizontal: brilho FORTE na DIREITA, apaga em direção
+          // à esquerda. (to left = começa pleno na direita, transparente na esquerda)
           maskImage:
-            "linear-gradient(135deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.35) 55%, transparent 100%)",
+            "linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0.55) 45%, transparent 100%)",
           WebkitMaskImage:
-            "linear-gradient(135deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.35) 55%, transparent 100%)",
+            "linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0.55) 45%, transparent 100%)",
         }}
         aria-hidden="true"
       />
