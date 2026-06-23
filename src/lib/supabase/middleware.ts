@@ -47,9 +47,12 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
 
-  // Rotas publicas (landing, /login, /auth/*): nao redireciona.
+  // Rotas publicas (landing, /login, /auth/*, demos do mapa 3D): nao redireciona.
   const isLandingOuAuth =
-    path === "/" || path.startsWith("/login") || path.startsWith("/auth");
+    path === "/" ||
+    path.startsWith("/login") ||
+    path.startsWith("/auth") ||
+    path.startsWith("/mapa-3d-demo");
 
   // Dev shortcut: em desenvolvimento, ?eu=<email> bypassa auth (pra
   // testar paginas do cliente/equipe sem rodar OTP). Em producao,
