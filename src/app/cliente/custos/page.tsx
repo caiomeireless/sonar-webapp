@@ -34,7 +34,7 @@ export default async function CustosClientePage({ searchParams }: Props) {
 
   return (
     <main className="mx-auto max-w-[1100px] px-6 py-10 sm:px-10">
-      <header className="mb-8 flex items-center gap-3">
+      <header className="title-shield mb-8 flex items-center gap-3">
         <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)] text-[var(--color-signal)]">
           <DollarSign className="h-5 w-5" />
         </span>

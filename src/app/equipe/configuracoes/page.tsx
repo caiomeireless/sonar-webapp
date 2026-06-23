@@ -22,7 +22,7 @@ export default async function ConfiguracoesPage() {
 
   return (
     <main className="mx-auto max-w-[1400px] px-6 py-10 sm:px-10">
-      <header className="mb-6 flex items-center gap-3">
+      <header className="title-shield mb-6 flex items-center gap-3">
         <Settings className="h-6 w-6 text-[var(--color-signal)]" />
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">

@@ -344,6 +344,32 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.55);
 }
 
+/* Title shield — card de vidro sutil pra wrap em cabeçalhos de página.
+   Garante leitura do título sobre o AetherBackground (partículas verdes
+   no fundo). Padding generoso + glass leve. Aplicar como wrapper do
+   <header> da página. */
+.title-shield {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 60%),
+    var(--color-surface-1);
+  border: 1px solid var(--color-line);
+  border-radius: 16px;
+  padding: 1.5rem 1.75rem;
+  backdrop-filter: blur(14px) saturate(135%);
+  -webkit-backdrop-filter: blur(14px) saturate(135%);
+  box-shadow:
+    0 8px 24px -16px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+[data-theme="light"] .title-shield {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.6), transparent 60%),
+    var(--color-surface-1);
+  box-shadow:
+    0 8px 24px -16px rgba(10, 12, 11, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
 /* Glass nivel 2 — sub-card sem sombra grande */
 .glass-2 {
   background:
@@ -360,13 +386,22 @@ body {
    gradient signal->transparent (assinatura visual do portal). */
 .glass-side {
   position: relative;
+  /* 20% mais transparente: a base var(--color-bg) virou rgba(...,0.80)
+     em vez de cor sólida, então o fundo (AetherBackground + bg-grid)
+     passa atrás da sidebar dando vidro mais "fume". */
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 25%),
     linear-gradient(180deg, var(--color-surface-2), var(--color-surface-1)),
-    var(--color-bg);
+    rgba(10, 12, 11, 0.80);
   border-right: 1px solid transparent;
   backdrop-filter: blur(22px) saturate(145%);
   -webkit-backdrop-filter: blur(22px) saturate(145%);
+}
+[data-theme="light"] .glass-side {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.55), transparent 25%),
+    linear-gradient(180deg, var(--color-surface-2), var(--color-surface-1)),
+    rgba(246, 243, 234, 0.80);
 }
 /* Border-right signal->gold da sidebar — só aparece ABAIXO da TopBar
    (top: 122px), pra que a faixa de bg-grid da sidebar header se funda

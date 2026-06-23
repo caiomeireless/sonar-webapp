@@ -14,7 +14,7 @@ export default async function CustosPage() {
 
   return (
     <main className="mx-auto max-w-[1400px] px-6 py-10 sm:px-10">
-      <header className="mb-6">
+      <header className="title-shield mb-6">
         <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
           Monitor de custos
         </p>

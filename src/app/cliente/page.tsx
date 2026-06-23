@@ -47,7 +47,7 @@ export default async function DashboardClientePage({ searchParams }: Props) {
 
   return (
     <main className="mx-auto max-w-[1400px] px-6 py-10 sm:px-10">
-      <header className="mb-8">
+      <header className="title-shield mb-8">
         <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
           Dashboard
         </p>
