@@ -13,7 +13,11 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Bell, ChevronDown, Eye, LogOut, RefreshCw } from "lucide-react";
+import { Bell, Bot, ChevronDown, Eye, LogOut, RefreshCw } from "lucide-react";
+
+import { LogoSvg } from "./LogoSvg";
+
+const SUPORTE_EMAIL = "contato@bpadvogados.com.br";
 
 type Usuario = { email: string; papel: string };
 
@@ -85,29 +89,82 @@ export function TopBar({
 
   const inicial = (usuario.email[0] || "?").toUpperCase();
 
+  const homeHref = `/${portal}`;
+
   return (
-    <header className="sticky top-0 z-20 border-b border-[var(--color-line)] bg-[var(--color-bg-2)]/70 backdrop-blur-xl">
-      <div className="flex items-center justify-between gap-6 px-6 py-4 sm:px-10">
-        {/* Esquerda: título da página */}
-        <div className="min-w-0">
-          <h1 className="font-serif text-2xl font-medium uppercase tracking-[0.06em] text-[var(--color-fg)] sm:text-[28px]">
-            {titulo}
-          </h1>
-          {subtitulo ? (
-            <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-fg-muted)]">
-              {subtitulo}
-            </p>
-          ) : null}
+    <header className="relative sticky top-0 z-20 overflow-hidden border-b border-[var(--color-line)] bg-[var(--color-bg-2)]/70 backdrop-blur-xl">
+      {/* Faixa de quadriculado verde — mesmo padrão da sidebar */}
+      <div
+        className="bg-grid-strong animate-grid-pulse absolute inset-0 opacity-80"
+        aria-hidden="true"
+      />
+      {/* Vinheta radial signal pra dar peso ao centro */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, rgba(60,255,138,0.08), transparent 70%)",
+        }}
+      />
+
+      <div className="relative flex items-center justify-between gap-6 px-6 py-3 sm:px-10">
+        {/* Esquerda: Logo + título da página */}
+        <div className="flex min-w-0 items-center gap-5">
+          <Link
+            href={homeHref}
+            aria-label="Sonar — página inicial"
+            className="inline-flex shrink-0 items-center rounded-lg outline-none transition focus-visible:ring-2 focus-visible:ring-[var(--color-signal)]"
+          >
+            <LogoSvg height={42} />
+          </Link>
+          <div className="hidden h-10 w-px shrink-0 bg-[var(--color-line)] md:block" />
+          <div className="min-w-0">
+            <h1 className="font-serif text-xl font-medium uppercase tracking-[0.06em] text-[var(--color-fg)] sm:text-2xl">
+              {titulo}
+            </h1>
+            {subtitulo ? (
+              <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-fg-muted)]">
+                {subtitulo}
+              </p>
+            ) : null}
+          </div>
         </div>
 
-        {/* Direita: Sincronizar + Sino + Avatar */}
+        {/* Direita: Sincronizar + Sino + Dúvidas + Avatar */}
         <div className="flex items-center gap-2">
           <BotaoSincronizar />
           <BotaoSino />
+          <BotaoDuvidas />
           <AvatarMenu usuario={usuario} inicial={inicial} />
         </div>
       </div>
     </header>
+  );
+}
+
+// --------------------------------------------------------------------------
+
+function BotaoDuvidas() {
+  function abrir() {
+    const subject = encodeURIComponent("Dúvida sobre o Sonar");
+    window.location.href = `mailto:${SUPORTE_EMAIL}?subject=${subject}`;
+  }
+  return (
+    <button
+      type="button"
+      onClick={abrir}
+      aria-label="Tem dúvidas? Fale com a equipe"
+      title="Tem dúvidas? Fale com a equipe"
+      className="
+        relative inline-flex h-9 w-9 items-center justify-center rounded-lg
+        border border-[var(--color-line)] bg-[var(--color-surface-2)] text-[var(--color-fg-muted)]
+        transition hover:border-[var(--color-signal-soft-2)] hover:text-[var(--color-signal)]
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-signal-soft-2)]
+      "
+    >
+      <Bot className="h-4 w-4" aria-hidden="true" />
+    </button>
   );
 }
 

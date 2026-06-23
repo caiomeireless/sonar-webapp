@@ -52,6 +52,7 @@ export function AetherBackground({
     let raf = 0;
 
     function ajustarTamanho() {
+      if (!canvas) return;
       const parent = canvas.parentElement;
       if (!parent) return;
       w = parent.clientWidth;
@@ -60,7 +61,7 @@ export function AetherBackground({
       canvas.height = Math.floor(h * dpr);
       canvas.style.width = `${w}px`;
       canvas.style.height = `${h}px`;
-      if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
       gerarParticulas();
     }
 
@@ -146,7 +147,8 @@ export function AetherBackground({
     }
 
     function onMove(e: MouseEvent) {
-      const rect = canvas!.getBoundingClientRect();
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
       mouse.x = e.clientX - rect.left;
       mouse.y = e.clientY - rect.top;
     }
