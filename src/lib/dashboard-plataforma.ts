@@ -102,6 +102,25 @@ export interface DashboardPlataforma {
 }
 
 // ============================================================
+// FILTROS (decisao Caio 2026-06-23): periodo, advogado, credor, status
+// ============================================================
+
+export type PeriodoChave = "tudo" | "7d" | "30d" | "90d" | "mes" | "ano";
+export type StatusCaso = "ativo" | "pausado" | "encerrado" | "satisfeito";
+
+export interface FiltrosPlataforma {
+  periodo?: PeriodoChave;
+  advogados?: string[];
+  credores?: number[];
+  statusCasos?: StatusCaso[];
+}
+
+export interface OpcoesFiltros {
+  advogados: { email: string; nome: string }[];
+  credores: { id: number; nome: string }[];
+}
+
+// ============================================================
 // CONFIG
 // ============================================================
 
@@ -654,10 +673,113 @@ function agregarFeedMedidas(args: {
 }
 
 // ============================================================
+// APLICACAO DE FILTROS — filtra os arrays crus em CASCATA antes de agregar.
+// Casos sao o pivot: credor / advogado / status filtram casos primeiro.
+// Daí bens e custos filtram via devedor_id dos casos sobreviventes;
+// medidas filtram via caso_id.
+// Periodo filtra medidas e custos por data; bens nao tem semantica de
+// periodo (e snapshot do que ja foi localizado).
+// ============================================================
+
+function inicioDoPeriodoISO(p: PeriodoChave): string | null {
+  const hoje = new Date();
+  switch (p) {
+    case "tudo":
+      return null;
+    case "7d":
+      return new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    case "30d":
+      return new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    case "90d":
+      return new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+    case "mes":
+      return new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString();
+    case "ano":
+      return new Date(hoje.getFullYear(), 0, 1).toISOString();
+  }
+}
+
+interface DadosCrus {
+  credores: CredorRow[];
+  devedores: DevedorRow[];
+  casos: CasoRow[];
+  bens: BemRow[];
+  medidas: MedidaRow[];
+  custos: CustoRow[];
+}
+
+function aplicarFiltros(raw: DadosCrus, f: FiltrosPlataforma | undefined): DadosCrus {
+  if (!f || (!f.periodo && !f.advogados?.length && !f.credores?.length && !f.statusCasos?.length)) {
+    return raw;
+  }
+
+  // 1. Filtra casos por status / credor / advogado
+  let casos = raw.casos;
+  if (f.statusCasos?.length) {
+    const set = new Set(f.statusCasos);
+    casos = casos.filter((c) => set.has(c.status));
+  }
+  if (f.credores?.length) {
+    const set = new Set(f.credores);
+    casos = casos.filter((c) => set.has(c.credor_id));
+  }
+  if (f.advogados?.length) {
+    const set = new Set(f.advogados);
+    casos = casos.filter((c) => c.responsavel_email && set.has(c.responsavel_email));
+  }
+
+  const casoIds = new Set(casos.map((c) => c.id));
+  const devedorIds = new Set(casos.map((c) => c.devedor_id));
+
+  // 2. Cascateia em bens / medidas / custos
+  let bens = raw.bens.filter((b) => devedorIds.has(b.devedor_id));
+  let medidas = raw.medidas.filter((m) => casoIds.has(m.caso_id));
+  let custos = raw.custos.filter((cu) => cu.devedor_id === null || devedorIds.has(cu.devedor_id));
+
+  // 3. Periodo: filtra medidas (data) e custos (criado_em)
+  if (f.periodo) {
+    const corte = inicioDoPeriodoISO(f.periodo);
+    if (corte) {
+      const corteDia = corte.slice(0, 10);
+      medidas = medidas.filter((m) => (m.data || m.criado_em).slice(0, 10) >= corteDia);
+      custos = custos.filter((cu) => cu.criado_em >= corte);
+      bens = bens.filter((b) => !b.fonte_consultada_em || b.fonte_consultada_em >= corte);
+    }
+  }
+
+  return { credores: raw.credores, devedores: raw.devedores, casos, bens, medidas, custos };
+}
+
+// ============================================================
+// OPCOES PARA UI DOS FILTROS (lista quem aparece nos dropdowns)
+// ============================================================
+
+export async function listarOpcoesFiltros(): Promise<OpcoesFiltros> {
+  const [credores, casos, mapaPerfis] = await Promise.all([
+    lerCredores(),
+    lerCasos(),
+    perfisPorEmail(),
+  ]);
+  const emailsAdvogado = new Set<string>();
+  for (const c of casos) {
+    if (c.responsavel_email) emailsAdvogado.add(c.responsavel_email);
+  }
+  const advogados = Array.from(emailsAdvogado).map((email) => ({
+    email,
+    nome: nomeOuEmail(email, mapaPerfis),
+  }));
+  advogados.sort((a, b) => a.nome.localeCompare(b.nome));
+  const credoresOrdenados = [...credores].sort((a, b) => a.nome.localeCompare(b.nome));
+  return { advogados, credores: credoresOrdenados };
+}
+
+// ============================================================
 // ENTRY POINT
 // ============================================================
 
-export async function obterDadosDashboardPlataforma(): Promise<DashboardPlataforma> {
+export async function obterDadosDashboardPlataforma(
+  filtros?: FiltrosPlataforma,
+): Promise<DashboardPlataforma> {
   const [credores, devedores, casos, bens, medidas, custos, mapaPerfis] =
     await Promise.all([
       lerCredores(),
@@ -669,32 +791,48 @@ export async function obterDadosDashboardPlataforma(): Promise<DashboardPlatafor
       perfisPorEmail(),
     ]);
 
-  const kpisGerais = agregarKpisGerais({ bens, casos, medidas, custos });
-  const evolucaoMensal = agregarEvolucaoMensal({ bens, medidas });
-  const mixBensPorTipo = agregarMixBens(bens);
-  const atividadeEquipe7Dias = agregarAtividadeEquipe(medidas, mapaPerfis);
+  const filtrado = aplicarFiltros(
+    { credores, devedores, casos, bens, medidas, custos },
+    filtros,
+  );
+
+  const kpisGerais = agregarKpisGerais({
+    bens: filtrado.bens,
+    casos: filtrado.casos,
+    medidas: filtrado.medidas,
+    custos: filtrado.custos,
+  });
+  const evolucaoMensal = agregarEvolucaoMensal({
+    bens: filtrado.bens,
+    medidas: filtrado.medidas,
+  });
+  const mixBensPorTipo = agregarMixBens(filtrado.bens);
+  const atividadeEquipe7Dias = agregarAtividadeEquipe(
+    filtrado.medidas,
+    mapaPerfis,
+  );
   const top5ClientesPorPatrimonio = agregarTopClientes({
-    credores,
-    casos,
-    bens,
+    credores: filtrado.credores,
+    casos: filtrado.casos,
+    bens: filtrado.bens,
   });
   const top5DevedoresRastreio = agregarTopDevedores({
-    devedores,
-    casos,
-    bens,
-    medidas,
+    devedores: filtrado.devedores,
+    casos: filtrado.casos,
+    bens: filtrado.bens,
+    medidas: filtrado.medidas,
   });
   const carteiraPorAdvogado = agregarCarteiraPorAdvogado({
-    casos,
-    bens,
-    custos,
+    casos: filtrado.casos,
+    bens: filtrado.bens,
+    custos: filtrado.custos,
     mapaPerfis,
   });
-  const custosPorAPI = agregarCustosPorApi(custos);
+  const custosPorAPI = agregarCustosPorApi(filtrado.custos);
   const feedMedidasRecentes = agregarFeedMedidas({
-    medidas,
-    casos,
-    devedores,
+    medidas: filtrado.medidas,
+    casos: filtrado.casos,
+    devedores: filtrado.devedores,
   });
 
   return {
