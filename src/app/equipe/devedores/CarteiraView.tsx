@@ -8,6 +8,7 @@
 // Default: cards.
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Mail, Phone, Hash, Clock } from "lucide-react";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { formatBRL, formatTempoRelativo } from "@/lib/format";
 import type { CredorListagem } from "@/lib/devedores";
@@ -119,65 +120,99 @@ function CardCredor({
       href={`/equipe/devedores/credor/${credor.id}${euQuery}`}
       className="block"
     >
-      <SpotlightCard className="cursor-pointer p-6">
-        {/* === CLIENTE (topo, grande dourado) === */}
-        <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-ivory-66)]">
-          Cliente
-        </span>
-        <h3 className="mt-2 font-serif text-2xl leading-tight text-[var(--color-gold)]">
-          {credor.nome}
-        </h3>
-        <p className="mt-1 font-mono text-xs text-[var(--color-ivory-66)]">
-          {credor.tipo === "PF" ? "PF" : "PJ"} · {docLabel} {credor.documento}
-        </p>
+      <SpotlightCard className="cursor-pointer p-7">
+        {/* === IDENTIFICAÇÃO === */}
+        <header>
+          <span className="font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-signal)]">
+            Cliente
+          </span>
+          <h3 className="mt-3 font-serif text-[26px] leading-[1.15] text-[var(--color-gold)]">
+            {credor.nome}
+          </h3>
 
+          {/* Chip do documento — separa visualmente do nome */}
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[var(--color-ivory-22)] bg-[var(--color-surface-2)]/60 px-3 py-1.5">
+            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-signal)]">
+              {credor.tipo}
+            </span>
+            <span className="h-3 w-px bg-[var(--color-ivory-22)]" />
+            <span className="font-mono text-[12px] text-ivory">
+              {docLabel} {credor.documento}
+            </span>
+          </div>
+        </header>
+
+        {/* === CONTATO === bloco próprio com ícones */}
         {credor.email_contato || credor.telefone ? (
-          <p className="mt-2 font-mono text-[11px] leading-snug text-[var(--color-ivory-88)]">
+          <div className="mt-5 space-y-2">
             {credor.email_contato ? (
-              <span className="block break-all">{credor.email_contato}</span>
+              <div className="flex items-center gap-2.5">
+                <Mail className="h-3.5 w-3.5 flex-none text-[var(--color-ivory-66)]" />
+                <span className="break-all font-mono text-[12px] text-ivory">
+                  {credor.email_contato}
+                </span>
+              </div>
             ) : null}
             {credor.telefone ? (
-              <span className="block">{credor.telefone}</span>
+              <div className="flex items-center gap-2.5">
+                <Phone className="h-3.5 w-3.5 flex-none text-[var(--color-ivory-66)]" />
+                <span className="font-mono text-[12px] text-ivory">
+                  {credor.telefone}
+                </span>
+              </div>
             ) : null}
-          </p>
+          </div>
         ) : null}
 
-        <div className="my-5 h-px bg-[var(--color-ivory-12)]" />
+        <div className="my-6 h-px bg-[var(--color-ivory-12)]" />
 
-        {/* === STATS === */}
-        <div className="flex items-baseline gap-2">
-          <span className="font-serif text-3xl text-ivory">
-            {credor.total_casos}
-          </span>
-          <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-ivory-66)]">
-            {credor.total_casos === 1 ? "caso" : "casos"}
-          </span>
+        {/* === STATS === grid 3 colunas, hierarquia clara */}
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <p className="font-serif text-3xl leading-none text-ivory">
+              {credor.total_casos}
+            </p>
+            <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+              {credor.total_casos === 1 ? "Caso" : "Casos"}
+            </p>
+          </div>
+          <div>
+            <p className="font-serif text-3xl leading-none text-ivory">
+              {credor.total_devedores}
+            </p>
+            <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+              {credor.total_devedores === 1 ? "Devedor" : "Devedores"}
+            </p>
+          </div>
+          <div>
+            <p className="font-serif text-3xl leading-none text-[var(--color-gold)]">
+              {credor.total_bens}
+            </p>
+            <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+              {credor.total_bens === 1 ? "Bem" : "Bens"}
+            </p>
+          </div>
         </div>
-        <p className="mt-2 font-mono text-xs leading-snug text-[var(--color-ivory-88)]">
-          {credor.total_devedores}{" "}
-          {credor.total_devedores === 1
-            ? "devedor rastreado"
-            : "devedores rastreados"}{" "}
-          ·{" "}
-          <span className="text-[var(--color-gold)]">{credor.total_bens}</span>{" "}
-          {credor.total_bens === 1 ? "bem encontrado" : "bens encontrados"}
-        </p>
 
         {credor.valor_estimado_total_brl > 0 ? (
-          <p className="mt-3 text-sm text-[var(--color-ivory-88)]">
-            Valor estimado total:{" "}
-            <span className="text-ivory">
+          <div className="mt-5 rounded-lg border border-[var(--color-gold)]/25 bg-[var(--color-gold)]/5 px-3.5 py-2.5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+              Valor Estimado Total
+            </p>
+            <p className="mt-1 font-mono text-base font-medium tabular-nums text-[var(--color-gold)]">
               {formatBRL(credor.valor_estimado_total_brl)}
-            </span>
-          </p>
+            </p>
+          </div>
         ) : null}
 
-        <div className="mt-5 flex items-center justify-between border-t border-[var(--color-ivory-12)] pt-5">
-          <span className="rounded-full border border-[var(--color-ivory-22)] px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-ivory-88)]">
-            #{credor.id}
+        <div className="mt-6 flex items-center justify-between border-t border-[var(--color-ivory-12)] pt-4">
+          <span className="inline-flex items-center gap-1.5 font-mono text-[12px] text-[var(--color-ivory-66)]">
+            <Hash className="h-3 w-3" />
+            {credor.id}
           </span>
-          <span className="font-mono text-xs text-[var(--color-ivory-66)]">
-            Última consulta {formatTempoRelativo(credor.ultima_consulta_em)}
+          <span className="inline-flex items-center gap-1.5 font-mono text-[12px] text-[var(--color-ivory-66)]">
+            <Clock className="h-3 w-3" />
+            {formatTempoRelativo(credor.ultima_consulta_em)}
           </span>
         </div>
       </SpotlightCard>
