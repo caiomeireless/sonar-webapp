@@ -68,11 +68,24 @@ export function CasosCredorView({
       </div>
 
       {modo === "cards" || !hidratado ? (
-        <div className="mt-8 flex justify-center">
+        <div className="w-full max-w-[1100px] mx-auto mt-12">
           <CardStack
             items={casos.map((c) => ({ id: c.caso_id, ...c }))}
-            cardWidth={480}
-            cardHeight={540}
+            cardWidth={400}
+            cardHeight={480}
+            overlap={0.32}
+            spreadDeg={18}
+            perspectivePx={1200}
+            depthPx={110}
+            tiltXDeg={6}
+            activeLiftPx={14}
+            activeScale={1.04}
+            inactiveScale={0.9}
+            springStiffness={280}
+            springDamping={28}
+            maxVisible={5}
+            loop
+            showArrows
             showDots
             renderCard={(item, { active }) => (
               <CardCaso caso={item} euQuery={euQuery} active={active} />

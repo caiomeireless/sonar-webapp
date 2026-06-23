@@ -21,22 +21,24 @@ export function CasosClientStack({ casos }: Props) {
   const items = casos.map((c) => ({ id: c.caso_id, caso: c }));
 
   return (
-    <div className="mt-12 grid place-items-center">
+    <div className="mx-auto mt-12 w-full max-w-[1100px]">
       <CardStack
         items={items}
-        cardWidth={440}
-        cardHeight={520}
-        overlap={0.5}
-        spreadDeg={42}
+        cardWidth={380}
+        cardHeight={460}
+        overlap={0.32}
+        spreadDeg={18}
         perspectivePx={1200}
-        depthPx={120}
-        tiltXDeg={10}
-        activeLiftPx={18}
+        depthPx={110}
+        tiltXDeg={6}
+        activeLiftPx={14}
         activeScale={1.04}
-        inactiveScale={0.92}
-        springStiffness={260}
-        springDamping={26}
+        inactiveScale={0.9}
+        springStiffness={280}
+        springDamping={28}
+        maxVisible={5}
         loop
+        showArrows
         showDots
         renderCard={(item, { active }) => (
           <CardCaso caso={item.caso} active={active} />
