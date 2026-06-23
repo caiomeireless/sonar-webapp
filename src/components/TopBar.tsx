@@ -13,9 +13,11 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Bell, ChevronDown, Eye, LogOut, RefreshCw } from "lucide-react";
+import { Bell, Camera, ChevronDown, Eye, LogOut, RefreshCw, Trash2 } from "lucide-react";
 
 import { AssistantBot } from "./AssistantBot";
+
+const FOTO_STORAGE_KEY = "sonar-user-photo";
 
 type Usuario = { email: string; papel: string };
 
@@ -221,7 +223,19 @@ function AvatarMenu({
   inicial: string;
 }) {
   const [aberto, setAberto] = useState(false);
+  const [foto, setFoto] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  // Carrega foto salva em localStorage no primeiro mount.
+  useEffect(() => {
+    try {
+      const cached = localStorage.getItem(FOTO_STORAGE_KEY);
+      if (cached) setFoto(cached);
+    } catch {
+      // localStorage indisponível — segue com fallback inicial.
+    }
+  }, []);
 
   // Fecha ao clicar fora.
   useEffect(() => {
@@ -232,6 +246,35 @@ function AvatarMenu({
     document.addEventListener("mousedown", onDown);
     return () => document.removeEventListener("mousedown", onDown);
   }, [aberto]);
+
+  function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2_000_000) {
+      alert("Imagem grande demais (máx. 2 MB). Comprima ou redimensione antes.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const url = reader.result as string;
+      setFoto(url);
+      try {
+        localStorage.setItem(FOTO_STORAGE_KEY, url);
+      } catch {
+        // localStorage cheio ou indisponível — segue só em memória.
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removerFoto() {
+    setFoto(null);
+    try {
+      localStorage.removeItem(FOTO_STORAGE_KEY);
+    } catch {
+      /* ignora */
+    }
+  }
 
   return (
     <div ref={ref} className="relative">
@@ -249,11 +292,20 @@ function AvatarMenu({
       >
         <span
           className="
-            flex h-12 w-12 items-center justify-center rounded-full
+            flex h-12 w-12 items-center justify-center overflow-hidden rounded-full
             bg-[var(--color-signal-soft)] text-[18px] font-semibold text-[var(--color-signal)]
           "
         >
-          {inicial}
+          {foto ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={foto}
+              alt="Foto do usuário"
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            inicial
+          )}
         </span>
         <ChevronDown
           className={`h-5 w-5 text-[var(--color-fg-muted)] transition ${aberto ? "rotate-180" : ""}`}
@@ -276,6 +328,41 @@ function AvatarMenu({
               {usuario.papel}
             </p>
           </div>
+
+          {/* Upload da foto de perfil — persistida em localStorage. */}
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            className="
+              flex w-full items-center gap-2 border-b border-[var(--color-line)]
+              px-4 py-2.5 text-left text-sm text-[var(--color-ivory-88)] transition
+              hover:bg-[var(--color-surface-2)] hover:text-[var(--color-signal)]
+            "
+          >
+            <Camera className="h-4 w-4" aria-hidden="true" />
+            {foto ? "Trocar foto" : "Carregar foto do escritório"}
+          </button>
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleUpload}
+          />
+          {foto && (
+            <button
+              type="button"
+              onClick={removerFoto}
+              className="
+                flex w-full items-center gap-2 border-b border-[var(--color-line)]
+                px-4 py-2.5 text-left text-sm text-[var(--color-ivory-88)] transition
+                hover:bg-[var(--color-surface-2)] hover:text-[var(--color-fg)]
+              "
+            >
+              <Trash2 className="h-4 w-4" aria-hidden="true" />
+              Remover foto
+            </button>
+          )}
 
           {/* Admin/Sócio: pode entrar na visão do cliente demo (banner mostra
               que está em modo visualização). */}
