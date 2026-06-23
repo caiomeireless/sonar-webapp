@@ -86,7 +86,7 @@ export default async function DashboardPlataformaPage({
       {/* Cabeçalho centralizado dentro do container 1400 */}
       <div className="mx-auto max-w-[1400px] px-6 sm:px-10">
         <header className="title-shield mb-6 text-center">
-          <h1 className="font-serif text-[clamp(38px,5.5vw,68px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
+          <h1 className="font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
             Visão Geral do Escritório
           </h1>
           <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
