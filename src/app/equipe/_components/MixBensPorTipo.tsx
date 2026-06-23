@@ -1,11 +1,14 @@
 "use client";
 
-// Donut do Dashboard do Caso: bens agrupados por TIPO, valor em R$.
-// Centro = valor total. Legenda lateral = tipo + valor + %.
-// Componente CLIENT por causa do Recharts (ResponsiveContainer mede o DOM).
-//
-// Dados ja vem agregados de obterDadosDashboardCaso(devedorId) — esta view
-// nao chama Supabase. Recebe `dados` (DashboardBreakdownBem[]) via prop.
+// Mix de bens por tipo — Dashboard da Plataforma.
+// Donut Recharts agrupando bens pelos 6 TipoBem. Metrica = QUANTIDADE
+// (o gemeo `DonutBensPorValor` do Dashboard do Caso ja mostra valor;
+// aqui a leitura util pra gestao da equipe e "quantos veiculos vs
+// quantos imoveis estamos rastreando" — distribuicao do esforco).
+// Centro = total de bens. Legenda lateral = tipo + qtd + %.
+// Client por causa do Recharts (mede o DOM no ResponsiveContainer).
+// Dados ja vem agregados de obterDadosDashboardPlataforma(); o componente
+// NAO chama Supabase.
 
 import {
   Cell,
@@ -21,7 +24,7 @@ import type {
 } from "recharts/types/component/DefaultTooltipContent";
 
 import type { TipoBem } from "@/lib/mock-fixtures";
-import type { DashboardBreakdownBem } from "@/lib/dashboard-caso";
+import type { MixBensItem } from "@/lib/dashboard-plataforma";
 import { formatBRL } from "@/lib/format";
 
 import { DashboardCard } from "@/components/dashboard/DashboardCard";
@@ -33,12 +36,13 @@ import {
 } from "@/components/dashboard/ChartTheme";
 
 // ============================================================
-// META — label + icone por tipo de bem (espelha lib/devedores
-// page.tsx; sem TIPO_META exportado, inline aqui pra manter
-// consistencia visual com o dossie).
+// META — label + icone por tipo de bem.
+// Espelha o mapa usado em DonutBensPorValor / equipe/devedores/[id]
+// pra consistencia visual entre dashboards. Nao ha TIPO_META exportado
+// pra bens em /lib (so existe pra medidas).
 // ============================================================
 
-const TIPO_META: Record<TipoBem, { label: string; icone: string }> = {
+const TIPO_BEM_META: Record<TipoBem, { label: string; icone: string }> = {
   veiculo: { label: "Veiculos", icone: "V" },
   imovel: { label: "Imoveis", icone: "I" },
   empresa: { label: "Participacoes societarias", icone: "E" },
@@ -47,23 +51,21 @@ const TIPO_META: Record<TipoBem, { label: string; icone: string }> = {
   vinculo: { label: "Vinculos familiares", icone: "F" },
 };
 
-// Forma que o Recharts consome — `name` vira label do tooltip,
-// `value` vira a fatia. `tipo` carrega a chave pra colorir.
+// Forma consumida pelo Recharts. `value` = quantidade (eixo do donut).
+// `valorBrl` viaja junto pro tooltip mostrar tambem o patrimonio do tipo.
 type PieDatum = {
   tipo: TipoBem;
   name: string;
   value: number;
-  qtd: number;
+  valorBrl: number;
 };
 
 type Props = {
-  dados: DashboardBreakdownBem[];
+  dados: MixBensItem[];
 };
 
 // ============================================================
-// TOOLTIP custom — tipa o payload pra evitar `any`/`unknown`
-// soltos. Recharts entrega payload[].payload com o datum
-// original; aqui castamos pro nosso PieDatum.
+// TOOLTIP custom — tipa o payload pra evitar any/unknown solto.
 // ============================================================
 
 function DonutTooltip({
@@ -77,9 +79,11 @@ function DonutTooltip({
     <div style={tooltipContentStyle}>
       <div style={tooltipLabelStyle}>{datum.name}</div>
       <div style={tooltipItemStyle}>
-        <strong>{formatBRL(datum.value)}</strong>
+        <strong>
+          {datum.value} {datum.value === 1 ? "bem" : "bens"}
+        </strong>
         <span style={{ color: "rgba(234, 231, 220, 0.40)", marginLeft: 6 }}>
-          {datum.qtd} {datum.qtd === 1 ? "item" : "itens"}
+          {formatBRL(datum.valorBrl)}
         </span>
       </div>
     </div>
@@ -90,16 +94,16 @@ function DonutTooltip({
 // COMPONENTE
 // ============================================================
 
-export default function DonutBensPorValor({ dados }: Props) {
-  // Recharts nao desenha fatias com value=0; filtramos pra nao
-  // poluir tooltip nem legenda com tipos vazios.
+export default function MixBensPorTipo({ dados }: Props) {
+  // Recharts nao desenha fatias com value=0; filtra antes pra nao
+  // poluir legenda e tooltip com tipos vazios.
   const datums: PieDatum[] = dados
-    .filter((d) => d.valorBrl > 0)
+    .filter((d) => d.qtd > 0)
     .map((d) => ({
       tipo: d.tipo,
-      name: TIPO_META[d.tipo]?.label ?? d.tipo,
-      value: d.valorBrl,
-      qtd: d.qtd,
+      name: TIPO_BEM_META[d.tipo]?.label ?? d.tipo,
+      value: d.qtd,
+      valorBrl: d.valorBrl,
     }));
 
   const total = datums.reduce((s, d) => s + d.value, 0);
@@ -107,12 +111,12 @@ export default function DonutBensPorValor({ dados }: Props) {
   if (datums.length === 0 || total === 0) {
     return (
       <DashboardCard
-        titulo="Patrimonio por tipo"
-        descricao="Distribuicao do valor estimado por categoria de bem"
+        titulo="Mix de bens por tipo"
+        descricao="Distribuicao dos bens rastreados por categoria"
         accent="gold"
       >
         <div className="flex h-48 items-center justify-center text-sm text-[var(--color-ivory-66)]">
-          Nenhum bem com valor estimado.
+          Nenhum bem rastreado.
         </div>
       </DashboardCard>
     );
@@ -120,8 +124,8 @@ export default function DonutBensPorValor({ dados }: Props) {
 
   return (
     <DashboardCard
-      titulo="Patrimonio por tipo"
-      descricao="Distribuicao do valor estimado por categoria de bem"
+      titulo="Mix de bens por tipo"
+      descricao="Distribuicao dos bens rastreados por categoria"
       accent="gold"
     >
       <div className="grid grid-cols-1 gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-center">
@@ -153,16 +157,17 @@ export default function DonutBensPorValor({ dados }: Props) {
             </PieChart>
           </ResponsiveContainer>
 
-          {/* CENTRO — total. pointer-events-none pra nao tampar tooltip. */}
+          {/* CENTRO — total de bens (count). pointer-events-none pra
+              nao bloquear hover do tooltip nas fatias. */}
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-[10px] uppercase tracking-[0.12em] text-[var(--color-ivory-66)]">
-              Patrimonio total
+              Total de bens
             </span>
-            <span className="mt-1 text-2xl font-medium tracking-tight text-[var(--color-ivory)]">
-              {formatBRL(total)}
+            <span className="mt-1 text-3xl font-medium tracking-tight tabular-nums text-[var(--color-ivory)]">
+              {total}
             </span>
             <span className="mt-0.5 text-[10px] text-[var(--color-ivory-66)]">
-              {datums.reduce((s, d) => s + d.qtd, 0)} bens
+              {datums.length} {datums.length === 1 ? "tipo" : "tipos"}
             </span>
           </div>
         </div>
@@ -172,7 +177,7 @@ export default function DonutBensPorValor({ dados }: Props) {
           {datums.map((d) => {
             const pct = total > 0 ? (d.value / total) * 100 : 0;
             const cor = TIPO_BEM_COLORS[d.tipo] ?? "#EAE7DC";
-            const meta = TIPO_META[d.tipo];
+            const meta = TIPO_BEM_META[d.tipo];
             return (
               <li
                 key={d.tipo}
@@ -196,9 +201,9 @@ export default function DonutBensPorValor({ dados }: Props) {
                 </div>
                 <div className="flex shrink-0 items-baseline gap-2">
                   <span className="text-sm tabular-nums text-[var(--color-ivory)]">
-                    {formatBRL(d.value)}
+                    {d.value}
                   </span>
-                  <span className="w-10 text-right text-[11px] tabular-nums text-[var(--color-ivory-66)]">
+                  <span className="w-12 text-right text-[11px] tabular-nums text-[var(--color-ivory-66)]">
                     {pct.toFixed(1)}%
                   </span>
                 </div>

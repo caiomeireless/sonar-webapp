@@ -14,7 +14,7 @@ import { SpotlightCard } from "@/components/ui/SpotlightCard";
 
 import KPIRecuperabilidade from "./_components/KPIRecuperabilidade";
 import TempoMedidaPenhora from "./_components/TempoMedidaPenhora";
-import { KPIHero } from "./_components/KPIHero";
+import { KPIHero } from "@/components/dashboard/KPIHero";
 import FunilTentadasPositivas from "./_components/FunilTentadasPositivas";
 import DonutBensPorValor from "./_components/DonutBensPorValor";
 import LinhaCobrancaRecuperacao from "./_components/LinhaCobrancaRecuperacao";

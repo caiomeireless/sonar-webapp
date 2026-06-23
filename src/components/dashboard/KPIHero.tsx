@@ -2,7 +2,7 @@
 // Usado nas 4 a 8 metricas principais no topo do dashboard.
 // Valor ja vem formatado (string) pra evitar acoplamento com Intl.
 
-import { DashboardCard, type DashboardCardAccent } from "./DashboardCard";
+import { DashboardCard, type DashboardCardAccent } from "@/components/dashboard/DashboardCard";
 
 export type KPIDelta = {
   value: string;

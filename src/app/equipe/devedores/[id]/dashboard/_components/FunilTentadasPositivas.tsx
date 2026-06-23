@@ -18,7 +18,7 @@ import {
   YAxis,
 } from "recharts";
 
-import { DashboardCard } from "./DashboardCard";
+import { DashboardCard } from "@/components/dashboard/DashboardCard";
 import {
   CHART_COLOR_GOLD,
   CHART_COLOR_SIGNAL,
@@ -28,7 +28,7 @@ import {
   tooltipCursorFill,
   tooltipItemStyle,
   tooltipLabelStyle,
-} from "./ChartTheme";
+} from "@/components/dashboard/ChartTheme";
 import type { DashboardFunil } from "@/lib/dashboard-caso";
 
 type Props = {

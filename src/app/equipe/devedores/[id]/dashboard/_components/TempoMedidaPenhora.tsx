@@ -3,7 +3,7 @@
 // baseline de mercado. Mais rapido que o baseline = verde (up); mais lento =
 // vermelho (down). O baseline vem dos dados — a view nao chuta valor.
 
-import { KPIHero } from "./KPIHero";
+import { KPIHero } from "@/components/dashboard/KPIHero";
 import type { DashboardTempoMedio } from "@/lib/dashboard-caso";
 
 type Props = {

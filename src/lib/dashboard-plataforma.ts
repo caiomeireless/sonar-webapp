@@ -1,0 +1,711 @@
+// Dashboard da Plataforma — agregacao DO LADO SERVIDOR pra a tela
+// /equipe (visao gerencial da equipe inteira, nao de 1 caso).
+//
+// Server-only: usa createAdminClient. Reune dados de credores, devedores,
+// casos, bens_encontrados, medidas_tomadas e custos. NAO faz checagem de
+// papel — decisao do Caio: funcionario ve tudo, incluindo valores.
+//
+// REGRA: Toda metrica devolvida ja vem pronta pra UI consumir. A view
+// nao deve fazer agregacao no client.
+
+import { createAdminClient } from "@/lib/supabase/admin";
+import { ROTULO_TIPO, type RegistroCusto } from "@/lib/custos";
+import { perfisPorEmail, nomeOuEmail } from "@/lib/perfis";
+import type { TipoBem } from "@/lib/mock-fixtures";
+import type { TipoMedida, ResultadoMedida } from "@/lib/medidas";
+
+// ============================================================
+// TIPOS de saida
+// ============================================================
+
+export interface KPIsGerais {
+  patrimonioLocalizadoTotalBrl: number;
+  penhorasEfetivadasMes: number;
+  casosAtivosTotal: number;
+  casosBreakdown: {
+    ativos: number;
+    pausados: number;
+    encerrados: number;
+    satisfeitos: number;
+  };
+  gastoApisMes: number;
+  gastoApisLimite: number;
+}
+
+export interface EvolucaoMensalItem {
+  mes: string; // 'YYYY-MM'
+  patrimonioLocalizado: number;
+  penhorasEfetivadas: number;
+}
+
+export interface MixBensItem {
+  tipo: TipoBem;
+  qtd: number;
+  valorBrl: number;
+}
+
+export interface AtividadeEquipeItem {
+  advogadoEmail: string;
+  advogadoNome: string;
+  medidasTomadas: number;
+  breakdown: Partial<Record<TipoMedida, number>>;
+}
+
+export interface TopClienteItem {
+  credorId: number;
+  credorNome: string;
+  valorPatrimonioLocalizado: number;
+  qtdCasos: number;
+}
+
+export interface TopDevedorItem {
+  devedorId: number;
+  devedorNome: string;
+  valorEstimadoBens: number;
+  qtdCasos: number;
+  qtdMedidas: number;
+}
+
+export interface CarteiraAdvogadoItem {
+  advogadoEmail: string;
+  advogadoNome: string;
+  qtdCasos: number;
+  valorPatrimonioGerido: number;
+  gastoMes: number;
+}
+
+export interface CustoApiItem {
+  tipo: string;
+  custoBrl: number;
+  descricaoRotulo: string;
+}
+
+export interface FeedMedidaItem {
+  tipo: TipoMedida;
+  resultado: ResultadoMedida;
+  casoId: number;
+  devedorNome: string;
+  advogadoEmail: string | null;
+  criadoEm: string;
+}
+
+export interface DashboardPlataforma {
+  kpisGerais: KPIsGerais;
+  evolucaoMensal: EvolucaoMensalItem[];
+  mixBensPorTipo: MixBensItem[];
+  atividadeEquipe7Dias: AtividadeEquipeItem[];
+  top5ClientesPorPatrimonio: TopClienteItem[];
+  top5DevedoresRastreio: TopDevedorItem[];
+  carteiraPorAdvogado: CarteiraAdvogadoItem[];
+  custosPorAPI: CustoApiItem[];
+  feedMedidasRecentes: FeedMedidaItem[];
+}
+
+// ============================================================
+// CONFIG
+// ============================================================
+
+// Teto mensal de gasto com APIs — heuristica pra exibir progresso no card.
+// Quando virar configuracao por escritorio, mover pra `preferencias`.
+const GASTO_APIS_LIMITE_PADRAO = 5000;
+
+// PostgREST trunca em 1000 linhas por padrao. Quando precisarmos varrer
+// tabelas grandes (bens_encontrados, medidas_tomadas, custos), paginamos.
+const PAGINA = 1000;
+
+// ============================================================
+// HELPERS de paginacao + datas
+// ============================================================
+
+async function selecionarTudo<T>(
+  build: (from: number, to: number) => Promise<{ data: T[] | null; error: unknown }>,
+): Promise<T[]> {
+  const acc: T[] = [];
+  let from = 0;
+  // hard cap defensivo — 50 paginas (50k linhas) ja cobre tudo do Sonar
+  // por anos. Se ultrapassar, e melhor explodir do que silenciar.
+  for (let pagina = 0; pagina < 50; pagina++) {
+    const to = from + PAGINA - 1;
+    const { data, error } = await build(from, to);
+    if (error || !data || data.length === 0) break;
+    acc.push(...data);
+    if (data.length < PAGINA) break;
+    from += PAGINA;
+  }
+  return acc;
+}
+
+function ymKey(d: Date): string {
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  return `${yyyy}-${mm}`;
+}
+
+function ultimos12Meses(): string[] {
+  const out: string[] = [];
+  const hoje = new Date();
+  const cursor = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(cursor.getFullYear(), cursor.getMonth() - i, 1);
+    out.push(ymKey(d));
+  }
+  return out;
+}
+
+function inicioDoMesISO(): string {
+  const hoje = new Date();
+  const d = new Date(hoje.getFullYear(), hoje.getMonth(), 1, 0, 0, 0);
+  return d.toISOString();
+}
+
+function diasAtrasISO(dias: number): string {
+  return new Date(Date.now() - dias * 24 * 60 * 60 * 1000).toISOString();
+}
+
+// ============================================================
+// ROWS — formato cru lido do Supabase (so pra tipar sem `any`)
+// ============================================================
+
+interface CredorRow {
+  id: number;
+  nome: string;
+}
+
+interface DevedorRow {
+  id: number;
+  nome: string;
+}
+
+interface CasoRow {
+  id: number;
+  credor_id: number;
+  devedor_id: number;
+  status: "ativo" | "pausado" | "encerrado" | "satisfeito";
+  responsavel_email: string | null;
+}
+
+interface BemRow {
+  devedor_id: number;
+  tipo: TipoBem;
+  valor_estimado_brl: number | null;
+  fonte_consultada_em: string | null;
+}
+
+interface MedidaRow {
+  id: number;
+  caso_id: number;
+  data: string;
+  tipo: TipoMedida;
+  resultado: ResultadoMedida;
+  advogado_email: string | null;
+  criado_em: string;
+  valor_recuperado_brl: number | null;
+}
+
+interface CustoRow {
+  id: number;
+  email: string;
+  tipo: string;
+  descricao: string;
+  custo: number;
+  criado_em: string;
+  devedor_id: number | null;
+}
+
+// ============================================================
+// LEITURAS (cada uma resiliente — se a tabela ainda nao existir,
+// devolve [] em vez de quebrar a pagina inteira)
+// ============================================================
+
+async function lerCredores(): Promise<CredorRow[]> {
+  try {
+    const sb = createAdminClient();
+    return await selecionarTudo<CredorRow>(async (from, to) => {
+      const res = await sb
+        .from("credores")
+        .select("id, nome")
+        .range(from, to);
+      return { data: res.data as CredorRow[] | null, error: res.error };
+    });
+  } catch {
+    return [];
+  }
+}
+
+async function lerDevedores(): Promise<DevedorRow[]> {
+  try {
+    const sb = createAdminClient();
+    return await selecionarTudo<DevedorRow>(async (from, to) => {
+      const res = await sb
+        .from("devedores")
+        .select("id, nome")
+        .range(from, to);
+      return { data: res.data as DevedorRow[] | null, error: res.error };
+    });
+  } catch {
+    return [];
+  }
+}
+
+async function lerCasos(): Promise<CasoRow[]> {
+  try {
+    const sb = createAdminClient();
+    return await selecionarTudo<CasoRow>(async (from, to) => {
+      const res = await sb
+        .from("casos")
+        .select("id, credor_id, devedor_id, status, responsavel_email")
+        .range(from, to);
+      return { data: res.data as CasoRow[] | null, error: res.error };
+    });
+  } catch {
+    return [];
+  }
+}
+
+async function lerBens(): Promise<BemRow[]> {
+  try {
+    const sb = createAdminClient();
+    return await selecionarTudo<BemRow>(async (from, to) => {
+      const res = await sb
+        .from("bens_encontrados")
+        .select("devedor_id, tipo, valor_estimado_brl, fonte_consultada_em")
+        .eq("ativo", true)
+        .range(from, to);
+      return { data: res.data as BemRow[] | null, error: res.error };
+    });
+  } catch {
+    return [];
+  }
+}
+
+async function lerMedidas(): Promise<MedidaRow[]> {
+  try {
+    const sb = createAdminClient();
+    return await selecionarTudo<MedidaRow>(async (from, to) => {
+      const res = await sb
+        .from("medidas_tomadas")
+        .select(
+          "id, caso_id, data, tipo, resultado, advogado_email, criado_em, valor_recuperado_brl",
+        )
+        .range(from, to);
+      return { data: res.data as MedidaRow[] | null, error: res.error };
+    });
+  } catch {
+    return [];
+  }
+}
+
+async function lerCustos(): Promise<CustoRow[]> {
+  try {
+    const sb = createAdminClient();
+    return await selecionarTudo<CustoRow>(async (from, to) => {
+      const res = await sb
+        .from("custos")
+        .select("id, email, tipo, descricao, custo, criado_em, devedor_id")
+        .range(from, to);
+      return { data: res.data as CustoRow[] | null, error: res.error };
+    });
+  } catch {
+    return [];
+  }
+}
+
+// ============================================================
+// AGREGACOES
+// ============================================================
+
+function agregarKpisGerais(args: {
+  bens: BemRow[];
+  casos: CasoRow[];
+  medidas: MedidaRow[];
+  custos: CustoRow[];
+}): KPIsGerais {
+  const { bens, casos, medidas, custos } = args;
+
+  const patrimonioLocalizadoTotalBrl = bens.reduce(
+    (s, b) => s + (Number(b.valor_estimado_brl) || 0),
+    0,
+  );
+
+  const inicioMes = inicioDoMesISO();
+
+  const penhorasEfetivadasMes = medidas.filter((m) => {
+    if (m.tipo !== "penhora_efetivada") return false;
+    if (m.resultado !== "positivo") return false;
+    const ts = m.data ?? m.criado_em;
+    if (!ts) return false;
+    return ts >= inicioMes.slice(0, 10); // m.data eh `date` (YYYY-MM-DD)
+  }).length;
+
+  const breakdown = {
+    ativos: 0,
+    pausados: 0,
+    encerrados: 0,
+    satisfeitos: 0,
+  };
+  for (const c of casos) {
+    if (c.status === "ativo") breakdown.ativos++;
+    else if (c.status === "pausado") breakdown.pausados++;
+    else if (c.status === "encerrado") breakdown.encerrados++;
+    else if (c.status === "satisfeito") breakdown.satisfeitos++;
+  }
+
+  const gastoApisMes = custos
+    .filter((c) => c.criado_em && c.criado_em >= inicioMes)
+    .reduce((s, c) => s + (Number(c.custo) || 0), 0);
+
+  return {
+    patrimonioLocalizadoTotalBrl,
+    penhorasEfetivadasMes,
+    casosAtivosTotal: breakdown.ativos,
+    casosBreakdown: breakdown,
+    gastoApisMes,
+    gastoApisLimite: GASTO_APIS_LIMITE_PADRAO,
+  };
+}
+
+function agregarEvolucaoMensal(args: {
+  bens: BemRow[];
+  medidas: MedidaRow[];
+}): EvolucaoMensalItem[] {
+  const { bens, medidas } = args;
+  const meses = ultimos12Meses();
+
+  // Patrimonio localizado por mes = soma de valor_estimado_brl dos bens
+  // cuja `fonte_consultada_em` cai no mes. Heuristica boa o suficiente
+  // pra grafico de evolucao (quando o bem foi "trazido" ao sistema).
+  const patrPorMes = new Map<string, number>();
+  for (const b of bens) {
+    if (!b.fonte_consultada_em) continue;
+    const d = new Date(b.fonte_consultada_em);
+    if (Number.isNaN(d.getTime())) continue;
+    const k = ymKey(d);
+    const v = Number(b.valor_estimado_brl) || 0;
+    patrPorMes.set(k, (patrPorMes.get(k) ?? 0) + v);
+  }
+
+  // Penhoras efetivadas por mes = count das medidas penhora_efetivada
+  // com resultado=positivo agrupadas por mes da data da medida.
+  const penPorMes = new Map<string, number>();
+  for (const m of medidas) {
+    if (m.tipo !== "penhora_efetivada") continue;
+    if (m.resultado !== "positivo") continue;
+    const ts = m.data || m.criado_em;
+    if (!ts) continue;
+    const d = new Date(ts);
+    if (Number.isNaN(d.getTime())) continue;
+    const k = ymKey(d);
+    penPorMes.set(k, (penPorMes.get(k) ?? 0) + 1);
+  }
+
+  return meses.map((mes) => ({
+    mes,
+    patrimonioLocalizado: patrPorMes.get(mes) ?? 0,
+    penhorasEfetivadas: penPorMes.get(mes) ?? 0,
+  }));
+}
+
+function agregarMixBens(bens: BemRow[]): MixBensItem[] {
+  const acc = new Map<TipoBem, { qtd: number; valor: number }>();
+  for (const b of bens) {
+    const cur = acc.get(b.tipo) ?? { qtd: 0, valor: 0 };
+    cur.qtd += 1;
+    cur.valor += Number(b.valor_estimado_brl) || 0;
+    acc.set(b.tipo, cur);
+  }
+  const out: MixBensItem[] = [];
+  for (const [tipo, v] of acc.entries()) {
+    out.push({ tipo, qtd: v.qtd, valorBrl: v.valor });
+  }
+  // Maior valor primeiro — leitura natural pra grafico de mix.
+  out.sort((a, b) => b.valorBrl - a.valorBrl);
+  return out;
+}
+
+function agregarAtividadeEquipe(
+  medidas: MedidaRow[],
+  mapaPerfis: Record<string, string>,
+): AtividadeEquipeItem[] {
+  const corte = diasAtrasISO(7);
+  const recentes = medidas.filter((m) => (m.criado_em || m.data) >= corte);
+
+  // email -> { total, breakdown }
+  const acc = new Map<
+    string,
+    { total: number; breakdown: Partial<Record<TipoMedida, number>> }
+  >();
+  for (const m of recentes) {
+    const email = (m.advogado_email ?? "").toLowerCase().trim();
+    if (!email) continue;
+    const cur = acc.get(email) ?? { total: 0, breakdown: {} };
+    cur.total += 1;
+    cur.breakdown[m.tipo] = (cur.breakdown[m.tipo] ?? 0) + 1;
+    acc.set(email, cur);
+  }
+
+  const out: AtividadeEquipeItem[] = [];
+  for (const [email, v] of acc.entries()) {
+    out.push({
+      advogadoEmail: email,
+      advogadoNome: nomeOuEmail(email, mapaPerfis),
+      medidasTomadas: v.total,
+      breakdown: v.breakdown,
+    });
+  }
+  out.sort((a, b) => b.medidasTomadas - a.medidasTomadas);
+  return out;
+}
+
+function agregarTopClientes(args: {
+  credores: CredorRow[];
+  casos: CasoRow[];
+  bens: BemRow[];
+}): TopClienteItem[] {
+  const { credores, casos, bens } = args;
+
+  // mapa devedor_id -> valor total dos bens deste devedor
+  const valorPorDevedor = new Map<number, number>();
+  for (const b of bens) {
+    const v = Number(b.valor_estimado_brl) || 0;
+    valorPorDevedor.set(b.devedor_id, (valorPorDevedor.get(b.devedor_id) ?? 0) + v);
+  }
+
+  // mapa credor_id -> { valor, qtdCasos }
+  const porCredor = new Map<number, { valor: number; qtdCasos: number }>();
+  for (const c of casos) {
+    const cur = porCredor.get(c.credor_id) ?? { valor: 0, qtdCasos: 0 };
+    cur.qtdCasos += 1;
+    cur.valor += valorPorDevedor.get(c.devedor_id) ?? 0;
+    porCredor.set(c.credor_id, cur);
+  }
+
+  const nomePorCredor = new Map<number, string>();
+  for (const c of credores) nomePorCredor.set(c.id, c.nome);
+
+  const out: TopClienteItem[] = [];
+  for (const [credorId, v] of porCredor.entries()) {
+    out.push({
+      credorId,
+      credorNome: nomePorCredor.get(credorId) ?? `Credor #${credorId}`,
+      valorPatrimonioLocalizado: v.valor,
+      qtdCasos: v.qtdCasos,
+    });
+  }
+  out.sort(
+    (a, b) => b.valorPatrimonioLocalizado - a.valorPatrimonioLocalizado,
+  );
+  return out.slice(0, 5);
+}
+
+function agregarTopDevedores(args: {
+  devedores: DevedorRow[];
+  casos: CasoRow[];
+  bens: BemRow[];
+  medidas: MedidaRow[];
+}): TopDevedorItem[] {
+  const { devedores, casos, bens, medidas } = args;
+
+  const valorPorDevedor = new Map<number, number>();
+  for (const b of bens) {
+    const v = Number(b.valor_estimado_brl) || 0;
+    valorPorDevedor.set(b.devedor_id, (valorPorDevedor.get(b.devedor_id) ?? 0) + v);
+  }
+
+  const casosPorDevedor = new Map<number, number>();
+  // tambem montamos: caso_id -> devedor_id pra atribuir medidas ao devedor
+  const devedorDoCaso = new Map<number, number>();
+  for (const c of casos) {
+    casosPorDevedor.set(c.devedor_id, (casosPorDevedor.get(c.devedor_id) ?? 0) + 1);
+    devedorDoCaso.set(c.id, c.devedor_id);
+  }
+
+  const medidasPorDevedor = new Map<number, number>();
+  for (const m of medidas) {
+    const did = devedorDoCaso.get(m.caso_id);
+    if (did === undefined) continue;
+    medidasPorDevedor.set(did, (medidasPorDevedor.get(did) ?? 0) + 1);
+  }
+
+  const nomePorDevedor = new Map<number, string>();
+  for (const d of devedores) nomePorDevedor.set(d.id, d.nome);
+
+  const out: TopDevedorItem[] = [];
+  // candidatos = devedores com pelo menos 1 bem (faz sentido falar em
+  // "patrimonio em rastreio")
+  for (const [devedorId, valor] of valorPorDevedor.entries()) {
+    out.push({
+      devedorId,
+      devedorNome: nomePorDevedor.get(devedorId) ?? `Devedor #${devedorId}`,
+      valorEstimadoBens: valor,
+      qtdCasos: casosPorDevedor.get(devedorId) ?? 0,
+      qtdMedidas: medidasPorDevedor.get(devedorId) ?? 0,
+    });
+  }
+  out.sort((a, b) => b.valorEstimadoBens - a.valorEstimadoBens);
+  return out.slice(0, 5);
+}
+
+function agregarCarteiraPorAdvogado(args: {
+  casos: CasoRow[];
+  bens: BemRow[];
+  custos: CustoRow[];
+  mapaPerfis: Record<string, string>;
+}): CarteiraAdvogadoItem[] {
+  const { casos, bens, custos, mapaPerfis } = args;
+
+  const valorPorDevedor = new Map<number, number>();
+  for (const b of bens) {
+    const v = Number(b.valor_estimado_brl) || 0;
+    valorPorDevedor.set(b.devedor_id, (valorPorDevedor.get(b.devedor_id) ?? 0) + v);
+  }
+
+  const acc = new Map<
+    string,
+    { qtdCasos: number; valor: number; gastoMes: number }
+  >();
+
+  for (const c of casos) {
+    const email = (c.responsavel_email ?? "").toLowerCase().trim();
+    if (!email) continue;
+    const cur = acc.get(email) ?? { qtdCasos: 0, valor: 0, gastoMes: 0 };
+    cur.qtdCasos += 1;
+    cur.valor += valorPorDevedor.get(c.devedor_id) ?? 0;
+    acc.set(email, cur);
+  }
+
+  // Gasto do mes por email (campo `email` em custos = quem disparou a consulta).
+  const inicioMes = inicioDoMesISO();
+  for (const cu of custos) {
+    if (!cu.criado_em || cu.criado_em < inicioMes) continue;
+    const email = (cu.email ?? "").toLowerCase().trim();
+    if (!email) continue;
+    const cur = acc.get(email) ?? { qtdCasos: 0, valor: 0, gastoMes: 0 };
+    cur.gastoMes += Number(cu.custo) || 0;
+    acc.set(email, cur);
+  }
+
+  const out: CarteiraAdvogadoItem[] = [];
+  for (const [email, v] of acc.entries()) {
+    out.push({
+      advogadoEmail: email,
+      advogadoNome: nomeOuEmail(email, mapaPerfis),
+      qtdCasos: v.qtdCasos,
+      valorPatrimonioGerido: v.valor,
+      gastoMes: v.gastoMes,
+    });
+  }
+  out.sort((a, b) => b.valorPatrimonioGerido - a.valorPatrimonioGerido);
+  return out;
+}
+
+function agregarCustosPorApi(custos: CustoRow[]): CustoApiItem[] {
+  const acc = new Map<string, number>();
+  for (const c of custos) {
+    const tipo = c.tipo || "outro";
+    acc.set(tipo, (acc.get(tipo) ?? 0) + (Number(c.custo) || 0));
+  }
+  const out: CustoApiItem[] = [];
+  for (const [tipo, custoBrl] of acc.entries()) {
+    out.push({
+      tipo,
+      custoBrl,
+      descricaoRotulo: ROTULO_TIPO[tipo] ?? tipo,
+    });
+  }
+  out.sort((a, b) => b.custoBrl - a.custoBrl);
+  return out;
+}
+
+function agregarFeedMedidas(args: {
+  medidas: MedidaRow[];
+  casos: CasoRow[];
+  devedores: DevedorRow[];
+}): FeedMedidaItem[] {
+  const { medidas, casos, devedores } = args;
+
+  const corte = diasAtrasISO(1);
+  const devedorDoCaso = new Map<number, number>();
+  for (const c of casos) devedorDoCaso.set(c.id, c.devedor_id);
+  const nomePorDevedor = new Map<number, string>();
+  for (const d of devedores) nomePorDevedor.set(d.id, d.nome);
+
+  const recentes = medidas
+    .filter((m) => (m.criado_em || m.data) >= corte)
+    .sort((a, b) => {
+      const ta = a.criado_em || a.data;
+      const tb = b.criado_em || b.data;
+      return tb.localeCompare(ta);
+    })
+    .slice(0, 10);
+
+  return recentes.map((m) => {
+    const did = devedorDoCaso.get(m.caso_id);
+    const devedorNome =
+      did !== undefined ? (nomePorDevedor.get(did) ?? `Devedor #${did}`) : "—";
+    return {
+      tipo: m.tipo,
+      resultado: m.resultado,
+      casoId: m.caso_id,
+      devedorNome,
+      advogadoEmail: m.advogado_email,
+      criadoEm: m.criado_em || m.data,
+    };
+  });
+}
+
+// ============================================================
+// ENTRY POINT
+// ============================================================
+
+export async function obterDadosDashboardPlataforma(): Promise<DashboardPlataforma> {
+  const [credores, devedores, casos, bens, medidas, custos, mapaPerfis] =
+    await Promise.all([
+      lerCredores(),
+      lerDevedores(),
+      lerCasos(),
+      lerBens(),
+      lerMedidas(),
+      lerCustos(),
+      perfisPorEmail(),
+    ]);
+
+  const kpisGerais = agregarKpisGerais({ bens, casos, medidas, custos });
+  const evolucaoMensal = agregarEvolucaoMensal({ bens, medidas });
+  const mixBensPorTipo = agregarMixBens(bens);
+  const atividadeEquipe7Dias = agregarAtividadeEquipe(medidas, mapaPerfis);
+  const top5ClientesPorPatrimonio = agregarTopClientes({
+    credores,
+    casos,
+    bens,
+  });
+  const top5DevedoresRastreio = agregarTopDevedores({
+    devedores,
+    casos,
+    bens,
+    medidas,
+  });
+  const carteiraPorAdvogado = agregarCarteiraPorAdvogado({
+    casos,
+    bens,
+    custos,
+    mapaPerfis,
+  });
+  const custosPorAPI = agregarCustosPorApi(custos);
+  const feedMedidasRecentes = agregarFeedMedidas({
+    medidas,
+    casos,
+    devedores,
+  });
+
+  return {
+    kpisGerais,
+    evolucaoMensal,
+    mixBensPorTipo,
+    atividadeEquipe7Dias,
+    top5ClientesPorPatrimonio,
+    top5DevedoresRastreio,
+    carteiraPorAdvogado,
+    custosPorAPI,
+    feedMedidasRecentes,
+  };
+}

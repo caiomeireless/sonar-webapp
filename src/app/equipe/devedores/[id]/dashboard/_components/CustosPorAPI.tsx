@@ -7,8 +7,8 @@
 
 import type { DashboardCustoApi } from "@/lib/dashboard-caso";
 import { formatBRL } from "@/lib/format";
-import { DashboardCard } from "./DashboardCard";
-import { CHART_COLOR_GOLD } from "./ChartTheme";
+import { DashboardCard } from "@/components/dashboard/DashboardCard";
+import { CHART_COLOR_GOLD } from "@/components/dashboard/ChartTheme";
 
 type Props = {
   dados: DashboardCustoApi[];

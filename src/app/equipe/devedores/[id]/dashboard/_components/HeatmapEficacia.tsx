@@ -9,8 +9,8 @@ import {
   type ResultadoMedida,
   type TipoMedida,
 } from "@/lib/medidas";
-import { CHART_COLOR_SIGNAL } from "./ChartTheme";
-import { DashboardCard } from "./DashboardCard";
+import { CHART_COLOR_SIGNAL } from "@/components/dashboard/ChartTheme";
+import { DashboardCard } from "@/components/dashboard/DashboardCard";
 
 // Linhas e colunas FIXAS pelo brief — heatmap eh um snapshot operacional
 // focado, nao um cubo completo. Outros tipos/resultados ficam fora aqui.

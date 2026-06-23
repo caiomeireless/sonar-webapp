@@ -1,22 +1,117 @@
-// Entry point do portal da equipe — manda direto pra lista de devedores.
-// Em dev, suporta ?eu=email pra simular login (gating em lib/dev-auth).
+// Dashboard da Plataforma — entry point do portal da equipe.
+//
+// Server Component:
+//   - Checa sessao (perfilLogado): nao equipe → /login
+//   - Agrega tudo no servidor (obterDadosDashboardPlataforma)
+//   - Layout grid 12-col Tailwind, mobile cai pra 1 coluna
+//
+// Decisao do Caio: funcionario ve TUDO (valores, equipe inteira). A
+// pagina apenas roteia + monta o grid; cada card e responsavel pelo
+// proprio chrome via DashboardCard/KPIHero.
+
 import { redirect } from "next/navigation";
 import { perfilLogado } from "@/lib/perfis-server";
-import { ehCliente } from "@/lib/perfis";
-import { devEuFromParam } from "@/lib/dev-auth";
+import { ehEquipe } from "@/lib/perfis";
+import { obterDadosDashboardPlataforma } from "@/lib/dashboard-plataforma";
 
-type Props = {
-  searchParams?: Promise<{ eu?: string | string[] }>;
-};
+import KPIPatrimonioTotal from "./_components/KPIPatrimonioTotal";
+import KPIPenhorasEfetivadasMes from "./_components/KPIPenhorasEfetivadasMes";
+import KPICasosAtivos from "./_components/KPICasosAtivos";
+import KPIGastoAPIs from "./_components/KPIGastoAPIs";
+import EvolucaoPatrimonioMensal from "./_components/EvolucaoPatrimonioMensal";
+import MixBensPorTipo from "./_components/MixBensPorTipo";
+import AtividadeEquipe7Dias from "./_components/AtividadeEquipe7Dias";
+import CustosPorAPIDonut from "./_components/CustosPorAPIDonut";
+import Top5ClientesPorPatrimonio from "./_components/Top5ClientesPorPatrimonio";
+import Top5DevedoresRastreio from "./_components/Top5DevedoresRastreio";
+import CarteiraPorAdvogado from "./_components/CarteiraPorAdvogado";
+import FeedMedidasRecentes from "./_components/FeedMedidasRecentes";
 
-export default async function EquipeIndexPage({ searchParams }: Props) {
-  const params = (await searchParams) ?? {};
+export default async function DashboardPlataformaPage() {
   const perfil = await perfilLogado();
-  if (ehCliente(perfil)) redirect("/cliente/casos");
-  const eu = devEuFromParam(params.eu) ?? perfil?.email ?? null;
-  if (!eu) redirect("/login");
-  const qs = devEuFromParam(params.eu)
-    ? `?eu=${encodeURIComponent(devEuFromParam(params.eu)!)}`
-    : "";
-  redirect(`/equipe/devedores${qs}`);
+  if (!ehEquipe(perfil)) redirect("/login");
+
+  const dados = await obterDadosDashboardPlataforma();
+
+  // Penhoras do mes anterior — penultimo bucket da serie de 12 meses
+  // (o ultimo e o mes corrente). Se a serie for curta por algum motivo,
+  // cai pra 0 sem quebrar o delta.
+  const evol = dados.evolucaoMensal;
+  const penhorasMesAnterior =
+    evol.length >= 2 ? evol[evol.length - 2].penhorasEfetivadas : 0;
+
+  return (
+    <main className="mx-auto max-w-[1400px] px-6 py-10 sm:px-10">
+      {/* Cabecalho */}
+      <header className="mb-8">
+        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+          Painel da Plataforma
+        </p>
+        <h1 className="mt-2 text-3xl font-medium tracking-tight text-ivory sm:text-4xl">
+          Visao geral do escritorio
+        </h1>
+      </header>
+
+      {/* Grid principal: 12 colunas no desktop, 1 no mobile */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
+        {/* L1 — KPIs (5 + 3 + 2 + 2) */}
+        <div className="md:col-span-5">
+          <KPIPatrimonioTotal
+            valorBrl={dados.kpisGerais.patrimonioLocalizadoTotalBrl}
+          />
+        </div>
+        <div className="md:col-span-3">
+          <KPIPenhorasEfetivadasMes
+            mesAtual={dados.kpisGerais.penhorasEfetivadasMes}
+            mesAnterior={penhorasMesAnterior}
+          />
+        </div>
+        <div className="md:col-span-2">
+          <KPICasosAtivos
+            ativos={dados.kpisGerais.casosBreakdown.ativos}
+            pausados={dados.kpisGerais.casosBreakdown.pausados}
+            encerrados={dados.kpisGerais.casosBreakdown.encerrados}
+          />
+        </div>
+        <div className="md:col-span-2">
+          <KPIGastoAPIs
+            gastoMes={dados.kpisGerais.gastoApisMes}
+            limite={dados.kpisGerais.gastoApisLimite}
+          />
+        </div>
+
+        {/* L2 — Evolucao mensal (full width) */}
+        <div className="md:col-span-12">
+          <EvolucaoPatrimonioMensal dados={dados.evolucaoMensal} />
+        </div>
+
+        {/* L3 — Mix (4) + Atividade (5) + Custos (3) */}
+        <div className="md:col-span-4">
+          <MixBensPorTipo dados={dados.mixBensPorTipo} />
+        </div>
+        <div className="md:col-span-5">
+          <AtividadeEquipe7Dias dados={dados.atividadeEquipe7Dias} />
+        </div>
+        <div className="md:col-span-3">
+          <CustosPorAPIDonut dados={dados.custosPorAPI} />
+        </div>
+
+        {/* L4 — Rankings (6 + 6) */}
+        <div className="md:col-span-6">
+          <Top5ClientesPorPatrimonio itens={dados.top5ClientesPorPatrimonio} />
+        </div>
+        <div className="md:col-span-6">
+          <Top5DevedoresRastreio dados={dados.top5DevedoresRastreio} />
+        </div>
+
+        {/* L5 — Carteira (7) + Feed (5) */}
+        <div className="md:col-span-7">
+          <CarteiraPorAdvogado itens={dados.carteiraPorAdvogado} />
+        </div>
+        <div className="md:col-span-5">
+          <FeedMedidasRecentes dados={dados.feedMedidasRecentes} />
+        </div>
+      </div>
+    </main>
+  );
 }

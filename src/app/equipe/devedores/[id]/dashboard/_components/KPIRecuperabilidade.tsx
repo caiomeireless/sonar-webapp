@@ -3,8 +3,8 @@
 // Faixas: >=60 verde, 30-59 gold, <30 neutral (vermelho-mut sinalizado pelo accent neutro
 // — KPIHero hardcoda a cor do valor em ivory; o accent gold/neutral comunica a severidade).
 
-import { KPIHero } from "./KPIHero";
-import type { DashboardCardAccent } from "./DashboardCard";
+import { KPIHero } from "@/components/dashboard/KPIHero";
+import type { DashboardCardAccent } from "@/components/dashboard/DashboardCard";
 
 type Props = {
   score: number;

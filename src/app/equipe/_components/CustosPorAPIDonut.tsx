@@ -1,11 +1,12 @@
 "use client";
 
-// Donut do Dashboard do Caso: bens agrupados por TIPO, valor em R$.
-// Centro = valor total. Legenda lateral = tipo + valor + %.
-// Componente CLIENT por causa do Recharts (ResponsiveContainer mede o DOM).
+// Donut do Dashboard da Plataforma: custos do mes agrupados por API.
+// Top 5 APIs com maior gasto + fatia "Outros" se houver excedente.
+// Centro = total R$ gasto no mes corrente. Legenda lateral = API + R$ + %.
+// Client Component por causa do Recharts (ResponsiveContainer mede o DOM).
 //
-// Dados ja vem agregados de obterDadosDashboardCaso(devedorId) — esta view
-// nao chama Supabase. Recebe `dados` (DashboardBreakdownBem[]) via prop.
+// Dados ja vem agregados (CustoApiItem[]) de obterDadosDashboardPlataforma().
+// Este componente NAO consulta Supabase.
 
 import {
   Cell,
@@ -20,50 +21,39 @@ import type {
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
 
-import type { TipoBem } from "@/lib/mock-fixtures";
-import type { DashboardBreakdownBem } from "@/lib/dashboard-caso";
+import type { CustoApiItem } from "@/lib/dashboard-plataforma";
 import { formatBRL } from "@/lib/format";
 
 import { DashboardCard } from "@/components/dashboard/DashboardCard";
 import {
-  TIPO_BEM_COLORS,
+  CHART_COLORS,
   tooltipContentStyle,
   tooltipItemStyle,
   tooltipLabelStyle,
 } from "@/components/dashboard/ChartTheme";
 
-// ============================================================
-// META — label + icone por tipo de bem (espelha lib/devedores
-// page.tsx; sem TIPO_META exportado, inline aqui pra manter
-// consistencia visual com o dossie).
-// ============================================================
+// Quantas APIs entram nominalmente — o restante vira "Outros".
+const TOP_N = 5;
 
-const TIPO_META: Record<TipoBem, { label: string; icone: string }> = {
-  veiculo: { label: "Veiculos", icone: "V" },
-  imovel: { label: "Imoveis", icone: "I" },
-  empresa: { label: "Participacoes societarias", icone: "E" },
-  processo_credito: { label: "Processos onde e credor", icone: "P" },
-  endereco: { label: "Enderecos confirmados", icone: "A" },
-  vinculo: { label: "Vinculos familiares", icone: "F" },
-};
+// Cor neutra reservada para a fatia "Outros" — fica fora da paleta primaria
+// pra reforcar que e um agregado, nao uma API individual.
+const OUTROS_COLOR = "rgba(234, 231, 220, 0.40)";
+const OUTROS_KEY = "__outros__";
 
-// Forma que o Recharts consome — `name` vira label do tooltip,
-// `value` vira a fatia. `tipo` carrega a chave pra colorir.
+// Forma consumida pelo Recharts. `tipo` carrega a chave (pra cor estavel),
+// `name` vira label do tooltip, `value` e a fatia.
 type PieDatum = {
-  tipo: TipoBem;
+  tipo: string;
   name: string;
   value: number;
-  qtd: number;
 };
 
 type Props = {
-  dados: DashboardBreakdownBem[];
+  dados: CustoApiItem[];
 };
 
 // ============================================================
-// TOOLTIP custom — tipa o payload pra evitar `any`/`unknown`
-// soltos. Recharts entrega payload[].payload com o datum
-// original; aqui castamos pro nosso PieDatum.
+// TOOLTIP custom — tipa o payload pra evitar `any` solto.
 // ============================================================
 
 function DonutTooltip({
@@ -78,9 +68,6 @@ function DonutTooltip({
       <div style={tooltipLabelStyle}>{datum.name}</div>
       <div style={tooltipItemStyle}>
         <strong>{formatBRL(datum.value)}</strong>
-        <span style={{ color: "rgba(234, 231, 220, 0.40)", marginLeft: 6 }}>
-          {datum.qtd} {datum.qtd === 1 ? "item" : "itens"}
-        </span>
       </div>
     </div>
   );
@@ -90,38 +77,53 @@ function DonutTooltip({
 // COMPONENTE
 // ============================================================
 
-export default function DonutBensPorValor({ dados }: Props) {
-  // Recharts nao desenha fatias com value=0; filtramos pra nao
-  // poluir tooltip nem legenda com tipos vazios.
-  const datums: PieDatum[] = dados
-    .filter((d) => d.valorBrl > 0)
-    .map((d) => ({
-      tipo: d.tipo,
-      name: TIPO_META[d.tipo]?.label ?? d.tipo,
-      value: d.valorBrl,
-      qtd: d.qtd,
-    }));
+export default function CustosPorAPIDonut({ dados }: Props) {
+  // `dados` vem ordenado desc por custoBrl (ver agregarCustosPorApi).
+  // Filtramos zerados antes de cortar — Recharts nao desenha fatias com
+  // value=0 e nao queremos pagar slot do top-N com lixo.
+  const positivos = dados.filter((d) => d.custoBrl > 0);
+
+  const top = positivos.slice(0, TOP_N);
+  const resto = positivos.slice(TOP_N);
+  const valorOutros = resto.reduce((s, d) => s + d.custoBrl, 0);
+
+  const datums: PieDatum[] = top.map((d) => ({
+    tipo: d.tipo,
+    name: d.descricaoRotulo,
+    value: d.custoBrl,
+  }));
+
+  if (valorOutros > 0) {
+    datums.push({
+      tipo: OUTROS_KEY,
+      name: `Outros (${resto.length})`,
+      value: valorOutros,
+    });
+  }
 
   const total = datums.reduce((s, d) => s + d.value, 0);
 
   if (datums.length === 0 || total === 0) {
     return (
       <DashboardCard
-        titulo="Patrimonio por tipo"
-        descricao="Distribuicao do valor estimado por categoria de bem"
+        titulo="Custos por API"
+        descricao="Gasto do mes por fonte de dados paga"
         accent="gold"
       >
         <div className="flex h-48 items-center justify-center text-sm text-[var(--color-ivory-66)]">
-          Nenhum bem com valor estimado.
+          Nenhuma consulta paga registrada neste mes.
         </div>
       </DashboardCard>
     );
   }
 
+  const corPorIndice = (i: number, tipo: string) =>
+    tipo === OUTROS_KEY ? OUTROS_COLOR : CHART_COLORS[i % CHART_COLORS.length];
+
   return (
     <DashboardCard
-      titulo="Patrimonio por tipo"
-      descricao="Distribuicao do valor estimado por categoria de bem"
+      titulo="Custos por API"
+      descricao="Gasto do mes por fonte de dados paga"
       accent="gold"
     >
       <div className="grid grid-cols-1 gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-center">
@@ -142,37 +144,33 @@ export default function DonutBensPorValor({ dados }: Props) {
                 strokeWidth={2}
                 isAnimationActive={false}
               >
-                {datums.map((d) => (
-                  <Cell
-                    key={d.tipo}
-                    fill={TIPO_BEM_COLORS[d.tipo] ?? "#EAE7DC"}
-                  />
+                {datums.map((d, i) => (
+                  <Cell key={d.tipo} fill={corPorIndice(i, d.tipo)} />
                 ))}
               </Pie>
               <Tooltip content={(props) => <DonutTooltip {...props} />} />
             </PieChart>
           </ResponsiveContainer>
 
-          {/* CENTRO — total. pointer-events-none pra nao tampar tooltip. */}
+          {/* CENTRO — total do mes. pointer-events-none pra nao tampar tooltip. */}
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-[10px] uppercase tracking-[0.12em] text-[var(--color-ivory-66)]">
-              Patrimonio total
+              Gasto no mes
             </span>
             <span className="mt-1 text-2xl font-medium tracking-tight text-[var(--color-ivory)]">
               {formatBRL(total)}
             </span>
             <span className="mt-0.5 text-[10px] text-[var(--color-ivory-66)]">
-              {datums.reduce((s, d) => s + d.qtd, 0)} bens
+              {datums.length} {datums.length === 1 ? "fonte" : "fontes"}
             </span>
           </div>
         </div>
 
         {/* LEGENDA */}
         <ul className="flex flex-col gap-2">
-          {datums.map((d) => {
+          {datums.map((d, i) => {
             const pct = total > 0 ? (d.value / total) * 100 : 0;
-            const cor = TIPO_BEM_COLORS[d.tipo] ?? "#EAE7DC";
-            const meta = TIPO_META[d.tipo];
+            const cor = corPorIndice(i, d.tipo);
             return (
               <li
                 key={d.tipo}
@@ -181,15 +179,9 @@ export default function DonutBensPorValor({ dados }: Props) {
                 <div className="flex min-w-0 items-center gap-2.5">
                   <span
                     aria-hidden
-                    className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded text-[10px] font-semibold"
-                    style={{
-                      background: `${cor}22`,
-                      color: cor,
-                      border: `1px solid ${cor}55`,
-                    }}
-                  >
-                    {meta?.icone ?? "?"}
-                  </span>
+                    className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+                    style={{ background: cor }}
+                  />
                   <span className="truncate text-sm text-[var(--color-ivory)]">
                     {d.name}
                   </span>

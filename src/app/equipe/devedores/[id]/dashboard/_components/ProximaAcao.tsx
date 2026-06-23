@@ -7,8 +7,8 @@
 "use client";
 
 import { useState } from "react";
-import { DashboardCard } from "./DashboardCard";
-import { CHART_COLOR_SIGNAL, CHART_COLOR_GOLD } from "./ChartTheme";
+import { DashboardCard } from "@/components/dashboard/DashboardCard";
+import { CHART_COLOR_SIGNAL, CHART_COLOR_GOLD } from "@/components/dashboard/ChartTheme";
 import type { DashboardProximaAcao } from "@/lib/dashboard-caso";
 
 // ============================================================

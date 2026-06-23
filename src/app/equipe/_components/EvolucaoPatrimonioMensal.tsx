@@ -1,12 +1,15 @@
 "use client";
 
-// Linha do tempo financeira — cobranca acumulada (ouro BP) x valor recuperado
-// (verde Sonar) nos ultimos 12 meses. Recharts roda no client.
+// Evolucao mensal da plataforma — patrimonio localizado (R$, ouro) x
+// penhoras efetivadas (count, verde) nos ultimos 12 meses. Full width na
+// linha 2 do Dashboard da Plataforma.
 //
-// Recebe os dados ja agregados pelo helper obterDadosDashboardCaso (server).
-// A unica transformacao feita aqui e o ACUMULADO da cobranca: o helper
-// devolve cobranca mensal (linear); a serie do grafico mostra o saldo
-// acumulado mes a mes, que e a leitura natural pra credor.
+// Eixos Y separados: o patrimonio em R$ pode chegar a milhoes, enquanto as
+// penhoras efetivadas sao contagens pequenas. Misturar na mesma escala
+// achataria a serie verde. Dois <YAxis yAxisId> resolvem isso de forma
+// limpa no Recharts.
+//
+// Recebe `dados` ja agregados por `agregarEvolucaoMensal` (server).
 
 import { useMemo } from "react";
 import {
@@ -25,7 +28,7 @@ import type {
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
 
-import type { DashboardLinhaTempoItem } from "@/lib/dashboard-caso";
+import type { EvolucaoMensalItem } from "@/lib/dashboard-plataforma";
 import { formatBRL } from "@/lib/format";
 
 import { DashboardCard } from "@/components/dashboard/DashboardCard";
@@ -41,14 +44,14 @@ import {
 } from "@/components/dashboard/ChartTheme";
 
 type Props = {
-  dados: DashboardLinhaTempoItem[];
+  dados: EvolucaoMensalItem[];
 };
 
 type Ponto = {
   mes: string;
   rotuloMes: string;
-  cobrancaAcumulada: number;
-  valorRecuperado: number;
+  patrimonioLocalizado: number;
+  penhorasEfetivadas: number;
 };
 
 const MESES_PT = [
@@ -66,8 +69,8 @@ const MESES_PT = [
   "dez",
 ] as const;
 
-// 'YYYY-MM' -> 'mmm/yy' (pt-BR curto). Evita Intl pra nao depender de locale
-// no SSR — o helper ja entrega o YYYY-MM canonico.
+// 'YYYY-MM' -> 'mmm/yy' (pt-BR curto). Sem Intl pra evitar mismatch de
+// locale SSR/CSR.
 function rotularMes(ym: string): string {
   const [yyyy, mm] = ym.split("-");
   const idx = Number.parseInt(mm ?? "", 10) - 1;
@@ -84,15 +87,20 @@ function compactBRL(value: number): string {
   return `R$ ${value.toFixed(0)}`;
 }
 
-function TooltipFinanceiro({
+function formatInteiro(value: number): string {
+  if (!Number.isFinite(value)) return "0";
+  return new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 }).format(
+    value,
+  );
+}
+
+function TooltipEvolucao({
   active,
   payload,
   label,
 }: TooltipContentProps<ValueType, NameType>) {
   if (!active || !payload || payload.length === 0) return null;
 
-  // Recharts entrega payload na ordem das <Line>s. Buscar por dataKey e mais
-  // seguro do que confiar em indice.
   const ponto = (payload[0]?.payload ?? null) as Ponto | null;
   if (!ponto) return null;
 
@@ -109,9 +117,9 @@ function TooltipFinanceiro({
             className="inline-block h-2 w-2 rounded-full"
             style={{ background: CHART_COLOR_GOLD }}
           />
-          <span>Cobranca acumulada</span>
+          <span>Patrimonio localizado</span>
           <span className="ml-auto font-medium tabular-nums">
-            {formatBRL(ponto.cobrancaAcumulada)}
+            {formatBRL(ponto.patrimonioLocalizado)}
           </span>
         </div>
         <div
@@ -123,9 +131,9 @@ function TooltipFinanceiro({
             className="inline-block h-2 w-2 rounded-full"
             style={{ background: CHART_COLOR_SIGNAL }}
           />
-          <span>Valor recuperado</span>
+          <span>Penhoras efetivadas</span>
           <span className="ml-auto font-medium tabular-nums">
-            {formatBRL(ponto.valorRecuperado)}
+            {formatInteiro(ponto.penhorasEfetivadas)}
           </span>
         </div>
       </div>
@@ -133,38 +141,36 @@ function TooltipFinanceiro({
   );
 }
 
-export default function LinhaCobrancaRecuperacao({ dados }: Props) {
-  const pontos = useMemo<Ponto[]>(() => {
-    let acumulado = 0;
-    return dados.map((item) => {
-      acumulado += Number(item.cobranca) || 0;
-      return {
+export default function EvolucaoPatrimonioMensal({ dados }: Props) {
+  const pontos = useMemo<Ponto[]>(
+    () =>
+      dados.map((item) => ({
         mes: item.mes,
         rotuloMes: rotularMes(item.mes),
-        cobrancaAcumulada: acumulado,
-        valorRecuperado: Number(item.recuperacao) || 0,
-      };
-    });
-  }, [dados]);
+        patrimonioLocalizado: Number(item.patrimonioLocalizado) || 0,
+        penhorasEfetivadas: Number(item.penhorasEfetivadas) || 0,
+      })),
+    [dados],
+  );
 
   const semDados =
     pontos.length === 0 ||
     pontos.every(
-      (p) => p.cobrancaAcumulada === 0 && p.valorRecuperado === 0,
+      (p) => p.patrimonioLocalizado === 0 && p.penhorasEfetivadas === 0,
     );
 
   return (
     <DashboardCard
-      titulo="Cobranca x recuperacao"
-      descricao="Cobranca acumulada e valor recuperado nos ultimos 12 meses."
+      titulo="Evolucao mensal"
+      descricao="Patrimonio localizado e penhoras efetivadas nos ultimos 12 meses."
       accent="gold"
     >
       {semDados ? (
-        <div className="flex h-64 items-center justify-center text-sm text-[var(--color-ivory-66)]">
-          Sem movimentacao financeira no periodo.
+        <div className="flex h-72 items-center justify-center text-sm text-[var(--color-ivory-66)]">
+          Sem movimentacao no periodo.
         </div>
       ) : (
-        <div className="h-64 w-full">
+        <div className="h-72 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={pontos}
@@ -184,14 +190,25 @@ export default function LinhaCobrancaRecuperacao({ dados }: Props) {
                 minTickGap={16}
               />
               <YAxis
+                yAxisId="patrimonio"
                 tick={axisTickStyle}
                 axisLine={axisLineStyle}
                 tickLine={false}
                 tickFormatter={compactBRL}
                 width={64}
               />
+              <YAxis
+                yAxisId="penhoras"
+                orientation="right"
+                tick={axisTickStyle}
+                axisLine={axisLineStyle}
+                tickLine={false}
+                tickFormatter={formatInteiro}
+                allowDecimals={false}
+                width={40}
+              />
               <Tooltip
-                content={(props) => <TooltipFinanceiro {...props} />}
+                content={(props) => <TooltipEvolucao {...props} />}
                 cursor={{
                   stroke: "rgba(234, 231, 220, 0.13)",
                   strokeDasharray: "3 3",
@@ -211,9 +228,10 @@ export default function LinhaCobrancaRecuperacao({ dados }: Props) {
                 }}
               />
               <Line
+                yAxisId="patrimonio"
                 type="monotone"
-                dataKey="cobrancaAcumulada"
-                name="Cobranca acumulada"
+                dataKey="patrimonioLocalizado"
+                name="Patrimonio localizado"
                 stroke={CHART_COLOR_GOLD}
                 strokeWidth={2}
                 dot={{ r: 2.5, fill: CHART_COLOR_GOLD, strokeWidth: 0 }}
@@ -221,9 +239,10 @@ export default function LinhaCobrancaRecuperacao({ dados }: Props) {
                 isAnimationActive={false}
               />
               <Line
+                yAxisId="penhoras"
                 type="monotone"
-                dataKey="valorRecuperado"
-                name="Valor recuperado"
+                dataKey="penhorasEfetivadas"
+                name="Penhoras efetivadas"
                 stroke={CHART_COLOR_SIGNAL}
                 strokeWidth={2}
                 dot={{ r: 2.5, fill: CHART_COLOR_SIGNAL, strokeWidth: 0 }}
