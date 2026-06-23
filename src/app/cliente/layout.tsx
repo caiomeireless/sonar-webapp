@@ -33,10 +33,10 @@ export default async function ClienteLayout({ children }: { children: ReactNode 
         portal="cliente"
       />
       <div className="relative flex min-w-0 flex-1 flex-col">
-        {/* Grade interativa verde signal — pano de fundo da area principal */}
+        {/* Grade interativa verde signal — pano de fundo MUITO discreto. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+          className="pointer-events-none absolute inset-0 z-0 overflow-hidden opacity-60"
         >
           <InteractiveGrid />
         </div>

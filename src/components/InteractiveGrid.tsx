@@ -17,9 +17,9 @@ interface Props {
 }
 
 export function InteractiveGrid({
-  dotDistance = 32,
-  dotRadius = 1.6,
-  minProximity = 220,
+  dotDistance = 36,
+  dotRadius = 1.1,
+  minProximity = 150,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouseRef = useRef({ x: -1000, y: -1000 });
@@ -99,15 +99,16 @@ export function InteractiveGrid({
 
         if (d2 <= minProxSq) {
           const t = 1 - d2 / minProxSq; // 1 = colado no cursor; 0 = na borda do raio
-          // Brilho do ponto + linha até o cursor.
-          const alphaPonto = 0.35 + t * 0.65;
-          const alphaLinha = 0.06 + t * 0.45;
+          // Brilho discreto — fundo ambiente, não pode competir com os
+          // dados que estão por cima dos cards.
+          const alphaPonto = 0.06 + t * 0.18;
+          const alphaLinha = 0.015 + t * 0.05;
           ctx.fillStyle = `rgba(60, 255, 138, ${alphaPonto})`;
           ctx.strokeStyle = `rgba(60, 255, 138, ${alphaLinha})`;
-          ctx.lineWidth = 1;
+          ctx.lineWidth = 0.6;
 
           ctx.beginPath();
-          ctx.arc(p.x, p.y, dotRadius + t * 1.5, 0, Math.PI * 2);
+          ctx.arc(p.x, p.y, dotRadius + t * 0.5, 0, Math.PI * 2);
           ctx.fill();
 
           ctx.beginPath();
@@ -117,7 +118,7 @@ export function InteractiveGrid({
         } else {
           // Ponto neutro discreto — usa ivory bem fraco pra ficar elegante
           // tanto no tema escuro quanto no claro.
-          ctx.fillStyle = "rgba(234, 231, 220, 0.10)";
+          ctx.fillStyle = "rgba(234, 231, 220, 0.05)";
           ctx.beginPath();
           ctx.arc(p.x, p.y, dotRadius, 0, Math.PI * 2);
           ctx.fill();

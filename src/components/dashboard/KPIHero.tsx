@@ -29,10 +29,11 @@ type Props = {
   destaque?: boolean;
 };
 
+// Cores brand mantidas (signal/danger) — neutral usa fg-muted semântico.
 const DIRECTION_COLOR: Record<KPIDelta["direction"], string> = {
   up: "var(--color-signal)",
-  down: "#ff5b5b",
-  neutral: "var(--color-ivory-66)",
+  down: "var(--color-danger)",
+  neutral: "var(--color-fg-muted)",
 };
 
 const DIRECTION_ARROW: Record<KPIDelta["direction"], string> = {

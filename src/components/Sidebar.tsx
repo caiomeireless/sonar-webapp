@@ -92,7 +92,7 @@ export function Sidebar({ items, usuario, portal }: SidebarProps) {
           aria-label="Abrir menu"
           className="fixed left-4 top-4 z-40 inline-flex h-10 w-10 items-center
                      justify-center rounded-xl border border-[var(--color-line)]
-                     bg-[var(--color-surface-1)] text-[var(--color-ivory)]
+                     bg-[var(--color-surface-1)] text-[var(--color-fg)]
                      backdrop-blur-xl transition hover:bg-[var(--color-surface-2)]
                      md:hidden"
         >

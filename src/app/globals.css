@@ -69,6 +69,20 @@
   /* Borders */
   --border-hairline: 1px solid var(--color-ivory-12);
   --border-divider:  1px solid var(--color-ivory-22);
+
+  /* ============================================================
+     Semanticos — alias dos tokens brand para uso direto em CSS.
+     Permite var(--color-bg) / var(--color-fg-muted) dentro de
+     classes globais (.glass-card, .input, .selo). Tailwind tambem
+     gera bg-bg / text-fg-muted via @theme inline.
+     ============================================================ */
+  --color-bg:           var(--color-onyx);
+  --color-bg-2:         var(--color-onyx-2);
+  --color-fg:           var(--color-ivory);
+  --color-fg-muted:     var(--color-ivory-66);
+  --color-fg-faint:     var(--color-ivory-40);
+  --color-surface:      var(--color-surface-1);
+  /* --color-surface-2 e --color-line/-strong ja existem acima */
 }
 
 /* ============================================================
@@ -116,6 +130,14 @@
   --color-signal-soft:   rgba(60, 170, 92, 0.14);
   --color-signal-soft-2: rgba(60, 170, 92, 0.22);
 
+  /* Semanticos (light) — alias dos tokens brand pra uso em var() */
+  --color-bg:           var(--color-onyx);
+  --color-bg-2:         var(--color-onyx-2);
+  --color-fg:           var(--color-ivory);
+  --color-fg-muted:     var(--color-ivory-66);
+  --color-fg-faint:     var(--color-ivory-40);
+  --color-surface:      var(--color-surface-1);
+
   color-scheme: light;
 }
 
@@ -152,6 +174,14 @@
   --color-signal-12:     rgba(60, 255, 138, 0.07);
   --color-signal-soft:   rgba(60, 255, 138, 0.10);
   --color-signal-soft-2: rgba(60, 255, 138, 0.18);
+
+  /* Semanticos (dark) — alias dos tokens brand pra uso em var() */
+  --color-bg:           var(--color-onyx);
+  --color-bg-2:         var(--color-onyx-2);
+  --color-fg:           var(--color-ivory);
+  --color-fg-muted:     var(--color-ivory-66);
+  --color-fg-faint:     var(--color-ivory-40);
+  --color-surface:      var(--color-surface-1);
 
   color-scheme: dark;
 }

@@ -13,10 +13,12 @@ import { GlowSpot } from "./GlowSpot";
 export type DashboardCardAccent = "green" | "gold" | "neutral";
 export type DashboardCardVariant = "default" | "premium";
 
+// Cores brand mantidas literais nos bullets (assinatura visual intencional).
+// `neutral` usa o token semântico fg-muted (alias de ivory-66).
 const ACCENT_COLOR: Record<DashboardCardAccent, string> = {
   green: "var(--color-signal)",
   gold: "var(--color-gold)",
-  neutral: "var(--color-ivory-66)",
+  neutral: "var(--color-fg-muted)",
 };
 
 const ACCENT_GLOW: Record<DashboardCardAccent, string> = {
@@ -57,7 +59,7 @@ export function DashboardCard({
   return (
     <section
       className={[
-        "glass p-5 text-[var(--color-ivory)]",
+        "glass p-5 text-fg",
         interactive ? "glow-card" : "",
         className ?? "",
       ]
@@ -88,23 +90,23 @@ export function DashboardCard({
             <span className="group relative ml-1 inline-flex">
               <span
                 aria-label="Mais informações"
-                className="flex h-3.5 w-3.5 cursor-help items-center justify-center rounded-full border border-[var(--color-ivory-22)] text-[10px] font-medium text-[var(--color-ivory-66)] transition group-hover:border-[var(--color-ivory-66)] group-hover:text-[var(--color-ivory)]"
+                className="flex h-3.5 w-3.5 cursor-help items-center justify-center rounded-full border border-line text-[10px] font-medium text-fg-muted transition group-hover:border-line-strong group-hover:text-fg"
               >
                 ?
               </span>
-              <span className="pointer-events-none invisible absolute left-0 top-full z-50 mt-2 w-72 whitespace-pre-line rounded-lg border border-[var(--color-line-strong)] bg-[var(--color-surface-solid)] p-3 text-[11px] normal-case leading-relaxed tracking-normal text-[var(--color-ivory)] opacity-0 shadow-2xl transition group-hover:visible group-hover:opacity-100">
+              <span className="pointer-events-none invisible absolute left-0 top-full z-50 mt-2 w-72 whitespace-pre-line rounded-lg border border-line-strong bg-surface-solid p-3 text-[11px] normal-case leading-relaxed tracking-normal text-fg opacity-0 shadow-2xl transition group-hover:visible group-hover:opacity-100">
                 {info}
               </span>
             </span>
           ) : null}
         </div>
         {descricao ? (
-          <p className="mt-1 text-xs text-[var(--color-ivory-66)]">
+          <p className="mt-1 text-xs text-fg-muted">
             {descricao}
           </p>
         ) : null}
       </header>
-      <div className="relative text-[var(--color-ivory)]">{children}</div>
+      <div className="relative text-fg">{children}</div>
     </section>
   );
 }
