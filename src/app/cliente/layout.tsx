@@ -6,6 +6,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Eye } from "lucide-react";
 
+import { InteractiveGrid } from "@/components/InteractiveGrid";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
 import { NAV_CLIENTE } from "@/lib/nav-cliente";
@@ -31,7 +32,15 @@ export default async function ClienteLayout({ children }: { children: ReactNode 
         usuario={{ email, papel }}
         portal="cliente"
       />
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="relative flex min-w-0 flex-1 flex-col">
+        {/* Grade interativa verde signal — pano de fundo da area principal */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+        >
+          <InteractiveGrid />
+        </div>
+        <div className="relative z-10 flex min-w-0 flex-1 flex-col">
         {ehVisualizacao && (
           <div
             className="
@@ -54,6 +63,7 @@ export default async function ClienteLayout({ children }: { children: ReactNode 
         )}
         <TopBar usuario={{ email, papel }} portal="cliente" />
         <main className="flex-1">{children}</main>
+        </div>
       </div>
     </div>
   );

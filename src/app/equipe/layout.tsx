@@ -5,6 +5,7 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 
+import { InteractiveGrid } from "@/components/InteractiveGrid";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
 import { NAV_EQUIPE } from "@/lib/nav-equipe";
@@ -32,9 +33,18 @@ export default async function EquipeLayout({ children }: { children: ReactNode }
         usuario={{ email, papel }}
         portal="equipe"
       />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar usuario={{ email, papel }} portal="equipe" />
-        <main className="flex-1">{children}</main>
+      <div className="relative flex min-w-0 flex-1 flex-col">
+        {/* Grade interativa verde signal — pano de fundo da area principal */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+        >
+          <InteractiveGrid />
+        </div>
+        <div className="relative z-10 flex min-w-0 flex-1 flex-col">
+          <TopBar usuario={{ email, papel }} portal="equipe" />
+          <main className="flex-1">{children}</main>
+        </div>
       </div>
     </div>
   );
