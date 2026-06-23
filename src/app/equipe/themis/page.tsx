@@ -67,15 +67,8 @@ export default async function ThemisPage({ searchParams }: Props) {
 
   return (
     <main className="relative mx-auto max-w-[1100px] px-6 py-16 sm:px-10">
-      {/* Glow de fundo */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -top-32 left-1/2 h-[420px] w-[900px] -translate-x-1/2 opacity-40"
-        style={{
-          background:
-            "radial-gradient(ellipse at center, rgba(201,162,74,0.14), transparent 65%)",
-        }}
-      />
+      {/* Glow de fundo gold removido — agora o AetherBackground global
+          do layout vale pra todas as páginas (uniformidade visual). */}
 
       {/* Cabeçalho */}
       <header className="title-shield relative">

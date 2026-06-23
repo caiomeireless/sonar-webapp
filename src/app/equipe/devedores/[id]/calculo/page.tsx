@@ -44,14 +44,7 @@ export default async function CalculoPage({ params, searchParams }: Props) {
     <main>
       {/* ============ HEADER ============ */}
       <section className="relative overflow-hidden">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -top-32 left-1/2 h-[420px] w-[900px] -translate-x-1/2 opacity-50"
-          style={{
-            background:
-              "radial-gradient(ellipse at center, rgba(201,162,74,0.16), transparent 65%)",
-          }}
-        />
+        {/* Glow gold removido — fundo unico (AetherBackground do layout). */}
         <div className="relative mx-auto max-w-[1100px] px-6 py-12 sm:px-10">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <Link
