@@ -227,7 +227,7 @@ function AvatarMenu({
         type="button"
         onClick={() => setAberto((a) => !a)}
         aria-haspopup="menu"
-        aria-expanded={aberto ? "true" : "false"}
+        aria-expanded={aberto}
         className="
           inline-flex items-center gap-2 rounded-full border border-[var(--color-line)]
           bg-[var(--color-surface-2)] py-1 pl-1 pr-2 transition
