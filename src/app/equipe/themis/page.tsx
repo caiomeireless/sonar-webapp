@@ -6,6 +6,7 @@
 // via componente <AcoesBuscaCardThemis>. Cada um abre modal de confirmação
 // e depois redireciona pra animação adaptada ao modo escolhido.
 import { redirect } from "next/navigation";
+import { Clock, FileText, Scale } from "lucide-react";
 import { listarProcessosThemis, type ProcessoThemis } from "@/lib/casos";
 import { perfilLogado } from "@/lib/perfis-server";
 import { ehCliente } from "@/lib/perfis";
@@ -192,93 +193,152 @@ function CardProcesso({
   linkBase: string;
 }) {
   const status = formatStatus(processo.status);
+  const tipoLabel = processo.devedor.tipo === "PF" ? "PF" : "PJ";
+  const docLabel = processo.devedor.tipo === "PF" ? "CPF" : "CNPJ";
 
   return (
     <SpotlightCard className="p-7">
-      {/* Top bar */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-        <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-ivory-66)]">
-          Recebido {formatTempoRelativo(processo.recebido_em)} ·{" "}
-          <span className="text-ivory">{processo.credor.nome}</span>
+      {/* === BLOCO 1: IDENTIFICAÇÃO DO DEVEDOR === */}
+      <header>
+        <span className="font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-signal)]">
+          Processo Themis
         </span>
-        <span
-          className="self-start rounded-full border px-3 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em]"
-          style={{ borderColor: status.color, color: status.color }}
-        >
-          {status.label}
-        </span>
-      </div>
-
-      {/* Número processo */}
-      <p className="mt-4 font-mono text-xl text-[var(--color-gold)]">
-        {processo.numero_processo ?? "Sem número de processo"}
-      </p>
-
-      {/* Devedor */}
-      <h3 className="mt-2 font-serif text-2xl leading-tight text-ivory">
-        {processo.devedor.nome}
-      </h3>
-      <p className="mt-1 font-mono text-xs text-[var(--color-ivory-66)]">
-        {processo.devedor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"}{" "}
-        · {processo.devedor.documento}
-      </p>
-
-      {/* Valor + status do rastreamento */}
-      <div className="mt-5 grid gap-4 sm:grid-cols-2">
-        <div>
-          <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-ivory-66)]">
-            Crédito
+        <h3 className="mt-3 font-serif text-[24px] leading-[1.15] text-[var(--color-gold)]">
+          {processo.devedor.nome}
+        </h3>
+        <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[var(--color-ivory-22)] bg-[var(--color-surface-2)]/60 px-3 py-1.5">
+          <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-signal)]">
+            {tipoLabel}
           </span>
-          <p className="mt-1 font-serif text-3xl text-[var(--color-gold)]">
+          <span className="h-3 w-px bg-[var(--color-ivory-22)]" />
+          <span className="font-mono text-[12px] text-ivory">
+            {docLabel} {processo.devedor.documento}
+          </span>
+        </div>
+      </header>
+
+      {/* === DIVIDER === */}
+      <div className="my-6 h-px bg-[var(--color-ivory-12)]" />
+
+      {/* === BLOCO 2: PROCESSO + CRÉDITO === */}
+      <div>
+        <p className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+          <FileText className="h-3 w-3" />
+          Processo
+        </p>
+        <p className="mt-2 break-all font-mono text-[15px] text-[var(--color-gold)]">
+          {processo.numero_processo ?? "Sem número de processo"}
+        </p>
+        <p className="mt-3 font-mono text-[13px] text-ivory">
+          <span className="text-[var(--color-ivory-66)]">Crédito:</span>{" "}
+          <span className="tabular-nums">
             {processo.valor_credito_brl !== null
               ? formatBRL(processo.valor_credito_brl)
               : "—"}
+          </span>
+        </p>
+      </div>
+
+      {/* === DIVIDER === */}
+      <div className="my-6 h-px bg-[var(--color-ivory-12)]" />
+
+      {/* === BLOCO 3: CREDOR + ADVOGADO === */}
+      <div className="space-y-3">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+            Credor
+          </p>
+          <p className="mt-2 font-medium text-[15px] text-ivory">
+            {processo.credor.nome}
           </p>
         </div>
         <div>
-          <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-ivory-66)]">
-            Rastreamento
-          </span>
-          <p className="mt-1 font-mono text-sm text-ivory">
-            {processo.ja_rastreado
-              ? `${processo.total_bens} ${
-                  processo.total_bens === 1
-                    ? "bem já localizado"
-                    : "bens já localizados"
-                }`
-              : "Aguardando primeira busca"}
+          <p className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+            <Scale className="h-3 w-3" />
+            Advogado responsável
           </p>
+          {processo.responsavel_email ? (
+            <p className="mt-2 font-mono text-[13px] text-ivory">
+              {processo.responsavel_email}
+            </p>
+          ) : (
+            <p className="mt-2 font-mono text-[13px] italic text-[var(--color-ivory-66)]">
+              Sem responsável atribuído
+            </p>
+          )}
         </div>
       </div>
 
+      {/* === DIVIDER === */}
+      <div className="my-6 h-px bg-[var(--color-ivory-12)]" />
+
+      {/* === BLOCO 4: STATS DE RASTREAMENTO === */}
+      <div className="flex items-end justify-between gap-4">
+        {processo.ja_rastreado ? (
+          <>
+            <div>
+              <p className="font-serif text-4xl leading-none text-[var(--color-gold)]">
+                {processo.total_bens}
+              </p>
+              <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+                {processo.total_bens === 1 ? "Bem Encontrado" : "Bens Encontrados"}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+                Rastreamento
+              </p>
+              <p className="mt-1 font-mono text-[14px] text-[var(--color-signal)]">
+                Concluído
+              </p>
+            </div>
+          </>
+        ) : (
+          <div>
+            <p className="font-serif text-2xl leading-none text-[var(--color-ivory-88)]">
+              Aguardando Busca
+            </p>
+            <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+              Pendente · Nenhum Bem Localizado
+            </p>
+          </div>
+        )}
+      </div>
+
       {processo.observacoes ? (
-        <p className="mt-4 border-l-2 border-[var(--color-ivory-22)] pl-3 font-mono text-xs italic text-[var(--color-ivory-66)]">
+        <p className="mt-6 border-l-2 border-[var(--color-ivory-22)] pl-3 font-mono text-[13px] italic text-[var(--color-ivory-88)]">
           {processo.observacoes}
         </p>
       ) : null}
 
-      {/* Advogado responsável */}
-      <div className="mt-5 border-t border-[var(--color-ivory-12)] pt-4">
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
-          Adv. responsável:{" "}
-          {processo.responsavel_email ? (
-            <span className="text-[var(--color-ivory-88)] normal-case tracking-normal">
-              {processo.responsavel_email}
-            </span>
-          ) : (
-            <span className="text-[var(--color-ivory-66)] italic normal-case tracking-normal">
-              sem responsável atribuído
-            </span>
-          )}
-        </span>
-      </div>
+      {/* === BLOCO 5: FOOTER (status + tempo) === */}
+      <div className="mt-6 space-y-3 border-t border-[var(--color-ivory-12)] pt-4">
+        <div className="flex items-center justify-between">
+          <span
+            className="inline-flex rounded-full border px-3 py-1 font-mono text-[12px] uppercase tracking-[0.18em]"
+            style={{
+              borderColor: `${status.color}66`,
+              backgroundColor: `${status.color}14`,
+              color: status.color,
+            }}
+          >
+            {status.label}
+          </span>
+          <span className="inline-flex items-center gap-1.5 font-mono text-[12px] text-[var(--color-ivory-66)]">
+            <Clock className="h-3 w-3" />
+            Recebido {formatTempoRelativo(processo.recebido_em)}
+          </span>
+        </div>
 
-      {/* Ações: 3 modos (Combo Lead, Combo Doc, Individual) */}
-      <AcoesBuscaCardThemis
-        devedorId={processo.devedor.id}
-        eu={eu ?? ""}
-        jaRastreado={processo.ja_rastreado}
-      />
+        {/* Ações: 3 modos (Combo Lead, Combo Doc, Individual) — preservado */}
+        <div className="-mx-1 pt-1">
+          <AcoesBuscaCardThemis
+            devedorId={processo.devedor.id}
+            eu={eu ?? ""}
+            jaRastreado={processo.ja_rastreado}
+          />
+        </div>
+      </div>
     </SpotlightCard>
   );
 }
