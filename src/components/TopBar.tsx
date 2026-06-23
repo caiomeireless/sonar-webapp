@@ -88,21 +88,29 @@ export function TopBar({
   const inicial = (usuario.email[0] || "?").toUpperCase();
 
   return (
-    <header className="relative sticky top-0 z-20 border-b border-[var(--color-line)] bg-[var(--color-bg-2)]/70 backdrop-blur-xl">
-      {/* Faixa de quadriculado verde — mesma altura/estilo da faixa do logo
-          na sidebar, ficam alinhadas na horizontal. */}
+    <header className="relative sticky top-0 z-20 overflow-hidden border-b border-[var(--color-line)] bg-onyx">
+      {/* Quadriculado verde com fade diagonal — EXATAMENTE igual à faixa
+          superior da landing page (page.tsx). Forte no canto superior
+          esquerdo, some até transparente no canto inferior direito. */}
       <div
-        className="bg-grid-strong animate-grid-pulse absolute inset-0 overflow-hidden opacity-80"
+        className="bg-grid-strong animate-grid-pulse absolute inset-0"
+        style={{
+          maskImage:
+            "linear-gradient(135deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.35) 55%, transparent 100%)",
+          WebkitMaskImage:
+            "linear-gradient(135deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.35) 55%, transparent 100%)",
+        }}
         aria-hidden="true"
       />
-      {/* Vinheta radial signal sutil pra dar peso ao centro */}
+      {/* Vinheta lateral: escurece o quadriculado nas bordas esquerda e
+          direita (mesma da landing, mantém peso visual nas pontas). */}
       <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 overflow-hidden"
+        className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse at center, rgba(60,255,138,0.10), transparent 70%)",
+            "linear-gradient(90deg, rgba(10,12,11,0.85) 0%, transparent 18%, transparent 82%, rgba(10,12,11,0.85) 100%)",
         }}
+        aria-hidden="true"
       />
 
       <div className="relative flex min-h-[122px] items-center px-6 sm:px-10">
