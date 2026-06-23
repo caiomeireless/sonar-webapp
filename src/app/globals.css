@@ -171,9 +171,12 @@
 
   --color-ivory-12:    rgba(232, 228, 214, 0.07);
   --color-ivory-22:    rgba(232, 228, 214, 0.13);
-  --color-ivory-40:    rgba(232, 228, 214, 0.30);
-  --color-ivory-66:    rgba(232, 228, 214, 0.40);
-  --color-ivory-88:    rgba(232, 228, 214, 0.53);
+  /* TAUPE solido — mesma escala do bloco :root (eliminado o
+     translucido antigo que SOBRESCREVIA os tokens taupe via
+     [data-theme="dark"], fazendo o cinza voltar a aparecer em prod). */
+  --color-ivory-40:    #8E866F;
+  --color-ivory-66:    #B5AB91;
+  --color-ivory-88:    #D2C9B0;
 
   --color-signal-06:     rgba(60, 255, 138, 0.024);
   --color-signal-12:     rgba(60, 255, 138, 0.07);
