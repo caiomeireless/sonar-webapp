@@ -89,11 +89,17 @@ export default function MapaDistribuicaoBens({ distribuicao }: Props) {
       accent="green"
     >
       <div
-        className="grid gap-5 lg:grid-cols-[1fr_240px]"
+        className="relative grid gap-5 lg:grid-cols-[1fr_240px]"
         onMouseLeave={() => setAtivo(null)}
       >
+        {/* Fundo preto opaco — protege a leitura do mapa do AetherBackground
+            (partículas verdes do layout passariam por cima sem isso). */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -inset-3 rounded-2xl bg-[var(--color-onyx)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+        />
         {/* ===== Mapa ===== */}
-        <div className="relative">
+        <div className="relative z-10">
           <svg
             viewBox={BR_VIEWBOX}
             className="h-auto w-full"
@@ -188,7 +194,7 @@ export default function MapaDistribuicaoBens({ distribuicao }: Props) {
         </div>
 
         {/* ===== Painel lateral ===== */}
-        <div className="flex flex-col gap-3">
+        <div className="relative z-10 flex flex-col gap-3">
           {detalhe ? (
             <div className="rounded-xl border border-[var(--color-signal)]/30 bg-[rgba(60,255,138,0.06)] p-4">
               <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
