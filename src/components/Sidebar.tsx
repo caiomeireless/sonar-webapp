@@ -273,7 +273,17 @@ function NavLinkItem({ item }: { item: SidebarItem }) {
         }
       />
 
-      <span className="inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center">
+      {/* Caixinha de vidro envolvendo o ícone — sutil quando inativo,
+          forte quando ativo (signal-soft sobre signal-soft-2). */}
+      <span
+        className={
+          "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg " +
+          "border backdrop-blur-md transition " +
+          (ativo
+            ? "border-[var(--color-signal-soft-2)] bg-[var(--color-signal-soft)] text-[var(--color-signal)] shadow-[0_0_12px_rgba(60,255,138,0.25)]"
+            : "border-[var(--color-line)] bg-[var(--color-surface-2)] text-[var(--color-ivory-88)] group-hover:border-[var(--color-signal-soft-2)] group-hover:text-[var(--color-ivory)]")
+        }
+      >
         {item.icon}
       </span>
 
