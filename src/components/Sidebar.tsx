@@ -232,11 +232,13 @@ function SidebarPanel({
         ))}
       </nav>
 
-      {/* === BLOCO INFERIOR — abaixo do nav ate o fim ===
-          Recebe o MESMO quadriculado verde da faixa do logo. O cinza dos
-          cards/botoes individuais (usuario, ThemeToggle, Sair) e' mantido
-          porque cada um tem seu proprio bg-surface-2 sobre o quadriculado. */}
-      <div className="relative -mx-4 -mb-6 mt-auto flex flex-col overflow-hidden">
+      {/* === BLOCO INFERIOR — comeca LOGO abaixo do nav (quase grudado) e
+          vai ate o fim. Recebe o MESMO quadriculado verde da faixa do
+          logo. flex-1 faz o bloco capturar TODO o espaco apos o nav; o
+          spacer interno empurra o footer pra base. O cinza dos
+          cards/botoes individuais e' mantido porque cada um tem seu
+          proprio bg-surface-2 sobre o quadriculado. */}
+      <div className="relative -mx-4 -mb-6 mt-3 flex flex-1 flex-col overflow-hidden">
         {/* Camada do grid quadriculado animado */}
         <div
           className="bg-grid-strong animate-grid-pulse absolute inset-0"
