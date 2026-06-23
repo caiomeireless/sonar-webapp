@@ -555,7 +555,7 @@ export default function LandingPage() {
               agora se transforma na rápida geração de uma ficha pronta com todos
               os bens do devedor que serão utilizados para fundamentar os pedidos
               judiciais de penhora.{" "}
-              <span className="text-zinc-300 underline decoration-[var(--color-signal)] decoration-2 underline-offset-4">
+              <span className="text-[var(--color-ivory-88)] underline decoration-[var(--color-signal)] decoration-2 underline-offset-4">
                 Esse é um diferencial que só os clientes do{" "}
                 <span className="font-serif text-2xl font-medium tracking-tight text-[var(--color-gold)]">
                   Battaglia <span className="italic text-white">&amp;</span> Pedrosa

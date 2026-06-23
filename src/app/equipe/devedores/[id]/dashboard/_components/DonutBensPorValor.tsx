@@ -78,7 +78,7 @@ function DonutTooltip({
       <div style={tooltipLabelStyle}>{datum.name}</div>
       <div style={tooltipItemStyle}>
         <strong>{formatBRL(datum.value)}</strong>
-        <span style={{ color: "rgba(234, 231, 220, 0.40)", marginLeft: 6 }}>
+        <span style={{ color: "#8E866F", marginLeft: 6 }}>
           {datum.qtd} {datum.qtd === 1 ? "item" : "itens"}
         </span>
       </div>

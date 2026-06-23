@@ -82,7 +82,7 @@ function DonutTooltip({
         <strong>
           {datum.value} {datum.value === 1 ? "bem" : "bens"}
         </strong>
-        <span style={{ color: "rgba(234, 231, 220, 0.40)", marginLeft: 6 }}>
+        <span style={{ color: "#8E866F", marginLeft: 6 }}>
           {formatBRL(datum.valorBrl)}
         </span>
       </div>

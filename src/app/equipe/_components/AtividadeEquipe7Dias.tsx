@@ -121,7 +121,7 @@ function CustomTooltip({ active, payload, label }: TooltipProps) {
       <div
         className="mt-2 flex items-center justify-between border-t pt-1.5"
         style={{
-          borderColor: "rgba(234, 231, 220, 0.13)",
+          borderColor: "rgba(232, 228, 214, 0.13)", // var(--color-ivory-22)
           ...tooltipItemStyle,
         }}
       >

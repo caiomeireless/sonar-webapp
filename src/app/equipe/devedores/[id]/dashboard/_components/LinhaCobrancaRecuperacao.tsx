@@ -193,7 +193,7 @@ export default function LinhaCobrancaRecuperacao({ dados }: Props) {
               <Tooltip
                 content={(props) => <TooltipFinanceiro {...props} />}
                 cursor={{
-                  stroke: "rgba(234, 231, 220, 0.13)",
+                  stroke: "rgba(232, 228, 214, 0.13)", // var(--color-ivory-22)
                   strokeDasharray: "3 3",
                 }}
               />
@@ -207,7 +207,7 @@ export default function LinhaCobrancaRecuperacao({ dados }: Props) {
                   fontFamily:
                     "var(--font-open-sans), system-ui, sans-serif",
                   fontSize: 11,
-                  color: "rgba(234, 231, 220, 0.66)",
+                  color: "#B5AB91", // var(--color-ivory-66) — taupe fg-muted
                 }}
               />
               <Line

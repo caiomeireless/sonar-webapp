@@ -62,7 +62,7 @@ export const CHART_PALETTE_ACCENT: readonly string[] = [
   CHART_COLOR_SIGNAL,
   CHART_COLOR_SIGNAL_STRONG,
   "rgba(60, 255, 138, 0.5)",
-  "rgba(232, 228, 214, 0.40)", // ivory-66
+  "rgba(232, 228, 214, 0.40)", // ivory translúcido (paleta de série, não texto)
   "rgba(60, 255, 138, 0.25)",
 ];
 
@@ -107,53 +107,54 @@ export const AREA_GRADIENT_SIGNAL = {
 // GRID + EIXOS
 // ============================================================
 
-// Grid em signal suave (espelho gold suave do BP). Padrão `strokeDasharray="3 3"`.
-export const gridStroke = "rgba(60, 255, 138, 0.10)";
+// Grid em ivory-22 taupe (token --color-ivory-22 do globals.css dark).
+// Padrão `strokeDasharray="3 3"`.
+export const gridStroke = "rgba(232, 228, 214, 0.13)";
 
 // Recharts 3.x exige TextProps (não CSSProperties) para `tick`, e SVGProps
-// para `axisLine`. Mantemos os mesmos valores visuais, só trocamos os types.
+// para `axisLine`. Eixos usam taupe khaki (var(--color-ivory-40) = #8E866F).
 export const axisTickStyle: TextProps = {
-  fill: "rgba(234, 231, 220, 0.40)", // var(--color-ivory-66) literal pra Recharts
+  fill: "#8E866F", // var(--color-ivory-40) — caption/meta taupe
   fontSize: 11,
   fontFamily: "var(--font-manrope), system-ui, sans-serif",
 };
 
 // Variante p/ YAxis categórico grosso (espelho BP).
 export const axisTickStyleLarge: TextProps = {
-  fill: "rgba(234, 231, 220, 0.40)",
+  fill: "#8E866F", // var(--color-ivory-40)
   fontSize: 12,
   fontFamily: "var(--font-manrope), system-ui, sans-serif",
 };
 
 export const axisLineStyle: SVGProps<SVGLineElement> = {
-  stroke: "rgba(234, 231, 220, 0.13)",
+  stroke: "rgba(232, 228, 214, 0.13)", // var(--color-ivory-22)
 };
 
 // ============================================================
 // TOOLTIP
 // ============================================================
 
-// Onyx 96% + borda signal 30% + radius 10 + sombra mais forte (espelho TIP do BP).
+// Onyx 95% + borda line taupe + radius 10 + sombra forte. Texto em ivory primário.
 export const tooltipContentStyle: CSSProperties = {
-  background: "rgba(10, 12, 11, 0.96)", // var(--color-onyx) com alpha
-  border: "1px solid rgba(60, 255, 138, 0.30)", // signal soft (replicar borda gold BP)
+  background: "rgba(20, 25, 22, 0.95)", // onyx escuro com alpha
+  border: "1px solid rgba(232, 228, 214, 0.09)", // var(--color-line)
   borderRadius: 10,
   padding: "8px 12px",
   fontFamily: "var(--font-manrope), system-ui, sans-serif",
   fontSize: 12,
-  color: "#EAE7DC",
+  color: "#E8E4D6", // var(--color-ivory)
   boxShadow: "0 4px 16px rgba(0, 0, 0, 0.45)",
 };
 
 export const tooltipItemStyle: CSSProperties = {
-  color: "#EAE7DC",
+  color: "#E8E4D6", // var(--color-ivory)
   fontFamily: "var(--font-manrope), system-ui, sans-serif",
   fontSize: 12,
   padding: 0,
 };
 
 export const tooltipLabelStyle: CSSProperties = {
-  color: "rgba(234, 231, 220, 0.40)",
+  color: "#8E866F", // var(--color-ivory-40) — caption taupe
   fontFamily: "var(--font-jetbrains), ui-monospace, monospace",
   fontSize: 10,
   letterSpacing: "0.08em",
