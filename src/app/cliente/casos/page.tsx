@@ -5,7 +5,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { listarCasosDoCliente, type CasoListagem } from "@/lib/casos";
 import { perfilLogado } from "@/lib/perfis-server";
-import { devEuFromParam } from "@/lib/dev-auth";
+import { previewEuFromParam } from "@/lib/dev-auth";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { formatBRL, formatStatus, formatTempoRelativo } from "@/lib/format";
 
@@ -16,7 +16,7 @@ type Props = {
 export default async function CasosClientePage({ searchParams }: Props) {
   const params = (await searchParams) ?? {};
   const perfil = await perfilLogado();
-  const eu = devEuFromParam(params.eu) ?? perfil?.email ?? null;
+  const eu = previewEuFromParam(params.eu, perfil) ?? perfil?.email ?? null;
 
   if (!eu) redirect("/login");
 

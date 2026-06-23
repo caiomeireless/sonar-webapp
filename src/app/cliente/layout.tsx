@@ -2,7 +2,9 @@
 // monta o shell com Sidebar lateral (Meus casos / Preferencias). O
 // conteudo da pagina vai dentro do <main>.
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Eye } from "lucide-react";
 
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
@@ -16,8 +18,11 @@ export default async function ClienteLayout({ children }: { children: ReactNode 
     redirect("/login");
   }
 
-  const email = perfil?.email ?? "Cliente Demonstracao";
+  const email = perfil?.email ?? "Cliente Demonstração";
   const papel = (perfil?.papel ?? "cliente").toUpperCase();
+
+  // Admin/sócio que entrou no portal cliente está em modo visualização.
+  const ehVisualizacao = perfil?.papel === "admin" || perfil?.papel === "socio";
 
   return (
     <div className="flex min-h-svh bg-onyx text-ivory">
@@ -27,6 +32,26 @@ export default async function ClienteLayout({ children }: { children: ReactNode 
         portal="cliente"
       />
       <div className="flex min-w-0 flex-1 flex-col">
+        {ehVisualizacao && (
+          <div
+            className="
+              flex items-center justify-between gap-3 border-b border-[var(--color-gold)]/40
+              bg-[var(--color-gold)]/10 px-6 py-2 text-xs text-[var(--color-gold)] sm:px-10
+            "
+          >
+            <span className="inline-flex items-center gap-2">
+              <Eye className="h-3.5 w-3.5" aria-hidden="true" />
+              <strong className="font-medium">Modo visualização —</strong>
+              você está vendo a plataforma como o cliente vê.
+            </span>
+            <Link
+              href="/equipe"
+              className="font-mono text-[10px] uppercase tracking-[0.18em] underline-offset-2 hover:underline"
+            >
+              ← Voltar para a equipe
+            </Link>
+          </div>
+        )}
         <TopBar usuario={{ email, papel }} portal="cliente" />
         <main className="flex-1">{children}</main>
       </div>

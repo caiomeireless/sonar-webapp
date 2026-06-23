@@ -14,3 +14,19 @@ export function devEuFromParam(
   if (!value) return undefined;
   return Array.isArray(value) ? value[0] : value;
 }
+
+// Permite admin/sócio "visualizar como cliente" em prod. Aceita ?eu= se:
+// - estamos em dev (qualquer perfil), OU
+// - perfil logado tem papel admin ou sócio (visualização autorizada).
+import type { Perfil } from "./perfis";
+
+export function previewEuFromParam(
+  value: string | string[] | undefined,
+  perfil: Perfil | null,
+): string | undefined {
+  if (!value) return undefined;
+  const email = Array.isArray(value) ? value[0] : value;
+  if (process.env.NODE_ENV !== "production") return email;
+  if (perfil?.papel === "admin" || perfil?.papel === "socio") return email;
+  return undefined;
+}

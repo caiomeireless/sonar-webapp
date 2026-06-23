@@ -12,7 +12,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Bell, ChevronDown, LogOut, RefreshCw } from "lucide-react";
+import Link from "next/link";
+import { Bell, ChevronDown, Eye, LogOut, RefreshCw } from "lucide-react";
 
 type Usuario = { email: string; papel: string };
 
@@ -190,7 +191,7 @@ function AvatarMenu({
         type="button"
         onClick={() => setAberto((a) => !a)}
         aria-haspopup="menu"
-        aria-expanded={aberto}
+        aria-expanded={aberto ? "true" : "false"}
         className="
           inline-flex items-center gap-2 rounded-full border border-[var(--color-line)]
           bg-[var(--color-surface-2)] py-1 pl-1 pr-2 transition
@@ -214,7 +215,6 @@ function AvatarMenu({
 
       {aberto && (
         <div
-          role="menu"
           className="
             absolute right-0 mt-2 w-[260px] overflow-hidden rounded-xl border
             border-[var(--color-line)] bg-[var(--color-surface-solid)] shadow-2xl
@@ -228,6 +228,24 @@ function AvatarMenu({
               {usuario.papel}
             </p>
           </div>
+
+          {/* Admin/Sócio: pode entrar na visão do cliente demo (banner mostra
+              que está em modo visualização). */}
+          {(usuario.papel === "ADMIN" || usuario.papel === "SOCIO") && (
+            <Link
+              href="/cliente/casos?eu=cliente.demo@battaglia.com.br"
+              className="
+                flex items-center gap-2 border-b border-[var(--color-line)]
+                px-4 py-2.5 text-sm text-[var(--color-ivory-88)] transition
+                hover:bg-[var(--color-surface-2)] hover:text-[var(--color-signal)]
+              "
+              onClick={() => setAberto(false)}
+            >
+              <Eye className="h-4 w-4" aria-hidden="true" />
+              Visualizar como cliente
+            </Link>
+          )}
+
           <form action="/auth/signout" method="post">
             <button
               type="submit"
