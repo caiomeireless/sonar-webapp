@@ -925,3 +925,21 @@ body {
   font-size: 0.875rem;
   color: var(--color-fg);
 }
+
+/* Glow neon nos graficos — aplica drop-shadow em todas as formas
+   pintadas (slices do donut, barras, lines). Cada Cell mantem sua
+   cor solida; o glow tira o "achatado" e da efeito neon brilhante. */
+.chart-neon-glow .recharts-pie-sector path,
+.chart-neon-glow .recharts-bar-rectangle path,
+.chart-neon-glow .recharts-rectangle,
+.chart-neon-glow .recharts-line-curve {
+  filter:
+    drop-shadow(0 0 3px rgba(255, 255, 255, 0.18))
+    drop-shadow(0 0 6px rgba(60, 255, 138, 0.25));
+}
+
+/* Variante mais discreta pra graficos pequenos */
+.chart-neon-soft .recharts-pie-sector path,
+.chart-neon-soft .recharts-bar-rectangle path {
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.18));
+}

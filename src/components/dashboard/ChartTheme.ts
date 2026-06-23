@@ -19,6 +19,13 @@
 //   - Donut: cornerRadius 6 + paddingAngle 2 (quando >1 fatia).
 //   - Recharts NÃO resolve `var(--...)` em `fill`/`stroke`: usar literais.
 //   - `num(v)` formata pt-BR — usar em todo formatter de Tooltip e LabelList.
+//
+// NEON (a pedido do Caio 2026-06-23):
+//   - As paletas TIPO_BEM_COLORS e CHART_PALETTE_PASTEL agora usam versões
+//     NEON BRILHANTE das mesmas cores (mantendo o tom de cada uma, só
+//     saturando pro aspecto neon).
+//   - CHART_COLOR_GOLD original (#C9A24A) foi preservado — quem precisa do
+//     gold neon usa CHART_COLOR_GOLD_NEON (#FFD93D).
 
 import type { CSSProperties, SVGProps } from "react";
 import type { TextProps } from "recharts";
@@ -30,6 +37,7 @@ import type { TextProps } from "recharts";
 export const CHART_COLOR_SIGNAL = "#3CFF8A"; // verde Sonar — accent principal
 export const CHART_COLOR_SIGNAL_STRONG = "#7CFFB0"; // signal claro — hover/grad
 export const CHART_COLOR_GOLD = "#C9A24A"; // ouro BP — meta/target (secundário)
+export const CHART_COLOR_GOLD_NEON = "#FFD93D"; // ouro neon — só pra TIPO_BEM_COLORS.imovel (a pedido do Caio 2026-06-23)
 export const CHART_COLOR_IVORY = "#EAE7DC"; // marfim — neutro texto/serie
 export const CHART_COLOR_NEGATIVE = "#FF5B5B"; // vermelho — negativos
 export const CHART_COLOR_WARN = "#F4C542"; // amber — parcial/aguardando
@@ -45,16 +53,16 @@ export const CHART_COLORS: readonly string[] = [
 ];
 
 // Paleta pastel multi-tom — usar em donut com várias fatias.
-// Espelho do PALETA_PASTEL do BP (signal claro substitui o gold-strong).
+// Espelho do PALETA_PASTEL do BP, agora em versão NEON (Caio 2026-06-23).
 export const CHART_PALETTE_PASTEL: readonly string[] = [
-  "#7CFFB0", // signal claro (1a posição)
-  "#9ED8FF", // azul suave
-  "#A8E4B0", // verde suave alt
-  "#E8A3A3", // rosa suave
-  "#C0A3D0", // lilás
-  "#8FC1BD", // teal
-  "#E8C39A", // pêssego
-  "#B3B8C4", // ardósia
+  "#00FFA3", // verde neon brilhante
+  "#00D4FF", // azul neon
+  "#39FF14", // lima neon
+  "#FF3366", // rosa neon
+  "#B967FF", // lilás neon
+  "#00F5D4", // teal neon
+  "#FFB833", // âmbar neon
+  "#7DF9FF", // cyan claro neon
 ];
 
 // Paleta accent — rankings com 1-2 séries destacadas.
@@ -66,14 +74,14 @@ export const CHART_PALETTE_ACCENT: readonly string[] = [
   "rgba(60, 255, 138, 0.25)",
 ];
 
-// Paleta de tipos de bem — alinhada ao dossiê.
+// Paleta de tipos de bem — alinhada ao dossiê, versão NEON (Caio 2026-06-23).
 export const TIPO_BEM_COLORS: Record<string, string> = {
-  veiculo: "#9ED8FF",
-  imovel: CHART_COLOR_GOLD,
-  empresa: "#B08CFF",
-  processo_credito: CHART_COLOR_SIGNAL,
-  endereco: "#FF8A3D",
-  vinculo: "#FF6B9D",
+  veiculo: "#00D4FF", // cyan neon
+  imovel: CHART_COLOR_GOLD_NEON, // #FFD93D — amarelo dourado neon vibrante
+  empresa: "#B967FF", // purple neon
+  processo_credito: CHART_COLOR_SIGNAL, // #3CFF8A — já é neon
+  endereco: "#FF6B00", // laranja neon
+  vinculo: "#FF1F8F", // pink neon
 };
 
 // ============================================================

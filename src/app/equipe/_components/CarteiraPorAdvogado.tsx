@@ -130,7 +130,7 @@ export default function CarteiraPorAdvogado({ itens }: Props) {
       descricao="Patrimonio sob responsabilidade de cada membro da equipe"
       accent="gold"
     >
-      <div style={{ height: alturaPx }} className="w-full">
+      <div style={{ height: alturaPx }} className="chart-neon-glow w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}

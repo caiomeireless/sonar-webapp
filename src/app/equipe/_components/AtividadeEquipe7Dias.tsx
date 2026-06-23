@@ -146,7 +146,7 @@ export default function AtividadeEquipe7Dias({ dados }: Props) {
           Nenhuma medida registrada nos últimos 7 dias.
         </p>
       ) : (
-        <div className="h-72 w-full">
+        <div className="chart-neon-glow h-72 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={linhas}

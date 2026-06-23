@@ -126,7 +126,7 @@ export default function DonutBensPorValor({ dados }: Props) {
     >
       <div className="grid grid-cols-1 gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-center">
         {/* DONUT */}
-        <div className="relative h-64 w-full">
+        <div className="chart-neon-glow relative h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie

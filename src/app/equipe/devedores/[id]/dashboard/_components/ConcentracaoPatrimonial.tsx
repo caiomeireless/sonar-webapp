@@ -109,7 +109,7 @@ export default function ConcentracaoPatrimonial({ dados }: Props) {
     >
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-[140px_minmax(0,1fr)] sm:items-center">
         {/* MINI-DONUT */}
-        <div className="relative mx-auto h-32 w-32">
+        <div className="chart-neon-glow relative mx-auto h-32 w-32">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
