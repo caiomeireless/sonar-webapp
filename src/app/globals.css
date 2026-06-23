@@ -368,19 +368,21 @@ body {
   backdrop-filter: blur(22px) saturate(145%);
   -webkit-backdrop-filter: blur(22px) saturate(145%);
 }
+/* Border-right signal->gold da sidebar — só aparece ABAIXO da TopBar
+   (top: 122px), pra que a faixa de bg-grid da sidebar header se funda
+   visualmente com o bg-grid da TopBar sem nenhuma divisão vertical. */
 .glass-side::after {
   content: "";
   position: absolute;
-  top: 0;
+  top: 122px;
   right: -1px;
   width: 1px;
-  height: 100%;
+  height: calc(100% - 122px);
   background: linear-gradient(
     180deg,
-    transparent,
-    var(--color-signal-soft-2) 18%,
-    var(--color-signal) 50%,
-    var(--color-gold) 82%,
+    var(--color-signal-soft-2),
+    var(--color-signal) 35%,
+    var(--color-gold) 75%,
     transparent
   );
   opacity: 0.55;
