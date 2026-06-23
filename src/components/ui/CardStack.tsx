@@ -305,29 +305,15 @@ export function CardStack<T>({
               type="button"
               aria-label="Anterior"
               onClick={goPrev}
-              className={cn(
-                "absolute left-2 top-1/2 z-20 -translate-y-1/2",
-                "flex h-10 w-10 items-center justify-center rounded-full",
-                "border border-[var(--color-line)] bg-[var(--color-onyx-soft)]/60",
-                "text-[var(--color-ivory)] backdrop-blur-sm transition",
-                "hover:bg-[var(--color-signal-soft)] hover:text-[var(--color-signal)]",
-                "focus-visible:ring-2 focus-visible:ring-[var(--color-signal)]/40 focus:outline-none",
-              )}
+              className="btn-neon-circle absolute left-2 top-1/2 z-20 -translate-y-1/2"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
             <button
               type="button"
-              aria-label="Proximo"
+              aria-label="Próximo"
               onClick={goNext}
-              className={cn(
-                "absolute right-2 top-1/2 z-20 -translate-y-1/2",
-                "flex h-10 w-10 items-center justify-center rounded-full",
-                "border border-[var(--color-line)] bg-[var(--color-onyx-soft)]/60",
-                "text-[var(--color-ivory)] backdrop-blur-sm transition",
-                "hover:bg-[var(--color-signal-soft)] hover:text-[var(--color-signal)]",
-                "focus-visible:ring-2 focus-visible:ring-[var(--color-signal)]/40 focus:outline-none",
-              )}
+              className="btn-neon-circle absolute right-2 top-1/2 z-20 -translate-y-1/2"
             >
               <ChevronRight className="h-5 w-5" />
             </button>
