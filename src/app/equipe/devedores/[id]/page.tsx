@@ -441,11 +441,8 @@ function HeaderDossie({
           ) : null}
         </div>
 
-        {/* Atalho Dashboard Analítico */}
-        <Link
-          href={dashboardHref}
-          className="group mt-6 inline-flex items-center gap-2 rounded-xl border border-[var(--color-gold)]/45 bg-[rgba(201,162,74,0.06)] px-5 py-2.5 font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-gold)] transition hover:border-[var(--color-tip-glow)] hover:bg-[rgba(201,162,74,0.12)] hover:text-[var(--color-tip-glow)]"
-        >
+        {/* Atalho Dashboard Analítico — neon signal solido (igual + Novo Devedor) */}
+        <Link href={dashboardHref} className="btn-neon-signal group mt-6">
           Dashboard Analítico
           <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
         </Link>
