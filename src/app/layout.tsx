@@ -6,6 +6,7 @@ import {
   Open_Sans,
 } from "next/font/google";
 import "./globals.css";
+import { lerTemaCookie } from "@/lib/theme-cookie";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -46,13 +47,47 @@ export const metadata: Metadata = {
   icons: { icon: "/favicon.svg" },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+// Script anti-flash: roda ANTES da hidratação React e reconcilia o
+// `data-theme` aplicado pelo SSR (via cookie) com o estado mais fresco
+// guardado em localStorage. Cobre o caso de o usuário trocar tema em
+// outra aba — sem isso teríamos FOUC ao recarregar a aba antiga.
+//
+// Estratégia: lê localStorage; se válido e diferente do atributo já
+// presente, sobrescreve imediatamente. Qualquer erro cai em silêncio
+// (mantém o que o SSR mandou).
+const antiFlashScript = `(function(){
+  try {
+    var ls = localStorage.getItem('sonar-theme');
+    if (ls === 'light' || ls === 'dark') {
+      var atual = document.documentElement.getAttribute('data-theme');
+      if (atual !== ls) {
+        document.documentElement.setAttribute('data-theme', ls);
+      }
+    }
+  } catch (e) {}
+})();`;
+
+export default async function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const tema = await lerTemaCookie();
+
   return (
     <html
       lang="pt-BR"
+      data-theme={tema}
+      suppressHydrationWarning
       className={`${manrope.variable} ${cormorant.variable} ${jetbrains.variable} ${openSans.variable}`}
     >
-      <body>{children}</body>
+      <head>
+        <script
+          id="theme-init"
+          dangerouslySetInnerHTML={{ __html: antiFlashScript }}
+        />
+      </head>
+      <body className="fade-theme">{children}</body>
     </html>
   );
 }

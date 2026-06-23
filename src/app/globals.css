@@ -71,24 +71,120 @@
   --border-divider:  1px solid var(--color-ivory-22);
 }
 
+/* ============================================================
+   LIGHT — sobrescreve tokens quando <html data-theme="light">
+   Mantem signal/gold do brand; inverte neutrals.
+   ============================================================ */
+[data-theme="light"] {
+  /* Brand neutrals invertidos */
+  --color-onyx:        #F6F3EA;   /* fundo da pagina — off-white ivory */
+  --color-onyx-2:      #FFFFFF;   /* topbar/popover opaco */
+  --color-carbon:      #FFFFFF;   /* surface clara */
+  --color-ivory:       #0A0C0B;   /* texto primario — onyx original */
+
+  /* Accents — verde e ouro de brand MANTIDOS (regra do usuario).
+     Apelidos "-strong" / "-soft" ajustados pra contraste sobre fundo claro. */
+  --color-signal:        #3CFF8A;
+  --color-signal-strong: #178A48;     /* hover de signal em texto sobre claro */
+  --color-gold:          #C9A24A;
+  --color-gold-soft:     #6E5618;     /* gold suave pra texto sobre claro */
+  --color-tip-glow:      #C7F2D5;
+
+  /* Surfaces — alpha-on-onyx (texto onyx em alpha sobre fundo claro) */
+  --color-surface-1:     rgba(10, 12, 11, 0.035);
+  --color-surface-2:     rgba(10, 12, 11, 0.06);
+  --color-surface-solid: #FFFFFF;
+
+  /* Lines */
+  --color-line:          rgba(10, 12, 11, 0.10);
+  --color-line-strong:   rgba(10, 12, 11, 0.18);
+
+  /* Ambient body radial — verde mais discreto sobre claro */
+  --color-signal-ambient-1: rgba(60, 200, 110, 0.05);
+  --color-signal-ambient-2: rgba(60, 200, 110, 0.025);
+
+  /* Alpha onyx variants (espelho dos ivory-*) */
+  --color-ivory-12:    rgba(10, 12, 11, 0.08);
+  --color-ivory-22:    rgba(10, 12, 11, 0.16);
+  --color-ivory-40:    rgba(10, 12, 11, 0.45);   /* fg-faint */
+  --color-ivory-66:    rgba(10, 12, 11, 0.62);   /* fg-muted */
+  --color-ivory-88:    rgba(10, 12, 11, 0.80);
+
+  /* Signal alpha — mantem hue verde, opacidades maiores pra visibilidade no light */
+  --color-signal-06:     rgba(60, 170, 92, 0.05);
+  --color-signal-12:     rgba(60, 170, 92, 0.10);
+  --color-signal-soft:   rgba(60, 170, 92, 0.14);
+  --color-signal-soft-2: rgba(60, 170, 92, 0.22);
+
+  color-scheme: light;
+}
+
+/* Dark explicito — mesmos valores do :root; permite [data-theme="dark"]
+   sobrescrever um eventual ancestral em light. */
+[data-theme="dark"] {
+  --color-onyx:        #0A0C0B;
+  --color-onyx-2:      #0F1311;
+  --color-carbon:      #050706;
+  --color-ivory:       #E8E4D6;
+  --color-signal:      #3CFF8A;
+  --color-signal-strong: #7CFFB0;
+  --color-gold:        #C9A24A;
+  --color-gold-soft:   #A77A2E;
+  --color-tip-glow:    #E8FFEE;
+
+  --color-surface-1:      rgba(232, 228, 214, 0.045);
+  --color-surface-2:      rgba(232, 228, 214, 0.07);
+  --color-surface-solid:  #0E1110;
+
+  --color-line:           rgba(232, 228, 214, 0.09);
+  --color-line-strong:    rgba(232, 228, 214, 0.14);
+
+  --color-signal-ambient-1: rgba(60, 255, 138, 0.04);
+  --color-signal-ambient-2: rgba(60, 255, 138, 0.02);
+
+  --color-ivory-12:    rgba(232, 228, 214, 0.07);
+  --color-ivory-22:    rgba(232, 228, 214, 0.13);
+  --color-ivory-40:    rgba(232, 228, 214, 0.30);
+  --color-ivory-66:    rgba(232, 228, 214, 0.40);
+  --color-ivory-88:    rgba(232, 228, 214, 0.53);
+
+  --color-signal-06:     rgba(60, 255, 138, 0.024);
+  --color-signal-12:     rgba(60, 255, 138, 0.07);
+  --color-signal-soft:   rgba(60, 255, 138, 0.10);
+  --color-signal-soft-2: rgba(60, 255, 138, 0.18);
+
+  color-scheme: dark;
+}
+
+/* Default no :root (sem data-theme): dark */
+:root { color-scheme: dark; }
+
 /* Tailwind v4 — bridge dos tokens para utilitarios (bg-onyx, text-ivory, etc.) */
 @theme inline {
-  --color-onyx:          var(--color-onyx);
-  --color-onyx-2:        var(--color-onyx-2);
-  --color-carbon:        var(--color-carbon);
-  --color-ivory:         var(--color-ivory);
-  --color-ivory-40:      var(--color-ivory-40);
-  --color-signal:        var(--color-signal);
-  --color-signal-strong: var(--color-signal-strong);
-  --color-signal-soft:   var(--color-signal-soft);
-  --color-gold:          var(--color-gold);
-  --color-gold-soft:     var(--color-gold-soft);
-  --color-tip-glow:      var(--color-tip-glow);
-  --color-surface-1:     var(--color-surface-1);
-  --color-surface-2:     var(--color-surface-2);
-  --color-surface-solid: var(--color-surface-solid);
-  --color-line:          var(--color-line);
-  --color-line-strong:   var(--color-line-strong);
+  --color-onyx:            var(--color-onyx);
+  --color-onyx-2:          var(--color-onyx-2);
+  --color-carbon:          var(--color-carbon);
+  --color-ivory:           var(--color-ivory);
+  --color-ivory-40:        var(--color-ivory-40);
+  --color-signal:          var(--color-signal);
+  --color-signal-strong:   var(--color-signal-strong);
+  --color-signal-soft:     var(--color-signal-soft);
+  --color-signal-soft-2:   var(--color-signal-soft-2);
+  --color-gold:            var(--color-gold);
+  --color-gold-soft:       var(--color-gold-soft);
+  --color-tip-glow:        var(--color-tip-glow);
+  --color-surface-1:       var(--color-surface-1);
+  --color-surface-2:       var(--color-surface-2);
+  --color-surface-solid:   var(--color-surface-solid);
+  --color-line:            var(--color-line);
+  --color-line-strong:     var(--color-line-strong);
+
+  /* Semanticos — preferir bg-bg / text-fg / text-fg-muted daqui pra frente */
+  --color-bg:        var(--color-onyx);
+  --color-bg-2:      var(--color-onyx-2);
+  --color-fg:        var(--color-ivory);
+  --color-fg-muted:  var(--color-ivory-66);
+  --color-fg-faint:  var(--color-ivory-40);
 
   --font-sans:  var(--font-manrope), system-ui, -apple-system, sans-serif;
   --font-serif: var(--font-cormorant), Georgia, serif;
@@ -201,6 +297,32 @@ body {
   backdrop-filter: blur(18px) saturate(135%);
   -webkit-backdrop-filter: blur(18px) saturate(135%);
   border-radius: 12px;
+}
+
+/* Glass-side — sidebar fixa. Mais opaca que .glass pra criar separacao clara
+   da area principal sem perder o ar de "vidro fume". */
+.glass-side {
+  background:
+    linear-gradient(180deg, var(--color-surface-2), var(--color-surface-1)),
+    var(--color-bg);
+  border-right: 1px solid var(--color-line);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+}
+[data-theme="light"] .glass-side {
+  box-shadow: 1px 0 0 var(--color-line), 4px 0 24px -16px rgba(10, 12, 11, 0.18);
+}
+[data-theme="dark"] .glass-side {
+  box-shadow: 1px 0 0 var(--color-line), 4px 0 24px -20px rgba(0, 0, 0, 0.6);
+}
+
+/* Fade-theme — transicao curta de cor ao trocar tema. Aplica no <body>. */
+.fade-theme,
+.fade-theme * {
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease;
 }
 
 /* GlowCard — segue cursor com spot signal (versao Sonar do GlowCard BP).
@@ -399,6 +521,15 @@ body {
     calc(var(--spotlight-size) * 0.5) calc(var(--spotlight-size) * 0.5)
     at calc(var(--x, 0) * 1px) calc(var(--y, 0) * 1px),
     hsl(0 100% 100% / 0.95),
+    transparent 100%
+  );
+}
+/* No light, nucleo branco some sobre fundo claro — inverter pra onyx escuro */
+[data-theme="light"] [data-spotlight]::after {
+  background-image: radial-gradient(
+    calc(var(--spotlight-size) * 0.5) calc(var(--spotlight-size) * 0.5)
+    at calc(var(--x, 0) * 1px) calc(var(--y, 0) * 1px),
+    hsl(180 6% 10% / 0.92),
     transparent 100%
   );
 }
