@@ -346,6 +346,8 @@ function AvatarMenu({
             ref={inputRef}
             type="file"
             accept="image/*"
+            aria-label="Carregar foto do usuário"
+            title="Carregar foto do usuário"
             className="hidden"
             onChange={handleUpload}
           />
