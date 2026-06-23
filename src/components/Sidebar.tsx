@@ -167,13 +167,13 @@ function SidebarPanel({
   // assim o usuário sempre vê o nav inteiro ao rolar, e o background da
   // sidebar continua até o rodapé da página.
   const shellClass = isDrawer
-    ? "glass-side absolute left-0 top-0 z-10 flex h-dvh w-[280px] shrink-0 flex-col gap-6 px-4 py-6 animate-[slideIn_180ms_ease-out]"
+    ? "glass-side absolute left-0 top-0 z-10 flex h-dvh w-[280px] shrink-0 flex-col px-4 py-6 animate-[slideIn_180ms_ease-out]"
     : "glass-side hidden w-[280px] shrink-0 self-stretch md:block";
 
   const Wrapper = isDrawer
     ? ({ children }: { children: React.ReactNode }) => <>{children}</>
     : ({ children }: { children: React.ReactNode }) => (
-        <div className="sticky top-0 flex h-dvh flex-col gap-6 px-4 py-6">
+        <div className="sticky top-0 flex h-dvh flex-col px-4 py-6">
           {children}
         </div>
       );
@@ -225,15 +225,38 @@ function SidebarPanel({
         </div>
       </div>
 
-      {/* Nav */}
-      <nav className="flex flex-1 flex-col gap-1 overflow-y-auto">
+      {/* Nav — fundo cinza herdado do glass-side (NAO leva o quadriculado) */}
+      <nav className="flex flex-col gap-1 overflow-y-auto">
         {items.map((item) => (
           <NavLinkItem key={item.href} item={item} />
         ))}
       </nav>
 
-      {/* Footer: usuario + acoes */}
-      <SidebarFooter usuario={usuario} portal={portal} />
+      {/* === BLOCO INFERIOR — abaixo do nav ate o fim ===
+          Recebe o MESMO quadriculado verde da faixa do logo. O cinza dos
+          cards/botoes individuais (usuario, ThemeToggle, Sair) e' mantido
+          porque cada um tem seu proprio bg-surface-2 sobre o quadriculado. */}
+      <div className="relative -mx-4 -mb-6 mt-auto flex flex-col overflow-hidden">
+        {/* Camada do grid quadriculado animado */}
+        <div
+          className="bg-grid-strong animate-grid-pulse absolute inset-0"
+          aria-hidden="true"
+        />
+        {/* Vinheta verde do topo (espelha a do header do logo) */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse at bottom, rgba(60,255,138,0.10), transparent 75%)",
+          }}
+        />
+        {/* Conteudo do footer + spacer */}
+        <div className="relative z-10 flex flex-1 flex-col px-4 pt-5 pb-6">
+          <div className="flex-1" />
+          <SidebarFooter usuario={usuario} portal={portal} />
+        </div>
+      </div>
       </Wrapper>
     </aside>
   );
