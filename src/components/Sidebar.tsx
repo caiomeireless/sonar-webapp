@@ -239,9 +239,13 @@ function SidebarPanel({
           cards/botoes individuais e' mantido porque cada um tem seu
           proprio bg-surface-2 sobre o quadriculado. */}
       <div className="relative -mx-4 -mb-6 mt-3 flex flex-1 flex-col overflow-hidden">
-        {/* Camada do grid quadriculado animado */}
+        {/* Camada do grid quadriculado animado — fade suave do topo:
+            o quadriculado "nasce" transparente nos primeiros 90px e so
+            depois aparece pleno, criando transicao com o cinza do nav. */}
         <div
-          className="bg-grid-strong animate-grid-pulse absolute inset-0"
+          className="bg-grid-strong animate-grid-pulse absolute inset-0
+            [mask-image:linear-gradient(to_bottom,transparent_0%,rgba(0,0,0,0.25)_45px,black_120px)]
+            [-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,rgba(0,0,0,0.25)_45px,black_120px)]"
           aria-hidden="true"
         />
         {/* Vinheta verde do topo (espelha a do header do logo) */}
