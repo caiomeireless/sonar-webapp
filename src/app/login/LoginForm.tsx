@@ -29,12 +29,25 @@ export function LoginForm() {
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim().toLowerCase(),
       options: {
+        // shouldCreateUser=false: usuario PRECISA existir em auth.users
+        // antes (criado pelo admin no Supabase Dashboard ou via API).
+        // Sem isso, novos emails recebem o template "Confirm signup"
+        // com link e nao o codigo OTP, o que confunde o usuario.
+        shouldCreateUser: false,
         emailRedirectTo: `${window.location.origin}/auth/confirm`,
       },
     });
     setCarregando(false);
     if (error) {
-      setErro(error.message);
+      // Mensagem amigavel pra "user not found"
+      const msg = error.message.toLowerCase();
+      if (msg.includes("not found") || msg.includes("signups not allowed")) {
+        setErro(
+          "E-mail nao autorizado. Peca ao administrador (Caio) pra liberar seu acesso.",
+        );
+      } else {
+        setErro(error.message);
+      }
     } else {
       setEtapa("codigo");
     }

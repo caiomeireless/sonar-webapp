@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Mail, Phone, Hash, Clock } from "lucide-react";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
+import { CardStack } from "@/components/ui/CardStack";
 import { formatBRL, formatTempoRelativo } from "@/lib/format";
 import type { CredorListagem } from "@/lib/devedores";
 
@@ -68,10 +69,27 @@ export function CarteiraView({
       </div>
 
       {modo === "cards" || !hidratado ? (
-        <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {credores.map((c) => (
-            <CardCredor key={c.id} credor={c} euQuery={euQuery} />
-          ))}
+        <div className="mt-8 flex justify-center">
+          <CardStack
+            items={credores.map((c) => ({ ...c, id: c.id }))}
+            cardWidth={460}
+            cardHeight={520}
+            overlap={0.5}
+            spreadDeg={42}
+            perspectivePx={1200}
+            depthPx={120}
+            tiltXDeg={10}
+            activeLiftPx={18}
+            activeScale={1.04}
+            inactiveScale={0.92}
+            springStiffness={260}
+            springDamping={26}
+            loop
+            showDots
+            renderCard={(item, { active }) => (
+              <CardCredor credor={item} euQuery={euQuery} active={active} />
+            )}
+          />
         </div>
       ) : (
         <ListaCredores credores={credores} euQuery={euQuery} />
@@ -110,17 +128,23 @@ function ToggleBtn({
 function CardCredor({
   credor,
   euQuery,
+  active = true,
 }: {
   credor: CredorListagem;
   euQuery: string;
+  active?: boolean;
 }) {
   const docLabel = credor.tipo === "PF" ? "CPF" : "CNPJ";
-  return (
-    <Link
-      href={`/equipe/devedores/credor/${credor.id}${euQuery}`}
-      className="block"
+  // Conteudo do card (compartilhado entre versao ativa/inativa).
+  // Quando inativo, baixa opacidade pra dar sensacao de profundidade extra
+  // alem do scale ja aplicado pelo CardStack.
+  const conteudo = (
+    <SpotlightCard
+      className={
+        "h-full p-7 transition-opacity duration-300 " +
+        (active ? "cursor-pointer opacity-100" : "opacity-[0.78]")
+      }
     >
-      <SpotlightCard className="cursor-pointer p-7">
         {/* === IDENTIFICAÇÃO === */}
         <header>
           <span className="font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-signal)]">
@@ -216,6 +240,20 @@ function CardCredor({
           </span>
         </div>
       </SpotlightCard>
+  );
+
+  // Link clicavel SO no card ativo (topo do baralho). Cards de baixo viram
+  // <div> pra evitar navegacao acidental — o click neles e' capturado pelo
+  // CardStack pra virar ativo.
+  if (!active) {
+    return <div className="block h-full">{conteudo}</div>;
+  }
+  return (
+    <Link
+      href={`/equipe/devedores/credor/${credor.id}${euQuery}`}
+      className="block h-full"
+    >
+      {conteudo}
     </Link>
   );
 }

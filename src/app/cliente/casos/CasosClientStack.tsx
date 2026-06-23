@@ -17,12 +17,7 @@ type Props = {
 };
 
 export function CasosClientStack({ casos }: Props) {
-  // Briefing pediu props `overlap`, `spreadDeg`, `perspectivePx`, `depthPx`,
-  // `tiltXDeg`, `activeLiftPx`, `activeScale`, `inactiveScale`,
-  // `springStiffness`, `springDamping`, `loop` — o CardStack atual nao expoe
-  // essas props (e' uma implementacao com leque/fan via offset/scale fixos
-  // + AnimatePresence + drag/swipe). Mapeio so o que existe na API real
-  // e deixo o resto como visual default do componente.
+  // Briefing: aplicar tuning visual de leque 3D (overlap/spread/tilt/etc).
   const items = casos.map((c) => ({ id: c.caso_id, caso: c }));
 
   return (
@@ -31,9 +26,20 @@ export function CasosClientStack({ casos }: Props) {
         items={items}
         cardWidth={440}
         cardHeight={520}
+        overlap={0.5}
+        spreadDeg={42}
+        perspectivePx={1200}
+        depthPx={120}
+        tiltXDeg={10}
+        activeLiftPx={18}
+        activeScale={1.04}
+        inactiveScale={0.92}
+        springStiffness={260}
+        springDamping={26}
+        loop
         showDots
-        renderCard={(item, isTop) => (
-          <CardCaso caso={item.caso} active={isTop} />
+        renderCard={(item, { active }) => (
+          <CardCaso caso={item.caso} active={active} />
         )}
       />
     </div>
