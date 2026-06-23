@@ -177,14 +177,14 @@ function BotaoSincronizar() {
       type="button"
       onClick={sincronizar}
       className="
-        inline-flex items-center gap-2 rounded-lg border border-[var(--color-signal-soft-2)]
-        bg-[var(--color-signal-soft)] px-3 py-1.5 text-xs font-medium text-[var(--color-signal)]
+        inline-flex items-center gap-2.5 rounded-xl border border-[var(--color-signal-soft-2)]
+        bg-[var(--color-signal-soft)] px-5 py-3 text-sm font-medium text-[var(--color-signal)]
         transition hover:bg-[var(--color-signal-soft-2)]
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-signal)]
       "
     >
       <RefreshCw
-        className={`h-3.5 w-3.5 ${girando ? "animate-spin" : ""}`}
+        className={`h-5 w-5 ${girando ? "animate-spin" : ""}`}
         aria-hidden="true"
       />
       Sincronizar
@@ -200,13 +200,13 @@ function BotaoSino() {
       type="button"
       aria-label="Notificações"
       className="
-        relative inline-flex h-9 w-9 items-center justify-center rounded-lg
+        relative inline-flex h-14 w-14 items-center justify-center rounded-xl
         border border-[var(--color-line)] bg-[var(--color-surface-2)] text-[var(--color-fg-muted)]
         transition hover:border-[var(--color-signal-soft-2)] hover:text-[var(--color-fg)]
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-signal-soft-2)]
       "
     >
-      <Bell className="h-4 w-4" aria-hidden="true" />
+      <Bell className="h-6 w-6" aria-hidden="true" />
     </button>
   );
 }
@@ -242,21 +242,21 @@ function AvatarMenu({
         aria-expanded={aberto}
         className="
           inline-flex items-center gap-2 rounded-full border border-[var(--color-line)]
-          bg-[var(--color-surface-2)] py-1 pl-1 pr-2 transition
+          bg-[var(--color-surface-2)] py-1.5 pl-1.5 pr-3 transition
           hover:border-[var(--color-signal-soft-2)]
           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-signal-soft-2)]
         "
       >
         <span
           className="
-            flex h-7 w-7 items-center justify-center rounded-full
-            bg-[var(--color-signal-soft)] text-[12px] font-semibold text-[var(--color-signal)]
+            flex h-12 w-12 items-center justify-center rounded-full
+            bg-[var(--color-signal-soft)] text-[18px] font-semibold text-[var(--color-signal)]
           "
         >
           {inicial}
         </span>
         <ChevronDown
-          className={`h-3.5 w-3.5 text-[var(--color-fg-muted)] transition ${aberto ? "rotate-180" : ""}`}
+          className={`h-5 w-5 text-[var(--color-fg-muted)] transition ${aberto ? "rotate-180" : ""}`}
           aria-hidden="true"
         />
       </button>
