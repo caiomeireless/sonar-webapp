@@ -198,7 +198,7 @@ function SidebarPanel({
                        focus-visible:ring-2 focus-visible:ring-[var(--color-signal)]"
             aria-label="Sonar — página inicial"
           >
-            <LogoSvg height={96} />
+            <LogoSvg height={82} />
           </Link>
 
           {isDrawer && (
