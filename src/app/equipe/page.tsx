@@ -82,25 +82,28 @@ export default async function DashboardPlataformaPage({
     evol.length >= 2 ? evol[evol.length - 2].penhorasEfetivadas : 0;
 
   return (
-    <main className="mx-auto max-w-[1400px] px-6 py-10 sm:px-10">
-      {/* Cabeçalho */}
-      <header className="title-shield mb-6">
-        <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-fg-muted)]">
-          Painel da Plataforma
-        </p>
-        <h1 className="mt-2 text-[clamp(34px,5vw,52px)] font-medium tracking-tight text-ivory">
-          Visão Geral do Escritório
-        </h1>
-      </header>
+    <main className="py-10">
+      {/* Cabeçalho centralizado dentro do container 1400 */}
+      <div className="mx-auto max-w-[1400px] px-6 sm:px-10">
+        <header className="title-shield mb-6">
+          <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-fg-muted)]">
+            Painel da Plataforma
+          </p>
+          <h1 className="mt-2 text-[clamp(34px,5vw,52px)] font-medium tracking-tight text-ivory">
+            Visão Geral do Escritório
+          </h1>
+        </header>
+      </div>
 
-      {/* Barra de filtros (sticky no topo) */}
+      {/* Barra de filtros FULL WIDTH — encosta lateral a lateral da área
+          principal (após a sidebar). Fora do container 1400 propositalmente. */}
       <FiltrosPlataformaUI
         advogados={opcoes.advogados}
         credores={opcoes.credores}
       />
 
-      {/* Grid principal: 12 colunas no desktop, 1 no mobile */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
+      {/* Grid principal centralizado */}
+      <div className="mx-auto grid max-w-[1400px] grid-cols-1 gap-4 px-6 sm:px-10 md:grid-cols-12">
         {/* L1 — KPIs (5 + 3 + 2 + 2) */}
         <div className="md:col-span-5">
           <KPIPatrimonioTotal
