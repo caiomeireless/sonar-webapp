@@ -320,15 +320,6 @@ function AvatarMenu({
             border-[var(--color-line)] bg-[var(--color-surface-solid)] shadow-2xl
           "
         >
-          <div className="border-b border-[var(--color-line)] px-4 py-3">
-            <p className="truncate text-[13px] text-[var(--color-fg)]" title={usuario.email}>
-              {usuario.email}
-            </p>
-            <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-signal)]">
-              {usuario.papel}
-            </p>
-          </div>
-
           {/* Upload da foto de perfil — persistida em localStorage. */}
           <button
             type="button"
