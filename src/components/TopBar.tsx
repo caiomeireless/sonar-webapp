@@ -120,13 +120,14 @@ export function TopBar({
             "radial-gradient(ellipse 480px 220px at 12% 50%, rgba(60,255,138,0.20), transparent 70%)",
         }}
       />
-      {/* Vinheta lateral: escurece o quadriculado nas bordas esquerda e
-          direita (mesma da landing, mantém peso visual nas pontas). */}
+      {/* Vinheta lateral: SÓ escurece a borda DIREITA (onde o quadriculado
+          some no fade). Esquerda fica transparente pra que o bg-grid
+          continue visualmente o quadriculado da sidebar header. */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "linear-gradient(90deg, rgba(10,12,11,0.85) 0%, transparent 18%, transparent 82%, rgba(10,12,11,0.85) 100%)",
+            "linear-gradient(90deg, transparent 0%, transparent 82%, rgba(10,12,11,0.85) 100%)",
         }}
         aria-hidden="true"
       />
