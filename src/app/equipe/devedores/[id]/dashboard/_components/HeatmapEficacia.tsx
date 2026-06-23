@@ -9,7 +9,6 @@ import {
   type ResultadoMedida,
   type TipoMedida,
 } from "@/lib/medidas";
-import { CHART_COLOR_SIGNAL } from "@/components/dashboard/ChartTheme";
 import { DashboardCard } from "@/components/dashboard/DashboardCard";
 
 // Linhas e colunas FIXAS pelo brief — heatmap eh um snapshot operacional
@@ -65,29 +64,41 @@ function montarMatriz(
   return { matriz, max, total };
 }
 
-function corCelula(count: number, max: number): {
-  background: string;
-  border: string;
-} {
+// Cor base por COLUNA (resultado): verde p/ positivo, amarelo p/ aguardando,
+// laranja p/ parcial, vermelho p/ negativo. Intensidade (alpha) varia
+// conforme count vs max — heat scale dentro da coluna.
+const COR_BASE_POR_RESULTADO: Record<ResultadoMedida, [number, number, number]> = {
+  positivo: [60, 255, 138],    // verde signal
+  aguardando: [244, 197, 66],  // amarelo
+  parcial: [249, 115, 22],     // laranja
+  negativo: [255, 91, 91],     // vermelho
+  nao_aplica: [169, 169, 169], // cinza (caso entre no recorte no futuro)
+};
+
+function corCelula(
+  resultado: ResultadoMedida,
+  count: number,
+  max: number,
+): { background: string; border: string } {
   if (count === 0 || max === 0) {
     return {
       background: "rgba(234, 231, 220, 0.03)",
       border: "1px solid rgba(234, 231, 220, 0.06)",
     };
   }
-  // Escala nao-linear (sqrt) — count baixo ainda fica visivel, count alto
-  // nao satura cedo. Alpha entre 0.10 e 0.92.
+  const [r, g, b] = COR_BASE_POR_RESULTADO[resultado];
+  // Escala nao-linear (sqrt): count baixo ainda visivel, alto sem saturar cedo.
   const ratio = Math.sqrt(count / max);
-  const alpha = 0.10 + ratio * 0.82;
+  const alpha = 0.12 + ratio * 0.78;
   return {
-    background: `rgba(60, 255, 138, ${alpha.toFixed(3)})`,
-    border: `1px solid rgba(60, 255, 138, ${Math.min(1, alpha + 0.1).toFixed(3)})`,
+    background: `rgba(${r}, ${g}, ${b}, ${alpha.toFixed(3)})`,
+    border: `1px solid rgba(${r}, ${g}, ${b}, ${Math.min(1, alpha + 0.12).toFixed(3)})`,
   };
 }
 
 function corTexto(count: number, max: number): string {
   if (count === 0 || max === 0) return "var(--color-ivory-66)";
-  // Contraste invertido nas celulas mais quentes — fica preto sobre verde.
+  // Contraste invertido nas celulas mais quentes — fica preto sobre cor saturada.
   const ratio = max > 0 ? count / max : 0;
   return ratio > 0.55 ? "#050706" : "var(--color-ivory)";
 }
@@ -98,7 +109,7 @@ export default function HeatmapEficacia({ heatmap }: Props) {
   return (
     <DashboardCard
       titulo="Eficacia por medida"
-      descricao="Cruzamento entre tipo de medida e resultado obtido. Verde mais forte = mais ocorrencias."
+      descricao="Tipo de medida x resultado. Cor por coluna (verde positivo, amarelo aguardando, laranja parcial, vermelho negativo) — intensidade = quantidade."
       accent="green"
     >
       {total === 0 ? (
@@ -150,7 +161,11 @@ export default function HeatmapEficacia({ heatmap }: Props) {
                       count: 0,
                       pct: 0,
                     };
-                    const { background, border } = corCelula(cell.count, max);
+                    const { background, border } = corCelula(
+                      res,
+                      cell.count,
+                      max,
+                    );
                     const color = corTexto(cell.count, max);
                     const titleLabel = `${tipoMeta.label} / ${RESULTADO_META[res].label}: ${cell.count} (${cell.pct.toFixed(1)}%)`;
                     return (
@@ -183,17 +198,22 @@ export default function HeatmapEficacia({ heatmap }: Props) {
             })}
           </div>
 
-          {/* Rodape: legenda da escala + total */}
+          {/* Rodape: legenda da escala por resultado + total */}
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--color-ivory-12)] pt-3 text-[11px] text-[var(--color-ivory-66)]">
-            <div className="flex items-center gap-2">
-              <span>menos</span>
-              <div
-                className="h-2 w-24 rounded-full"
-                style={{
-                  background: `linear-gradient(90deg, rgba(60, 255, 138, 0.10) 0%, ${CHART_COLOR_SIGNAL} 100%)`,
-                }}
-              />
-              <span>mais</span>
+            <div className="flex flex-wrap items-center gap-3">
+              {RESULTADOS_COLUNA.map((res) => {
+                const [r, g, b] = COR_BASE_POR_RESULTADO[res];
+                return (
+                  <div key={res} className="flex items-center gap-1.5">
+                    <span
+                      aria-hidden
+                      className="inline-block h-2 w-2 rounded-full"
+                      style={{ background: `rgb(${r}, ${g}, ${b})` }}
+                    />
+                    <span>{RESULTADO_META[res].label}</span>
+                  </div>
+                );
+              })}
             </div>
             <div className="tabular-nums">
               <span className="text-[var(--color-ivory)]">{total}</span>

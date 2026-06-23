@@ -41,14 +41,15 @@ type Props = {
 const CHART_COLOR_SIGNAL_MUT = "#1FAE5C";
 
 type EstagioFunil = {
-  estagio: "Tentadas" | "Positivas" | "Penhoras efetivadas";
+  estagio: "Tentativas" | "Positivas" | "Penhoras efetivadas";
+
   valor: number;
   cor: string;
 };
 
 function montarSeries(f: DashboardFunil): EstagioFunil[] {
   return [
-    { estagio: "Tentadas", valor: f.tentadas, cor: CHART_COLOR_SIGNAL },
+    { estagio: "Tentativas", valor: f.tentadas, cor: CHART_COLOR_SIGNAL },
     { estagio: "Positivas", valor: f.positivas, cor: CHART_COLOR_SIGNAL_MUT },
     {
       estagio: "Penhoras efetivadas",
@@ -60,7 +61,7 @@ function montarSeries(f: DashboardFunil): EstagioFunil[] {
 
 export default function FunilTentadasPositivas({ funil }: Props) {
   const data = montarSeries(funil);
-  const totalTentadas = funil.tentadas;
+  const totalTentativas = funil.tentadas;
 
   // Domain explicito evita Recharts colapsar o eixo quando todos os valores
   // sao 0 (caso sem nenhuma medida tomada).
@@ -121,8 +122,8 @@ export default function FunilTentadasPositivas({ funil }: Props) {
       <dl className="mt-4 grid grid-cols-3 gap-3 text-xs">
         {data.map((d) => {
           const pct =
-            totalTentadas > 0
-              ? Math.round((d.valor / totalTentadas) * 100)
+            totalTentativas > 0
+              ? Math.round((d.valor / totalTentativas) * 100)
               : 0;
           return (
             <div
@@ -144,7 +145,7 @@ export default function FunilTentadasPositivas({ funil }: Props) {
                 {d.valor}
               </dd>
               <dd className="text-[var(--color-ivory-66)]">
-                {totalTentadas > 0 ? `${pct}% das tentadas` : "Sem medidas"}
+                {totalTentativas > 0 ? `${pct}% das tentativas` : "Sem medidas"}
               </dd>
             </div>
           );

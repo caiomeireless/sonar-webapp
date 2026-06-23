@@ -16,6 +16,7 @@ type Props = {
   subtitulo?: string;
   delta?: KPIDelta;
   accent?: DashboardCardAccent;
+  info?: string;
 };
 
 const DIRECTION_COLOR: Record<KPIDelta["direction"], string> = {
@@ -36,9 +37,10 @@ export function KPIHero({
   subtitulo,
   delta,
   accent = "green",
+  info,
 }: Props) {
   return (
-    <DashboardCard titulo={titulo} accent={accent}>
+    <DashboardCard titulo={titulo} accent={accent} info={info}>
       <div className="flex flex-col gap-2">
         <div className="text-4xl font-medium leading-none tracking-tight text-[var(--color-ivory)]">
           {valor}

@@ -26,6 +26,16 @@ export default function KPIRecuperabilidade({ score }: Props) {
       valor={`${valor}/100`}
       subtitulo="Score estimado de cobranca"
       accent={accentDoScore(valor)}
+      info={
+        "Score de 0 a 100 que estima a chance de recuperar o credito.\n\n" +
+        "Formula:\n" +
+        "  (qtd bens x 5) + (casos ativos x 3) + (valor recuperado / cobranca x 50)\n\n" +
+        "Faixas:\n" +
+        "  >= 60 verde (alta chance)\n" +
+        "  30 a 59 ouro (media)\n" +
+        "  < 30 baixa (rever caso)\n\n" +
+        "Antes das penhoras o score reflete potencial bruto. Apos elas, o ROI real domina."
+      }
     />
   );
 }

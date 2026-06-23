@@ -17,6 +17,9 @@ type Props = {
   children: ReactNode;
   accent?: DashboardCardAccent;
   className?: string;
+  // Texto opcional que aparece num popover ao passar mouse no "?" ao lado
+  // do titulo. CSS-only via group-hover (sem JS).
+  info?: string;
 };
 
 export function DashboardCard({
@@ -25,6 +28,7 @@ export function DashboardCard({
   children,
   accent = "neutral",
   className,
+  info,
 }: Props) {
   const accentColor = ACCENT_COLOR[accent];
   return (
@@ -56,6 +60,19 @@ export function DashboardCard({
             }}
           />
           {titulo}
+          {info ? (
+            <span className="group relative ml-1 inline-flex">
+              <span
+                aria-label="Mais informacoes"
+                className="flex h-3.5 w-3.5 cursor-help items-center justify-center rounded-full border border-[var(--color-ivory-22)] text-[10px] font-medium text-[var(--color-ivory-66)] transition group-hover:border-[var(--color-ivory-66)] group-hover:text-[var(--color-ivory)]"
+              >
+                ?
+              </span>
+              <span className="pointer-events-none invisible absolute left-0 top-full z-50 mt-2 w-72 whitespace-pre-line rounded-lg border border-[var(--color-ivory-22)] bg-[var(--color-onyx)] p-3 text-[11px] normal-case leading-relaxed tracking-normal text-[var(--color-ivory)] opacity-0 shadow-2xl transition group-hover:visible group-hover:opacity-100">
+                {info}
+              </span>
+            </span>
+          ) : null}
         </div>
         {descricao ? (
           <p className="mt-1.5 text-xs text-[var(--color-ivory-66)]">
