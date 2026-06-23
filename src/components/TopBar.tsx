@@ -90,11 +90,13 @@ export function TopBar({
   return (
     <header className="relative sticky top-0 z-20 overflow-hidden border-b border-[var(--color-line)] bg-onyx">
       {/* Quadriculado verde com fade diagonal — EXATAMENTE igual à faixa
-          superior da landing page (page.tsx). Forte no canto superior
-          esquerdo, some até transparente no canto inferior direito. */}
+          superior da landing page. Background-attachment: fixed pra que
+          as linhas se ALINHEM com o grid do header da sidebar (que também
+          usa fixed), formando uma faixa contínua sem emendas. */}
       <div
         className="bg-grid-strong animate-grid-pulse absolute inset-0"
         style={{
+          backgroundAttachment: "fixed",
           maskImage:
             "linear-gradient(135deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.35) 55%, transparent 100%)",
           WebkitMaskImage:
