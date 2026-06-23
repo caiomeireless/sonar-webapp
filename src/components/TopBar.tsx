@@ -25,7 +25,7 @@ const TITULOS_EQUIPE: TitulosMap = {
     subtitulo: "Visão geral da carteira do escritório",
   },
   "/equipe/devedores": {
-    titulo: "Devedores",
+    titulo: "Banco de Devedores",
     subtitulo: "Carteira hierárquica de clientes e casos",
   },
   "/equipe/themis": {
