@@ -166,7 +166,7 @@ function SidebarPanel({
   // Usa .glass-side (definida em globals.css) pra vidro fume + gradient
   // border-right signal -> gold.
   const baseShell =
-    "glass-side flex h-svh w-[240px] shrink-0 flex-col gap-6 px-4 py-6";
+    "glass-side flex h-svh w-[280px] shrink-0 flex-col gap-6 px-4 py-6";
 
   const shellClass = isDrawer
     ? `absolute left-0 top-0 z-10 ${baseShell} animate-[slideIn_180ms_ease-out]`
