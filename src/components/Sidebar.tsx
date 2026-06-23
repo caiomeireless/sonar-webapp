@@ -173,32 +173,49 @@ function SidebarPanel({
     : `sticky top-0 hidden ${baseShell} md:flex`;
 
   return (
-    <aside className={shellClass} aria-label="Navegacao principal">
-      {/* Header: logo + (drawer) botao fechar */}
-      <div className="flex items-center justify-between gap-2 px-1">
-        <Link
-          href={homeHref}
-          className="inline-flex items-center rounded-lg outline-none transition
-                     focus-visible:ring-2 focus-visible:ring-[var(--color-signal)]"
-          aria-label="Sonar — página inicial"
-        >
-          <LogoSvg height={56} />
-        </Link>
-
-        {isDrawer && (
-          <button
-            ref={closeBtnRef}
-            type="button"
-            onClick={onClose}
-            aria-label="Fechar menu"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg
-                       border border-[var(--color-line)] bg-[var(--color-surface-2)]
-                       text-[var(--color-ivory)] transition
-                       hover:bg-[var(--color-line)]"
+    <aside className={shellClass} aria-label="Navegação principal">
+      {/* Header: faixa de grid quadriculado verde com logo sobreposto.
+          A faixa "sangra" pras laterais (negative margin) pra cobrir o
+          padding interno do shell. */}
+      <div className="relative -mx-4 -mt-6 mb-2 overflow-hidden">
+        <div
+          className="bg-grid-strong animate-grid-pulse absolute inset-0"
+          aria-hidden="true"
+        />
+        {/* Vinheta dourada nos cantos pra suavizar a borda do grid */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse at top, rgba(60,255,138,0.10), transparent 70%)",
+          }}
+        />
+        <div className="relative flex items-center justify-between gap-2 px-4 py-5">
+          <Link
+            href={homeHref}
+            className="inline-flex items-center rounded-lg outline-none transition
+                       focus-visible:ring-2 focus-visible:ring-[var(--color-signal)]"
+            aria-label="Sonar — página inicial"
           >
-            <X className="h-4 w-4" aria-hidden="true" />
-          </button>
-        )}
+            <LogoSvg height={48} />
+          </Link>
+
+          {isDrawer && (
+            <button
+              ref={closeBtnRef}
+              type="button"
+              onClick={onClose}
+              aria-label="Fechar menu"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg
+                         border border-[var(--color-line)] bg-[var(--color-surface-2)]
+                         text-[var(--color-ivory)] transition
+                         hover:bg-[var(--color-line)]"
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Nav */}
@@ -302,11 +319,7 @@ function SidebarFooter({
           {usuario.email}
         </span>
         <div className="flex items-center gap-2">
-          <PortalBadge portal={portal} />
-          <span className="truncate text-[10px] uppercase tracking-[0.12em]
-                           text-[var(--color-ivory-40)]">
-            {usuario.papel}
-          </span>
+          <PortalBadge portal={portal} papel={usuario.papel} />
         </div>
       </div>
 
@@ -340,10 +353,19 @@ function SidebarFooter({
 }
 
 // --------------------------------------------------------------------------
-// Portal badge (verde signal pra Equipe, dourado pra Cliente)
+// Badge do PAPEL do usuário (ADMIN/SÓCIO/FUNCIONÁRIO em signal verde;
+// CLIENTE em dourado).
 // --------------------------------------------------------------------------
 
-function PortalBadge({ portal }: { portal: SidebarPortal }) {
+function PortalBadge({
+  portal,
+  papel,
+}: {
+  portal: SidebarPortal;
+  papel: string;
+}) {
+  const label = papel || (portal === "equipe" ? "EQUIPE" : "CLIENTE");
+
   if (portal === "equipe") {
     return (
       <span
@@ -352,7 +374,7 @@ function PortalBadge({ portal }: { portal: SidebarPortal }) {
                    px-2 py-0.5 text-[10px] uppercase tracking-[0.14em]
                    text-[var(--color-signal)]"
       >
-        Equipe
+        {label}
       </span>
     );
   }
@@ -364,7 +386,7 @@ function PortalBadge({ portal }: { portal: SidebarPortal }) {
                  px-2 py-0.5 text-[10px] uppercase tracking-[0.14em]
                  text-[var(--color-gold)]"
     >
-      Cliente
+      {label}
     </span>
   );
 }
