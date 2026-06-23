@@ -60,10 +60,7 @@ export default async function ClienteLayout({ children }: { children: ReactNode 
               <strong className="font-medium">Modo visualização —</strong>
               você está vendo a plataforma como o cliente vê.
             </span>
-            <Link
-              href="/equipe"
-              className="font-mono text-[10px] uppercase tracking-[0.18em] underline-offset-2 hover:underline"
-            >
+            <Link href="/equipe" className="btn-neon-gold">
               ← Voltar para a equipe
             </Link>
           </div>

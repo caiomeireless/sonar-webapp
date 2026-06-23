@@ -70,10 +70,7 @@ export default async function DossieClientePage({ params, searchParams }: Props)
       <section className="relative overflow-hidden">
         {/* Glow gold removido — fundo unico (AetherBackground do layout). */}
         <div className="relative mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
-          <Link
-            href="/cliente/casos"
-            className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--color-gold)] transition hover:text-[var(--color-tip-glow)]"
-          >
+          <Link href="/cliente/casos" className="btn-neon-gold">
             ← Voltar
           </Link>
 
@@ -185,10 +182,7 @@ function AcessoNegado() {
             Este devedor não consta entre os casos vinculados ao seu email de
             contato. Se isso está errado, entre em contato com o escritório.
           </p>
-          <Link
-            href="/cliente/casos"
-            className="mt-6 inline-block rounded-lg border border-[var(--color-ivory-22)] bg-white/5 px-4 py-2 text-xs font-medium text-ivory transition hover:border-[var(--color-signal)] hover:text-[var(--color-signal)]"
-          >
+          <Link href="/cliente/casos" className="btn-neon-gold mt-6">
             ← Voltar para casos
           </Link>
         </SpotlightCard>

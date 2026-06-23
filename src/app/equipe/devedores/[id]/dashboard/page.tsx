@@ -92,10 +92,7 @@ export default async function DashboardCasoPage({ params, searchParams }: Props)
             </p>
           </div>
 
-          <Link
-            href={dossieHref}
-            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-[var(--color-ivory-22)] bg-white/5 px-4 py-2.5 text-xs font-medium uppercase tracking-[0.12em] text-ivory transition hover:border-[var(--color-gold)] hover:text-[var(--color-gold)]"
-          >
+          <Link href={dossieHref} className="btn-neon-gold shrink-0">
             ← Voltar ao dossiê
           </Link>
         </div>
@@ -246,10 +243,7 @@ function NaoEncontrado({ voltarHref }: { voltarHref: string }) {
             O identificador informado não corresponde a nenhum devedor
             cadastrado.
           </p>
-          <Link
-            href={voltarHref}
-            className="mt-6 inline-block rounded-lg border border-[var(--color-ivory-22)] bg-white/5 px-4 py-2 text-xs font-medium text-ivory transition hover:border-[var(--color-signal)] hover:text-[var(--color-signal)]"
-          >
+          <Link href={voltarHref} className="btn-neon-gold mt-6">
             ← Voltar para devedores
           </Link>
         </SpotlightCard>

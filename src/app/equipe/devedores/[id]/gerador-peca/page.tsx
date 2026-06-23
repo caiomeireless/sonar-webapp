@@ -57,9 +57,9 @@ export default async function GeradorPecaPage({
           <div className="flex flex-col gap-1">
             <Link
               href={`/equipe/devedores/${devedorId}${euQuery}`}
-              className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-gold)] transition hover:text-[var(--color-tip-glow)]"
+              className="btn-neon-gold self-start"
             >
-              ← Voltar ao dossie
+              ← Voltar ao dossiê
             </Link>
             <h1 className="font-serif text-xl text-ivory sm:text-2xl">
               Gerador de Peca ·{" "}
@@ -98,10 +98,7 @@ function AcessoNegado({ voltarHref }: { voltarHref: string }) {
             O identificador informado nao corresponde a nenhum devedor
             cadastrado.
           </p>
-          <Link
-            href={voltarHref}
-            className="mt-6 inline-block rounded-lg border border-[var(--color-ivory-22)] bg-white/5 px-4 py-2 text-xs font-medium text-ivory transition hover:border-[var(--color-signal)] hover:text-[var(--color-signal)]"
-          >
+          <Link href={voltarHref} className="btn-neon-gold mt-6">
             ← Voltar para devedores
           </Link>
         </SpotlightCard>

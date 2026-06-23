@@ -36,10 +36,7 @@ export default async function NovoDevedorPage({ searchParams }: Props) {
 
   return (
     <main className="mx-auto max-w-[820px] px-6 py-16 sm:px-10">
-      <Link
-        href={`/equipe/devedores${linkBase}`}
-        className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--color-gold)] transition hover:text-[var(--color-tip-glow)]"
-      >
+      <Link href={`/equipe/devedores${linkBase}`} className="btn-neon-gold">
         ← Voltar
       </Link>
 

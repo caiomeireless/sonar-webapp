@@ -44,14 +44,30 @@ export type CardStackItem = {
   href?: string;
 };
 
+/**
+ * Contexto passado ao `renderCard` — informa o estado do card no leque.
+ * O 2o argumento usado a ser apenas `isTop: boolean`; agora e' um objeto
+ * pra permitir extensoes (ex.: `index`, `offset`) sem virar breaking change.
+ */
+export type CardRenderContext = {
+  /** True quando o card e' o do topo (alvo de drag/click). */
+  active: boolean;
+  /** Alias historico de `active`. */
+  isTop: boolean;
+  /** Indice absoluto do card na lista `items`. */
+  index: number;
+  /** Profundidade no leque: 0 = topo, 1 = 2o, etc. */
+  offset: number;
+};
+
 export type CardStackProps<T extends CardStackItem> = {
   items: T[];
   /**
-   * Render customizado de cada card. Recebe o item e um flag indicando se
-   * ele esta no topo do baralho (ativo). Se omitido, exibe um placeholder
+   * Render customizado de cada card. Recebe o item e um contexto com
+   * `active`/`isTop`/`index`/`offset`. Se omitido, exibe um placeholder
    * neutro.
    */
-  renderCard?: (item: T, isTop: boolean) => ReactNode;
+  renderCard?: (item: T, ctx: CardRenderContext) => ReactNode;
   /** Quantos cards do topo devem ser visiveis no leque. Default: 3. */
   visibleCount?: number;
   /** Distancia (px) que classifica o gesto como swipe. Default: 90. */
@@ -70,6 +86,29 @@ export type CardStackProps<T extends CardStackItem> = {
   className?: string;
   /** Callback quando o card do topo muda. */
   onChange?: (index: number, item: T) => void;
+  // ---- Tuning visual do leque 3D --------------------------------------
+  /** Fracao [0..1] de quanto cada camada abaixa em relacao a anterior. Default: 0 (controlado por `depthPx` apenas). */
+  overlap?: number;
+  /** Abertura do leque em graus (espalhamento dos cards de fundo). Default: 0 — comportamento legado. */
+  spreadDeg?: number;
+  /** Perspectiva 3D em px aplicada no palco. Default: 1200. */
+  perspectivePx?: number;
+  /** Recuo Y (px) entre cada camada do leque. Default: 14 (legado). */
+  depthPx?: number;
+  /** Tilt em X (graus) aplicado ao palco — da sensacao de leque inclinado. Default: 0. */
+  tiltXDeg?: number;
+  /** Eleva (px) o card ativo. Default: 0. */
+  activeLiftPx?: number;
+  /** Escala do card ativo. Default: 1. */
+  activeScale?: number;
+  /** Escala dos cards inativos. Default: 1 - offset * 0.05 (legado). */
+  inactiveScale?: number;
+  /** Rigidez da spring de animacao. Default: 280. */
+  springStiffness?: number;
+  /** Amortecimento da spring. Default: 30. */
+  springDamping?: number;
+  /** Habilita navegacao circular (wrap nos dots e ao chegar nas pontas). Default: true. */
+  loop?: boolean;
 };
 
 // ---------------------------------------------------------------------------
@@ -88,6 +127,17 @@ export function CardStack<T extends CardStackItem>({
   cardHeight = 420,
   className,
   onChange,
+  overlap = 0,
+  spreadDeg = 0,
+  perspectivePx = 1200,
+  depthPx = 14,
+  tiltXDeg = 0,
+  activeLiftPx = 0,
+  activeScale = 1,
+  inactiveScale,
+  springStiffness = 280,
+  springDamping = 30,
+  loop = true,
 }: CardStackProps<T>) {
   const prefersReducedMotion = useReducedMotion();
   const [index, setIndex] = useState(0);
@@ -101,9 +151,11 @@ export function CardStack<T extends CardStackItem>({
   const wrap = useCallback(
     (i: number) => {
       if (total === 0) return 0;
-      return ((i % total) + total) % total;
+      if (loop) return ((i % total) + total) % total;
+      // sem loop: clamp nas pontas
+      return Math.max(0, Math.min(total - 1, i));
     },
-    [total],
+    [total, loop],
   );
 
   const goTo = useCallback(
@@ -154,12 +206,13 @@ export function CardStack<T extends CardStackItem>({
 
   // ---- Lista visivel: pega `visibleCount` cards a partir do topo ----------
   const visible = useMemo(() => {
-    if (total === 0) return [] as Array<{ item: T; offset: number }>;
+    if (total === 0)
+      return [] as Array<{ item: T; offset: number; absIndex: number }>;
     const count = Math.min(visibleCount, total);
-    return Array.from({ length: count }, (_, offset) => ({
-      item: items[wrap(index + offset)],
-      offset,
-    }));
+    return Array.from({ length: count }, (_, offset) => {
+      const absIndex = wrap(index + offset);
+      return { item: items[absIndex], offset, absIndex };
+    });
   }, [items, index, visibleCount, total, wrap]);
 
   if (total === 0) {
@@ -210,11 +263,13 @@ export function CardStack<T extends CardStackItem>({
         style={{
           width: cardWidth,
           height: cardHeight,
-          perspective: 1200,
+          perspective: perspectivePx,
+          transformStyle: "preserve-3d",
+          transform: tiltXDeg ? `rotateX(${tiltXDeg}deg)` : undefined,
         }}
       >
         <AnimatePresence initial={false} custom={direction}>
-          {visible.map(({ item, offset }) => {
+          {visible.map(({ item, offset, absIndex }) => {
             const isTop = offset === 0;
             return (
               <FanCard
@@ -228,9 +283,22 @@ export function CardStack<T extends CardStackItem>({
                 prefersReducedMotion={!!prefersReducedMotion}
                 onSwipeLeft={goNext}
                 onSwipeRight={goPrev}
+                depthPx={depthPx}
+                overlap={overlap}
+                spreadDeg={spreadDeg}
+                activeLiftPx={activeLiftPx}
+                activeScale={activeScale}
+                inactiveScale={inactiveScale}
+                springStiffness={springStiffness}
+                springDamping={springDamping}
               >
                 {renderCard ? (
-                  renderCard(item, isTop)
+                  renderCard(item, {
+                    active: isTop,
+                    isTop,
+                    index: absIndex,
+                    offset,
+                  })
                 ) : (
                   <DefaultPlaceholder item={item} />
                 )}
@@ -282,6 +350,14 @@ type FanCardProps = {
   onSwipeLeft: () => void;
   onSwipeRight: () => void;
   children: ReactNode;
+  depthPx: number;
+  overlap: number;
+  spreadDeg: number;
+  activeLiftPx: number;
+  activeScale: number;
+  inactiveScale?: number;
+  springStiffness: number;
+  springDamping: number;
 };
 
 function FanCard({
@@ -295,11 +371,31 @@ function FanCard({
   onSwipeLeft,
   onSwipeRight,
   children,
+  depthPx,
+  overlap,
+  spreadDeg,
+  activeLiftPx,
+  activeScale,
+  inactiveScale,
+  springStiffness,
+  springDamping,
 }: FanCardProps) {
   // Cada camada do leque recua um pouco no Y, encolhe e gira de leve.
-  const yOffset = offset * 14;
-  const scale = 1 - offset * 0.05;
-  const rotateBase = offset === 0 ? 0 : (offset % 2 === 0 ? -1 : 1) * offset * 2;
+  // `overlap` 0..1 puxa o card pra cima do anterior; `depthPx` continua
+  // contribuindo com um delta pequeno pra dar profundidade visual.
+  const overlapPull = overlap * cardHeight * offset;
+  const yOffset = offset * depthPx - overlapPull + (isTop ? -activeLiftPx : 0);
+  const inactiveScaleResolved =
+    inactiveScale ?? 1 - offset * 0.05;
+  const scale = isTop ? activeScale : inactiveScaleResolved;
+  // Se `spreadDeg` foi passado, abrimos o leque com angulos crescentes
+  // alternando esquerda/direita; senao mantemos o comportamento legado.
+  const rotateBase =
+    offset === 0
+      ? 0
+      : spreadDeg > 0
+        ? (offset % 2 === 0 ? -1 : 1) * (spreadDeg / 2) * Math.ceil(offset / 2)
+        : (offset % 2 === 0 ? -1 : 1) * offset * 2;
 
   // Drag so na carta do topo
   const x = useMotionValue(0);
@@ -351,8 +447,8 @@ function FanCard({
       }
       transition={{
         type: "spring",
-        stiffness: 280,
-        damping: 30,
+        stiffness: springStiffness,
+        damping: springDamping,
         mass: 0.9,
       }}
       drag={isTop ? "x" : false}

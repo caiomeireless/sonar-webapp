@@ -47,11 +47,8 @@ export default async function CalculoPage({ params, searchParams }: Props) {
         {/* Glow gold removido — fundo unico (AetherBackground do layout). */}
         <div className="relative mx-auto max-w-[1100px] px-6 py-12 sm:px-10">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <Link
-              href={voltarHref}
-              className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--color-gold)] transition hover:text-[var(--color-tip-glow)]"
-            >
-              ← Voltar ao dossie
+            <Link href={voltarHref} className="btn-neon-gold">
+              ← Voltar ao dossiê
             </Link>
             <Link
               href={imprimirHref}
@@ -121,10 +118,7 @@ function NaoEncontrado({ voltarHref }: { voltarHref: string }) {
             O identificador informado nao corresponde a nenhum devedor
             cadastrado.
           </p>
-          <Link
-            href={voltarHref}
-            className="mt-6 inline-block rounded-lg border border-[var(--color-ivory-22)] bg-white/5 px-4 py-2 text-xs font-medium text-ivory transition hover:border-[var(--color-signal)] hover:text-[var(--color-signal)]"
-          >
+          <Link href={voltarHref} className="btn-neon-gold mt-6">
             ← Voltar
           </Link>
         </SpotlightCard>

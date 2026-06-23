@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FileText, User2, Coins, Clock, Scale } from "lucide-react";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
+import { CardStack } from "@/components/ui/CardStack";
 import { formatBRL, formatTempoRelativo } from "@/lib/format";
 import type { CredorComCasos } from "@/lib/devedores";
 
@@ -67,10 +68,16 @@ export function CasosCredorView({
       </div>
 
       {modo === "cards" || !hidratado ? (
-        <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {casos.map((c) => (
-            <CardCaso key={c.caso_id} caso={c} euQuery={euQuery} />
-          ))}
+        <div className="mt-8 flex justify-center">
+          <CardStack
+            items={casos.map((c) => ({ id: c.caso_id, ...c }))}
+            cardWidth={480}
+            cardHeight={540}
+            showDots
+            renderCard={(item, { active }) => (
+              <CardCaso caso={item} euQuery={euQuery} active={active} />
+            )}
+          />
         </div>
       ) : (
         <ListaCasos casos={casos} euQuery={euQuery} />
@@ -92,7 +99,7 @@ function ToggleBtn({
     <button
       type="button"
       role="tab"
-      aria-selected={ativo}
+      aria-selected={ativo ? "true" : "false"}
       onClick={onClick}
       className={
         "rounded-md px-4 py-2 font-mono text-[12px] uppercase tracking-[0.28em] transition " +
@@ -112,17 +119,21 @@ function ToggleBtn({
 function CardCaso({
   caso,
   euQuery,
+  active = true,
 }: {
   caso: CasoRow;
   euQuery: string;
+  active?: boolean;
 }) {
   const docLabel = caso.devedor.tipo === "PF" ? "CPF" : "CNPJ";
-  return (
-    <Link
-      href={`/equipe/devedores/${caso.devedor.id}${euQuery}`}
-      className="block"
+  // Conteudo do card (compartilhado entre versao ativa/inativa).
+  const conteudo = (
+    <SpotlightCard
+      className={
+        "h-full p-7 transition-opacity duration-300 " +
+        (active ? "cursor-pointer opacity-100" : "opacity-70")
+      }
     >
-      <SpotlightCard className="cursor-pointer p-7">
         {/* === DEVEDOR === */}
         <header>
           <span className="font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-signal)]">
@@ -209,6 +220,19 @@ function CardCaso({
           </div>
         </div>
       </SpotlightCard>
+  );
+
+  // Link clicavel SO no card ativo (topo do baralho). Cards de baixo ficam
+  // como <div> pra evitar navegacao acidental.
+  if (!active) {
+    return <div className="block h-full">{conteudo}</div>;
+  }
+  return (
+    <Link
+      href={`/equipe/devedores/${caso.devedor.id}${euQuery}`}
+      className="block h-full"
+    >
+      {conteudo}
     </Link>
   );
 }
