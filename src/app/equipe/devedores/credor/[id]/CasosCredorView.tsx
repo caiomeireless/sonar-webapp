@@ -9,7 +9,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FileText, User2, Coins, Clock, Scale } from "lucide-react";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
-import { CardStack } from "@/components/ui/CardStack";
+import { CardDeck } from "@/components/ui/CardDeck";
 import { formatBRL, formatTempoRelativo } from "@/lib/format";
 import type { CredorComCasos } from "@/lib/devedores";
 
@@ -69,24 +69,17 @@ export function CasosCredorView({
 
       {modo === "cards" || !hidratado ? (
         <div className="w-full max-w-[1100px] mx-auto mt-12">
-          <CardStack
-            items={casos.map((c) => ({ id: c.caso_id, ...c }))}
+          <CardDeck
+            items={casos.map((c) => ({ ...c, id: c.caso_id }))}
             cardWidth={400}
-            cardHeight={480}
-            overlap={0.32}
-            spreadDeg={18}
-            perspectivePx={1200}
-            depthPx={110}
-            tiltXDeg={6}
-            activeLiftPx={14}
-            activeScale={1.04}
-            inactiveScale={0.9}
-            springStiffness={280}
-            springDamping={28}
-            maxVisible={5}
-            loop
+            cardHeight={500}
+            visibleCount={4}
+            offsetTopPct={8}
+            scaleStep={0.05}
+            dimStep={0.12}
             showArrows
-            showDots
+            showProgress
+            loop
             renderCard={(item, { active }) => (
               <CardCaso caso={item} euQuery={euQuery} active={active} />
             )}
