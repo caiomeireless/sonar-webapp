@@ -130,6 +130,11 @@ function somarBens(bens: { valor_estimado_brl: number | null }[]): number {
 // LEITURA — CLIENTE (filtra por email_contato do credor)
 // ============================================================
 
+// E-mail demo: quando o "Visualizar como cliente" usa este alias, devolve
+// os casos do PRIMEIRO credor existente do banco (fallback que garante a
+// demo sempre ter conteúdo, sem precisar rodar o seed de novo).
+const DEMO_CLIENTE_EMAIL = "cliente.demo@battaglia.com.br";
+
 // Lista os casos visíveis pro cliente logado (devedores rastreados pelo
 // credor que tem email_contato = clienteEmail).
 export async function listarCasosDoCliente(clienteEmail: string): Promise<CasoListagem[]> {
@@ -142,7 +147,20 @@ export async function listarCasosDoCliente(clienteEmail: string): Promise<CasoLi
     .select("id")
     .eq("email_contato", email);
 
-  const credorIds = (credores ?? []).map((c) => c.id as number);
+  let credorIds = (credores ?? []).map((c) => c.id as number);
+
+  // Fallback demo: se for o e-mail do "Visualizar como cliente" e ele não
+  // tiver credor associado, pega o primeiro credor do banco. Garante que
+  // a apresentação sempre mostra dados ricos.
+  if (credorIds.length === 0 && email === DEMO_CLIENTE_EMAIL) {
+    const { data: primeiroCredor } = await sb
+      .from("credores")
+      .select("id")
+      .order("id", { ascending: true })
+      .limit(1);
+    credorIds = (primeiroCredor ?? []).map((c) => c.id as number);
+  }
+
   if (credorIds.length === 0) return [];
 
   // Depois pega os casos desses credores.
@@ -202,6 +220,12 @@ export async function obterDossieParaCliente(
 ): Promise<Dossie | null> {
   const sb = createAdminClient();
   const email = clienteEmail.toLowerCase().trim();
+
+  // Fallback demo: cliente.demo vê qualquer devedor que exista (visão
+  // sintética de "todos os processos" pra apresentação).
+  if (email === DEMO_CLIENTE_EMAIL) {
+    return obterDossie(devedorId);
+  }
 
   // Verifica se este devedor está em algum caso de credor com esse email.
   const { data: autorizacao } = await sb
