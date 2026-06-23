@@ -106,14 +106,8 @@ export function TopBar({
       />
 
       <div className="relative flex min-h-[122px] items-center px-6 sm:px-10">
-        {/* Esquerda: Sincronizar + Sino */}
-        <div className="flex items-center gap-2">
-          <BotaoSincronizar />
-          <BotaoSino />
-        </div>
-
-        {/* Centro absoluto: título da página + subtítulo, centralizados
-            horizontal e vertical, independentes do conteúdo lateral. */}
+        {/* Centro absoluto: título + subtítulo, centralizados horizontal
+            e vertical, independentes do conteúdo lateral. */}
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
           <h1 className="font-serif text-2xl font-medium uppercase tracking-[0.06em] text-[var(--color-fg)] sm:text-[28px]">
             {titulo}
@@ -125,9 +119,11 @@ export function TopBar({
           ) : null}
         </div>
 
-        {/* Direita: AssistantBot (3D) + Avatar */}
+        {/* Direita: tudo agrupado — robô + Sincronizar + Sino + Avatar */}
         <div className="ml-auto flex items-center gap-3">
-          <AssistantBot />
+          <AssistantBot solido />
+          <BotaoSincronizar />
+          <BotaoSino />
           <AvatarMenu usuario={usuario} inicial={inicial} />
         </div>
       </div>

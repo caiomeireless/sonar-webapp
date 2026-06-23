@@ -8,7 +8,12 @@ import { STAIRCASE_PATTERN } from "@/components/LogoSvg";
 const SCENE_URL = "https://prod.spline.design/PyzDhpQ9E5f1E3MT/scene.splinecode";
 const SUPPORT_EMAIL = "contato@bpadvogados.com.br";
 
-export function AssistantBot() {
+type Props = {
+  /** Modo "topbar": fundo onyx sólido atrás do robô + sem mixBlendMode (cor total). */
+  solido?: boolean;
+};
+
+export function AssistantBot({ solido = false }: Props = {}) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [email, setEmail] = useState("");
   const [msg, setMsg] = useState("");
@@ -34,8 +39,17 @@ export function AssistantBot() {
         onClick={open}
         title="Tem dúvidas? Fale com a equipe"
         aria-label="Tire suas dúvidas com a equipe"
-        className="group relative h-[130px] w-[110px] cursor-pointer"
+        className="group relative h-[130px] w-[110px] cursor-pointer overflow-hidden rounded-xl"
       >
+        {/* Fundo onyx opaco — usado quando `solido` (modo topbar) pra que o
+            mixBlendMode lighten clareie sobre PRETO (igual à landing), mesmo
+            quando o layout pai tem fundo translúcido ou particulas. */}
+        {solido ? (
+          <span
+            aria-hidden="true"
+            className="absolute inset-0 bg-onyx"
+          />
+        ) : null}
         {/* Renderiza o canvas Spline INTEIRO em alta resolução (400x520),
             depois encolhe via CSS transform pra caber em 110x130 visualmente.
             O scene aparece em miniatura COMPLETA (robô + cubo, sem corte).

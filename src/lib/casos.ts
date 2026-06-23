@@ -149,16 +149,19 @@ export async function listarCasosDoCliente(clienteEmail: string): Promise<CasoLi
 
   let credorIds = (credores ?? []).map((c) => c.id as number);
 
-  // Fallback demo: se for o e-mail do "Visualizar como cliente" e ele não
-  // tiver credor associado, pega o primeiro credor do banco. Garante que
-  // a apresentação sempre mostra dados ricos.
-  if (credorIds.length === 0 && email === DEMO_CLIENTE_EMAIL) {
-    const { data: primeiroCredor } = await sb
-      .from("credores")
-      .select("id")
-      .order("id", { ascending: true })
-      .limit(1);
-    credorIds = (primeiroCredor ?? []).map((c) => c.id as number);
+  // Fallback demo: cliente.demo sempre cai num credor que TEM casos no banco
+  // (ignora vinculação por email_contato — se o seed criou esse perfil sem
+  // credor próprio ou sem casos, ele "empresta" do primeiro credor com casos).
+  if (email === DEMO_CLIENTE_EMAIL) {
+    const { data: credoresComCasos } = await sb
+      .from("casos")
+      .select("credor_id")
+      .order("credor_id", { ascending: true })
+      .limit(50);
+    const idsComCasos = Array.from(
+      new Set((credoresComCasos ?? []).map((c) => c.credor_id as number)),
+    );
+    if (idsComCasos.length > 0) credorIds = idsComCasos;
   }
 
   if (credorIds.length === 0) return [];
