@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 
 import { Sidebar } from "@/components/Sidebar";
+import { TopBar } from "@/components/TopBar";
 import { NAV_EQUIPE } from "@/lib/nav-equipe";
 import { ehCliente } from "@/lib/perfis";
 import { perfilLogado } from "@/lib/perfis-server";
@@ -31,7 +32,10 @@ export default async function EquipeLayout({ children }: { children: ReactNode }
         usuario={{ email, papel }}
         portal="equipe"
       />
-      <main className="min-w-0 flex-1">{children}</main>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <TopBar usuario={{ email, papel }} portal="equipe" />
+        <main className="flex-1">{children}</main>
+      </div>
     </div>
   );
 }

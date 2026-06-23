@@ -198,7 +198,7 @@ function SidebarPanel({
                        focus-visible:ring-2 focus-visible:ring-[var(--color-signal)]"
             aria-label="Sonar — página inicial"
           >
-            <LogoSvg height={48} />
+            <LogoSvg height={96} />
           </Link>
 
           {isDrawer && (
@@ -344,10 +344,20 @@ function SidebarFooter({
         </form>
       </div>
 
-      {/* Assinatura */}
-      <p className="px-1 text-[10px] text-[var(--color-ivory-40)]">
-        Sonar &middot; Battaglia &amp; Pedrosa
-      </p>
+      {/* Assinatura — projeto BETA + autoria */}
+      <div className="flex flex-col gap-0.5 px-1">
+        <div className="flex items-center gap-1.5">
+          <span className="inline-flex items-center rounded-full border border-[var(--color-signal-soft-2)] bg-[var(--color-signal-soft)] px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-[0.18em] text-[var(--color-signal)]">
+            Beta
+          </span>
+          <span className="font-mono text-[10px] text-[var(--color-ivory-66)]">
+            Sonar &middot; Battaglia &amp; Pedrosa
+          </span>
+        </div>
+        <p className="text-[10px] text-[var(--color-ivory-40)]">
+          Projeto conduzido por Caio Vicentino
+        </p>
+      </div>
     </div>
   );
 }

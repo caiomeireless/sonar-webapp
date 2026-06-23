@@ -13,10 +13,38 @@ import { devEuFromParam } from "@/lib/dev-auth";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { formatBRL, formatStatus, formatTempoRelativo } from "@/lib/format";
 import { AcoesBuscaCardThemis } from "./AcoesBuscaCardThemis";
+import { FiltroThemis } from "./FiltroThemis";
+import { ToggleVisao, type VisaoThemis } from "./ToggleVisao";
 
 type Props = {
-  searchParams?: Promise<{ eu?: string | string[] }>;
+  searchParams?: Promise<{
+    eu?: string | string[];
+    q?: string | string[];
+    v?: string | string[];
+  }>;
 };
+
+function normalizar(s: string | null | undefined): string {
+  return (s ?? "")
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[̀-ͯ]/g, "")
+    .trim();
+}
+
+function matchBusca(p: ProcessoThemis, q: string): boolean {
+  if (!q) return true;
+  const alvo = normalizar(q);
+  // Busca por número do processo, pasta (= ID interno), nome do devedor ou credor.
+  const campos = [
+    p.numero_processo,
+    String(p.caso_id),
+    p.devedor.nome,
+    p.devedor.documento,
+    p.credor.nome,
+  ].map(normalizar);
+  return campos.some((c) => c.includes(alvo));
+}
 
 export default async function ThemisPage({ searchParams }: Props) {
   const params = (await searchParams) ?? {};
@@ -26,8 +54,12 @@ export default async function ThemisPage({ searchParams }: Props) {
   const eu = euDev ?? perfil?.email ?? null;
   if (!eu) redirect("/login");
 
-  const processos = await listarProcessosThemis();
+  const todos = await listarProcessosThemis();
+  const q = (Array.isArray(params.q) ? params.q[0] : params.q) ?? "";
+  const processos = q ? todos.filter((p) => matchBusca(p, q)) : todos;
   const linkBase = euDev ? `?eu=${encodeURIComponent(euDev)}` : "";
+  const vRaw = Array.isArray(params.v) ? params.v[0] : params.v;
+  const visao: VisaoThemis = vRaw === "lista" ? "lista" : "cards";
 
   const totalProcessos = processos.length;
   const totalRastreados = processos.filter((p) => p.ja_rastreado).length;
@@ -58,7 +90,9 @@ export default async function ThemisPage({ searchParams }: Props) {
         </h1>
         <p className="mt-6 max-w-[680px] font-mono text-sm text-[var(--color-ivory-66)]">
           {totalProcessos === 0
-            ? "Nenhum processo recebido do Themis ainda."
+            ? q
+              ? `Nenhum processo encontrado para "${q}".`
+              : "Nenhum processo recebido do Themis ainda."
             : `${totalProcessos} ${
                 totalProcessos === 1 ? "processo recebido" : "processos recebidos"
               } do sistema interno · ${totalPendentes} ${
@@ -67,6 +101,12 @@ export default async function ThemisPage({ searchParams }: Props) {
                 totalRastreados === 1 ? "" : "s"
               }`}
         </p>
+
+        {/* Filtro + toggle de visualização */}
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+          <FiltroThemis />
+          <ToggleVisao atual={visao} />
+        </div>
       </div>
 
       {/* Lista */}
@@ -82,6 +122,60 @@ export default async function ThemisPage({ searchParams }: Props) {
               escritório cadastra uma execução ou cumprimento de sentença.
             </p>
           </SpotlightCard>
+        </div>
+      ) : visao === "lista" ? (
+        <div className="relative mt-8 overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-1)]">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-[var(--color-line)] text-left font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+                <th className="px-4 py-3">Processo</th>
+                <th className="px-4 py-3">Devedor</th>
+                <th className="px-4 py-3">Crédito</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Rastreamento</th>
+              </tr>
+            </thead>
+            <tbody>
+              {processos.map((p, i) => {
+                const status = formatStatus(p.status);
+                return (
+                  <tr
+                    key={p.caso_id}
+                    className={
+                      "border-b border-[var(--color-line)] transition hover:bg-[var(--color-surface-2)] " +
+                      (i % 2 === 1 ? "bg-[var(--color-surface-2)]/30" : "")
+                    }
+                  >
+                    <td className="px-4 py-3 font-mono text-xs text-[var(--color-gold)]">
+                      {p.numero_processo ?? "—"}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="text-ivory">{p.devedor.nome}</div>
+                      <div className="font-mono text-[10px] text-[var(--color-ivory-66)]">
+                        {p.devedor.tipo === "PF" ? "PF" : "PJ"} · {p.devedor.documento}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 font-mono text-xs text-[var(--color-gold)]">
+                      {p.valor_credito_brl !== null ? formatBRL(p.valor_credito_brl) : "—"}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className="inline-flex rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em]"
+                        style={{ borderColor: status.color, color: status.color }}
+                      >
+                        {status.label}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 font-mono text-xs text-[var(--color-ivory-88)]">
+                      {p.ja_rastreado
+                        ? `${p.total_bens} ${p.total_bens === 1 ? "bem" : "bens"}`
+                        : "Aguardando"}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       ) : (
         <div className="relative mt-12 space-y-4">
