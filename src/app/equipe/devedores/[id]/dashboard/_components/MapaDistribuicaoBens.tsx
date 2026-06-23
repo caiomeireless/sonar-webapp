@@ -1,299 +1,288 @@
 "use client";
 
-// Mapa de distribuicao geografica dos bens — SVG puro com d3-geo.
+// Mapa de distribuicao geografica dos bens — Brasil inteiro com bolhas por UF.
+// Inspirado no MapaBrasil do BP CRM: paths SVG embarcados (br-geo.ts), zero fetch,
+// renderizacao instantanea. Hover destaca a UF e mostra detalhes lateralmente.
 //
-// Decisao automatica entre 2 mapas:
-//   - TODAS as cidades em SP  -> carrega /maps/sp.geojson (municipios)
-//   - Pelo menos 1 fora de SP -> carrega /maps/br.geojson (estados)
-//
-// Renderiza paths transparentes com stroke leve + pin (halo + dot) por cidade.
-// Tamanho do pin: sqrt(qtdBens) clampeado [5..14].
-// Cor: todos 'gold' por enquanto — todos os bens entram como "identificado".
-// Quando o schema ganhar `penhora_confirmada`, alternar pra signal verde
-// quando >= 1 confirmado na cidade.
-//
-// Component CLIENT porque:
-//   - fetch do geojson (publica, cacheada) acontece no useEffect
-//   - SVG depende de width/height medidos no DOM via ResizeObserver
+// Agregacao: recebe DistribuicaoGeografica[] (por cidade+uf), agrupa por UF
+// pras bolhas; cidades viram lista no painel lateral quando a UF e selecionada.
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { geoMercator, geoPath, type GeoPermissibleObjects } from "d3-geo";
-import type {
-  Feature,
-  FeatureCollection,
-  Geometry,
-  GeoJsonProperties,
-} from "geojson";
+import { useMemo, useState } from "react";
 
 import type { DistribuicaoGeografica } from "@/lib/dashboard-caso";
-import { buscarCoord } from "@/lib/cidades-coords";
+import { BR_STATES, BR_VIEWBOX } from "@/lib/br-geo";
 import { formatBRL } from "@/lib/format";
-
 import { DashboardCard } from "@/components/dashboard/DashboardCard";
-
-// ============================================================
-// CONSTANTES visuais
-// ============================================================
-
-// Verde 'penhora confirmada' (futuro) vs. gold 'identificado' (atual).
-// Comentario: quando schema ganhar penhora_confirmada, usar SIGNAL.
-const COR_IDENTIFICADO = "#C9A24A"; // gold
-const COR_CONFIRMADO = "#3CFF8A"; // signal — placeholder p/ uso futuro
-
-// Faixa de tamanhos do pin (raio do dot).
-const PIN_MIN = 5;
-const PIN_MAX = 14;
-
-// ============================================================
-// TIPOS
-// ============================================================
 
 type Props = {
   distribuicao: DistribuicaoGeografica[];
 };
 
-type GeoFC = FeatureCollection<Geometry, GeoJsonProperties>;
-type GeoFeat = Feature<Geometry, GeoJsonProperties>;
-
-type PinPlot = {
-  cidade: string;
-  uf: string;
+interface DadosUf {
   qtdBens: number;
-  valorTotalBrl: number;
-  cx: number;
-  cy: number;
-  raio: number;
-  cor: string;
-  // penhoraConfirmada: virara campo futuro (DistribuicaoGeografica.confirmados);
-  // por hora todos sao 'identificado' -> cor gold.
-};
-
-// ============================================================
-// HELPERS
-// ============================================================
-
-function todasEmSP(itens: DistribuicaoGeografica[]): boolean {
-  if (itens.length === 0) return true; // empty -> default pra SP
-  return itens.every((d) => (d.uf ?? "").toUpperCase() === "SP");
+  valorBrl: number;
+  cidades: { nome: string; qtd: number; valor: number }[];
 }
 
-function raioPin(qtd: number): number {
-  // sqrt amortiza diferencas grandes; clamp pros extremos visuais.
-  const r = Math.sqrt(Math.max(1, qtd)) * 3;
-  return Math.max(PIN_MIN, Math.min(PIN_MAX, r));
-}
+function agregarPorUf(
+  itens: DistribuicaoGeografica[],
+): { porUf: Record<string, DadosUf>; semUf: number; totalGeral: number; valorGeral: number } {
+  const porUf: Record<string, DadosUf> = {};
+  let semUf = 0;
+  let totalGeral = 0;
+  let valorGeral = 0;
 
-async function carregarGeojson(url: string): Promise<GeoFC> {
-  const res = await fetch(url, { cache: "force-cache" });
-  if (!res.ok) throw new Error(`Falha ao carregar ${url}: ${res.status}`);
-  const json = (await res.json()) as GeoFC;
-  return json;
+  for (const d of itens) {
+    totalGeral += d.qtdBens;
+    valorGeral += d.valorTotalBrl;
+    const uf = (d.uf ?? "").trim().toUpperCase();
+    if (!uf) {
+      semUf += d.qtdBens;
+      continue;
+    }
+    if (!porUf[uf]) porUf[uf] = { qtdBens: 0, valorBrl: 0, cidades: [] };
+    porUf[uf].qtdBens += d.qtdBens;
+    porUf[uf].valorBrl += d.valorTotalBrl;
+    porUf[uf].cidades.push({
+      nome: d.cidade || "—",
+      qtd: d.qtdBens,
+      valor: d.valorTotalBrl,
+    });
+  }
+  // Ordena cidades por qtd dentro de cada UF
+  for (const uf of Object.keys(porUf)) {
+    porUf[uf].cidades.sort((a, b) => b.qtd - a.qtd);
+  }
+  return { porUf, semUf, totalGeral, valorGeral };
 }
-
-// ============================================================
-// COMPONENTE
-// ============================================================
 
 export default function MapaDistribuicaoBens({ distribuicao }: Props) {
-  // Escolhe SP vs BR antes de qualquer fetch — memo evita troca de geojson
-  // a cada render caso `distribuicao` venha estavel.
-  const usarSP = useMemo(() => todasEmSP(distribuicao), [distribuicao]);
+  const [ativo, setAtivo] = useState<string | null>(null);
 
-  const [geojson, setGeojson] = useState<GeoFC | null>(null);
-  const [erro, setErro] = useState<string | null>(null);
+  const { porUf, semUf, totalGeral, valorGeral } = useMemo(
+    () => agregarPorUf(distribuicao),
+    [distribuicao],
+  );
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const [tamanho, setTamanho] = useState<{ w: number; h: number }>({
-    w: 600,
-    h: 450,
-  });
+  const max = useMemo(
+    () =>
+      Object.values(porUf).reduce((m, d) => Math.max(m, d.qtdBens), 0) || 1,
+    [porUf],
+  );
 
-  // ----- fetch do geojson quando a escolha SP/BR muda -----
-  useEffect(() => {
-    let cancelado = false;
-    setGeojson(null);
-    setErro(null);
-    const url = usarSP ? "/maps/sp.geojson" : "/maps/br.geojson";
-    carregarGeojson(url)
-      .then((j) => {
-        if (!cancelado) setGeojson(j);
-      })
-      .catch((e: unknown) => {
-        if (!cancelado) {
-          const msg = e instanceof Error ? e.message : "Erro desconhecido";
-          setErro(msg);
-        }
-      });
-    return () => {
-      cancelado = true;
-    };
-  }, [usarSP]);
+  const ranking = useMemo(
+    () =>
+      Object.entries(porUf)
+        .map(([uf, d]) => ({ uf, qtd: d.qtdBens, valor: d.valorBrl }))
+        .sort((a, b) => b.qtd - a.qtd),
+    [porUf],
+  );
 
-  // ----- mede o container (ResizeObserver) pra projection responsive -----
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const obs = new ResizeObserver((entries) => {
-      for (const e of entries) {
-        const cr = e.contentRect;
-        const w = Math.max(1, Math.round(cr.width));
-        const h = Math.max(1, Math.round(cr.height));
-        setTamanho((prev) => (prev.w === w && prev.h === h ? prev : { w, h }));
-      }
-    });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  // ----- projection + path generator (memoizados) -----
-  const proj = useMemo(() => {
-    if (!geojson) return null;
-    // fitSize escolhe scale+translate pra encaixar a FC inteira no svg.
-    return geoMercator().fitSize(
-      [tamanho.w, tamanho.h],
-      geojson as GeoPermissibleObjects,
-    );
-  }, [geojson, tamanho.w, tamanho.h]);
-
-  const pathGen = useMemo(() => {
-    if (!proj) return null;
-    return geoPath(proj);
-  }, [proj]);
-
-  // ----- pins plotaveis (precisam de coord) -----
-  const pins: PinPlot[] = useMemo(() => {
-    if (!proj) return [];
-    const out: PinPlot[] = [];
-    for (const d of distribuicao) {
-      const coord = buscarCoord(d.cidade, d.uf);
-      if (!coord) continue;
-      const xy = proj([coord.lng, coord.lat]);
-      if (!xy) continue;
-      out.push({
-        cidade: d.cidade,
-        uf: d.uf,
-        qtdBens: d.qtdBens,
-        valorTotalBrl: d.valorTotalBrl,
-        cx: xy[0],
-        cy: xy[1],
-        raio: raioPin(d.qtdBens),
-        // Por enquanto fixo no gold. Quando penhoraConfirmada existir:
-        //   cor: (d.qtdConfirmados ?? 0) >= 1 ? COR_CONFIRMADO : COR_IDENTIFICADO
-        cor: COR_IDENTIFICADO,
-      });
-    }
-    return out;
-  }, [distribuicao, proj]);
-
-  // Marca onde COR_CONFIRMADO sera usado no futuro — evita "declarado mas
-  // nao lido" do TS strict ate o schema chegar.
-  void COR_CONFIRMADO;
-
-  // ----- features pra iterar com chave estavel -----
-  const features: GeoFeat[] = geojson?.features ?? [];
-
-  // ============================================================
-  // RENDER
-  // ============================================================
-
-  const titulo = "Distribuicao geografica dos bens";
-  const descricao = usarSP
-    ? "Mapa de SP com pinos nas cidades onde ha bens identificados"
-    : "Mapa do Brasil com pinos nas cidades onde ha bens identificados";
+  const nomeDe = (uf: string) => BR_STATES.find((s) => s.uf === uf)?.nome ?? uf;
+  const raio = (qtd: number) => 5 + 27 * Math.sqrt(qtd / max);
+  const detalhe = ativo ? porUf[ativo] : null;
 
   return (
-    <DashboardCard titulo={titulo} descricao={descricao} accent="green">
+    <DashboardCard
+      titulo="Distribuicao geografica dos bens"
+      descricao="Bens identificados por UF. Passe o mouse para ver cidades."
+      accent="green"
+    >
       <div
-        ref={containerRef}
-        className="relative w-full"
-        style={{ aspectRatio: "4 / 3" }}
+        className="grid gap-5 lg:grid-cols-[1fr_240px]"
+        onMouseLeave={() => setAtivo(null)}
       >
-        {/* ===== Loading skeleton ===== */}
-        {!geojson && !erro ? (
-          <div className="absolute inset-0 animate-pulse rounded-md bg-[var(--color-ivory-12)]" />
-        ) : null}
-
-        {/* ===== Erro de fetch ===== */}
-        {erro ? (
-          <div className="absolute inset-0 flex items-center justify-center text-xs text-[var(--color-ivory-66)]">
-            Nao foi possivel carregar o mapa ({erro}).
-          </div>
-        ) : null}
-
-        {/* ===== SVG (so renderiza quando geojson + projection prontos) ===== */}
-        {geojson && pathGen ? (
+        {/* ===== Mapa ===== */}
+        <div className="relative">
           <svg
-            width={tamanho.w}
-            height={tamanho.h}
-            viewBox={`0 0 ${tamanho.w} ${tamanho.h}`}
-            className="absolute inset-0 h-full w-full"
+            viewBox={BR_VIEWBOX}
+            className="h-auto w-full"
             role="img"
-            aria-label={titulo}
+            aria-label="Mapa do Brasil"
           >
-            {/* Paths dos municipios/estados — fundo discreto, so contorno. */}
-            <g>
-              {features.map((f, i) => {
-                const d = pathGen(f);
-                if (!d) return null;
-                // Chave estavel: tenta id, depois properties.name/codarea, depois index.
-                const props = (f.properties ?? {}) as Record<string, unknown>;
-                const id =
-                  (f.id as string | number | undefined) ??
-                  (props.id as string | undefined) ??
-                  (props.name as string | undefined) ??
-                  (props.codarea as string | undefined) ??
-                  i;
+            {/* Contorno dos estados */}
+            {BR_STATES.map((s) => {
+              const tem = porUf[s.uf]?.qtdBens ?? 0;
+              const on = ativo === s.uf;
+              return (
+                <path
+                  key={s.uf}
+                  d={s.d}
+                  onMouseEnter={() => setAtivo(s.uf)}
+                  style={{
+                    fill: on
+                      ? "rgba(60, 255, 138, 0.16)"
+                      : tem > 0
+                        ? "rgba(60, 255, 138, 0.06)"
+                        : "rgba(234, 231, 220, 0.025)",
+                    stroke: on
+                      ? "var(--color-signal)"
+                      : "var(--color-ivory-22)",
+                    strokeWidth: on ? 1.5 : 0.7,
+                    cursor: tem > 0 ? "pointer" : "default",
+                    transition: "fill .15s, stroke .15s",
+                  }}
+                  vectorEffect="non-scaling-stroke"
+                />
+              );
+            })}
+
+            {/* Bolhas proporcionais — 1 por UF com bens */}
+            {BR_STATES.filter((s) => (porUf[s.uf]?.qtdBens ?? 0) > 0).map(
+              (s) => {
+                const qtd = porUf[s.uf].qtdBens;
+                const r = raio(qtd);
+                const on = ativo === s.uf;
                 return (
-                  <path
-                    key={String(id)}
-                    d={d}
-                    fill="rgba(232, 228, 214, 0.02)"
-                    stroke="var(--color-ivory-22)"
-                    strokeWidth={0.5}
-                    vectorEffect="non-scaling-stroke"
-                  />
+                  <g
+                    key={s.uf}
+                    onMouseEnter={() => setAtivo(s.uf)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    {/* halo */}
+                    <circle
+                      cx={s.cx}
+                      cy={s.cy}
+                      r={r * 1.6}
+                      style={{
+                        fill: "rgba(60, 255, 138, 0.18)",
+                        opacity: on ? 1 : 0.6,
+                        transition: "opacity .15s",
+                      }}
+                    />
+                    {/* dot */}
+                    <circle
+                      cx={s.cx}
+                      cy={s.cy}
+                      r={r}
+                      style={{
+                        fill: "rgba(60, 255, 138, 0.65)",
+                        stroke: "var(--color-signal)",
+                        strokeWidth: on ? 2 : 1,
+                        opacity: on ? 1 : 0.9,
+                        transition: "opacity .15s, stroke-width .15s",
+                      }}
+                    />
+                    {/* numero dentro da bolha (se cabe) */}
+                    {r >= 13 && (
+                      <text
+                        x={s.cx}
+                        y={s.cy}
+                        textAnchor="middle"
+                        dominantBaseline="central"
+                        style={{
+                          fill: "#050706",
+                          fontSize: r > 22 ? 16 : 11,
+                          fontWeight: 700,
+                          pointerEvents: "none",
+                        }}
+                      >
+                        {qtd}
+                      </text>
+                    )}
+                  </g>
                 );
-              })}
-            </g>
-
-            {/* Pins — halo + dot + tooltip nativo via <title>. */}
-            <g>
-              {pins.map((p, i) => (
-                <g key={`${p.uf}-${p.cidade}-${i}`}>
-                  <title>
-                    {`${p.cidade}/${p.uf}\n${p.qtdBens} ${
-                      p.qtdBens === 1 ? "bem" : "bens"
-                    }\n${formatBRL(p.valorTotalBrl)}`}
-                  </title>
-                  {/* halo — circulo maior, baixa opacidade */}
-                  <circle
-                    cx={p.cx}
-                    cy={p.cy}
-                    r={p.raio * 1.9}
-                    fill={p.cor}
-                    opacity={0.18}
-                  />
-                  {/* dot principal */}
-                  <circle
-                    cx={p.cx}
-                    cy={p.cy}
-                    r={p.raio}
-                    fill={p.cor}
-                    stroke="var(--color-carbon)"
-                    strokeWidth={1.2}
-                  />
-                </g>
-              ))}
-            </g>
+              },
+            )}
           </svg>
-        ) : null}
+        </div>
 
-        {/* ===== Empty state — sem nenhuma coord encontrada ===== */}
-        {geojson && pathGen && pins.length === 0 ? (
-          <div className="absolute inset-0 flex items-center justify-center text-xs text-[var(--color-ivory-66)]">
-            Sem dados geograficos disponiveis.
-          </div>
-        ) : null}
+        {/* ===== Painel lateral ===== */}
+        <div className="flex flex-col gap-3">
+          {detalhe ? (
+            <div className="rounded-xl border border-[var(--color-signal)]/30 bg-[rgba(60,255,138,0.06)] p-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+                {ativo}
+              </p>
+              <p className="text-base font-medium text-[var(--color-ivory)]">
+                {nomeDe(ativo!)}
+              </p>
+              <p className="mt-1 text-2xl font-medium tabular-nums text-[var(--color-signal)]">
+                {detalhe.qtdBens}
+              </p>
+              <p className="text-[11px] text-[var(--color-ivory-66)]">
+                {detalhe.qtdBens === 1 ? "bem identificado" : "bens identificados"}
+                {totalGeral
+                  ? ` · ${((detalhe.qtdBens / totalGeral) * 100).toFixed(1)}% do total`
+                  : ""}
+              </p>
+              <p className="mt-1.5 text-xs tabular-nums text-[var(--color-gold)]">
+                {formatBRL(detalhe.valorBrl)}
+              </p>
+              {detalhe.cidades.length > 0 && (
+                <div className="mt-3 border-t border-[var(--color-signal)]/15 pt-2">
+                  <p className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+                    Principais cidades
+                  </p>
+                  {detalhe.cidades.slice(0, 6).map((c) => (
+                    <div
+                      key={`${ativo}-${c.nome}`}
+                      className="flex items-center justify-between py-0.5 text-xs"
+                    >
+                      <span className="truncate text-[var(--color-ivory-88)]">
+                        {c.nome}
+                      </span>
+                      <span className="ml-2 shrink-0 font-medium tabular-nums text-[var(--color-ivory)]">
+                        {c.qtd}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="rounded-xl border border-[var(--color-ivory-12)] bg-[var(--color-onyx)]/40 p-4">
+              <p className="text-xs text-[var(--color-ivory-66)]">
+                Passe o mouse sobre uma UF para ver detalhes.
+              </p>
+              <div className="mt-2 grid grid-cols-2 gap-2 border-t border-[var(--color-ivory-12)] pt-2 text-[11px]">
+                <div>
+                  <p className="text-[var(--color-ivory-66)]">Total de bens</p>
+                  <p className="text-base font-medium text-[var(--color-ivory)] tabular-nums">
+                    {totalGeral}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[var(--color-ivory-66)]">Valor estimado</p>
+                  <p className="text-base font-medium text-[var(--color-gold)] tabular-nums">
+                    {formatBRL(valorGeral)}
+                  </p>
+                </div>
+              </div>
+              {ranking.length > 0 && (
+                <div className="mt-3 border-t border-[var(--color-ivory-12)] pt-2">
+                  <p className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+                    Top UFs
+                  </p>
+                  {ranking.slice(0, 6).map((r) => (
+                    <button
+                      key={r.uf}
+                      type="button"
+                      onMouseEnter={() => setAtivo(r.uf)}
+                      className="flex w-full items-center justify-between rounded-md px-1.5 py-1 text-xs transition hover:bg-white/5"
+                    >
+                      <span className="text-[var(--color-ivory-66)]">
+                        <span className="font-medium text-[var(--color-ivory)]">
+                          {r.uf}
+                        </span>
+                        <span className="ml-1">· {nomeDe(r.uf)}</span>
+                      </span>
+                      <span className="ml-2 shrink-0 font-medium tabular-nums text-[var(--color-signal)]">
+                        {r.qtd}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {semUf > 0 && (
+            <p className="text-[11px] text-[var(--color-ivory-66)]">
+              {semUf} {semUf === 1 ? "bem" : "bens"} sem UF informada.
+            </p>
+          )}
+        </div>
       </div>
     </DashboardCard>
   );
