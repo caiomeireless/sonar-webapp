@@ -226,6 +226,11 @@
   --font-serif: var(--font-cormorant), Georgia, serif;
   --font-mono:  var(--font-jetbrains), ui-monospace, monospace;
 
+  /* Cormorant Garamond por default usa OLD-STYLE FIGURES — o glifo "1"
+     fica parecido com "I" (haste alta sem base). Forcamos lining-nums
+     + tabular-nums onde aparecer font-serif, .firm-name ou .font-display
+     pra todos numeros aparecerem na forma classica e alinhados. */
+
   --radius-sm:  var(--radius-sm);
   --radius-md:  var(--radius-md);
   --radius-lg:  var(--radius-lg);
@@ -253,6 +258,18 @@ body {
     radial-gradient(42rem 42rem at -12% 112%, var(--color-signal-ambient-2), transparent 60%);
   background-attachment: fixed;
   background-repeat: no-repeat;
+}
+
+/* Forca algarismos LINING (classicos, todos com a mesma altura) +
+   TABULAR (largura uniforme) em qualquer texto que use a fonte
+   Cormorant Garamond — onde os numeros default sairiam em "old-style"
+   e o "1" ficaria parecido com "I". */
+.font-serif,
+.firm-name,
+.font-display,
+[style*="--font-cormorant"] {
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: "lnum" 1, "tnum" 1;
 }
 
 /* Brand utilities (do handoff) */
