@@ -92,7 +92,7 @@ export default function FiltrosPlataforma({
       <div className="flex flex-wrap items-center gap-3">
         {/* Período */}
         <div className="flex items-center gap-1">
-          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory)]">
             Período
           </span>
           <div className="flex flex-wrap items-center gap-1">
@@ -143,7 +143,7 @@ export default function FiltrosPlataforma({
 
         {/* Status */}
         <div className="flex items-center gap-1">
-          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory)]">
             Status
           </span>
           <div className="flex flex-wrap items-center gap-1">
@@ -207,7 +207,7 @@ function DropdownMulti({
 
   return (
     <div className="relative flex items-center gap-1">
-      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory)]">
         {rotulo}
       </span>
       <button
