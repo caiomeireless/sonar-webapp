@@ -58,38 +58,36 @@ export default async function CredorDrilldownPage({
             href={`/equipe/devedores${linkBase}`}
             className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--color-gold)] transition hover:text-[var(--color-tip-glow)]"
           >
-            ← Carteira do escritório
+            ← Carteira do Escritório
           </Link>
 
-          <div className="mt-6 flex items-center gap-3">
-            <span className="eyebrow">Cliente</span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-signal)]">
-              Visão da equipe
-            </span>
-          </div>
-
-          <h1 className="mt-4 font-serif text-[clamp(28px,4vw,46px)] font-medium leading-[1.1] tracking-tight text-[var(--color-gold)]">
-            {credor.nome}
-          </h1>
-          <p className="mt-3 font-mono text-sm text-[var(--color-ivory-66)]">
-            {credor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"} ·{" "}
-            {docLabel} {credor.documento}
-          </p>
-
-          {credor.email_contato || credor.telefone ? (
-            <p className="mt-2 font-mono text-xs leading-snug text-[var(--color-ivory-88)]">
-              {credor.email_contato ? (
-                <span className="mr-3">{credor.email_contato}</span>
-              ) : null}
-              {credor.telefone ? <span>{credor.telefone}</span> : null}
+          <header className="title-shield mt-6 text-center">
+            <h1 className="font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
+              {credor.nome}
+            </h1>
+            <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
+              Cliente · Visão da Equipe
             </p>
-          ) : null}
-
-          {credor.observacoes ? (
-            <p className="mt-4 max-w-[720px] text-sm italic text-[var(--color-ivory-88)]">
-              {credor.observacoes}
+            <p className="mt-3 font-mono text-sm text-[var(--color-ivory-66)]">
+              {credor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"} ·{" "}
+              {docLabel} {credor.documento}
             </p>
-          ) : null}
+
+            {credor.email_contato || credor.telefone ? (
+              <p className="mt-2 font-mono text-xs leading-snug text-[var(--color-ivory-88)]">
+                {credor.email_contato ? (
+                  <span className="mr-3">{credor.email_contato}</span>
+                ) : null}
+                {credor.telefone ? <span>{credor.telefone}</span> : null}
+              </p>
+            ) : null}
+
+            {credor.observacoes ? (
+              <p className="mx-auto mt-4 max-w-[720px] text-sm italic text-[var(--color-ivory-88)]">
+                {credor.observacoes}
+              </p>
+            ) : null}
+          </header>
 
           {/* 3 cards de número grande */}
           <div className="mt-10 grid gap-4 sm:grid-cols-3">

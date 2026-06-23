@@ -71,19 +71,14 @@ export default async function ThemisPage({ searchParams }: Props) {
           do layout vale pra todas as páginas (uniformidade visual). */}
 
       {/* Cabeçalho */}
-      <header className="title-shield relative">
-        <div className="flex items-center gap-3">
-          <span className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-fg-muted)]">
-            Themis
-          </span>
-          <span className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-signal)]">
-            Fila do Escritório
-          </span>
-        </div>
-        <h1 className="mt-4 font-serif text-[clamp(34px,5vw,52px)] font-medium leading-[1.1] tracking-tight text-ivory">
+      <header className="title-shield relative mb-6 text-center">
+        <h1 className="font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
           Processos a Rastrear
         </h1>
-        <p className="mt-6 max-w-[680px] font-mono text-base text-[var(--color-ivory-66)]">
+        <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
+          Themis · Fila do Escritório
+        </p>
+        <p className="mx-auto mt-3 max-w-[680px] font-mono text-[13px] text-[var(--color-ivory-66)]">
           {totalProcessos === 0
             ? q
               ? `Nenhum processo encontrado para "${q}".`

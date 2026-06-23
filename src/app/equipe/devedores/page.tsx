@@ -70,42 +70,40 @@ export default async function DevedoresEquipePage({ searchParams }: Props) {
 
   return (
     <main className="relative mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
-      <div className="title-shield">
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <span className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-signal)]">
-              Banco de Devedores
-            </span>
-            <h1 className="mt-4 font-serif text-[clamp(36px,5vw,56px)] font-medium leading-[1.1] tracking-tight text-ivory">
-              Banco de Devedores Separado por Cliente
-            </h1>
-            <p className="mt-5 max-w-[760px] font-mono text-[15px] text-[var(--color-ivory-88)]">
-              {credores.length === 0
-                ? q
-                  ? `Nenhum resultado para "${q}".`
-                  : "Nenhum cliente cadastrado ainda."
-                : `${credores.length} ${
-                    credores.length === 1 ? "Cliente Ativo" : "Clientes Ativos"
-                  } · ${totalCasos} ${
-                    totalCasos === 1 ? "Caso" : "Casos"
-                  } · ${totalBens} ${
-                    totalBens === 1 ? "Bem Rastreado" : "Bens Rastreados"
-                  } — ${formatBRL(totalEstimado)} estimado`}
-            </p>
-          </div>
+      <header className="title-shield mb-6 text-center">
+        <h1 className="font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
+          Banco de Devedores Separado por Cliente
+        </h1>
+        <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
+          Banco de Devedores
+        </p>
+        <p className="mt-3 font-mono text-[13px] text-[var(--color-ivory-88)]">
+          {credores.length === 0
+            ? q
+              ? `Nenhum resultado para "${q}".`
+              : "Nenhum cliente cadastrado ainda."
+            : `${credores.length} ${
+                credores.length === 1 ? "Cliente Ativo" : "Clientes Ativos"
+              } · ${totalCasos} ${
+                totalCasos === 1 ? "Caso" : "Casos"
+              } · ${totalBens} ${
+                totalBens === 1 ? "Bem Rastreado" : "Bens Rastreados"
+              } — ${formatBRL(totalEstimado)} estimado`}
+        </p>
+      </header>
 
-          <Link
-            href={novoHref}
-            className="inline-flex items-center gap-2 self-start rounded-xl bg-[var(--color-signal)]/85 px-6 py-3.5 text-base font-semibold text-onyx shadow-[0_4px_24px_rgba(60,255,138,0.28)] ring-1 ring-[var(--color-signal)]/60 backdrop-blur-md transition hover:bg-[var(--color-tip-glow)]/90"
-          >
-            + Novo devedor
-          </Link>
-        </div>
-
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         {/* Busca: nome de devedor, nome de cliente ou CNPJ/CPF */}
-        <div className="mt-6">
+        <div className="flex-1">
           <BuscaCarteira />
         </div>
+
+        <Link
+          href={novoHref}
+          className="inline-flex items-center gap-2 self-start rounded-xl bg-[var(--color-signal)]/85 px-6 py-3.5 text-base font-semibold text-onyx shadow-[0_4px_24px_rgba(60,255,138,0.28)] ring-1 ring-[var(--color-signal)]/60 backdrop-blur-md transition hover:bg-[var(--color-tip-glow)]/90"
+        >
+          + Novo Devedor
+        </Link>
       </div>
 
       {credores.length === 0 ? (

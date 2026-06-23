@@ -77,23 +77,27 @@ export default async function DossieClientePage({ params, searchParams }: Props)
             ← Voltar
           </Link>
 
-          <span className="eyebrow mt-6 block">Dossiê patrimonial</span>
-          <h1 className="mt-4 font-serif text-[clamp(28px,4vw,46px)] font-medium leading-[1.1] tracking-tight text-ivory">
-            {devedor.nome}
-          </h1>
-          <p className="mt-3 font-mono text-sm text-[var(--color-ivory-66)]">
-            {devedor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"} ·{" "}
-            {devedor.documento}
-            {devedor.data_nascimento
-              ? ` · Nasc. ${formatData(devedor.data_nascimento)}`
-              : ""}
-          </p>
-
-          {devedor.ultima_consulta_em ? (
-            <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
-              Última consulta {formatTempoRelativo(devedor.ultima_consulta_em)}
+          <header className="title-shield mb-6 mt-6 text-center">
+            <h1 className="font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
+              {devedor.nome}
+            </h1>
+            <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
+              Dossiê Patrimonial
             </p>
-          ) : null}
+            <p className="mt-3 font-mono text-sm text-[var(--color-ivory-66)]">
+              {devedor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"} ·{" "}
+              {devedor.documento}
+              {devedor.data_nascimento
+                ? ` · Nasc. ${formatData(devedor.data_nascimento)}`
+                : ""}
+            </p>
+
+            {devedor.ultima_consulta_em ? (
+              <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+                Última consulta {formatTempoRelativo(devedor.ultima_consulta_em)}
+              </p>
+            ) : null}
+          </header>
 
           {/* 3 cards de número grande */}
           <div className="mt-10 grid gap-4 sm:grid-cols-3">

@@ -34,18 +34,16 @@ export default async function CustosClientePage({ searchParams }: Props) {
 
   return (
     <main className="mx-auto max-w-[1100px] px-6 py-10 sm:px-10">
-      <header className="title-shield mb-8 flex items-center gap-3">
-        <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)] text-[var(--color-signal)]">
-          <DollarSign className="h-5 w-5" />
-        </span>
-        <div>
-          <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
-            Monitor de Custos
-          </p>
-          <h1 className="mt-1 text-3xl font-medium tracking-tight text-ivory sm:text-4xl">
-            Quanto Está Sendo Investido no Seu Portfólio
-          </h1>
+      <header className="title-shield mb-6 text-center">
+        <div className="mx-auto mb-3 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)]">
+          <DollarSign className="h-5 w-5 text-[var(--color-signal)]" />
         </div>
+        <h1 className="font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
+          Quanto Está Sendo Investido no Seu Portfólio
+        </h1>
+        <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
+          Monitor de Custos
+        </p>
       </header>
 
       <section className="glass p-8">

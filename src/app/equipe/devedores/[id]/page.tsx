@@ -124,56 +124,49 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
             </button>
           </div>
 
-          {/* Card header grande: icone PF/PJ + nome em uppercase tracking + badges */}
-          <div className="title-shield mt-6">
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-              {/* Icone grande PF/PJ */}
-              <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-2xl border border-[var(--color-gold)]/35 bg-gradient-to-br from-[rgba(201,162,74,0.18)] to-[rgba(201,162,74,0.04)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-                {devedor.tipo === "PJ" ? (
-                  <Building2 className="h-10 w-10 text-[var(--color-gold)]" />
-                ) : (
-                  <User className="h-10 w-10 text-[var(--color-gold)]" />
-                )}
-              </div>
-
-              {/* Bloco nome + badges + eyebrow */}
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="eyebrow">Dossiê Patrimonial</span>
-                  <span className="font-mono text-[12px] uppercase tracking-[0.32em] text-[var(--color-signal)]">
-                    Visão da Equipe
-                  </span>
-                </div>
-                <h1 className="mt-3 break-words font-mono text-[clamp(28px,4vw,42px)] uppercase leading-[1.1] tracking-[0.06em] text-ivory">
-                  {devedor.nome}
-                </h1>
-                <div className="mt-4 flex flex-wrap items-center gap-2">
-                  <BadgeFicha
-                    label={devedor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"}
-                    color="var(--color-gold)"
-                  />
-                  <BadgeFicha
-                    label={statusLabel}
-                    color={statusColor}
-                    dot
-                  />
-                  {devedor.ultima_consulta_em ? (
-                    <span className="font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
-                      · Última Consulta {formatTempoRelativo(devedor.ultima_consulta_em)}
-                    </span>
-                  ) : null}
-                </div>
-                <div className="mt-4">
-                  <Link
-                    href={`/equipe/devedores/${devedor.id}/dashboard${linkBase}`}
-                    className="inline-flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-signal)] transition hover:text-[var(--color-tip-glow)]"
-                  >
-                    Ver Dashboard Analítico →
-                  </Link>
-                </div>
-              </div>
+          {/* Card header grande: icone PF/PJ centralizado + nome em gold serif uppercase + badges */}
+          <header className="title-shield mt-6 text-center">
+            {/* Icone PF/PJ acima, centralizado */}
+            <div className="mx-auto mb-3 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-[var(--color-gold)]/35 bg-gradient-to-br from-[rgba(201,162,74,0.18)] to-[rgba(201,162,74,0.04)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+              {devedor.tipo === "PJ" ? (
+                <Building2 className="h-5 w-5 text-[var(--color-gold)]" />
+              ) : (
+                <User className="h-5 w-5 text-[var(--color-gold)]" />
+              )}
             </div>
-          </div>
+
+            <h1 className="break-words font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
+              {devedor.nome}
+            </h1>
+            <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
+              Dossiê Patrimonial · Visão da Equipe
+            </p>
+
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+              <BadgeFicha
+                label={devedor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"}
+                color="var(--color-gold)"
+              />
+              <BadgeFicha
+                label={statusLabel}
+                color={statusColor}
+                dot
+              />
+              {devedor.ultima_consulta_em ? (
+                <span className="font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+                  · Última Consulta {formatTempoRelativo(devedor.ultima_consulta_em)}
+                </span>
+              ) : null}
+            </div>
+            <div className="mt-4">
+              <Link
+                href={`/equipe/devedores/${devedor.id}/dashboard${linkBase}`}
+                className="inline-flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-signal)] transition hover:text-[var(--color-tip-glow)]"
+              >
+                Ver Dashboard Analítico →
+              </Link>
+            </div>
+          </header>
 
           {/* Grid 2 colunas — secoes glass estilo BP CRM */}
           <div className="mt-6 grid gap-4 md:grid-cols-2">

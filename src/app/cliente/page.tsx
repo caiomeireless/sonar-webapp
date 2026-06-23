@@ -47,14 +47,14 @@ export default async function DashboardClientePage({ searchParams }: Props) {
 
   return (
     <main className="mx-auto max-w-[1400px] px-6 py-10 sm:px-10">
-      <header className="title-shield mb-8">
-        <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
-          Dashboard
-        </p>
-        <h1 className="mt-2 text-3xl font-medium tracking-tight text-ivory sm:text-4xl">
+      <header className="title-shield mb-6 text-center">
+        <h1 className="font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
           Visão Geral dos Seus Processos
         </h1>
-        <p className="mt-3 max-w-[680px] text-base text-[var(--color-ivory-88)]">
+        <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
+          Dashboard
+        </p>
+        <p className="mx-auto mt-3 max-w-[680px] text-base text-[var(--color-ivory-88)]">
           Acompanhamento patrimonial dos devedores nos processos em que você é credor.
         </p>
       </header>

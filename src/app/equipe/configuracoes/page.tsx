@@ -22,16 +22,16 @@ export default async function ConfiguracoesPage() {
 
   return (
     <main className="mx-auto max-w-[1400px] px-6 py-10 sm:px-10">
-      <header className="title-shield mb-6 flex items-center gap-3">
-        <Settings className="h-7 w-7 text-[var(--color-signal)]" />
-        <div>
-          <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-fg-muted)]">
-            Configurações
-          </p>
-          <h1 className="mt-1 text-[clamp(34px,5vw,52px)] font-medium tracking-tight text-ivory">
-            Administração da Plataforma
-          </h1>
+      <header className="title-shield mb-6 text-center">
+        <div className="mx-auto mb-3 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)]">
+          <Settings className="h-5 w-5 text-[var(--color-signal)]" />
         </div>
+        <h1 className="font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
+          Administração da Plataforma
+        </h1>
+        <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
+          Configurações
+        </p>
       </header>
 
       <section className="grid gap-4 md:grid-cols-2">
