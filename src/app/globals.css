@@ -280,40 +280,127 @@ body {
   box-shadow: none;
 }
 
-/* Glass nivel 1 — card primario (espelho do .glass do BP) */
+/* Glass nivel 1 — card primario. Camadas:
+   - frosted surface-1 + saturate
+   - blur 18px
+   - inner highlight no topo (luz vinda de cima)
+   - sombra dirigida grande
+   - hairline gradient signal+gold sutil na borda
+*/
 .glass {
-  background: var(--color-surface-1);
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 35%),
+    var(--color-surface-1);
   border: 1px solid var(--color-line);
-  backdrop-filter: blur(18px) saturate(135%);
-  -webkit-backdrop-filter: blur(18px) saturate(135%);
-  box-shadow: 0 10px 30px -16px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  box-shadow:
+    0 10px 30px -16px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
   border-radius: 16px;
 }
+[data-theme="light"] .glass {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.55), transparent 40%),
+    var(--color-surface-1);
+  box-shadow:
+    0 10px 30px -16px rgba(10, 12, 11, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
 
-/* Glass nivel 2 — sub-card sem sombra */
+/* Glass nivel 2 — sub-card sem sombra grande */
 .glass-2 {
-  background: var(--color-surface-2);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 40%),
+    var(--color-surface-2);
   border: 1px solid var(--color-line);
   backdrop-filter: blur(18px) saturate(135%);
   -webkit-backdrop-filter: blur(18px) saturate(135%);
   border-radius: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-/* Glass-side — sidebar fixa. Mais opaca que .glass pra criar separacao clara
-   da area principal sem perder o ar de "vidro fume". */
+/* Glass-side — sidebar fixa. Background vidro fume + border-right com
+   gradient signal->transparent (assinatura visual do portal). */
 .glass-side {
+  position: relative;
   background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 25%),
     linear-gradient(180deg, var(--color-surface-2), var(--color-surface-1)),
     var(--color-bg);
-  border-right: 1px solid var(--color-line);
-  backdrop-filter: blur(22px) saturate(140%);
-  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  border-right: 1px solid transparent;
+  backdrop-filter: blur(22px) saturate(145%);
+  -webkit-backdrop-filter: blur(22px) saturate(145%);
+}
+.glass-side::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -1px;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    var(--color-signal-soft-2) 18%,
+    var(--color-signal) 50%,
+    var(--color-gold) 82%,
+    transparent
+  );
+  opacity: 0.55;
+  pointer-events: none;
 }
 [data-theme="light"] .glass-side {
-  box-shadow: 1px 0 0 var(--color-line), 4px 0 24px -16px rgba(10, 12, 11, 0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    4px 0 24px -16px rgba(10, 12, 11, 0.18);
 }
 [data-theme="dark"] .glass-side {
-  box-shadow: 1px 0 0 var(--color-line), 4px 0 24px -20px rgba(0, 0, 0, 0.6);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    4px 0 24px -20px rgba(0, 0, 0, 0.6);
+}
+
+/* Glass-hero — card destacado com border gradient signal+gold girando.
+   Aplicar com moderacao (1-2 cards hero por dashboard). */
+.glass-hero {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 35%),
+    var(--color-surface-1);
+  backdrop-filter: blur(18px) saturate(145%);
+  -webkit-backdrop-filter: blur(18px) saturate(145%);
+  box-shadow:
+    0 12px 36px -18px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  border: 1px solid transparent;
+  background-clip: padding-box, border-box;
+  background-origin: padding-box, border-box;
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 35%),
+    linear-gradient(var(--color-surface-1), var(--color-surface-1)),
+    conic-gradient(
+      from var(--gradient-angle, 0deg),
+      rgba(60, 255, 138, 0.15) 0%,
+      rgba(60, 255, 138, 0.55) 18%,
+      rgba(201, 162, 74, 0.55) 38%,
+      rgba(60, 255, 138, 0.15) 60%,
+      rgba(201, 162, 74, 0.45) 82%,
+      rgba(60, 255, 138, 0.15) 100%
+    );
+  animation: gradient-rotate 12s linear infinite;
+}
+
+@property --gradient-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes gradient-rotate {
+  from { --gradient-angle: 0deg; }
+  to { --gradient-angle: 360deg; }
 }
 
 /* Fade-theme — transicao curta de cor ao trocar tema. Aplica no <body>. */
