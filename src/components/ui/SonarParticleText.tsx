@@ -167,7 +167,7 @@ interface SonarParticleTextProps {
   "aria-label"?: string;
 }
 
-// Cor padrao: ivory #E8E4D6 (mesma do wordmark Sonar original)
+// Cor padrão: ivory #E8E4D6 (mesma do wordmark Sonar original)
 const DEFAULT_COLOR = { r: 232, g: 228, b: 214 };
 
 export function SonarParticleText({
@@ -243,7 +243,7 @@ export function SonarParticleText({
             particleIndex++;
           } else {
             particle = new Particle();
-            // Spawn proximo do target (jitter pequeno) — aparece imediato,
+            // Spawn próximo do target (jitter pequeno) — aparece imediato,
             // sem fly-in longo de fora da tela
             const jitter = 18;
             particle.pos.x = x + (Math.random() - 0.5) * 2 * jitter;
@@ -289,8 +289,8 @@ export function SonarParticleText({
       // Fundo transparente — clear total a cada frame (sem trail)
       ctx.clearRect(0, 0, width, height);
 
-      // Dissolve baseado no scroll do hero — particulas se afastam radialmente
-      // do centro e fade conforme o usuario rola pra fora da faixa 2.
+      // Dissolve baseado no scroll do hero — partículas se afastam radialmente
+      // do centro e fade conforme o usuário rola pra fora da faixa 2.
       const scroll = getHeroScroll();
       const dissolveT = Math.min(1, Math.max(0, scroll * 2.5));
       const opacity = 1 - dissolveT;
@@ -304,7 +304,7 @@ export function SonarParticleText({
 
       ctx.globalAlpha = opacity;
 
-      // Repulsao por mouse: empurra particulas pra fora do raio do cursor
+      // Repulsão por mouse: empurra partículas pra fora do raio do cursor
       const mouse = mouseRef.current;
       const REPEL_RADIUS = 80;
       const REPEL_STRENGTH = 2.5;
@@ -325,7 +325,7 @@ export function SonarParticleText({
 
         particle.move();
 
-        // Aplica deslocamento radial APENAS no desenho (nao na simulacao)
+        // Aplica deslocamento radial APENAS no desenho (não na simulação)
         // — assim, rolando de volta, o efeito reverte suavemente.
         const dx = particle.pos.x - cx;
         const dy = particle.pos.y - cy;
@@ -353,7 +353,7 @@ export function SonarParticleText({
       animationRef.current = requestAnimationFrame(animate);
     };
 
-    // Mouse tracking pra repelir particulas no hover
+    // Mouse tracking pra repelir partículas no hover
     const onMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
       if (rect.width === 0 || rect.height === 0) return;

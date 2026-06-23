@@ -1,6 +1,6 @@
-// Portal do cliente — pagina de Preferencias.
+// Portal do cliente — página de Preferências.
 // Server Component: confirma papel CLIENTE, carrega credor associado,
-// preferencias atuais (ou null se nao definiu) e gasto do mes corrente.
+// preferências atuais (ou null se não definiu) e gasto do mês corrente.
 // Renderiza o Client Component <PreferenciasForm/> com o estado inicial.
 import { redirect } from "next/navigation";
 import { perfilLogado } from "@/lib/perfis-server";
@@ -28,7 +28,7 @@ export default async function PreferenciasPage({ searchParams }: Props) {
   // verificar o papel real desse email.
   const perfil = await perfilAtual(eu);
 
-  // Esta pagina e EXCLUSIVA do cliente. Equipe vai pra /equipe.
+  // Esta página é EXCLUSIVA do cliente. Equipe vai pra /equipe.
   if (!ehCliente(perfil)) {
     redirect("/equipe");
   }
@@ -49,13 +49,13 @@ export default async function PreferenciasPage({ searchParams }: Props) {
 
   return (
     <main className="relative mx-auto max-w-[920px] px-6 py-16 sm:px-10">
-      <span className="eyebrow">Preferencias</span>
+      <span className="eyebrow">Preferências</span>
       <h1 className="mt-4 font-serif text-[clamp(28px,4vw,44px)] font-medium leading-[1.15] tracking-tight text-ivory">
-        Preferencias
+        Preferências
       </h1>
       <p className="mt-6 max-w-[640px] text-base leading-relaxed text-[var(--color-ivory-88)]">
         Defina o limite mensal de gasto com pesquisas patrimoniais. O
-        escritorio respeita esse teto ao rodar consultas pagas no nome
+        escritório respeita esse teto ao rodar consultas pagas no nome
         dos seus devedores.
       </p>
 
@@ -66,7 +66,7 @@ export default async function PreferenciasPage({ searchParams }: Props) {
             Nenhum credor vinculado ao seu email
           </h3>
           <p className="mt-3 text-sm text-[var(--color-ivory-88)]">
-            Quando o escritorio associar seu email a um credor, voce podera
+            Quando o escritório associar seu email a um credor, você poderá
             definir o limite mensal de gasto aqui.
           </p>
         </div>

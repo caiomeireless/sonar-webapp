@@ -1,12 +1,12 @@
 "use client";
 
-// Card SLIM no dossie: STATUS ONLY do calculo do debito judicial.
-// A interacao completa (editor + impressao) vive em
-// /equipe/devedores/[id]/calculo — esse card so mostra "ultima
-// atualizacao + valor + status" e leva o usuario pra la.
+// Card SLIM no dossiê: STATUS ONLY do cálculo do débito judicial.
+// A interação completa (editor + impressão) vive em
+// /equipe/devedores/[id]/calculo — esse card só mostra "última
+// atualização + valor + status" e leva o usuário pra lá.
 //
-// MOCK pra demo: data "ultima atualizacao" eh sorteada entre 14 e 60
-// dias atras pra parecer plausivel; status (atualizado/desatualizado)
+// MOCK pra demo: data "última atualização" é sorteada entre 14 e 60
+// dias atrás pra parecer plausível; status (atualizado/desatualizado)
 // deriva desse intervalo. Sem 5+ substitui por leitura real.
 
 import Link from "next/link";
@@ -35,7 +35,7 @@ function formatDataBR(d: Date): string {
   return `${dd}/${mm}/${yyyy}`;
 }
 
-// Pseudo-random determinístico por devedor pra demo nao mudar a cada render.
+// Pseudo-random determinístico por devedor pra demo não mudar a cada render.
 function hashSeed(n: number): number {
   let h = (n * 2654435761) >>> 0;
   h ^= h >>> 16;

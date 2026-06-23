@@ -1,5 +1,5 @@
 // Reader functions de devedores PARA O ADVOGADO — server-only.
-// Sem regra de visibilidade — equipe ve TODOS os devedores rastreados.
+// Sem regra de visibilidade — equipe vê TODOS os devedores rastreados.
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export interface CredorResumo {
@@ -8,7 +8,7 @@ export interface CredorResumo {
 }
 
 // Listagem de credores (clientes) com agregados — alimenta a carteira
-// hierarquica do escritorio (1 entrada por cliente).
+// hierárquica do escritório (1 entrada por cliente).
 export interface CredorListagem {
   id: number;
   tipo: "PF" | "PJ";
@@ -25,7 +25,7 @@ export interface CredorListagem {
   ultima_consulta_em: string | null;
 }
 
-// Visao "credor + casos" pro drill-down da carteira (nivel 2).
+// Visão "credor + casos" pro drill-down da carteira (nível 2).
 export interface CredorComCasos {
   credor: {
     id: number;
@@ -64,11 +64,11 @@ export interface DevedorListagemAdmin {
   casos_count: number;
   criado_em: string;
   // Credores vinculados ao devedor via casos.
-  // Pode ter 0 (devedor sem caso), 1 ou varios (multiplos credores).
+  // Pode ter 0 (devedor sem caso), 1 ou vários (múltiplos credores).
   credores: CredorResumo[];
 }
 
-// Lista todos os devedores rastreados pelo escritorio,
+// Lista todos os devedores rastreados pelo escritório,
 // ordenados por ultima_consulta_em (mais recente primeiro).
 export async function listarDevedoresRastreados(): Promise<DevedorListagemAdmin[]> {
   const sb = createAdminClient();
@@ -96,7 +96,7 @@ export async function listarDevedoresRastreados(): Promise<DevedorListagemAdmin[
       .select("credor:credores!inner(id, nome)")
       .eq("devedor_id", d.id);
 
-    // Deduplica por id — o mesmo credor pode aparecer em varios casos.
+    // Deduplica por id — o mesmo credor pode aparecer em vários casos.
     const credoresMap = new Map<number, CredorResumo>();
     for (const row of casosComCredor ?? []) {
       const cred = row.credor as unknown as CredorResumo | null;
@@ -129,10 +129,10 @@ export async function listarDevedoresRastreados(): Promise<DevedorListagemAdmin[
   return result;
 }
 
-// Lista todos os credores (clientes) do escritorio com agregados.
-// Eh o nivel 1 da carteira hierarquica: 1 entrada por CLIENTE — em vez
+// Lista todos os credores (clientes) do escritório com agregados.
+// É o nível 1 da carteira hierárquica: 1 entrada por CLIENTE — em vez
 // de uma linha por devedor (que repetia o nome do cliente N vezes).
-// Ordenacao: maior valor estimado primeiro (cliente "mais quente" no topo).
+// Ordenação: maior valor estimado primeiro (cliente "mais quente" no topo).
 export async function listarCredoresComResumo(): Promise<CredorListagem[]> {
   const sb = createAdminClient();
   const { data: credores } = await sb

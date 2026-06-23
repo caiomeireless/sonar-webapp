@@ -1,22 +1,22 @@
-// Vinculos Patrimoniais — lista de pessoas ligadas ao devedor (conjuge, socio,
-// filho etc.) com badge sugerindo investigar o patrimonio de cada um.
+// Vínculos Patrimoniais — lista de pessoas ligadas ao devedor (cônjuge, sócio,
+// filho etc.) com badge sugerindo investigar o patrimônio de cada um.
 //
 // Por enquanto cada item entra com temPatrimonio=false (placeholder na
-// agregacao). O cruzamento real — rodar SISBAJUD/Receita/Junta sobre cada
-// vinculo pra descobrir se ele tem bens — vira no futuro, quando o pipeline
-// de consultas externas estender pros vinculos. Quando isso chegar, o badge
-// passa a refletir o estado real e o CTA muda pra "Ver patrimonio".
+// agregação). O cruzamento real — rodar SISBAJUD/Receita/Junta sobre cada
+// vínculo pra descobrir se ele tem bens — virá no futuro, quando o pipeline
+// de consultas externas estender pros vínculos. Quando isso chegar, o badge
+// passa a refletir o estado real e o CTA muda pra "Ver patrimônio".
 //
-// Server component: somente leitura, sem estado nem grafico.
+// Server component: somente leitura, sem estado nem gráfico.
 
 import type { VinculoPatrimonial } from "@/lib/dashboard-caso";
 import { DashboardCard } from "@/components/dashboard/DashboardCard";
 
 // ============================================================
-// CATALOGO de relacoes — rotulo + cor
+// CATÁLOGO de relações — rótulo + cor
 // ============================================================
-// A relacao vem livre de calcularVinculosPatrimoniais() (le detalhes.tipo /
-// .relacao). Padronizamos rotulo + cor por chave conhecida; fallback usa a
+// A relação vem livre de calcularVinculosPatrimoniais() (lê detalhes.tipo /
+// .relacao). Padronizamos rótulo + cor por chave conhecida; fallback usa a
 // string crua capitalizada com tom neutro.
 
 type RelacaoMeta = {
@@ -25,34 +25,34 @@ type RelacaoMeta = {
 };
 
 const RELACAO_CATALOGO: Record<string, RelacaoMeta> = {
-  conjuge: { rotulo: "Conjuge", cor: "var(--color-gold)" },
-  socio: { rotulo: "Socio", cor: "var(--color-signal)" },
+  conjuge: { rotulo: "Cônjuge", cor: "var(--color-gold)" },
+  socio: { rotulo: "Sócio", cor: "var(--color-signal)" },
   filho: { rotulo: "Filho(a)", cor: "var(--color-ivory-66)" },
   filha: { rotulo: "Filho(a)", cor: "var(--color-ivory-66)" },
-  pai: { rotulo: "Pai/Mae", cor: "var(--color-ivory-66)" },
-  mae: { rotulo: "Pai/Mae", cor: "var(--color-ivory-66)" },
-  irmao: { rotulo: "Irmao(a)", cor: "var(--color-ivory-66)" },
-  irma: { rotulo: "Irmao(a)", cor: "var(--color-ivory-66)" },
+  pai: { rotulo: "Pai/Mãe", cor: "var(--color-ivory-66)" },
+  mae: { rotulo: "Pai/Mãe", cor: "var(--color-ivory-66)" },
+  irmao: { rotulo: "Irmão(ã)", cor: "var(--color-ivory-66)" },
+  irma: { rotulo: "Irmão(ã)", cor: "var(--color-ivory-66)" },
 };
 
 function metaRelacao(relacao: string): RelacaoMeta {
   const chave = relacao.trim().toLowerCase();
   const hit = RELACAO_CATALOGO[chave];
   if (hit) return hit;
-  // Fallback: capitaliza primeira letra, mantem o resto.
+  // Fallback: capitaliza primeira letra, mantém o resto.
   const rotulo =
     chave.length === 0
-      ? "Vinculo"
+      ? "Vínculo"
       : chave.charAt(0).toUpperCase() + chave.slice(1);
   return { rotulo, cor: "var(--color-ivory-66)" };
 }
 
 // ============================================================
-// HELPERS de exibicao
+// HELPERS de exibição
 // ============================================================
 
-// Formata CPF/CNPJ sem assumir comprimento exato — se nao bate em nenhum
-// padrao conhecido, devolve cru. Strip de tudo que nao for digito antes.
+// Formata CPF/CNPJ sem assumir comprimento exato — se não bate em nenhum
+// padrão conhecido, devolve cru. Strip de tudo que não for dígito antes.
 function formatarDocumento(documento: string): string {
   const limpo = documento.replace(/\D/g, "");
   if (limpo.length === 11) {
@@ -76,24 +76,24 @@ export default function VinculosPatrimoniais({ vinculos }: Props) {
   const total = vinculos.length;
   const descricao =
     total === 0
-      ? "Pessoas ligadas ao devedor — alvos secundarios de investigacao"
+      ? "Pessoas ligadas ao devedor — alvos secundários de investigação"
       : `${total} ${total === 1 ? "pessoa ligada" : "pessoas ligadas"} ao devedor`;
 
   return (
     <DashboardCard
-      titulo="Vinculos patrimoniais"
+      titulo="Vínculos patrimoniais"
       descricao={descricao}
       accent="gold"
       info={
-        "Cada vinculo (conjuge, socio, filho) e um possivel alvo " +
-        "secundario. O badge 'Investigar patrimonio' vira clicavel " +
+        "Cada vínculo (cônjuge, sócio, filho) é um possível alvo " +
+        "secundário. O badge 'Investigar patrimônio' vira clicável " +
         "quando o pipeline de consultas externas rodar sobre os " +
-        "vinculos — hoje todos saem como 'a investigar'."
+        "vínculos — hoje todos saem como 'a investigar'."
       }
     >
       {total === 0 ? (
         <div className="flex items-center justify-center py-8 text-xs text-[var(--color-ivory-66)]">
-          Nenhum vinculo identificado pra este devedor.
+          Nenhum vínculo identificado pra este devedor.
         </div>
       ) : (
         <ul className="divide-y divide-[var(--color-ivory-12)]">
@@ -137,11 +137,11 @@ export default function VinculosPatrimoniais({ vinculos }: Props) {
                   )}
                 </div>
 
-                {/* Badge "Investigar patrimonio".
+                {/* Badge "Investigar patrimônio".
                     temPatrimonio sempre false hoje -> sempre o estado "a
                     investigar". Quando o cruzamento real chegar, o ramo
                     `v.temPatrimonio` aqui devolve o badge verde "Tem
-                    patrimonio" linkando pra um sub-dossie. */}
+                    patrimônio" linkando pra um sub-dossiê. */}
                 <span
                   className="shrink-0 rounded-md border px-2.5 py-1 text-[11px] text-[var(--color-ivory)]"
                   style={{
@@ -156,7 +156,7 @@ export default function VinculosPatrimoniais({ vinculos }: Props) {
                       : "transparent",
                   }}
                 >
-                  {v.temPatrimonio ? "Tem patrimonio" : "Investigar patrimonio"}
+                  {v.temPatrimonio ? "Tem patrimônio" : "Investigar patrimônio"}
                 </span>
               </li>
             );

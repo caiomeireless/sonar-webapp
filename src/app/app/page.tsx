@@ -1,5 +1,5 @@
-// Placeholder do app autenticado. Sera substituido pelo dashboard real
-// no proximo dia (depois das integracoes Themis + DataJud + busca de bens).
+// Placeholder do app autenticado. Será substituído pelo dashboard real
+// no próximo dia (depois das integrações Themis + DataJud + busca de bens).
 import { perfilLogado } from "@/lib/perfis-server";
 import { Logo } from "@/components/Logo";
 import Link from "next/link";

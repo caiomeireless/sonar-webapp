@@ -1,11 +1,11 @@
 "use client";
 
-// Form de preferencias do cliente — limite mensal de gasto com
-// pesquisas pagas. 3 niveis de teto:
+// Form de preferências do cliente — limite mensal de gasto com
+// pesquisas pagas. 3 níveis de teto:
 //   1. GLOBAL (limite_mensal_brl)
 //   2. POR MODO (Combo Lead / Combo Documento)
 //   3. POR API individual (Assertiva, BigDataCorp, ARISP, ...)
-// Regra: a consulta paga e bloqueada se ESTOURAR qualquer um dos niveis.
+// Regra: a consulta paga é bloqueada se ESTOURAR qualquer um dos níveis.
 // Mais restritivo vence.
 import { useMemo, useState, useTransition } from "react";
 import { formatBRL } from "@/lib/format";
@@ -23,8 +23,8 @@ type Props = {
   observacoesInicial: string;
 };
 
-// Parse "1.234,56" -> 1234.56. Aceita tambem "1234.56", "1234,56" e
-// vazio (devolve 0). Robusto a espacos e prefixos comuns.
+// Parse "1.234,56" -> 1234.56. Aceita também "1234.56", "1234,56" e
+// vazio (devolve 0). Robusto a espaços e prefixos comuns.
 function parseBRL(raw: string): number {
   const limpo = (raw ?? "")
     .replace(/R\$\s?/g, "")
@@ -35,15 +35,15 @@ function parseBRL(raw: string): number {
   if (limpo.includes(",") && limpo.includes(".")) {
     return Number(limpo.replace(/\./g, "").replace(",", "."));
   }
-  // So virgula -> decimal.
+  // Só vírgula -> decimal.
   if (limpo.includes(",")) {
     return Number(limpo.replace(",", "."));
   }
-  // So ponto -> ja e decimal.
+  // Só ponto -> já é decimal.
   return Number(limpo);
 }
 
-// Formata numero pra input BRL "1.234,56".
+// Formata número pra input BRL "1.234,56".
 function fmtInputBRL(n: number): string {
   if (!Number.isFinite(n) || n === 0) return "";
   return n.toLocaleString("pt-BR", {
@@ -71,9 +71,9 @@ export function PreferenciasForm({
   );
   const [bloquear, setBloquear] = useState(bloquearInicial);
   const [observacoes, setObservacoes] = useState(observacoesInicial ?? "");
-  // Estado granular por API: 1) quais estao "ativadas" (checkbox) e
+  // Estado granular por API: 1) quais estão "ativadas" (checkbox) e
   // 2) o valor digitado em cada input (string formato BRL). Iniciamos
-  // ativadas todas as APIs que ja tem limite definido em DB.
+  // ativadas todas as APIs que já tem limite definido em DB.
   const [ativadasPorApi, setAtivadasPorApi] = useState<Record<string, boolean>>(
     () => {
       const init: Record<string, boolean> = {};
@@ -111,13 +111,13 @@ export function PreferenciasForm({
     else if (pct > 70) corBarra = "var(--color-gold)";
   }
 
-  // Lista de APIs separadas por modo, pra render do acordeao.
+  // Lista de APIs separadas por modo, pra render do acordeão.
   const apisLead = useMemo(() => APIS.filter((a) => a.modo === "lead"), []);
   const apisDoc = useMemo(() => APIS.filter((a) => a.modo === "doc"), []);
 
-  // Monta o objeto { api_id -> limite_brl } pra enviar. So inclui APIs
-  // marcadas (checkbox on). Valor 0 e permitido (significa "bloquear
-  // 100% essa API" — util para Caio desativar eDossie caro, p. ex.).
+  // Monta o objeto { api_id -> limite_brl } pra enviar. Só inclui APIs
+  // marcadas (checkbox on). Valor 0 é permitido (significa "bloquear
+  // 100% essa API" — útil para Caio desativar eDossie caro, p. ex.).
   function buildLimitesPorApi(): Record<string, number> {
     const out: Record<string, number> = {};
     for (const api of APIS) {
@@ -136,7 +136,7 @@ export function PreferenciasForm({
     if (modo === "todos") {
       const next: Record<string, boolean> = {};
       for (const a of APIS) {
-        // So faz sentido marcar APIs pagas — gratis nao gera gasto.
+        // Só faz sentido marcar APIs pagas — grátis não gera gasto.
         if (a.preco > 0) next[a.id] = true;
       }
       setAtivadasPorApi(next);
@@ -158,11 +158,11 @@ export function PreferenciasForm({
     startTransition(async () => {
       const r = await atualizarPreferenciasCliente(fd);
       if (r.ok) {
-        setMsg({ tipo: "ok", texto: "Preferencias salvas." });
+        setMsg({ tipo: "ok", texto: "Preferências salvas." });
       } else {
         setMsg({
           tipo: "erro",
-          texto: r.error ?? "Nao foi possivel salvar.",
+          texto: r.error ?? "Não foi possível salvar.",
         });
       }
     });
@@ -170,10 +170,10 @@ export function PreferenciasForm({
 
   return (
     <div className="mt-12 space-y-8">
-      {/* === CARD DE GASTO DO MES === */}
+      {/* === CARD DE GASTO DO MÊS === */}
       <section className="rounded-2xl border border-[var(--color-ivory-12)] bg-white/[0.02] p-8">
         <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-ivory-66)]">
-          Gasto do mes
+          Gasto do mês
           {credorNome ? (
             <span className="ml-2 text-[var(--color-gold)]">
               · {credorNome}
@@ -239,11 +239,11 @@ export function PreferenciasForm({
               className="w-full bg-transparent font-serif text-2xl text-ivory outline-none placeholder:text-[var(--color-ivory-22)]"
             />
             <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
-              / mes
+              / mês
             </span>
           </div>
           <p className="mt-2 text-xs text-[var(--color-ivory-66)]">
-            Use 0 para nao definir um teto. O escritorio respeitara o
+            Use 0 para não definir um teto. O escritório respeitará o
             valor ao rodar pesquisas pagas no nome dos seus devedores.
           </p>
         </label>
@@ -262,7 +262,7 @@ export function PreferenciasForm({
             {/* Combo Lead */}
             <label className="block">
               <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--color-ivory-88)]">
-                Combo Lead (mes)
+                Combo Lead (mês)
               </span>
               <div className="mt-2 flex items-center gap-2 rounded-lg border border-[var(--color-ivory-22)] bg-white/5 px-3 py-2.5 focus-within:border-[var(--color-gold)]">
                 <span className="font-mono text-xs text-[var(--color-ivory-66)]">
@@ -288,7 +288,7 @@ export function PreferenciasForm({
             {/* Combo Documento */}
             <label className="block">
               <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--color-ivory-88)]">
-                Combo Documento (mes)
+                Combo Documento (mês)
               </span>
               <div className="mt-2 flex items-center gap-2 rounded-lg border border-[var(--color-ivory-22)] bg-white/5 px-3 py-2.5 focus-within:border-[var(--color-gold)]">
                 <span className="font-mono text-xs text-[var(--color-ivory-66)]">
@@ -307,7 +307,7 @@ export function PreferenciasForm({
                 />
               </div>
               <p className="mt-1.5 text-[11px] text-[var(--color-ivory-66)]">
-                Matricula, certidao, eDossie — documentos oficiais anexaveis.
+                Matrícula, certidão, eDossiê — documentos oficiais anexáveis.
               </p>
             </label>
           </div>
@@ -326,7 +326,7 @@ export function PreferenciasForm({
                 Limites granulares por API
               </span>
               <span className="mt-1 block text-xs text-[var(--color-ivory-66)]">
-                Tetos finos — sobrepoem o limite por modo para APIs caras.
+                Tetos finos — sobrepõem o limite por modo para APIs caras.
               </span>
             </span>
             <span className="rounded-md border border-[var(--color-ivory-22)] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-88)] transition hover:border-[var(--color-gold)]">
@@ -336,7 +336,7 @@ export function PreferenciasForm({
 
           {expandirApis ? (
             <div className="mt-6 space-y-6">
-              {/* Acoes rapidas */}
+              {/* Ações rápidas */}
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
@@ -391,11 +391,11 @@ export function PreferenciasForm({
               />
 
               <p className="text-[11px] leading-relaxed text-[var(--color-ivory-66)]">
-                Quando uma API esta marcada, o limite digitado vale APENAS
+                Quando uma API está marcada, o limite digitado vale APENAS
                 para ela. Use{" "}
                 <span className="font-mono text-[var(--color-ivory-88)]">0,00</span>{" "}
-                para bloquear 100% (util pra APIs caras como eDossie). APIs
-                gratis nao geram gasto — listadas so como referencia.
+                para bloquear 100% (útil pra APIs caras como eDossiê). APIs
+                grátis não geram gasto — listadas só como referência.
               </p>
             </div>
           ) : null}
@@ -428,27 +428,27 @@ export function PreferenciasForm({
             </span>
             <span className="mt-1 block text-xs text-[var(--color-ivory-66)]">
               Quando ativado, consultas pagas que ultrapassariam qualquer
-              dos tres niveis (global, por modo ou por API) sao recusadas.
-              Caso contrario, apenas geram alerta.
+              dos três níveis (global, por modo ou por API) são recusadas.
+              Caso contrário, apenas geram alerta.
             </span>
           </span>
         </label>
 
-        {/* Observacoes */}
+        {/* Observações */}
         <label className="block">
           <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-ivory-66)]">
-            Observacoes (opcional)
+            Observações (opcional)
           </span>
           <textarea
             value={observacoes}
             onChange={(e) => setObservacoes(e.target.value)}
             rows={3}
-            placeholder="Algum contexto pro escritorio?"
+            placeholder="Algum contexto pro escritório?"
             className="mt-2 w-full resize-y rounded-lg border border-[var(--color-ivory-22)] bg-white/5 px-4 py-3 text-sm text-ivory outline-none placeholder:text-[var(--color-ivory-22)] focus:border-[var(--color-gold)]"
           />
         </label>
 
-        {/* Acoes */}
+        {/* Ações */}
         <div className="flex items-center justify-between gap-4 pt-2">
           {msg ? (
             <span
@@ -469,7 +469,7 @@ export function PreferenciasForm({
             disabled={pending}
             className="rounded-lg border border-[var(--color-gold)] bg-[var(--color-gold)]/10 px-5 py-2.5 text-sm font-medium text-[var(--color-gold)] transition hover:bg-[var(--color-gold)]/20 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {pending ? "Salvando..." : "Salvar preferencias"}
+            {pending ? "Salvando..." : "Salvar preferências"}
           </button>
         </div>
       </form>
@@ -540,7 +540,7 @@ function ApisBlock({
                 </button>
               )}
 
-              {/* Nome + preco unitario */}
+              {/* Nome + preço unitário */}
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm text-ivory">
                   {api.nome}
@@ -577,7 +577,7 @@ function ApisBlock({
                     className="w-20 bg-transparent text-right font-mono text-sm text-ivory outline-none placeholder:text-[var(--color-ivory-22)] disabled:cursor-not-allowed"
                   />
                   <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
-                    /mes
+                    /mês
                   </span>
                 </span>
               )}

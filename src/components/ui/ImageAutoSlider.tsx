@@ -1,6 +1,6 @@
-// Slider horizontal infinito com mascara de fade nas bordas.
-// Adaptado pra Sonar: sem bg proprio, anel dourado sutil, sombra profunda
-// e legenda monoespacada. Recebe a lista de imagens via prop.
+// Slider horizontal infinito com máscara de fade nas bordas.
+// Adaptado pra Sonar: sem bg próprio, anel dourado sutil, sombra profunda
+// e legenda monoespaçada. Recebe a lista de imagens via prop.
 type Image = { src: string; alt: string };
 
 type Props = {
@@ -49,7 +49,7 @@ export function ImageAutoSlider({ images, repeat = 1, className = "" }: Props) {
               loading="lazy"
               className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
             />
-            {/* Tint cinematografico — escurece topo levemente e rodape mais forte */}
+            {/* Tint cinematográfico — escurece topo levemente e rodapé mais forte */}
             <div
               className="pointer-events-none absolute inset-0"
               style={{

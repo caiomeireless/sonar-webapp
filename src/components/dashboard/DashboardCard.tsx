@@ -1,12 +1,12 @@
-// Card base do Dashboard do Caso — wrapper visual reutilizavel.
-// Toda secao do dashboard (KPI, grafico, lista) entra dentro de um destes.
-// Mantem padding, borda e tipografia consistentes; o conteudo varia.
+// Card base do Dashboard do Caso — wrapper visual reutilizável.
+// Toda seção do dashboard (KPI, gráfico, lista) entra dentro de um destes.
+// Mantém padding, borda e tipografia consistentes; o conteúdo varia.
 //
-// Padrao visual: glass nivel 1 (surface-1 + blur 18px + sombra dirigida -16px)
+// Padrão visual: glass nível 1 (surface-1 + blur 18px + sombra dirigida -16px)
 // + borda var(--color-line) + rounded-2xl. Espelho do `.glass` do BP CRM.
 //
 // SSR-safe: o componente em si é server. O efeito GlowCard (cursor-follow)
-// fica num sub-componente client (`./GlowSpot`) montado so quando interactive=true.
+// fica num sub-componente client (`./GlowSpot`) montado só quando interactive=true.
 import type { ReactNode } from "react";
 import { GlowSpot } from "./GlowSpot";
 
@@ -32,7 +32,7 @@ type Props = {
   accent?: DashboardCardAccent;
   className?: string;
   // Texto opcional que aparece num popover ao passar mouse no "?" ao lado
-  // do titulo. CSS-only via group-hover (sem JS).
+  // do título. CSS-only via group-hover (sem JS).
   info?: string;
   // Ativa o efeito GlowCard: spot signal que segue o cursor + hover border signal.
   interactive?: boolean;
@@ -87,7 +87,7 @@ export function DashboardCard({
           {info ? (
             <span className="group relative ml-1 inline-flex">
               <span
-                aria-label="Mais informacoes"
+                aria-label="Mais informações"
                 className="flex h-3.5 w-3.5 cursor-help items-center justify-center rounded-full border border-[var(--color-ivory-22)] text-[10px] font-medium text-[var(--color-ivory-66)] transition group-hover:border-[var(--color-ivory-66)] group-hover:text-[var(--color-ivory)]"
               >
                 ?

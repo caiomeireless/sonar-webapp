@@ -1,11 +1,11 @@
 "use client";
 
-// Mapa de distribuicao geografica dos bens — Brasil inteiro com bolhas por UF.
+// Mapa de distribuição geográfica dos bens — Brasil inteiro com bolhas por UF.
 // Inspirado no MapaBrasil do BP CRM: paths SVG embarcados (br-geo.ts), zero fetch,
-// renderizacao instantanea. Hover destaca a UF e mostra detalhes lateralmente.
+// renderização instantânea. Hover destaca a UF e mostra detalhes lateralmente.
 //
-// Agregacao: recebe DistribuicaoGeografica[] (por cidade+uf), agrupa por UF
-// pras bolhas; cidades viram lista no painel lateral quando a UF e selecionada.
+// Agregação: recebe DistribuicaoGeografica[] (por cidade+uf), agrupa por UF
+// pras bolhas; cidades viram lista no painel lateral quando a UF é selecionada.
 
 import { useMemo, useState } from "react";
 
@@ -84,7 +84,7 @@ export default function MapaDistribuicaoBens({ distribuicao }: Props) {
 
   return (
     <DashboardCard
-      titulo="Distribuicao geografica dos bens"
+      titulo="Distribuição geográfica dos bens"
       descricao="Bens identificados por UF. Passe o mouse para ver cidades."
       accent="green"
     >
@@ -163,7 +163,7 @@ export default function MapaDistribuicaoBens({ distribuicao }: Props) {
                         transition: "opacity .15s, stroke-width .15s",
                       }}
                     />
-                    {/* numero dentro da bolha (se cabe) */}
+                    {/* número dentro da bolha (se cabe) */}
                     {r >= 13 && (
                       <text
                         x={s.cx}

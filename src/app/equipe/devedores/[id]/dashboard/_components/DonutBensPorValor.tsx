@@ -4,8 +4,8 @@
 // Centro = valor total. Legenda lateral = tipo + valor + %.
 // Componente CLIENT por causa do Recharts (ResponsiveContainer mede o DOM).
 //
-// Dados ja vem agregados de obterDadosDashboardCaso(devedorId) — esta view
-// nao chama Supabase. Recebe `dados` (DashboardBreakdownBem[]) via prop.
+// Dados já vêm agregados de obterDadosDashboardCaso(devedorId) — esta view
+// não chama Supabase. Recebe `dados` (DashboardBreakdownBem[]) via prop.
 
 import {
   Cell,
@@ -33,18 +33,18 @@ import {
 } from "@/components/dashboard/ChartTheme";
 
 // ============================================================
-// META — label + icone por tipo de bem (espelha lib/devedores
+// META — label + ícone por tipo de bem (espelha lib/devedores
 // page.tsx; sem TIPO_META exportado, inline aqui pra manter
-// consistencia visual com o dossie).
+// consistência visual com o dossiê).
 // ============================================================
 
 const TIPO_META: Record<TipoBem, { label: string; icone: string }> = {
-  veiculo: { label: "Veiculos", icone: "V" },
-  imovel: { label: "Imoveis", icone: "I" },
-  empresa: { label: "Participacoes societarias", icone: "E" },
-  processo_credito: { label: "Processos onde e credor", icone: "P" },
-  endereco: { label: "Enderecos confirmados", icone: "A" },
-  vinculo: { label: "Vinculos familiares", icone: "F" },
+  veiculo: { label: "Veículos", icone: "V" },
+  imovel: { label: "Imóveis", icone: "I" },
+  empresa: { label: "Participações societárias", icone: "E" },
+  processo_credito: { label: "Processos onde é credor", icone: "P" },
+  endereco: { label: "Endereços confirmados", icone: "A" },
+  vinculo: { label: "Vínculos familiares", icone: "F" },
 };
 
 // Forma que o Recharts consome — `name` vira label do tooltip,
@@ -91,7 +91,7 @@ function DonutTooltip({
 // ============================================================
 
 export default function DonutBensPorValor({ dados }: Props) {
-  // Recharts nao desenha fatias com value=0; filtramos pra nao
+  // Recharts não desenha fatias com value=0; filtramos pra não
   // poluir tooltip nem legenda com tipos vazios.
   const datums: PieDatum[] = dados
     .filter((d) => d.valorBrl > 0)
@@ -107,8 +107,8 @@ export default function DonutBensPorValor({ dados }: Props) {
   if (datums.length === 0 || total === 0) {
     return (
       <DashboardCard
-        titulo="Patrimonio por tipo"
-        descricao="Distribuicao do valor estimado por categoria de bem"
+        titulo="Patrimônio por tipo"
+        descricao="Distribuição do valor estimado por categoria de bem"
         accent="gold"
       >
         <div className="flex h-48 items-center justify-center text-sm text-[var(--color-ivory-66)]">
@@ -120,8 +120,8 @@ export default function DonutBensPorValor({ dados }: Props) {
 
   return (
     <DashboardCard
-      titulo="Patrimonio por tipo"
-      descricao="Distribuicao do valor estimado por categoria de bem"
+      titulo="Patrimônio por tipo"
+      descricao="Distribuição do valor estimado por categoria de bem"
       accent="gold"
     >
       <div className="grid grid-cols-1 gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-center">
@@ -153,10 +153,10 @@ export default function DonutBensPorValor({ dados }: Props) {
             </PieChart>
           </ResponsiveContainer>
 
-          {/* CENTRO — total. pointer-events-none pra nao tampar tooltip. */}
+          {/* CENTRO — total. pointer-events-none pra não tampar tooltip. */}
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-[10px] uppercase tracking-[0.12em] text-[var(--color-ivory-66)]">
-              Patrimonio total
+              Patrimônio total
             </span>
             <span className="mt-1 text-2xl font-medium tracking-tight text-[var(--color-ivory)]">
               {formatBRL(total)}

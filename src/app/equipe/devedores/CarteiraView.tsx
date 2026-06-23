@@ -1,8 +1,8 @@
 "use client";
 
-// Carteira hierarquica do escritorio — NIVEL 1: lista de CLIENTES (credores).
+// Carteira hierárquica do escritório — NÍVEL 1: lista de CLIENTES (credores).
 // Cada card/linha = 1 cliente. Click -> drill-down em /equipe/devedores/credor/{id}
-// (nivel 2, lista os casos daquele cliente).
+// (nível 2, lista os casos daquele cliente).
 //
 // Toggle Cards/Lista persistido em localStorage chave `sonar.carteira.view`.
 // Default: cards.
@@ -50,7 +50,7 @@ export function CarteiraView({
       <div className="mt-8 flex justify-end">
         <div
           role="tablist"
-          aria-label="Visualizacao"
+          aria-label="Visualização"
           className="inline-flex items-center gap-1 rounded-lg border border-[var(--color-ivory-12)] bg-[var(--color-onyx-soft)]/40 p-1"
         >
           <ToggleBtn
@@ -177,7 +177,7 @@ function CardCredor({
             #{credor.id}
           </span>
           <span className="font-mono text-xs text-[var(--color-ivory-66)]">
-            Ultima consulta {formatTempoRelativo(credor.ultima_consulta_em)}
+            Última consulta {formatTempoRelativo(credor.ultima_consulta_em)}
           </span>
         </div>
       </SpotlightCard>
@@ -204,7 +204,7 @@ function ListaCredores({
             <Th align="right">Devedores</Th>
             <Th align="right">Bens</Th>
             <Th align="right">Valor estimado</Th>
-            <Th align="right">Ultima consulta</Th>
+            <Th align="right">Última consulta</Th>
           </tr>
         </thead>
         <tbody>

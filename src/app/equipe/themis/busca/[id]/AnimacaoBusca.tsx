@@ -1,14 +1,14 @@
 "use client";
 
-// Animacao cinematografica das APIs SELECIONADAS acendendo em sequencia.
+// Animação cinematográfica das APIs SELECIONADAS acendendo em sequência.
 // Recebe `apisAtivas: ApiSonar[]` da URL — pode ser:
 //   - Combo Lead: 7 APIs (Assertiva + BigData x3 + DataJud + minhareceita + SICAR)
 //   - Combo Doc: 3 APIs (ARISP + ONR + Junta Comercial)
 //   - Individual: N escolhidas pelo advogado
 //
 // Cada card tem 3 estados: idle (cinza) -> buscando (pulso dourado) -> completo.
-// Preco mostrado no rotulo (regra sonar-consultas-pagas-sob-demanda).
-// Timing distribuido: 1.1s por card, gap de ~200ms — total escala com N.
+// Preço mostrado no rótulo (regra sonar-consultas-pagas-sob-demanda).
+// Timing distribuído: 1.1s por card, gap de ~200ms — total escala com N.
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -21,12 +21,12 @@ import {
 
 type Estado = "idle" | "buscando" | "completo";
 
-const STAGGER = 1100; // ms entre inicios consecutivos
+const STAGGER = 1100; // ms entre inícios consecutivos
 const DURACAO_CARD = 1100; // ms em estado buscando
 const ENTRADA = 400; // ms de intro antes do primeiro card
-const POS_FIM = 700; // ms de respiro depois do ultimo terminar
+const POS_FIM = 700; // ms de respiro depois do último terminar
 
-// Mapeia API id pra fonte canonica do banco (pra puxar contagem real).
+// Mapeia API id pra fonte canônica do banco (pra puxar contagem real).
 function apiIdToFonte(apiId: string): FonteBusca {
   if (apiId.startsWith("assertiva.")) return "Assertiva";
   if (apiId.startsWith("bigdatacorp.")) return "BigDataCorp";
@@ -34,11 +34,11 @@ function apiIdToFonte(apiId: string): FonteBusca {
   if (apiId.startsWith("minhareceita.")) return "minhareceita";
   if (apiId.startsWith("sicar.")) return "SICAR";
   if (apiId.startsWith("arisp.")) return "ARISP";
-  // Fontes que ainda nao existem na seed (no demo darao "documento solicitado")
+  // Fontes que ainda não existem na seed (no demo darão "documento solicitado")
   return "Manual";
 }
 
-// Legenda curta extraida do nome (depois do "—")
+// Legenda curta extraída do nome (depois do "—")
 function legendaCurta(nome: string): string {
   const idx = nome.indexOf("—");
   return idx >= 0 ? nome.slice(idx + 1).trim() : nome;
@@ -128,16 +128,16 @@ export function AnimacaoBusca(props: Props) {
       />
 
       <div className="relative mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
-        {/* Cabecalho */}
+        {/* Cabeçalho */}
         <div className="flex flex-col items-center text-center">
           <span className="eyebrow">
-            {concluiu ? "Analise concluida" : "Buscando bens"}
+            {concluiu ? "Análise concluída" : "Buscando bens"}
           </span>
           <h1 className="mt-4 font-serif text-[clamp(28px,4vw,46px)] font-medium leading-[1.1] tracking-tight text-ivory">
             {props.devedorNome}
           </h1>
           <p className="mt-3 font-mono text-sm text-[var(--color-ivory-66)]">
-            {props.devedorTipo === "PF" ? "Pessoa Fisica" : "Pessoa Juridica"} ·{" "}
+            {props.devedorTipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"} ·{" "}
             {props.devedorDocumento}
           </p>
           <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-gold)]">
@@ -166,7 +166,7 @@ export function AnimacaoBusca(props: Props) {
           </p>
         </div>
 
-        {/* Grade dinamica de fontes — flex-wrap centra naturalmente quando N e pequeno */}
+        {/* Grade dinâmica de fontes — flex-wrap centra naturalmente quando N é pequeno */}
         {apis.length === 0 ? (
           <div className="mt-12 grid place-items-center">
             <p className="rounded-lg border border-[var(--color-ivory-22)] bg-white/5 p-6 font-mono text-xs text-[var(--color-ivory-66)]">
@@ -212,7 +212,7 @@ export function AnimacaoBusca(props: Props) {
               href={`/equipe/devedores/${props.devedorId}${props.euQuery}`}
               className="mt-8 inline-flex items-center gap-2 rounded-lg bg-[var(--color-gold)] px-8 py-4 text-sm font-semibold text-onyx shadow-[0_4px_24px_rgba(201,162,74,0.4)] transition hover:bg-[var(--color-tip-glow)]"
             >
-              Ver dossie completo →
+              Ver dossiê completo →
             </Link>
             <Link
               href={`/equipe/themis${props.euQuery}`}
@@ -264,7 +264,7 @@ function CardFonte({
         />
       ) : null}
 
-      {/* Tag fonte + preco */}
+      {/* Tag fonte + preço */}
       <div className="relative flex items-start justify-between gap-2">
         <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-ivory">
           {tagCurta(api.id)}
@@ -278,6 +278,7 @@ function CardFonte({
       </div>
 
       {/* Legenda (o que essa API faz) */}
+
       <p className="relative mt-2 font-mono text-[10px] leading-tight text-[var(--color-ivory-66)]">
         {legendaCurta(api.nome)}
       </p>

@@ -1,8 +1,8 @@
-// Reader/types de medidas_tomadas — historico processual por caso.
-// Server-only (usa admin client). Renderizado como timeline no dossie.
+// Reader/types de medidas_tomadas — histórico processual por caso.
+// Server-only (usa admin client). Renderizado como timeline no dossiê.
 //
-// Tabela criada na migration 004. Se a tabela nao existir ainda (migration
-// nao rodou), as funcoes devolvem [] sem panic — a pagina continua viva.
+// Tabela criada na migration 004. Se a tabela não existir ainda (migration
+// não rodou), as funções devolvem [] sem panic — a página continua viva.
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export type TipoMedida =
@@ -42,7 +42,7 @@ export interface Medida {
 
 // Lista todas medidas dos casos vinculados a um devedor.
 // Ordenado por data DESC (mais recente primeiro).
-// Se a tabela nao existir (migration 004 nao rodou), devolve [].
+// Se a tabela não existir (migration 004 não rodou), devolve [].
 export async function listarMedidasPorDevedor(
   devedorId: number,
 ): Promise<Medida[]> {
@@ -57,8 +57,8 @@ export async function listarMedidasPorDevedor(
 
   const casoIds = casos.map((c) => c.id as number);
 
-  // 2) Busca medidas. Se a tabela nao existir (PostgREST 42P01),
-  //    devolve array vazio em vez de quebrar a pagina.
+  // 2) Busca medidas. Se a tabela não existir (PostgREST 42P01),
+  //    devolve array vazio em vez de quebrar a página.
   const { data, error } = await sb
     .from("medidas_tomadas")
     .select("*")
@@ -66,10 +66,10 @@ export async function listarMedidasPorDevedor(
     .order("data", { ascending: false });
 
   if (error) {
-    // 42P01 = undefined_table; PGRST205 = schema cache nao tem tabela.
-    // Em ambos cenarios o significado pratico e "tabela nao existe ainda".
+    // 42P01 = undefined_table; PGRST205 = schema cache não tem tabela.
+    // Em ambos cenários o significado prático é "tabela não existe ainda".
     console.warn(
-      `[medidas] tabela indisponivel ou erro de leitura: ${error.message}`,
+      `[medidas] tabela indisponível ou erro de leitura: ${error.message}`,
     );
     return [];
   }
@@ -80,20 +80,20 @@ export async function listarMedidasPorDevedor(
 // ============================================================
 // Metadados de UI — tipos e resultados com label + cor.
 // Centralizado aqui pra TimelineMedidas e AdicionarMedidaForm
-// consumirem o mesmo dicionario.
+// consumirem o mesmo dicionário.
 // ============================================================
 export const TIPO_META: Record<TipoMedida, { label: string; cor: string }> = {
   sisbajud: { label: "SISBAJUD", cor: "#5a9bff" },
   infojud: { label: "INFOJUD", cor: "#7a86ff" },
   renajud: { label: "RENAJUD", cor: "#ff8a3d" },
   arisp: { label: "ARISP", cor: "#d4b46a" },
-  oficio_cartorio: { label: "Oficio cartorio", cor: "#c9a24a" },
-  oficio_junta: { label: "Oficio junta", cor: "#c9a24a" },
-  peticao_penhora: { label: "Peticao penhora", cor: "#c9a24a" },
+  oficio_cartorio: { label: "Ofício cartório", cor: "#c9a24a" },
+  oficio_junta: { label: "Ofício junta", cor: "#c9a24a" },
+  peticao_penhora: { label: "Petição penhora", cor: "#c9a24a" },
   penhora_efetivada: { label: "Penhora efetivada", cor: "#3cff8a" },
-  audiencia: { label: "Audiencia", cor: "#b08cff" },
+  audiencia: { label: "Audiência", cor: "#b08cff" },
   recurso: { label: "Recurso", cor: "#ff6b9d" },
-  cumprimento_sentenca: { label: "Cumprim. sentenca", cor: "#9ed8ff" },
+  cumprimento_sentenca: { label: "Cumprim. sentença", cor: "#9ed8ff" },
   sniper: { label: "SNIPER", cor: "#ff5050" },
   serasajud: { label: "SERASAJUD", cor: "#5ad4d4" },
   outro: { label: "Outro", cor: "#a9a9a9" },

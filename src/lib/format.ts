@@ -1,9 +1,9 @@
-// Helpers de formatacao usados no portal do cliente.
-// Sem libs externas — Intl.NumberFormat + calculo manual de tempo relativo.
+// Helpers de formatação usados no portal do cliente.
+// Sem libs externas — Intl.NumberFormat + cálculo manual de tempo relativo.
 
-// Formato monetario BRL: SEMPRE com 2 casas decimais (vírgula de centavos).
-// Instrucao Caio 2026-06-22: "todo valor em R$, na plataforma e na peca,
-// sempre virgula de centavos". Sem mais maximumFractionDigits: 0.
+// Formato monetário BRL: SEMPRE com 2 casas decimais (vírgula de centavos).
+// Instrução Caio 2026-06-22: "todo valor em R$, na plataforma e na peça,
+// sempre vírgula de centavos". Sem mais maximumFractionDigits: 0.
 export function formatBRL(value: number | null | undefined): string {
   if (value === null || value === undefined || Number.isNaN(value)) return "—";
   return new Intl.NumberFormat("pt-BR", {
@@ -14,8 +14,8 @@ export function formatBRL(value: number | null | undefined): string {
   }).format(value);
 }
 
-// Tempo relativo em PT-BR: "hoje", "ontem", "ha 2 dias", "ha 1 semana",
-// "ha 3 semanas". Se mais de 30 dias, devolve data ISO curta (DD/MM/YYYY).
+// Tempo relativo em PT-BR: "hoje", "ontem", "há 2 dias", "há 1 semana",
+// "há 3 semanas". Se mais de 30 dias, devolve data ISO curta (DD/MM/YYYY).
 export function formatTempoRelativo(iso: string | null | undefined): string {
   if (!iso) return "—";
   const ts = new Date(iso);
@@ -27,9 +27,9 @@ export function formatTempoRelativo(iso: string | null | undefined): string {
 
   if (diffDias <= 0) return "hoje";
   if (diffDias === 1) return "ontem";
-  if (diffDias < 7) return `ha ${diffDias} dias`;
-  if (diffDias < 14) return "ha 1 semana";
-  if (diffDias < 30) return `ha ${Math.floor(diffDias / 7)} semanas`;
+  if (diffDias < 7) return `há ${diffDias} dias`;
+  if (diffDias < 14) return "há 1 semana";
+  if (diffDias < 30) return `há ${Math.floor(diffDias / 7)} semanas`;
 
   const dd = String(ts.getDate()).padStart(2, "0");
   const mm = String(ts.getMonth() + 1).padStart(2, "0");
@@ -37,7 +37,7 @@ export function formatTempoRelativo(iso: string | null | undefined): string {
   return `${dd}/${mm}/${yyyy}`;
 }
 
-// Documento (CPF/CNPJ) — assume que ja veio formatado do banco; so trim.
+// Documento (CPF/CNPJ) — assume que já veio formatado do banco; só trim.
 export function formatDocumento(_tipo: "PF" | "PJ", doc: string): string {
   return (doc ?? "").trim();
 }

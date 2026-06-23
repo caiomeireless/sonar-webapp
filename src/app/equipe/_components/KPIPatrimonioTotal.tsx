@@ -1,7 +1,7 @@
-// KPI hero do Dashboard da Plataforma — patrimonio localizado total em R$.
+// KPI hero do Dashboard da Plataforma — patrimônio localizado total em R$.
 // O col-span fica a cargo do grid pai (page.tsx) — assim a layout decide
 // como distribuir as 12 colunas sem o componente ditar tamanho. Sem delta:
-// e cumulativo, nao faz sentido comparar com mes anterior.
+// é cumulativo, não faz sentido comparar com mês anterior.
 
 import { KPIHero } from "@/components/dashboard/KPIHero";
 import { formatBRL } from "@/lib/format";
@@ -13,7 +13,7 @@ type Props = {
 export default function KPIPatrimonioTotal({ valorBrl }: Props) {
   return (
     <KPIHero
-      titulo="Patrimonio localizado"
+      titulo="Patrimônio localizado"
       valor={formatBRL(valorBrl)}
       subtitulo="Valor estimado dos bens identificados"
       accent="green"

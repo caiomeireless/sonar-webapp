@@ -1,5 +1,5 @@
-// Dashboard analitico do Caso — visao da EQUIPE.
-// Server Component: carrega dossie (cabecalho) + dados agregados (cards).
+// Dashboard analítico do Caso — visão da EQUIPE.
+// Server Component: carrega dossiê (cabeçalho) + dados agregados (cards).
 // Layout 12-col responsivo; mobile cai pra 1 coluna.
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -75,9 +75,9 @@ export default async function DashboardCasoPage({ params, searchParams }: Props)
         <div className="mx-auto flex max-w-[1400px] flex-col gap-4 px-6 py-8 sm:flex-row sm:items-end sm:justify-between sm:px-10">
           <div className="min-w-0">
             <div className="flex items-center gap-3">
-              <span className="eyebrow">Dashboard analitico</span>
+              <span className="eyebrow">Dashboard analítico</span>
               <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-signal)]">
-                Visao da equipe
+                Visão da equipe
               </span>
             </div>
             <h1 className="mt-3 truncate font-serif text-[clamp(22px,3vw,32px)] font-medium leading-tight tracking-tight text-ivory">
@@ -86,7 +86,7 @@ export default async function DashboardCasoPage({ params, searchParams }: Props)
             <p className="mt-1 font-mono text-xs text-[var(--color-ivory-66)]">
               {casos.length} {casos.length === 1 ? "caso vinculado" : "casos vinculados"}
               {" · "}
-              {devedor.tipo === "PF" ? "Pessoa Fisica" : "Pessoa Juridica"}
+              {devedor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"}
               {" · "}
               {devedor.documento}
             </p>
@@ -96,7 +96,7 @@ export default async function DashboardCasoPage({ params, searchParams }: Props)
             href={dossieHref}
             className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-[var(--color-ivory-22)] bg-white/5 px-4 py-2.5 text-xs font-medium uppercase tracking-[0.12em] text-ivory transition hover:border-[var(--color-gold)] hover:text-[var(--color-gold)]"
           >
-            ← Voltar ao dossie
+            ← Voltar ao dossiê
           </Link>
         </div>
       </section>
@@ -105,12 +105,12 @@ export default async function DashboardCasoPage({ params, searchParams }: Props)
       <section>
         <div className="mx-auto max-w-[1400px] px-6 py-10 sm:px-10">
           {/* ====================================================
-              SECAO 1 — Visao Operacional (cards v1)
+              SEÇÃO 1 — Visão Operacional (cards v1)
               ==================================================== */}
           <header className="mb-5">
-            <span className="eyebrow">Secao 1</span>
+            <span className="eyebrow">Seção 1</span>
             <h2 className="mt-2 font-serif text-[clamp(18px,2vw,24px)] font-medium leading-tight tracking-tight text-ivory">
-              Visao Operacional
+              Visão Operacional
             </h2>
           </header>
 
@@ -126,7 +126,7 @@ export default async function DashboardCasoPage({ params, searchParams }: Props)
             </div>
             <div className="col-span-1 md:col-span-4">
               <KPIHero
-                titulo="Patrimonio localizado"
+                titulo="Patrimônio localizado"
                 valor={formatBRL(dados.kpis.patrimonioLocalizadoBrl)}
                 subtitulo={`${dados.kpis.qtdBens} ${
                   dados.kpis.qtdBens === 1 ? "bem mapeado" : "bens mapeados"
@@ -156,7 +156,7 @@ export default async function DashboardCasoPage({ params, searchParams }: Props)
               <CustosPorAPI dados={dados.custosPorAPI} />
             </div>
 
-            {/* LINHA 5 — Proxima acao full (destaque) */}
+            {/* LINHA 5 — Próxima ação full (destaque) */}
             <div className="col-span-1 md:col-span-12">
               <div className="rounded-xl bg-gradient-to-br from-[rgba(60,255,138,0.04)] to-transparent p-px">
                 <ProximaAcao proximaAcao={dados.proximaAcaoSugerida} />
@@ -165,12 +165,12 @@ export default async function DashboardCasoPage({ params, searchParams }: Props)
           </div>
 
           {/* ====================================================
-              SECAO 2 — Analise de Risco (cards v2)
+              SEÇÃO 2 — Análise de Risco (cards v2)
               ==================================================== */}
           <header className="mb-5 mt-12">
-            <span className="eyebrow">Secao 2</span>
+            <span className="eyebrow">Seção 2</span>
             <h2 className="mt-2 font-serif text-[clamp(18px,2vw,24px)] font-medium leading-tight tracking-tight text-ivory">
-              Analise de Risco
+              Análise de Risco
             </h2>
           </header>
 
@@ -195,12 +195,12 @@ export default async function DashboardCasoPage({ params, searchParams }: Props)
           </div>
 
           {/* ====================================================
-              SECAO 3 — Inteligencia Patrimonial (cards v2)
+              SEÇÃO 3 — Inteligência Patrimonial (cards v2)
               ==================================================== */}
           <header className="mb-5 mt-12">
-            <span className="eyebrow">Secao 3</span>
+            <span className="eyebrow">Seção 3</span>
             <h2 className="mt-2 font-serif text-[clamp(18px,2vw,24px)] font-medium leading-tight tracking-tight text-ivory">
-              Inteligencia Patrimonial
+              Inteligência Patrimonial
             </h2>
           </header>
 
@@ -230,7 +230,7 @@ export default async function DashboardCasoPage({ params, searchParams }: Props)
 }
 
 // ============================================================
-// Estado vazio — devedor nao encontrado / id invalido
+// Estado vazio — devedor não encontrado / id inválido
 // ============================================================
 
 function NaoEncontrado({ voltarHref }: { voltarHref: string }) {
@@ -238,12 +238,12 @@ function NaoEncontrado({ voltarHref }: { voltarHref: string }) {
     <main className="mx-auto max-w-[1400px] px-6 py-24 sm:px-10">
       <div className="grid place-items-center">
         <SpotlightCard className="max-w-[520px] p-10 text-center">
-          <span className="eyebrow !text-[var(--color-gold)]">Nao encontrado</span>
+          <span className="eyebrow !text-[var(--color-gold)]">Não encontrado</span>
           <h3 className="mt-4 font-serif text-2xl text-ivory">
-            Devedor nao localizado
+            Devedor não localizado
           </h3>
           <p className="mt-3 text-sm text-[var(--color-ivory-88)]">
-            O identificador informado nao corresponde a nenhum devedor
+            O identificador informado não corresponde a nenhum devedor
             cadastrado.
           </p>
           <Link

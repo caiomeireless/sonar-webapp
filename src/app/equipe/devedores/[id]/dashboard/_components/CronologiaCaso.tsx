@@ -1,9 +1,9 @@
-// Cronologia do Caso — timeline horizontal scrollavel com 6 marcos canonicos.
-// Cada marco mostra check verde (completo) ou circulo cinza (pendente),
-// com a data abaixo. Linha conectora liga os marcos; o proximo pendente
+// Cronologia do Caso — timeline horizontal scrollável com 6 marcos canônicos.
+// Cada marco mostra check verde (completo) ou círculo cinza (pendente),
+// com a data abaixo. Linha conectora liga os marcos; o próximo pendente
 // recebe um anel dourado em destaque.
 //
-// Server component: nao usa Recharts nem estado — scroll horizontal e
+// Server component: não usa Recharts nem estado — scroll horizontal é
 // puro CSS (overflow-x-auto).
 
 import { DashboardCard } from "@/components/dashboard/DashboardCard";
@@ -19,12 +19,12 @@ type Props = {
 };
 
 export default function CronologiaCaso({ cronologia }: Props) {
-  // Ordena por `ordem` defensivamente — a metrica ja vem ordenada, mas
+  // Ordena por `ordem` defensivamente — a métrica já vem ordenada, mas
   // se algum dia o agregador mudar isso protege a UI.
   const itens = [...cronologia].sort((a, b) => a.ordem - b.ordem);
 
-  // Proximo pendente = primeiro item sem data, na ordem. Recebe destaque
-  // visual (ring dourado) pra orientar o advogado pra acao seguinte.
+  // Próximo pendente = primeiro item sem data, na ordem. Recebe destaque
+  // visual (ring dourado) pra orientar o advogado pra ação seguinte.
   const proximoPendenteOrdem =
     itens.find((it) => !it.completo)?.ordem ?? null;
 
@@ -34,9 +34,9 @@ export default function CronologiaCaso({ cronologia }: Props) {
   return (
     <DashboardCard
       titulo="Cronologia do caso"
-      descricao={`${completos} de ${total} marcos concluidos`}
+      descricao={`${completos} de ${total} marcos concluídos`}
       accent="gold"
-      info="Marcos processuais canonicos do caso. Verde = concluido com data registrada. Cinza = pendente. O proximo pendente fica destacado em ouro."
+      info="Marcos processuais canônicos do caso. Verde = concluído com data registrada. Cinza = pendente. O próximo pendente fica destacado em ouro."
     >
       <div className="overflow-x-auto pb-2">
         <ol
@@ -47,7 +47,7 @@ export default function CronologiaCaso({ cronologia }: Props) {
             const isUltimo = idx === itens.length - 1;
             const proximo = itens[idx + 1];
             // Cor da linha conectora: verde se AMBOS os marcos (atual e
-            // proximo) estao completos; senao cinza neutro.
+            // próximo) estão completos; senão cinza neutro.
             const conectorCompleto =
               item.completo && !!proximo?.completo;
             const isProximoPendente =
@@ -58,7 +58,7 @@ export default function CronologiaCaso({ cronologia }: Props) {
                 key={item.ordem}
                 className="relative flex min-w-[140px] flex-col items-center"
               >
-                {/* Linha conectora — vai do centro deste marco ate o proximo */}
+                {/* Linha conectora — vai do centro deste marco até o próximo */}
                 {!isUltimo ? (
                   <span
                     aria-hidden
@@ -120,7 +120,7 @@ export default function CronologiaCaso({ cronologia }: Props) {
                   )}
                 </span>
 
-                {/* Numero de ordem do marco */}
+                {/* Número de ordem do marco */}
                 <span
                   className="mt-2 font-mono text-[10px] uppercase tracking-wider"
                   style={{

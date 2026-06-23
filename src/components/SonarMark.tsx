@@ -1,4 +1,4 @@
-// Simbolo do Sonar (radar). Componente puro - sem dependencias de runtime.
+// Símbolo do Sonar (radar). Componente puro - sem dependências de runtime.
 // Renderiza o SVG inline para permitir controle fino de tamanho/aria.
 // Anatomia documentada no README do handoff.
 

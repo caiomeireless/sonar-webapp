@@ -1,10 +1,10 @@
-// Atividade da equipe nos ultimos 7 dias — barras verticais empilhadas
+// Atividade da equipe nos últimos 7 dias — barras verticais empilhadas
 // (uma barra por advogado, segmentos por tipo de medida). Quem mais
-// tocou processos aparece a esquerda; o tooltip abre o breakdown
-// completo de cada tipo (SISBAJUD, INFOJUD, oficios, audiencias...).
+// tocou processos aparece à esquerda; o tooltip abre o breakdown
+// completo de cada tipo (SISBAJUD, INFOJUD, ofícios, audiências...).
 //
-// Client component porque Recharts so renderiza no client (refs/SVG).
-// Dados ja vem agregados (atividadeEquipe7Dias da DashboardPlataforma).
+// Client component porque Recharts só renderiza no client (refs/SVG).
+// Dados já vem agregados (atividadeEquipe7Dias da DashboardPlataforma).
 "use client";
 
 import {
@@ -33,7 +33,7 @@ type Props = {
 };
 
 // Nome curto pro eixo X — primeiro nome + inicial do segundo (cabe melhor
-// quando temos 5+ advogados lado a lado). Cai pro email se nao houver nome.
+// quando temos 5+ advogados lado a lado). Cai pro email se não houver nome.
 function nomeCurto(item: AtividadeEquipeItem): string {
   const nome = (item.advogadoNome ?? "").trim();
   if (!nome || nome === item.advogadoEmail) {
@@ -47,8 +47,8 @@ function nomeCurto(item: AtividadeEquipeItem): string {
   return segundo ? `${primeiro} ${segundo}.` : primeiro;
 }
 
-// Linha do dataset que o Recharts consome: nome curto + uma chave numerica
-// por TipoMedida (zero quando o advogado nao executou aquele tipo).
+// Linha do dataset que o Recharts consome: nome curto + uma chave numérica
+// por TipoMedida (zero quando o advogado não executou aquele tipo).
 type Linha = { nome: string; emailKey: string } & Partial<
   Record<TipoMedida, number>
 >;
@@ -66,8 +66,8 @@ function montarLinhas(dados: AtividadeEquipeItem[]): Linha[] {
   });
 }
 
-// Tooltip do Recharts — payload nao tem tipo publico estavel, entao
-// modelamos so o que usamos. Mostra so tipos com count > 0, em ordem
+// Tooltip do Recharts — payload não tem tipo público estável, então
+// modelamos só o que usamos. Mostra só tipos com count > 0, em ordem
 // decrescente, mais o total ao final.
 interface PayloadItem {
   dataKey?: string | number;
@@ -138,12 +138,12 @@ export default function AtividadeEquipe7Dias({ dados }: Props) {
   return (
     <DashboardCard
       titulo="Atividade da equipe — 7 dias"
-      descricao="Medidas tomadas por advogado, empilhadas por tipo de providencia"
+      descricao="Medidas tomadas por advogado, empilhadas por tipo de providência"
       accent="green"
     >
       {linhas.length === 0 ? (
         <p className="text-sm text-[var(--color-ivory-66)]">
-          Nenhuma medida registrada nos ultimos 7 dias.
+          Nenhuma medida registrada nos últimos 7 dias.
         </p>
       ) : (
         <div className="h-72 w-full">
@@ -175,8 +175,8 @@ export default function AtividadeEquipe7Dias({ dados }: Props) {
               />
               {TIPOS_ORDEM.map((tipo, idx) => {
                 const meta = TIPO_META[tipo];
-                // Arredondamento so no topo da pilha — o ultimo tipo da
-                // lista que renderizamos vira o "ultimo segmento" visualmente.
+                // Arredondamento só no topo da pilha — o último tipo da
+                // lista que renderizamos vira o "último segmento" visualmente.
                 const ehTopo = idx === TIPOS_ORDEM.length - 1;
                 return (
                   <Bar

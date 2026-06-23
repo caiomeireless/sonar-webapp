@@ -1,10 +1,10 @@
 // GET /api/pecas/[devedorId]/[templateId]/docx
-// Gera a peca em formato .docx e devolve como download direto.
+// Gera a peça em formato .docx e devolve como download direto.
 //
 // Query params:
 //   - eu=email      (dev-only bypass, ignorado em prod)
-//   - caso_id=123   (escolhe um caso especifico do devedor; default: primeiro)
-//   - opcoes=a,b,c  (CSV das opcoes do template; ausente = defaults)
+//   - caso_id=123   (escolhe um caso específico do devedor; default: primeiro)
+//   - opcoes=a,b,c  (CSV das opções do template; ausente = defaults)
 //
 // Auth:
 //   - exige perfil logado (401) — incondicional, sem brecha de ambiente
@@ -30,7 +30,7 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ devedorId: string; templateId: string }> },
 ) {
-  // 1. Auth — incondicional. Dados pessoais LGPD nao podem vazar em nenhum ambiente.
+  // 1. Auth — incondicional. Dados pessoais LGPD não podem vazar em nenhum ambiente.
   const perfil = await perfilLogado();
   if (!perfil) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -39,7 +39,7 @@ export async function GET(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  // 2. Validacao dos params da rota
+  // 2. Validação dos params da rota
   const { devedorId: devedorIdRaw, templateId } = await params;
   const devedorId = Number.parseInt(devedorIdRaw, 10);
   if (!Number.isFinite(devedorId)) {
@@ -51,7 +51,7 @@ export async function GET(
     return NextResponse.json({ error: "Invalid templateId" }, { status: 400 });
   }
 
-  // 3. Carrega o dossie + escolhe o caso
+  // 3. Carrega o dossiê + escolhe o caso
   const dossie = await obterDossie(devedorId);
   if (!dossie) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -70,18 +70,18 @@ export async function GET(
     );
   }
 
-  // 4. Opcoes do template
+  // 4. Opções do template
   const opcoesParam = url.searchParams.get("opcoes");
   const opcoes =
     opcoesParam !== null
       ? parseOpcoesCSV(opcoesParam)
       : opcoesPadrao(templateMeta);
 
-  // 4b. Bens especificos via ?bens=1,2,3 (opcional; ausente = todos)
+  // 4b. Bens específicos via ?bens=1,2,3 (opcional; ausente = todos)
   const bensParam = url.searchParams.get("bens");
   const bensSelecionados = bensParam ? parseBensCSV(bensParam) : undefined;
 
-  // 5. Monta a peca e gera o .docx
+  // 5. Monta a peça e gera o .docx
   const peca = gerarPeca(
     templateId as TemplateId,
     dossie,
@@ -93,16 +93,16 @@ export async function GET(
   const buffer = await gerarDocxPeca({
     peca,
     dataExtenso: dataExtenso(),
-    cidade: "Sao Paulo",
+    cidade: "São Paulo",
   });
 
-  // 6. Nome do arquivo — Content-Disposition usa ByteString (so ASCII).
+  // 6. Nome do arquivo — Content-Disposition usa ByteString (só ASCII).
   // Precisa normalizar acentos, em-dashes (U+2014) e qualquer non-ASCII.
   function asciiSafe(s: string): string {
     return s
       .normalize("NFKD")
-      .replace(/[̀-ͯ]/g, "") // diacriticos (acentos)
-      .replace(/[‐-―]/g, "-") // travessao, em-dash, en-dash
+      .replace(/[̀-ͯ]/g, "") // diacríticos (acentos)
+      .replace(/[‐-―]/g, "-") // travessão, em-dash, en-dash
       .replace(/[^\x20-\x7E]/g, ""); // qualquer non-ASCII restante
   }
   const nomeTemplate = asciiSafe(templateMeta.nome).replace(/\s+/g, "-");
@@ -113,7 +113,7 @@ export async function GET(
     .replace(/[^a-zA-Z0-9_-]/g, "");
   const filename = `${nomeTemplate}-${nomeDevedor}.docx`;
 
-  // Buffer (Node) e ArrayBuffer/Uint8Array sao aceitos como BodyInit no Next.
+  // Buffer (Node) e ArrayBuffer/Uint8Array são aceitos como BodyInit no Next.
   return new NextResponse(new Uint8Array(buffer), {
     status: 200,
     headers: {

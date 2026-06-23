@@ -1,8 +1,8 @@
-// KPI Hero — card destaque de metrica numerica grande.
-// Usado nas 4 a 8 metricas principais no topo do dashboard.
-// Valor ja vem formatado (string) pra evitar acoplamento com Intl.
+// KPI Hero — card destaque de métrica numérica grande.
+// Usado nas 4 a 8 métricas principais no topo do dashboard.
+// Valor já vem formatado (string) pra evitar acoplamento com Intl.
 //
-// Padrao tipografico: numero `text-4xl md:text-5xl font-medium tabular-nums
+// Padrão tipográfico: número `text-4xl md:text-5xl font-medium tabular-nums
 // tracking-tight` na cor do `accent` (signal/gold/ivory). Espelho do "número
 // gigante dourado" do BP CRM, adaptado pra paleta Sonar (gold→signal).
 
@@ -41,7 +41,7 @@ const DIRECTION_ARROW: Record<KPIDelta["direction"], string> = {
   neutral: "→",
 };
 
-// Cor do numero por accent — verde signal e default (substituiu o gold do BP).
+// Cor do número por accent — verde signal é default (substituiu o gold do BP).
 const VALUE_COLOR: Record<DashboardCardAccent, string> = {
   green: "var(--color-signal)",
   gold: "var(--color-gold)",

@@ -1,11 +1,11 @@
 "use client";
 
-// Concentracao patrimonial — mini-donut + KPI lateral.
+// Concentração patrimonial — mini-donut + KPI lateral.
 // Donut em 2 fatias: bem dominante (topBemPct) x resto.
-// KPI: "Top 1 = X%" + nome/tipo do bem. Subtitulo: Herfindahl + faixa.
+// KPI: "Top 1 = X%" + nome/tipo do bem. Subtítulo: Herfindahl + faixa.
 //
 // CLIENT por causa do Recharts (ResponsiveContainer mede o DOM).
-// Recebe ja agregado em `dados: ConcentracaoPatrimonial` — page passa.
+// Recebe já agregado em `dados: ConcentracaoPatrimonial` — page passa.
 
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 
@@ -15,15 +15,15 @@ import type { ConcentracaoPatrimonial as ConcentracaoData } from "@/lib/dashboar
 import { DashboardCard } from "@/components/dashboard/DashboardCard";
 import { TIPO_BEM_COLORS } from "@/components/dashboard/ChartTheme";
 
-// Label PT-BR por tipo de bem. Inline pra manter consistencia com o resto
-// do dashboard — nao ha export central de TIPO_META pra bens.
+// Label PT-BR por tipo de bem. Inline pra manter consistência com o resto
+// do dashboard — não há export central de TIPO_META pra bens.
 const TIPO_LABEL: Record<TipoBem, string> = {
-  veiculo: "Veiculo",
-  imovel: "Imovel",
-  empresa: "Participacao societaria",
-  processo_credito: "Processo onde e credor",
-  endereco: "Endereco",
-  vinculo: "Vinculo familiar",
+  veiculo: "Veículo",
+  imovel: "Imóvel",
+  empresa: "Participação societária",
+  processo_credito: "Processo onde é credor",
+  endereco: "Endereço",
+  vinculo: "Vínculo familiar",
 };
 
 // Faixas do Herfindahl (HHI normalizado 0..1):
@@ -39,20 +39,20 @@ function classificarHHI(hhi: number): {
     return {
       label: "concentrado",
       cor: "#FF5B5B",
-      descricao: "patrimonio depende de poucos bens",
+      descricao: "patrimônio depende de poucos bens",
     };
   }
   if (hhi >= 0.25) {
     return {
       label: "moderado",
       cor: "var(--color-gold)",
-      descricao: "concentracao media",
+      descricao: "concentração média",
     };
   }
   return {
     label: "diversificado",
     cor: "var(--color-signal)",
-    descricao: "patrimonio bem distribuido",
+    descricao: "patrimônio bem distribuído",
   };
 }
 
@@ -63,11 +63,11 @@ type Props = {
 export default function ConcentracaoPatrimonial({ dados }: Props) {
   const { topBemPct, topBemTitulo, topBemTipo, indiceHerfindahl } = dados;
 
-  // Sem bens com valor — page ja zerou; mostra placeholder.
+  // Sem bens com valor — page já zerou; mostra placeholder.
   if (topBemPct === 0 || !topBemTitulo) {
     return (
       <DashboardCard
-        titulo="Concentracao patrimonial"
+        titulo="Concentração patrimonial"
         descricao="Peso do maior bem sobre o total"
         accent="gold"
       >
@@ -94,17 +94,17 @@ export default function ConcentracaoPatrimonial({ dados }: Props) {
 
   return (
     <DashboardCard
-      titulo="Concentracao patrimonial"
+      titulo="Concentração patrimonial"
       descricao="Peso do maior bem sobre o total"
       accent="gold"
       info={
-        "Mostra o quanto o patrimonio do devedor depende de um unico bem.\n\n" +
+        "Mostra o quanto o patrimônio do devedor depende de um único bem.\n\n" +
         "Top 1: percentual do bem mais valioso sobre o total.\n\n" +
-        "Indice Herfindahl (HHI): soma dos quadrados das fatias.\n" +
-        "  < 0.25 diversificado (varios bens equivalentes)\n" +
+        "Índice Herfindahl (HHI): soma dos quadrados das fatias.\n" +
+        "  < 0.25 diversificado (vários bens equivalentes)\n" +
         "  0.25 a 0.5 moderado\n" +
         "  > 0.5 concentrado (poucos bens carregam o caso)\n\n" +
-        "Caso concentrado = risco alto: perder o bem dominante esvazia a execucao."
+        "Caso concentrado = risco alto: perder o bem dominante esvazia a execução."
       }
     >
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-[140px_minmax(0,1fr)] sm:items-center">

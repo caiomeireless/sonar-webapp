@@ -1,10 +1,10 @@
-// Proximos atos processuais — timeline vertical do Dashboard do Caso.
-// Lista atos com prazo fatal, dias restantes e badge de urgencia.
-// Dados ja chegam ordenados/agregados pela page (calcularProximosAtosProcessuais).
+// Próximos atos processuais — timeline vertical do Dashboard do Caso.
+// Lista atos com prazo fatal, dias restantes e badge de urgência.
+// Dados já chegam ordenados/agregados pela page (calcularProximosAtosProcessuais).
 // MOCK por enquanto — quando Themis API entregar prazos fatais reais,
 // substituir a fonte em dashboard-caso.ts mantendo a interface ProximoAtoProcessual.
 //
-// Server component: sem estado, sem Recharts, so render.
+// Server component: sem estado, sem Recharts, só render.
 
 import { DashboardCard } from "@/components/dashboard/DashboardCard";
 import type { ProximoAtoProcessual } from "@/lib/dashboard-caso";
@@ -19,12 +19,12 @@ const URGENCIA_RANK: Record<Urgencia, number> = {
 
 const URGENCIA_LABEL: Record<Urgencia, string> = {
   alta: "Alta",
-  media: "Media",
+  media: "Média",
   baixa: "Baixa",
 };
 
 // Cores rgba literais — o badge precisa de fill + border com alpha,
-// e usar CSS vars dentro de rgba() nao funciona consistente.
+// e usar CSS vars dentro de rgba() não funciona consistente.
 const URGENCIA_BADGE: Record<
   Urgencia,
   { fg: string; bg: string; border: string; dot: string }
@@ -81,10 +81,10 @@ export default function ProximosAtosProcessuais({ atos }: Props) {
 
   return (
     <DashboardCard
-      titulo="Proximos atos processuais"
-      descricao="Prazos fatais ordenados por urgencia"
+      titulo="Próximos atos processuais"
+      descricao="Prazos fatais ordenados por urgência"
       accent={accent}
-      info="Lista mock ate a integracao com a API do Themis. A urgencia e calculada pelos dias restantes ate o prazo fatal: alta (<=10 dias), media (<=30), baixa (>30)."
+      info="Lista mock até a integração com a API do Themis. A urgência é calculada pelos dias restantes até o prazo fatal: alta (<=10 dias), média (<=30), baixa (>30)."
     >
       {ordenados.length === 0 ? (
         <p className="text-sm text-[var(--color-ivory-66)]">
@@ -106,7 +106,7 @@ export default function ProximosAtosProcessuais({ atos }: Props) {
                 key={`${ato.ato}-${idx}`}
                 className="relative pl-6"
               >
-                {/* no na timeline */}
+                {/* nó na timeline */}
                 <span
                   aria-hidden
                   className="absolute left-0 top-1.5 inline-block h-3.5 w-3.5 rounded-full border-2"

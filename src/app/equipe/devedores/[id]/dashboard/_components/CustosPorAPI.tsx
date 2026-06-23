@@ -1,9 +1,9 @@
 // Top 5 APIs com maior gasto no devedor. Mini-barras proporcionais ao maior
-// gasto da lista (nao ao total) — assim a barra do #1 sempre preenche 100% e
-// as demais sao lidas em comparacao. Total acumulado vai no rodape.
+// gasto da lista (não ao total) — assim a barra do #1 sempre preenche 100% e
+// as demais são lidas em comparação. Total acumulado vai no rodapé.
 //
-// Recebe dados ja agregados — a page chama obterDadosDashboardCaso.
-// Server Component: nao precisa de Recharts (lista simples + divs).
+// Recebe dados já agregados — a page chama obterDadosDashboardCaso.
+// Server Component: não precisa de Recharts (lista simples + divs).
 
 import type { DashboardCustoApi } from "@/lib/dashboard-caso";
 import { formatBRL } from "@/lib/format";
@@ -16,7 +16,7 @@ type Props = {
 
 export default function CustosPorAPI({ dados }: Props) {
   const total = dados.reduce((s, d) => s + d.custoBrl, 0);
-  // Base de proporcao = maior gasto. Se total/maior for 0, barras viram 0%.
+  // Base de proporção = maior gasto. Se total/maior for 0, barras viram 0%.
   const maior = dados.reduce((m, d) => (d.custoBrl > m ? d.custoBrl : m), 0);
 
   return (

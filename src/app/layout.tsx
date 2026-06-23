@@ -29,9 +29,9 @@ const jetbrains = JetBrains_Mono({
   display: "swap",
 });
 
-// Open Sans — fonte padrao das pecas processuais do BP Advogados.
-// Tamanho 10pt + line-height 1.5 + recuo de paragrafo 2.5cm (padrao
-// do escritorio, instrucao explicita do Caio em 2026-06-21).
+// Open Sans — fonte padrão das peças processuais do BP Advogados.
+// Tamanho 10pt + line-height 1.5 + recuo de parágrafo 2.5cm (padrão
+// do escritório, instrução explícita do Caio em 2026-06-21).
 const openSans = Open_Sans({
   subsets: ["latin"],
   weight: ["400", "600", "700"],

@@ -1,9 +1,9 @@
-// Dashboard do Caso — agregacao DO LADO SERVIDOR pra alimentar a view.
+// Dashboard do Caso — agregação DO LADO SERVIDOR pra alimentar a view.
 // Server-only (usa createAdminClient). Reutiliza obterDossie pra bens+casos
-// e consulta diretamente custos + medidas_tomadas pra metricas operacionais.
+// e consulta diretamente custos + medidas_tomadas pra métricas operacionais.
 //
-// Toda metrica devolvida ja vem pronta pra UI consumir — a view NAO faz
-// agregacao no client.
+// Toda métrica devolvida já vem pronta pra UI consumir — a view NÃO faz
+// agregação no client.
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
@@ -20,7 +20,7 @@ import {
 import type { Medida, ResultadoMedida, TipoMedida } from "@/lib/medidas";
 
 // ============================================================
-// TIPOS de saida
+// TIPOS de saída
 // ============================================================
 
 export interface DashboardKPIs {
@@ -60,7 +60,7 @@ export interface DashboardBreakdownBem {
 
 export interface DashboardTempoMedio {
   dias: number;
-  baseline: number; // baseline arbitrario de mercado (heuristica)
+  baseline: number; // baseline arbitrário de mercado (heurística)
 }
 
 export interface DashboardCustoApi {
@@ -85,7 +85,7 @@ export interface DashboardCaso {
 }
 
 // ============================================================
-// TIPOS v2 — 10 metricas novas pro Dashboard do Caso v2
+// TIPOS v2 — 10 métricas novas pro Dashboard do Caso v2
 // ============================================================
 
 export interface RiscoPrescricao {
@@ -231,7 +231,7 @@ function calcularHeatmap(medidas: Medida[]): DashboardHeatmapItem[] {
     const [tipo, resultado] = k.split("|") as [TipoMedida, ResultadoMedida];
     out.push({ tipo, resultado, count });
   }
-  // Determinismo de saida: ordena por tipo, depois resultado.
+  // Determinismo de saída: ordena por tipo, depois resultado.
   out.sort((a, b) => a.tipo.localeCompare(b.tipo) || a.resultado.localeCompare(b.resultado));
   return out;
 }
@@ -241,14 +241,14 @@ function calcularLinhaTempo(
   medidas: Medida[],
 ): DashboardLinhaTempoItem[] {
   const meses = ultimos12Meses();
-  // Cobranca = valor_credito_brl distribuido como valor "em aberto" no mes
-  // do caso (heuristica DEMO: como nao temos data de abertura por caso na
+  // Cobrança = valor_credito_brl distribuído como valor "em aberto" no mês
+  // do caso (heurística DEMO: como não temos data de abertura por caso na
   // CasoResumo, divide igualmente nos 12 meses). Substituir quando a data
   // de abertura entrar no schema.
   const totalCobranca = calcularCobrancaTotal(casos);
   const cobrancaMensal = meses.length > 0 ? totalCobranca / meses.length : 0;
 
-  // Recuperacao = soma de valor_recuperado_brl agrupado por YYYY-MM da data
+  // Recuperação = soma de valor_recuperado_brl agrupado por YYYY-MM da data
   // da medida.
   const recPorMes = new Map<string, number>();
   for (const m of medidas) {
@@ -269,10 +269,10 @@ function calcularLinhaTempo(
 }
 
 function calcularTempoMedio(medidas: Medida[]): DashboardTempoMedio {
-  // Tempo medio entre 'peticao_penhora' e 'penhora_efetivada' do mesmo caso.
-  // Para cada caso, pareia a peticao mais antiga ainda nao-pareada com a
-  // proxima penhora_efetivada subsequente.
-  const baseline = 120; // dias — heuristica de mercado (varia muito por vara)
+  // Tempo médio entre 'peticao_penhora' e 'penhora_efetivada' do mesmo caso.
+  // Para cada caso, pareia a petição mais antiga ainda não-pareada com a
+  // próxima penhora_efetivada subsequente.
+  const baseline = 120; // dias — heurística de mercado (varia muito por vara)
   const porCaso = new Map<number, Medida[]>();
   for (const m of medidas) {
     const arr = porCaso.get(m.caso_id) ?? [];
@@ -339,7 +339,7 @@ function calcularProximaAcao(args: {
 }): DashboardProximaAcao {
   const { medidas, bens, score } = args;
 
-  // 1) Sem atividade ha 90 dias?
+  // 1) Sem atividade há 90 dias?
   const agora = Date.now();
   const ultima = medidas.reduce<number>((max, m) => {
     const t = new Date(m.data).getTime();
@@ -350,11 +350,11 @@ function calcularProximaAcao(args: {
   if (semAtividade) {
     return {
       acao: "Rodar SISBAJUD",
-      motivo: "Sem atividade ha 90 dias",
+      motivo: "Sem atividade há 90 dias",
     };
   }
 
-  // 2) Imovel sem matricula validada?
+  // 2) Imóvel sem matrícula validada?
   const imovelSemMatricula = bens.some((b) => {
     if (b.tipo !== "imovel") return false;
     const det = (b.detalhes ?? {}) as Record<string, unknown>;
@@ -365,12 +365,12 @@ function calcularProximaAcao(args: {
   });
   if (imovelSemMatricula) {
     return {
-      acao: "Solicitar matricula no ARISP",
-      motivo: "Imovel localizado sem matricula validada",
+      acao: "Solicitar matrícula no ARISP",
+      motivo: "Imóvel localizado sem matrícula validada",
     };
   }
 
-  // 3) Participacao societaria sem CNPJ?
+  // 3) Participação societária sem CNPJ?
   const empresaSemCnpj = bens.some((b) => {
     if (b.tipo !== "empresa") return false;
     const det = (b.detalhes ?? {}) as Record<string, unknown>;
@@ -380,7 +380,7 @@ function calcularProximaAcao(args: {
   if (empresaSemCnpj) {
     return {
       acao: "Cruzar com Receita Federal",
-      motivo: "Participacao societaria sem CNPJ",
+      motivo: "Participação societária sem CNPJ",
     };
   }
 
@@ -394,7 +394,7 @@ function calcularProximaAcao(args: {
 
   // 5) Default
   return {
-    acao: "Sem proxima acao clara — revisar dossie completo",
+    acao: "Sem próxima ação clara — revisar dossiê completo",
     motivo: "Sinais operacionais dentro do esperado",
   };
 }
@@ -537,15 +537,15 @@ export async function obterDadosDashboardCaso(
 }
 
 // ============================================================
-// V2 — HELPERS das 10 metricas novas
+// V2 — HELPERS das 10 métricas novas
 // ============================================================
 
-// (a) Prescricao intercorrente — CPC 921: 5 anos sem manifestacao.
-// Calculo da janela: data_distribuicao + 5 anos = data fatal.
-// Faltam X dias ate a fatal. Buckets de risco:
-//   <= 90d  -> critico
+// (a) Prescrição intercorrente — CPC 921: 5 anos sem manifestação.
+// Cálculo da janela: data_distribuicao + 5 anos = data fatal.
+// Faltam X dias até a fatal. Buckets de risco:
+//   <= 90d  -> crítico
 //   <= 180d -> alto
-//   <= 365d -> medio
+//   <= 365d -> médio
 //   > 365d  -> baixo
 // Sem data_distribuicao -> sem_dados.
 function calcularRiscoPrescricao(
@@ -585,7 +585,7 @@ function calcularRiscoPrescricao(
   return { diasRestantes, dataDistribuicao, statusRisco };
 }
 
-// (b) Bens com restricao suspeita (impenhorabilidade provavel).
+// (b) Bens com restrição suspeita (impenhorabilidade provável).
 function calcularBensComRestricao(bens: Bem[]): BemComRestricao[] {
   const out: BemComRestricao[] = [];
   for (const b of bens) {
@@ -602,12 +602,12 @@ function calcularBensComRestricao(bens: Bem[]): BemComRestricao[] {
       valorBrl: Number(b.valor_estimado_brl) || 0,
     });
   }
-  // Maior valor primeiro — caso o usuario decida priorizar exclusao.
+  // Maior valor primeiro — caso o usuário decida priorizar exclusão.
   out.sort((a, b) => b.valorBrl - a.valorBrl);
   return out;
 }
 
-// (c) Concentracao patrimonial — Herfindahl + maior bem.
+// (c) Concentração patrimonial — Herfindahl + maior bem.
 function calcularConcentracaoPatrimonial(
   bens: Bem[],
 ): ConcentracaoPatrimonial {
@@ -652,29 +652,29 @@ function calcularConcentracaoPatrimonial(
   };
 }
 
-// (d) Distribuicao geografica.
+// (d) Distribuição geográfica.
 // Bens com cidade/uf no banco -> agrupa direto.
-// Bens SEM cidade/uf -> gera mock estavel via hash do bemId.
+// Bens SEM cidade/uf -> gera mock estável via hash do bemId.
 const CIDADES_MOCK_SP: { cidade: string; uf: string }[] = [
-  { cidade: "Sao Paulo", uf: "SP" },
-  { cidade: "Sao Paulo", uf: "SP" },
-  { cidade: "Sao Paulo", uf: "SP" },
+  { cidade: "São Paulo", uf: "SP" },
+  { cidade: "São Paulo", uf: "SP" },
+  { cidade: "São Paulo", uf: "SP" },
   { cidade: "Sorocaba", uf: "SP" },
   { cidade: "Campinas", uf: "SP" },
   { cidade: "Santos", uf: "SP" },
-  { cidade: "Ribeirao Preto", uf: "SP" },
-  { cidade: "Sao Jose dos Campos", uf: "SP" },
+  { cidade: "Ribeirão Preto", uf: "SP" },
+  { cidade: "São José dos Campos", uf: "SP" },
 ];
 
 const CIDADES_MOCK_FORA: { cidade: string; uf: string }[] = [
   { cidade: "Rio de Janeiro", uf: "RJ" },
   { cidade: "Belo Horizonte", uf: "MG" },
   { cidade: "Curitiba", uf: "PR" },
-  { cidade: "Goiania", uf: "GO" },
+  { cidade: "Goiânia", uf: "GO" },
 ];
 
 function rotularBemMock(bemId: number): { cidade: string; uf: string } {
-  // Hash determinista: 80% cai em SP (lista SP tem repeticao de Sao Paulo),
+  // Hash determinista: 80% cai em SP (lista SP tem repetição de São Paulo),
   // 20% sai pra outras UFs.
   const h = Math.abs(bemId * 2654435761) >>> 0; // Knuth multiplicative hash
   if (h % 5 === 0) {
@@ -720,7 +720,7 @@ function calcularDistribuicaoGeografica(
   return out;
 }
 
-// (e) Vinculos patrimoniais — le bens tipo 'vinculo'.
+// (e) Vínculos patrimoniais — lê bens tipo 'vinculo'.
 function calcularVinculosPatrimoniais(bens: Bem[]): VinculoPatrimonial[] {
   const out: VinculoPatrimonial[] = [];
   for (const b of bens) {
@@ -749,7 +749,7 @@ function calcularVinculosPatrimoniais(bens: Bem[]): VinculoPatrimonial[] {
   return out;
 }
 
-// (f) Cronologia processual — 6 marcos canonicos.
+// (f) Cronologia processual — 6 marcos canônicos.
 type MarcosProcessuais = {
   citacao?: string | null;
   sentenca?: string | null;
@@ -762,7 +762,7 @@ function calcularCronologiaCaso(
   marcos: MarcosProcessuais,
   medidas: Medida[],
 ): CronologiaItem[] {
-  // 1a medida tomada = min(data) das medidas.
+  // 1ª medida tomada = min(data) das medidas.
   let primeiraMedida: string | null = null;
   for (const m of medidas) {
     if (!m.data) continue;
@@ -774,12 +774,12 @@ function calcularCronologiaCaso(
   }
 
   const itens: { evento: string; data: string | null }[] = [
-    { evento: "Distribuicao", data: dataDistribuicao },
-    { evento: "Citacao", data: marcos.citacao ?? null },
-    { evento: "Sentenca", data: marcos.sentenca ?? null },
-    { evento: "Transito julgado", data: marcos.transito_julgado ?? null },
-    { evento: "Inicio do cumprimento", data: marcos.inicio_cumprimento ?? null },
-    { evento: "1a medida tomada", data: primeiraMedida },
+    { evento: "Distribuição", data: dataDistribuicao },
+    { evento: "Citação", data: marcos.citacao ?? null },
+    { evento: "Sentença", data: marcos.sentenca ?? null },
+    { evento: "Trânsito julgado", data: marcos.transito_julgado ?? null },
+    { evento: "Início do cumprimento", data: marcos.inicio_cumprimento ?? null },
+    { evento: "1ª medida tomada", data: primeiraMedida },
   ];
 
   return itens.map((it, i) => ({
@@ -790,7 +790,7 @@ function calcularCronologiaCaso(
   }));
 }
 
-// (g) Comparativo com a media do escritorio.
+// (g) Comparativo com a média do escritório.
 async function calcularComparativoEscritorio(
   devedorId: number,
   esteQtdBens: number,
@@ -799,7 +799,7 @@ async function calcularComparativoEscritorio(
 ): Promise<ComparativoEscritorio> {
   const sb = createAdminClient();
 
-  // Devedores "ativos" no escritorio = aqueles que tem pelo menos 1 caso
+  // Devedores "ativos" no escritório = aqueles que têm pelo menos 1 caso
   // ativo. Lista os devedor_ids dos casos ativos (excluindo este).
   const { data: casosAtivos } = await sb
     .from("casos")
@@ -864,7 +864,7 @@ async function calcularComparativoEscritorio(
     }
   }
 
-  // Medias sobre TODOS os outros devedores ativos (mesmo que tenha 0 bens).
+  // Médias sobre TODOS os outros devedores ativos (mesmo que tenha 0 bens).
   const n = outrosIds.size;
   let somaQtd = 0;
   let somaValor = 0;
@@ -894,7 +894,7 @@ async function calcularComparativoEscritorio(
   };
 }
 
-// (h) Custo de oportunidade — quanto se gastou vs. quanto da pra recuperar.
+// (h) Custo de oportunidade — quanto se gastou vs. quanto dá pra recuperar.
 function calcularCustoOportunidade(
   custoAcumuladoBrl: number,
   patrimonioLocalizadoBrl: number,
@@ -916,21 +916,21 @@ function calcularCustoOportunidade(
   };
 }
 
-// (i) Proximos atos processuais — MOCK ate Themis entregar prazos reais.
-// Gera 2-3 atos ficticios estaveis por devedorId. Quando Themis API entregar
+// (i) Próximos atos processuais — MOCK até Themis entregar prazos reais.
+// Gera 2-3 atos fictícios estáveis por devedorId. Quando Themis API entregar
 // prazos fatais, substituir este helper por uma leitura da API mantendo a
 // interface ProximoAtoProcessual.
 function calcularProximosAtosProcessuais(
   devedorId: number,
 ): ProximoAtoProcessual[] {
-  // MOCK: pool de atos ficticios. Hash do devedorId rotaciona quais entram
-  // pra cada caso ter um set diferente mas estavel entre reloads.
+  // MOCK: pool de atos fictícios. Hash do devedorId rotaciona quais entram
+  // pra cada caso ter um set diferente mas estável entre reloads.
   const pool: { ato: string; offsetDias: number }[] = [
-    { ato: "Manifestacao sobre penhora", offsetDias: 15 },
-    { ato: "Audiencia de conciliacao", offsetDias: 45 },
-    { ato: "Embargos a execucao", offsetDias: 10 },
-    { ato: "Impugnacao ao cumprimento de sentenca", offsetDias: 30 },
-    { ato: "Resposta a calculo do contador", offsetDias: 20 },
+    { ato: "Manifestação sobre penhora", offsetDias: 15 },
+    { ato: "Audiência de conciliação", offsetDias: 45 },
+    { ato: "Embargos à execução", offsetDias: 10 },
+    { ato: "Impugnação ao cumprimento de sentença", offsetDias: 30 },
+    { ato: "Resposta a cálculo do contador", offsetDias: 20 },
     { ato: "Recurso de agravo", offsetDias: 8 },
   ];
 
@@ -958,7 +958,7 @@ function calcularProximosAtosProcessuais(
   });
 }
 
-// (j) Sazonalidade — atividade processual nos ultimos 12 meses.
+// (j) Sazonalidade — atividade processual nos últimos 12 meses.
 function calcularSazonalidadeAtividade(
   medidas: Medida[],
 ): SazonalidadeAtividade[] {
@@ -1013,12 +1013,12 @@ export async function obterDadosDashboardCasoV2(
   const v1 = await obterDadosDashboardCaso(devedorId);
   if (!v1) return null;
 
-  // Pra montar as metricas v2 precisamos do dossie cru + colunas novas
+  // Pra montar as métricas v2 precisamos do dossiê cru + colunas novas
   // (data_distribuicao, marcos_processuais, restricao_*, cidade, uf).
-  // O dossie ja le bens com SELECT *, entao restricao_suspeita,
-  // restricao_motivo, cidade e uf vem junto. Pra casos.data_distribuicao
+  // O dossiê já lê bens com SELECT *, então restricao_suspeita,
+  // restricao_motivo, cidade e uf vêm junto. Pra casos.data_distribuicao
   // e marcos_processuais precisamos de uma query extra (o select de
-  // obterDossie nao traz essas colunas).
+  // obterDossie não traz essas colunas).
   const sb = createAdminClient();
   const dossie = await obterDossie(devedorId);
   if (!dossie) return null;
@@ -1031,8 +1031,8 @@ export async function obterDadosDashboardCasoV2(
       .eq("devedor_id", devedorId),
   ]);
 
-  // Pra prescricao e cronologia, considera o caso mais antigo distribuido
-  // (data_distribuicao minima). Se nenhum caso tiver, devolve null.
+  // Pra prescrição e cronologia, considera o caso mais antigo distribuído
+  // (data_distribuicao mínima). Se nenhum caso tiver, devolve null.
   let dataDistribuicao: string | null = null;
   let marcos: MarcosProcessuais = {};
   for (const c of casosExtra.data ?? []) {

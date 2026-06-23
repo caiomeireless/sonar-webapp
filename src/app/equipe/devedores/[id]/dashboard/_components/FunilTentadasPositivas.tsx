@@ -1,8 +1,8 @@
 // Funil operacional: Tentadas -> Positivas -> Penhoras Efetivadas.
 // Visualiza o afunilamento entre o que foi *tentado*, o que retornou
-// *positivo* e o que de fato virou *penhora efetivada*. Cada estagio
-// herda a contagem do estagio anterior na realidade, entao o cliente
-// le a queda como "perda" — cores escalonam de signal (alto) ate gold
+// *positivo* e o que de fato virou *penhora efetivada*. Cada estágio
+// herda a contagem do estágio anterior na realidade, então o cliente
+// lê a queda como "perda" — cores escalonam de signal (alto) até gold
 // (raro/valioso).
 //
 // Recharts BarChart layout="vertical" (eixo Y = categorias, X = valor).
@@ -35,9 +35,9 @@ type Props = {
   funil: DashboardFunil;
 };
 
-// Verde-Sonar dessaturado pra o estagio intermediario — nao existe token
-// global (--color-signal-mut), entao definimos aqui pra evitar inflar o
-// ChartTheme com algo usado por um unico componente.
+// Verde-Sonar dessaturado pra o estágio intermediário — não existe token
+// global (--color-signal-mut), então definimos aqui pra evitar inflar o
+// ChartTheme com algo usado por um único componente.
 const CHART_COLOR_SIGNAL_MUT = "#1FAE5C";
 
 type EstagioFunil = {
@@ -63,8 +63,8 @@ export default function FunilTentadasPositivas({ funil }: Props) {
   const data = montarSeries(funil);
   const totalTentativas = funil.tentadas;
 
-  // Domain explicito evita Recharts colapsar o eixo quando todos os valores
-  // sao 0 (caso sem nenhuma medida tomada).
+  // Domain explícito evita Recharts colapsar o eixo quando todos os valores
+  // são 0 (caso sem nenhuma medida tomada).
   const maxValor = Math.max(...data.map((d) => d.valor), 1);
 
   return (

@@ -1,4 +1,4 @@
-// Heatmap de eficacia operacional — tipo de medida (linhas) x resultado
+// Heatmap de eficácia operacional — tipo de medida (linhas) x resultado
 // (colunas). Cor: count alto = verde signal forte; count baixo = sombra leve.
 // CSS grid puro, sem Recharts — o componente continua server-side.
 
@@ -11,8 +11,8 @@ import {
 } from "@/lib/medidas";
 import { DashboardCard } from "@/components/dashboard/DashboardCard";
 
-// Linhas e colunas FIXAS pelo brief — heatmap eh um snapshot operacional
-// focado, nao um cubo completo. Outros tipos/resultados ficam fora aqui.
+// Linhas e colunas FIXAS pelo brief — heatmap é um snapshot operacional
+// focado, não um cubo completo. Outros tipos/resultados ficam fora aqui.
 const TIPOS_LINHA: readonly TipoMedida[] = [
   "sisbajud",
   "infojud",
@@ -44,8 +44,8 @@ function montarMatriz(
   let total = 0;
   let max = 0;
 
-  // Soma considera APENAS as celulas visiveis (tipos+resultados do recorte)
-  // — o % por celula precisa bater com 100% no total visivel.
+  // Soma considera APENAS as células visíveis (tipos+resultados do recorte)
+  // — o % por célula precisa bater com 100% no total visível.
   for (const item of heatmap) {
     if (!TIPOS_LINHA.includes(item.tipo)) continue;
     if (!RESULTADOS_COLUNA.includes(item.resultado)) continue;
@@ -87,7 +87,7 @@ function corCelula(
     };
   }
   const [r, g, b] = COR_BASE_POR_RESULTADO[resultado];
-  // Escala nao-linear (sqrt): count baixo ainda visivel, alto sem saturar cedo.
+  // Escala não-linear (sqrt): count baixo ainda visível, alto sem saturar cedo.
   const ratio = Math.sqrt(count / max);
   const alpha = 0.12 + ratio * 0.78;
   return {
@@ -98,7 +98,7 @@ function corCelula(
 
 function corTexto(count: number, max: number): string {
   if (count === 0 || max === 0) return "var(--color-ivory-66)";
-  // Contraste invertido nas celulas mais quentes — fica preto sobre cor saturada.
+  // Contraste invertido nas células mais quentes — fica preto sobre cor saturada.
   const ratio = max > 0 ? count / max : 0;
   return ratio > 0.55 ? "#050706" : "var(--color-ivory)";
 }
@@ -108,7 +108,7 @@ export default function HeatmapEficacia({ heatmap }: Props) {
 
   return (
     <DashboardCard
-      titulo="Eficacia por medida"
+      titulo="Eficácia por medida"
       descricao="Tipo de medida x resultado. Cor por coluna (verde positivo, amarelo aguardando, laranja parcial, vermelho negativo) — intensidade = quantidade."
       accent="green"
     >
@@ -121,12 +121,12 @@ export default function HeatmapEficacia({ heatmap }: Props) {
         <div className="flex flex-col gap-4">
           <div
             className="grid gap-1.5 text-xs"
-            // Grid: 1 col p/ rotulo de linha + N cols p/ resultados.
+            // Grid: 1 col p/ rótulo de linha + N cols p/ resultados.
             style={{
               gridTemplateColumns: `minmax(140px, 1fr) repeat(${RESULTADOS_COLUNA.length}, minmax(0, 1fr))`,
             }}
           >
-            {/* Header: celula vazia + nomes de resultado */}
+            {/* Header: célula vazia + nomes de resultado */}
             <div aria-hidden />
             {RESULTADOS_COLUNA.map((res) => {
               const meta = RESULTADO_META[res];
@@ -141,7 +141,7 @@ export default function HeatmapEficacia({ heatmap }: Props) {
               );
             })}
 
-            {/* Linhas: rotulo de tipo + celulas */}
+            {/* Linhas: rótulo de tipo + células */}
             {TIPOS_LINHA.map((tipo) => {
               const tipoMeta = TIPO_META[tipo];
               return (
@@ -198,7 +198,7 @@ export default function HeatmapEficacia({ heatmap }: Props) {
             })}
           </div>
 
-          {/* Rodape: legenda da escala por resultado + total */}
+          {/* Rodapé: legenda da escala por resultado + total */}
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--color-ivory-12)] pt-3 text-[11px] text-[var(--color-ivory-66)]">
             <div className="flex flex-wrap items-center gap-3">
               {RESULTADOS_COLUNA.map((res) => {

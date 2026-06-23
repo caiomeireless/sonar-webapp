@@ -2,20 +2,20 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 export const AVATAR_BUCKET = "avatares";
 
-// Papeis do Sonar:
+// Papéis do Sonar:
 // - admin/socio: equipe, acesso completo (escrita + leitura)
 // - funcionario: equipe, acesso por chave em `acessos`
-// - cliente: portal externo, SOMENTE LEITURA dos proprios processos
+// - cliente: portal externo, SOMENTE LEITURA dos próprios processos
 export type Papel = "admin" | "socio" | "funcionario" | "cliente";
 
 // Chaves de acesso granular que o admin pode ligar por pessoa.
-// Admin e socio tem TODAS automaticamente (ver `pode()`); estas chaves so
-// importam para FUNCIONARIOS. Cliente nunca passa em `pode()` (read-only).
+// Admin e sócio têm TODAS automaticamente (ver `pode()`); estas chaves só
+// importam para FUNCIONÁRIOS. Cliente nunca passa em `pode()` (read-only).
 export const ACESSOS = [
   { chave: "casos", rotulo: "Casos / Devedores" },
   { chave: "bens", rotulo: "Pesquisa de bens" },
   { chave: "custos", rotulo: "Monitor de Custos" },
-  { chave: "exportar", rotulo: "Exportar dossie" },
+  { chave: "exportar", rotulo: "Exportar dossiê" },
 ] as const;
 
 export interface Perfil {
@@ -36,8 +36,8 @@ const vazio = (email: string): Perfil => ({
   acessos: [],
 });
 
-// Resiliente: se a tabela/colunas ainda nao existem (migracao nao rodada) ou
-// o e-mail nao tem perfil, devolve um perfil "vazio" (funcionario sem foto).
+// Resiliente: se a tabela/colunas ainda não existem (migração não rodada) ou
+// o e-mail não tem perfil, devolve um perfil "vazio" (funcionário sem foto).
 export async function perfilAtual(email: string | null | undefined): Promise<Perfil | null> {
   if (!email) return null;
   const e = email.toLowerCase();
@@ -114,10 +114,10 @@ export function nomeOuEmail(email: string, mapa: Record<string, string>): string
   return local.charAt(0).toUpperCase() + local.slice(1);
 }
 
-// Pode acessar um recurso (chave) com permissao de ESCRITA.
+// Pode acessar um recurso (chave) com permissão de ESCRITA.
 // - Cliente NUNCA passa (read-only).
-// - Admin e socio passam em qualquer chave.
-// - Funcionario passa apenas nas chaves listadas em `acessos`.
+// - Admin e sócio passam em qualquer chave.
+// - Funcionário passa apenas nas chaves listadas em `acessos`.
 export function pode(p: Perfil | null, chave: string): boolean {
   if (!p) return false;
   if (p.papel === "cliente") return false;

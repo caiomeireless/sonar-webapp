@@ -1,12 +1,12 @@
 // Luz "lamp" — duas conic gradients formando um V de luz que desce do topo
 // do container, com glow focado + linha horizontal brilhante.
 // Adaptado de um prompt de hero com framer-motion — aqui usamos CSS keyframes
-// (definidas em globals.css) pra evitar uma dependencia nova.
+// (definidas em globals.css) pra evitar uma dependência nova.
 //
-// Default dourado (signal gold do Sonar). O bgClass das mascaras precisa bater
-// com o fundo da section onde o LampLight e colocado, senao o V de luz vaza.
+// Default dourado (signal gold do Sonar). O bgClass das máscaras precisa bater
+// com o fundo da section onde o LampLight é colocado, senão o V de luz vaza.
 type LampLightProps = {
-  /** Cor da luz em "R, G, B" — usada com varias opacidades. */
+  /** Cor da luz em "R, G, B" — usada com várias opacidades. */
   color?: string;
   /** Classe Tailwind do fundo da section pai (default bg-onyx). */
   bgClass?: string;
@@ -32,19 +32,19 @@ export function LampLight({
         style={{ background: `rgba(${color}, 0.35)` }}
       />
 
-      {/* Glow focal animado crescendo de 8rem -> 16rem (no ponto da "lampada") */}
+      {/* Glow focal animado crescendo de 8rem -> 16rem (no ponto da "lâmpada") */}
       <div
         className="lamp-anim-glow absolute left-1/2 top-0 z-10 h-36 -translate-x-1/2 -translate-y-2 rounded-full opacity-70 blur-2xl"
         style={{ background: `rgba(${color}, 0.35)` }}
       />
 
-      {/* Linha brilhante horizontal no foco da lampada — bem no topo */}
+      {/* Linha brilhante horizontal no foco da lâmpada — bem no topo */}
       <div
         className="lamp-anim-line absolute left-1/2 top-0 z-30 h-0.5 -translate-x-1/2"
         style={{ background: `rgba(${color}, 0.55)` }}
       />
 
-      {/* Cone esquerdo — conic gradient virando o vertice pro topo */}
+      {/* Cone esquerdo — conic gradient virando o vértice pro topo */}
       <div
         className="lamp-anim-cone absolute right-1/2 top-0 h-56"
         style={{

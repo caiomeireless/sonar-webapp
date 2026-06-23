@@ -1,4 +1,4 @@
-// Callback de magic link (link clicavel no email) e OAuth code.
+// Callback de magic link (link clicável no email) e OAuth code.
 // Aceita ?token_hash+type (magic link) OU ?code (OAuth/PKCE).
 // Erro -> /login?erro=link.
 import { type NextRequest, NextResponse } from "next/server";

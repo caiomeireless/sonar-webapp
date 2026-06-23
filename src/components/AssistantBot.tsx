@@ -21,7 +21,7 @@ export function AssistantBot() {
   }
   function send(e: FormEvent) {
     e.preventDefault();
-    const subject = encodeURIComponent("Duvida sobre o Sonar");
+    const subject = encodeURIComponent("Dúvida sobre o Sonar");
     const body = encodeURIComponent(`De: ${email}\n\n${msg}`);
     window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${subject}&body=${body}`;
     close();
@@ -32,13 +32,13 @@ export function AssistantBot() {
       <button
         type="button"
         onClick={open}
-        title="Tem duvidas? Fale com a equipe"
-        aria-label="Tire suas duvidas com a equipe"
+        title="Tem dúvidas? Fale com a equipe"
+        aria-label="Tire suas dúvidas com a equipe"
         className="group relative h-[130px] w-[110px] cursor-pointer"
       >
-        {/* Renderiza o canvas Spline INTEIRO em alta resolucao (400x520),
+        {/* Renderiza o canvas Spline INTEIRO em alta resolução (400x520),
             depois encolhe via CSS transform pra caber em 110x130 visualmente.
-            O scene aparece em miniatura COMPLETA (robo + cubo, sem corte).
+            O scene aparece em miniatura COMPLETA (robô + cubo, sem corte).
             Filter: roxo -> verde escuro + tom dourado (sepia). */}
         <div
           className="absolute left-0 top-0"
@@ -54,8 +54,8 @@ export function AssistantBot() {
         >
           <SplineScene scene={SCENE_URL} className="h-full w-full" />
         </div>
-        {/* Cobertura do watermark — barra full-width estendida ABAIXO do botao
-            (canvas escalado vaza ~15px alem do botao) */}
+        {/* Cobertura do watermark — barra full-width estendida ABAIXO do botão
+            (canvas escalado vaza ~15px além do botão) */}
         <span className="pointer-events-none absolute -bottom-5 left-0 right-0 z-10 h-8 bg-onyx" />
         {/* Escada B&P estampada na parede da caixa (lado esquerdo, espelhando o badge "?") */}
         <svg

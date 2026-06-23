@@ -123,10 +123,10 @@ export function AdicionarMedidaForm({
 
   return (
     <>
-      {/* Cabecalho */}
+      {/* Cabeçalho */}
       <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <span className="eyebrow">Historico de medidas tomadas</span>
+          <span className="eyebrow">Histórico de medidas tomadas</span>
           <p className="mt-2 font-mono text-xs text-[var(--color-ivory-66)]">
             {medidas.length}{" "}
             {medidas.length === 1
@@ -147,11 +147,11 @@ export function AdicionarMedidaForm({
         </button>
       </div>
 
-      {/* Timeline scrollavel ou empty state */}
+      {/* Timeline scrollável ou empty state */}
       {medidas.length === 0 ? (
         <div className="mt-6 rounded-lg border border-dashed border-[var(--color-ivory-22)] bg-[rgba(5,7,6,0.4)] p-10 text-center">
           <p className="font-mono text-xs text-[var(--color-ivory-66)]">
-            Nenhuma medida registrada ainda. Use o botao acima pra adicionar.
+            Nenhuma medida registrada ainda. Use o botão acima pra adicionar.
           </p>
         </div>
       ) : (
@@ -195,7 +195,7 @@ export function AdicionarMedidaForm({
                   Registrar medida tomada
                 </h3>
                 <p className="mt-1 font-mono text-xs text-[var(--color-ivory-66)]">
-                  As medidas alimentam a timeline horizontal do dossie.
+                  As medidas alimentam a timeline horizontal do dossiê.
                 </p>
 
                 <div className="mt-5 grid gap-4">
@@ -272,10 +272,10 @@ export function AdicionarMedidaForm({
                     </select>
                   </div>
 
-                  {/* Titulo */}
+                  {/* Título */}
                   <div>
                     <label className="block font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
-                      Titulo
+                      Título
                     </label>
                     <input
                       ref={tituloRef}
@@ -296,7 +296,7 @@ export function AdicionarMedidaForm({
                       value={formDetalhes}
                       onChange={(e) => setFormDetalhes(e.target.value)}
                       rows={3}
-                      placeholder="Resultado da medida, valores, observacoes..."
+                      placeholder="Resultado da medida, valores, observações..."
                       className="mt-2 w-full resize-none rounded-lg border border-[var(--color-ivory-22)] bg-[rgba(0,0,0,0.4)] px-3 py-2 text-sm text-ivory placeholder:text-[var(--color-ivory-66)] outline-none transition focus:border-[var(--color-gold)]"
                     />
                   </div>
@@ -304,7 +304,7 @@ export function AdicionarMedidaForm({
                   {/* Advogado (auto-preenchido) */}
                   <div>
                     <label className="block font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
-                      Advogado responsavel
+                      Advogado responsável
                     </label>
                     <p className="mt-2 font-mono text-xs text-ivory">
                       {advogadoEmail ?? "—"}

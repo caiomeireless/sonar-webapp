@@ -20,7 +20,7 @@ export default function KPICasosAtivos({
   encerrados,
 }: Props) {
   // Total inclui todos os status — denominador da barra empilhada.
-  // Se zerado, evitamos divisao por zero exibindo a barra "vazia".
+  // Se zerado, evitamos divisão por zero exibindo a barra "vazia".
   const total = ativos + pausados + encerrados;
   const pctAtivos = total > 0 ? (ativos / total) * 100 : 0;
   const pctPausados = total > 0 ? (pausados / total) * 100 : 0;
@@ -38,7 +38,7 @@ export default function KPICasosAtivos({
         <div
           className="flex h-1.5 w-full overflow-hidden rounded-full bg-[var(--color-ivory-12)]"
           role="img"
-          aria-label={`Distribuicao: ${subtitulo}`}
+          aria-label={`Distribuição: ${subtitulo}`}
         >
           {pctAtivos > 0 ? (
             <span

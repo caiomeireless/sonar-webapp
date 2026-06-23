@@ -2,8 +2,8 @@
 
 import { useEffect, useRef } from "react";
 
-// Particulas distribuidas em arco half-ellipse que cresce do emit ate max scale,
-// estilo halftone (mesmo padrao visual do SonarParticleText). 4 ondas staggered.
+// Partículas distribuídas em arco half-ellipse que cresce do emit até max scale,
+// estilo halftone (mesmo padrão visual do SonarParticleText). 4 ondas staggered.
 
 const RX = 18;
 const RY = 30;
@@ -49,7 +49,7 @@ export function SonarWaveParticles({
     canvas.style.height = `${height}px`;
     ctx.scale(dpr, dpr);
 
-    // 4 ondas, cada uma com N particulas distribuidas no half-arc
+    // 4 ondas, cada uma com N partículas distribuídas no half-arc
     const waves = Array.from({ length: WAVE_COUNT }, (_, w) => ({
       delay: w * WAVE_INTERVAL,
       lastCycle: -1,
@@ -73,7 +73,7 @@ export function SonarWaveParticles({
         const cycle = Math.floor(phaseTime / WAVE_DURATION);
         const waveT = (phaseTime / WAVE_DURATION) % 1;
 
-        // Reset particulas ao iniciar nova onda — snap pro centro
+        // Reset partículas ao iniciar nova onda — snap pro centro
         if (cycle !== wave.lastCycle) {
           for (const p of wave.particles) {
             p.pos.x = centerX;
@@ -93,7 +93,7 @@ export function SonarWaveParticles({
           p.pos.x += (targetX - p.pos.x) * 0.28;
           p.pos.y += (targetY - p.pos.y) * 0.28;
 
-          // Particula com glow interno
+          // Partícula com glow interno
           ctx.fillStyle = `rgba(${COLOR_RGB}, ${opacity * 0.95})`;
           ctx.beginPath();
           ctx.arc(p.pos.x, p.pos.y, 1.6, 0, Math.PI * 2);

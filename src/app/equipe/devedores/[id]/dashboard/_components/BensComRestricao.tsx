@@ -1,10 +1,10 @@
 // Lista compacta dos bens com restricao_suspeita (impenhorabilidade
-// provavel: Lei 8.009, CPC 833 IV, bem de familia, etc).
+// provável: Lei 8.009, CPC 833 IV, bem de família, etc).
 //
-// Cada item: badge do tipo + titulo + chip do motivo + valor estimado.
+// Cada item: badge do tipo + título + chip do motivo + valor estimado.
 // Estado vazio = bom: "Sem alertas".
 //
-// Recebe dados ja agregados (page chama obterDadosDashboardCasoV2).
+// Recebe dados já agregados (page chama obterDadosDashboardCasoV2).
 // Server Component — sem Recharts, sem interatividade.
 
 import type { TipoBem } from "@/lib/mock-fixtures";
@@ -12,29 +12,29 @@ import type { BemComRestricao } from "@/lib/dashboard-caso";
 import { formatBRL } from "@/lib/format";
 import { DashboardCard } from "@/components/dashboard/DashboardCard";
 
-// Meta dos tipos de bem — espelha DonutBensPorValor. Nao ha export
-// centralizado em @/lib/devedores, entao inline pra manter consistencia
+// Meta dos tipos de bem — espelha DonutBensPorValor. Não há export
+// centralizado em @/lib/devedores, então inline pra manter consistência
 // visual com os outros cards do dashboard.
 const TIPO_META: Record<TipoBem, { label: string; icone: string }> = {
-  veiculo: { label: "Veiculo", icone: "V" },
-  imovel: { label: "Imovel", icone: "I" },
-  empresa: { label: "Participacao", icone: "E" },
-  processo_credito: { label: "Credito", icone: "P" },
-  endereco: { label: "Endereco", icone: "A" },
-  vinculo: { label: "Vinculo", icone: "F" },
+  veiculo: { label: "Veículo", icone: "V" },
+  imovel: { label: "Imóvel", icone: "I" },
+  empresa: { label: "Participação", icone: "E" },
+  processo_credito: { label: "Crédito", icone: "P" },
+  endereco: { label: "Endereço", icone: "A" },
+  vinculo: { label: "Vínculo", icone: "F" },
 };
 
-// Mapa de codigos canonicos de motivo -> rotulo curto pro chip.
-// Quando vier um motivo fora do dicionario, mostra o proprio texto.
+// Mapa de códigos canônicos de motivo -> rótulo curto pro chip.
+// Quando vier um motivo fora do dicionário, mostra o próprio texto.
 const MOTIVO_ROTULO: Record<string, string> = {
-  lei_8009: "Lei 8.009 — bem de familia",
-  bem_de_familia: "Lei 8.009 — bem de familia",
+  lei_8009: "Lei 8.009 — bem de família",
+  bem_de_familia: "Lei 8.009 — bem de família",
   cpc_833_iv: "CPC 833 IV — verba salarial",
-  cpc_833: "CPC 833 — impenhoravel",
+  cpc_833: "CPC 833 — impenhorável",
   salario: "CPC 833 IV — verba salarial",
-  unico_imovel: "Lei 8.009 — unico imovel",
+  unico_imovel: "Lei 8.009 — único imóvel",
   ferramenta_trabalho: "CPC 833 V — ferramenta de trabalho",
-  restricao_nao_especificada: "Restricao nao especificada",
+  restricao_nao_especificada: "Restrição não especificada",
 };
 
 function rotularMotivo(motivo: string): string {
@@ -49,7 +49,7 @@ export default function BensComRestricao({ dados }: Props) {
   if (dados.length === 0) {
     return (
       <DashboardCard
-        titulo="Bens com restricao"
+        titulo="Bens com restrição"
         descricao="Bens sob suspeita de impenhorabilidade"
         accent="green"
       >
@@ -63,7 +63,7 @@ export default function BensComRestricao({ dados }: Props) {
               border: "1px solid rgba(60, 255, 138, 0.35)",
             }}
           >
-            {/* check sutil em texto pra nao depender de icon lib */}
+            {/* check sutil em texto pra não depender de icon lib */}
             <span className="text-xs font-semibold">OK</span>
           </span>
           <div className="flex flex-col">
@@ -83,14 +83,14 @@ export default function BensComRestricao({ dados }: Props) {
 
   return (
     <DashboardCard
-      titulo="Bens com restricao"
+      titulo="Bens com restrição"
       descricao={`${dados.length} ${
         dados.length === 1 ? "bem" : "bens"
       } sob suspeita de impenhorabilidade`}
       accent="gold"
       info={
-        "Bens com possivel protecao legal (Lei 8.009, CPC 833 etc).\n" +
-        "Verifique penhorabilidade antes de redigir peticao."
+        "Bens com possível proteção legal (Lei 8.009, CPC 833 etc).\n" +
+        "Verifique penhorabilidade antes de redigir petição."
       }
     >
       <ul className="flex flex-col gap-2">
@@ -115,7 +115,7 @@ export default function BensComRestricao({ dados }: Props) {
                 {meta?.icone ?? "?"}
               </span>
 
-              {/* Conteudo principal */}
+              {/* Conteúdo principal */}
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 <div className="flex items-baseline justify-between gap-3">
                   <span className="truncate text-sm font-medium text-[var(--color-ivory)]">

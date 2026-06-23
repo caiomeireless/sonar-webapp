@@ -1,15 +1,15 @@
 "use client";
 
-// Evolucao mensal da plataforma — patrimonio localizado (R$, ouro) x
-// penhoras efetivadas (count, verde) nos ultimos 12 meses. Full width na
+// Evolução mensal da plataforma — patrimônio localizado (R$, ouro) x
+// penhoras efetivadas (count, verde) nos últimos 12 meses. Full width na
 // linha 2 do Dashboard da Plataforma.
 //
-// Eixos Y separados: o patrimonio em R$ pode chegar a milhoes, enquanto as
-// penhoras efetivadas sao contagens pequenas. Misturar na mesma escala
-// achataria a serie verde. Dois <YAxis yAxisId> resolvem isso de forma
+// Eixos Y separados: o patrimônio em R$ pode chegar a milhões, enquanto as
+// penhoras efetivadas são contagens pequenas. Misturar na mesma escala
+// achataria a série verde. Dois <YAxis yAxisId> resolvem isso de forma
 // limpa no Recharts.
 //
-// Recebe `dados` ja agregados por `agregarEvolucaoMensal` (server).
+// Recebe `dados` já agregados por `agregarEvolucaoMensal` (server).
 
 import { useMemo } from "react";
 import {
@@ -117,7 +117,7 @@ function TooltipEvolucao({
             className="inline-block h-2 w-2 rounded-full"
             style={{ background: CHART_COLOR_GOLD }}
           />
-          <span>Patrimonio localizado</span>
+          <span>Patrimônio localizado</span>
           <span className="ml-auto font-medium tabular-nums">
             {formatBRL(ponto.patrimonioLocalizado)}
           </span>
@@ -161,13 +161,13 @@ export default function EvolucaoPatrimonioMensal({ dados }: Props) {
 
   return (
     <DashboardCard
-      titulo="Evolucao mensal"
-      descricao="Patrimonio localizado e penhoras efetivadas nos ultimos 12 meses."
+      titulo="Evolução mensal"
+      descricao="Patrimônio localizado e penhoras efetivadas nos últimos 12 meses."
       accent="gold"
     >
       {semDados ? (
         <div className="flex h-72 items-center justify-center text-sm text-[var(--color-ivory-66)]">
-          Sem movimentacao no periodo.
+          Sem movimentação no período.
         </div>
       ) : (
         <div className="h-72 w-full">
@@ -231,7 +231,7 @@ export default function EvolucaoPatrimonioMensal({ dados }: Props) {
                 yAxisId="patrimonio"
                 type="monotone"
                 dataKey="patrimonioLocalizado"
-                name="Patrimonio localizado"
+                name="Patrimônio localizado"
                 stroke={CHART_COLOR_GOLD}
                 strokeWidth={2}
                 dot={{ r: 2.5, fill: CHART_COLOR_GOLD, strokeWidth: 0 }}

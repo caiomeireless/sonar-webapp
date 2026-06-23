@@ -1,7 +1,7 @@
-// Portal da equipe — CARTEIRA hierarquica do escritorio.
-// NIVEL 1: lista de CLIENTES (credores) com agregados.
-// Click num cliente abre /equipe/devedores/credor/{id} (nivel 2 = casos do cliente).
-// Click num caso abre /equipe/devedores/{devedor_id} (nivel 3 = dossie).
+// Portal da equipe — CARTEIRA hierárquica do escritório.
+// NÍVEL 1: lista de CLIENTES (credores) com agregados.
+// Click num cliente abre /equipe/devedores/credor/{id} (nível 2 = casos do cliente).
+// Click num caso abre /equipe/devedores/{devedor_id} (nível 3 = dossiê).
 //
 // Server Component. Em dev/preview, aceita ?eu=email pra simular login.
 import Link from "next/link";
@@ -40,9 +40,9 @@ export default async function DevedoresEquipePage({ searchParams }: Props) {
     <main className="relative mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
       <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <span className="eyebrow">Clientes do escritorio</span>
+          <span className="eyebrow">Clientes do escritório</span>
           <h1 className="mt-4 font-serif text-[clamp(28px,4vw,44px)] font-medium leading-[1.15] tracking-tight text-ivory">
-            Carteira do escritorio
+            Carteira do escritório
           </h1>
           <p className="mt-6 max-w-[640px] font-mono text-sm text-[var(--color-ivory-66)]">
             {credores.length === 0
@@ -74,6 +74,7 @@ export default async function DevedoresEquipePage({ searchParams }: Props) {
             </h3>
             <p className="mt-3 text-sm text-[var(--color-ivory-88)]">
               Cadastre o primeiro devedor e vincule a um credor (cliente).
+
             </p>
             <Link
               href={novoHref}

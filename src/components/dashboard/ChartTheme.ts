@@ -1,8 +1,8 @@
-// Tema compartilhado dos graficos do Dashboard (Recharts).
-// Centraliza cores, tooltip, grid e tick style — sem isso cada grafico
+// Tema compartilhado dos gráficos do Dashboard (Recharts).
+// Centraliza cores, tooltip, grid e tick style — sem isso cada gráfico
 // vira um "frankenstein" visual.
 //
-// Importacao:
+// Importação:
 //   import {
 //     CHART_COLOR_SIGNAL, CHART_COLOR_GOLD, TIPO_BEM_COLORS,
 //     tooltipContentStyle, gridStroke, axisTickStyle,
@@ -14,10 +14,10 @@
 //
 // Notas de design (espelho do ChartTheme do BP CRM):
 //   - Tooltip onyx 96% + borda signal 30% + radius 10.
-//   - Grid em signal suave (rgba(60,255,138,0.10)) — reforca identidade.
+//   - Grid em signal suave (rgba(60,255,138,0.10)) — reforça identidade.
 //   - Barras horizontais: radius [0,6,6,0] + size 16. Verticais: [4,4,0,0] + max 28.
 //   - Donut: cornerRadius 6 + paddingAngle 2 (quando >1 fatia).
-//   - Recharts NAO resolve `var(--...)` em `fill`/`stroke`: usar literais.
+//   - Recharts NÃO resolve `var(--...)` em `fill`/`stroke`: usar literais.
 //   - `num(v)` formata pt-BR — usar em todo formatter de Tooltip e LabelList.
 
 import type { CSSProperties, SVGProps } from "react";
@@ -29,12 +29,12 @@ import type { TextProps } from "recharts";
 
 export const CHART_COLOR_SIGNAL = "#3CFF8A"; // verde Sonar — accent principal
 export const CHART_COLOR_SIGNAL_STRONG = "#7CFFB0"; // signal claro — hover/grad
-export const CHART_COLOR_GOLD = "#C9A24A"; // ouro BP — meta/target (secundario)
+export const CHART_COLOR_GOLD = "#C9A24A"; // ouro BP — meta/target (secundário)
 export const CHART_COLOR_IVORY = "#EAE7DC"; // marfim — neutro texto/serie
 export const CHART_COLOR_NEGATIVE = "#FF5B5B"; // vermelho — negativos
 export const CHART_COLOR_WARN = "#F4C542"; // amber — parcial/aguardando
 
-// Paleta primaria — usar para series independentes em ordem.
+// Paleta primária — usar para séries independentes em ordem.
 export const CHART_COLORS: readonly string[] = [
   CHART_COLOR_SIGNAL,
   CHART_COLOR_GOLD,
@@ -44,20 +44,20 @@ export const CHART_COLORS: readonly string[] = [
   CHART_COLOR_IVORY,
 ];
 
-// Paleta pastel multi-tom — usar em donut com varias fatias.
+// Paleta pastel multi-tom — usar em donut com várias fatias.
 // Espelho do PALETA_PASTEL do BP (signal claro substitui o gold-strong).
 export const CHART_PALETTE_PASTEL: readonly string[] = [
-  "#7CFFB0", // signal claro (1a posicao)
+  "#7CFFB0", // signal claro (1a posição)
   "#9ED8FF", // azul suave
   "#A8E4B0", // verde suave alt
   "#E8A3A3", // rosa suave
-  "#C0A3D0", // lilas
+  "#C0A3D0", // lilás
   "#8FC1BD", // teal
-  "#E8C39A", // pessego
-  "#B3B8C4", // ardosia
+  "#E8C39A", // pêssego
+  "#B3B8C4", // ardósia
 ];
 
-// Paleta accent — rankings com 1-2 series destacadas.
+// Paleta accent — rankings com 1-2 séries destacadas.
 export const CHART_PALETTE_ACCENT: readonly string[] = [
   CHART_COLOR_SIGNAL,
   CHART_COLOR_SIGNAL_STRONG,
@@ -66,7 +66,7 @@ export const CHART_PALETTE_ACCENT: readonly string[] = [
   "rgba(60, 255, 138, 0.25)",
 ];
 
-// Paleta de tipos de bem — alinhada ao dossie.
+// Paleta de tipos de bem — alinhada ao dossiê.
 export const TIPO_BEM_COLORS: Record<string, string> = {
   veiculo: "#9ED8FF",
   imovel: CHART_COLOR_GOLD,
@@ -80,7 +80,7 @@ export const TIPO_BEM_COLORS: Record<string, string> = {
 // GRADIENTES (para <defs> em Bar/Area)
 // ============================================================
 
-// Helper opaco — usar `id` unico por chart.
+// Helper opaco — usar `id` único por chart.
 // Exemplo de uso em <defs>:
 //   <linearGradient id={BAR_GRADIENT_SIGNAL.id} x1="0" y1="0" x2="1" y2="0">
 //     <stop offset="0%"  stopColor={CHART_COLOR_SIGNAL_STRONG} stopOpacity={0.55} />
@@ -107,18 +107,18 @@ export const AREA_GRADIENT_SIGNAL = {
 // GRID + EIXOS
 // ============================================================
 
-// Grid em signal suave (espelho gold suave do BP). Padrao `strokeDasharray="3 3"`.
+// Grid em signal suave (espelho gold suave do BP). Padrão `strokeDasharray="3 3"`.
 export const gridStroke = "rgba(60, 255, 138, 0.10)";
 
-// Recharts 3.x exige TextProps (nao CSSProperties) para `tick`, e SVGProps
-// para `axisLine`. Mantemos os mesmos valores visuais, so trocamos os types.
+// Recharts 3.x exige TextProps (não CSSProperties) para `tick`, e SVGProps
+// para `axisLine`. Mantemos os mesmos valores visuais, só trocamos os types.
 export const axisTickStyle: TextProps = {
   fill: "rgba(234, 231, 220, 0.40)", // var(--color-ivory-66) literal pra Recharts
   fontSize: 11,
   fontFamily: "var(--font-manrope), system-ui, sans-serif",
 };
 
-// Variante p/ YAxis categorico grosso (espelho BP).
+// Variante p/ YAxis categórico grosso (espelho BP).
 export const axisTickStyleLarge: TextProps = {
   fill: "rgba(234, 231, 220, 0.40)",
   fontSize: 12,
@@ -170,7 +170,7 @@ export const tooltipCursorScatter: SVGProps<SVGLineElement> = {
 };
 
 // ============================================================
-// BARRAS — radius e size padroes (espelho BP)
+// BARRAS — radius e size padrões (espelho BP)
 // ============================================================
 
 // Tupla [top-left, top-right, bottom-right, bottom-left] — formato do Recharts Bar.
@@ -187,6 +187,6 @@ export const BAR_SIZE_VERTICAL_MAX = 28;
 // FORMATTERS
 // ============================================================
 
-// `num(v)` — formata numero em pt-BR. Usar em todo formatter de Tooltip/LabelList.
+// `num(v)` — formata número em pt-BR. Usar em todo formatter de Tooltip/LabelList.
 export const num = (v: number | string): string =>
   Number(v).toLocaleString("pt-BR");

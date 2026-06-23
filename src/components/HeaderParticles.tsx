@@ -10,7 +10,7 @@ declare global {
 }
 
 // Hospedado localmente em /public/lib/ — evita CDN externa que pode ser
-// bloqueada por ad blocker ou CSP em producao.
+// bloqueada por ad blocker ou CSP em produção.
 const SCRIPT_SRC = "/lib/particles.min.js";
 const CONTAINER_ID = "sonar-header-particles";
 

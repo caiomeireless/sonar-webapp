@@ -1,10 +1,10 @@
-// Tela Themis — fila de processos vindos do sistema interno do escritorio.
-// No demo (Dia 4) le os casos do banco (mockados). No real (Sem 2) vira
+// Tela Themis — fila de processos vindos do sistema interno do escritório.
+// No demo (Dia 4) lê os casos do banco (mockados). No real (Sem 2) vira
 // chamada ao API Themis preservando a interface ProcessoThemis.
 //
-// Cada card tem 3 botoes de busca (Combo Lead, Combo Documento, Individual)
-// via componente <AcoesBuscaCardThemis>. Cada um abre modal de confirmacao
-// e depois redireciona pra animacao adaptada ao modo escolhido.
+// Cada card tem 3 botões de busca (Combo Lead, Combo Documento, Individual)
+// via componente <AcoesBuscaCardThemis>. Cada um abre modal de confirmação
+// e depois redireciona pra animação adaptada ao modo escolhido.
 import { redirect } from "next/navigation";
 import { listarProcessosThemis, type ProcessoThemis } from "@/lib/casos";
 import { perfilLogado } from "@/lib/perfis-server";
@@ -45,12 +45,12 @@ export default async function ThemisPage({ searchParams }: Props) {
         }}
       />
 
-      {/* Cabecalho */}
+      {/* Cabeçalho */}
       <div className="relative">
         <div className="flex items-center gap-3">
           <span className="eyebrow">Themis</span>
           <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-signal)]">
-            Fila do escritorio
+            Fila do escritório
           </span>
         </div>
         <h1 className="mt-4 font-serif text-[clamp(28px,4vw,44px)] font-medium leading-[1.15] tracking-tight text-ivory">
@@ -63,7 +63,7 @@ export default async function ThemisPage({ searchParams }: Props) {
                 totalProcessos === 1 ? "processo recebido" : "processos recebidos"
               } do sistema interno · ${totalPendentes} ${
                 totalPendentes === 1 ? "pendente" : "pendentes"
-              } de busca · ${totalRastreados} ja rastreado${
+              } de busca · ${totalRastreados} já rastreado${
                 totalRastreados === 1 ? "" : "s"
               }`}
         </p>
@@ -78,8 +78,8 @@ export default async function ThemisPage({ searchParams }: Props) {
               Nenhum processo recebido
             </h3>
             <p className="mt-3 text-sm text-[var(--color-ivory-88)]">
-              O Themis nao enviou novos processos. Eles aparecem aqui quando o
-              escritorio cadastra uma execucao ou cumprimento de sentenca.
+              O Themis não enviou novos processos. Eles aparecem aqui quando o
+              escritório cadastra uma execução ou cumprimento de sentença.
             </p>
           </SpotlightCard>
         </div>
@@ -125,9 +125,9 @@ function CardProcesso({
         </span>
       </div>
 
-      {/* Numero processo */}
+      {/* Número processo */}
       <p className="mt-4 font-mono text-sm text-[var(--color-gold)]">
-        {processo.numero_processo ?? "Sem numero de processo"}
+        {processo.numero_processo ?? "Sem número de processo"}
       </p>
 
       {/* Devedor */}
@@ -135,7 +135,7 @@ function CardProcesso({
         {processo.devedor.nome}
       </h3>
       <p className="mt-1 font-mono text-xs text-[var(--color-ivory-66)]">
-        {processo.devedor.tipo === "PF" ? "Pessoa Fisica" : "Pessoa Juridica"}{" "}
+        {processo.devedor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"}{" "}
         · {processo.devedor.documento}
       </p>
 
@@ -143,7 +143,7 @@ function CardProcesso({
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
         <div>
           <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-ivory-66)]">
-            Credito
+            Crédito
           </span>
           <p className="mt-1 font-serif text-xl text-[var(--color-gold)]">
             {processo.valor_credito_brl !== null
@@ -159,8 +159,8 @@ function CardProcesso({
             {processo.ja_rastreado
               ? `${processo.total_bens} ${
                   processo.total_bens === 1
-                    ? "bem ja localizado"
-                    : "bens ja localizados"
+                    ? "bem já localizado"
+                    : "bens já localizados"
                 }`
               : "Aguardando primeira busca"}
           </p>
@@ -173,23 +173,23 @@ function CardProcesso({
         </p>
       ) : null}
 
-      {/* Advogado responsavel */}
+      {/* Advogado responsável */}
       <div className="mt-5 border-t border-[var(--color-ivory-12)] pt-4">
         <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
-          Adv. responsavel:{" "}
+          Adv. responsável:{" "}
           {processo.responsavel_email ? (
             <span className="text-[var(--color-ivory-88)] normal-case tracking-normal">
               {processo.responsavel_email}
             </span>
           ) : (
             <span className="text-[var(--color-ivory-66)] italic normal-case tracking-normal">
-              sem responsavel atribuido
+              sem responsável atribuído
             </span>
           )}
         </span>
       </div>
 
-      {/* Acoes: 3 modos (Combo Lead, Combo Doc, Individual) */}
+      {/* Ações: 3 modos (Combo Lead, Combo Doc, Individual) */}
       <AcoesBuscaCardThemis
         devedorId={processo.devedor.id}
         eu={eu ?? ""}

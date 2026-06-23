@@ -129,7 +129,7 @@ export function BotaoGerarPeca({ devedorId, euQuery, sugeridos }: Props) {
         onClick={() => setAberto(true)}
         className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--color-gold)]/40 bg-[rgba(201,162,74,0.08)] px-6 py-4 text-sm font-medium text-[var(--color-gold)] transition hover:border-[var(--color-gold)] hover:bg-[rgba(201,162,74,0.14)] sm:w-auto"
       >
-        📄 Gerar peca a partir deste dossie
+        📄 Gerar peça a partir deste dossiê
       </button>
 
       {aberto && mounted
@@ -142,19 +142,19 @@ export function BotaoGerarPeca({ devedorId, euQuery, sugeridos }: Props) {
                 onClick={(e) => e.stopPropagation()}
                 className="w-full max-w-[920px] rounded-xl border border-[var(--color-ivory-22)] bg-[var(--color-carbon)] p-7 shadow-[0_20px_80px_-30px_rgba(0,0,0,0.9)]"
               >
-                <span className="eyebrow">Gerar peca</span>
+                <span className="eyebrow">Gerar peça</span>
                 <h3 className="mt-2 font-serif text-2xl text-ivory">
-                  Escolha o tipo de peca e ajuste as opcoes
+                  Escolha o tipo de peça e ajuste as opções
                 </h3>
                 <p className="mt-1 font-mono text-xs text-[var(--color-ivory-66)]">
-                  A peca sera gerada com timbre do escritorio, dados do caso e bens encontrados ja preenchidos.
+                  A peça será gerada com timbre do escritório, dados do caso e bens encontrados já preenchidos.
                 </p>
 
                 <div className="mt-6 grid gap-6 sm:grid-cols-1 md:grid-cols-[1fr_1fr]">
-                  {/* COLUNA ESQUERDA — tipo de peca por categoria */}
+                  {/* COLUNA ESQUERDA — tipo de peça por categoria */}
                   <div>
                     <div className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-ivory-66)]">
-                      Tipo de peca
+                      Tipo de peça
                     </div>
                     <div className="mt-3 space-y-5">
                       {CATEGORIA_ORDEM.map((cat) => {
@@ -233,10 +233,10 @@ export function BotaoGerarPeca({ devedorId, euQuery, sugeridos }: Props) {
                     </div>
                   </div>
 
-                  {/* COLUNA DIREITA — opcoes do template selecionado */}
+                  {/* COLUNA DIREITA — opções do template selecionado */}
                   <div>
                     <div className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-ivory-66)]">
-                      Opcoes desta peca
+                      Opções desta peça
                     </div>
                     <div className="mt-3 rounded-lg border border-[var(--color-ivory-12)] bg-[rgba(0,0,0,0.2)] p-4">
                       <div className="flex items-center gap-2">
@@ -252,7 +252,7 @@ export function BotaoGerarPeca({ devedorId, euQuery, sugeridos }: Props) {
                       </div>
                       {templateSelecionado.opcoes.length === 0 ? (
                         <p className="mt-3 font-mono text-xs text-[var(--color-ivory-66)]">
-                          Esta peca nao tem opcoes adicionais.
+                          Esta peça não tem opções adicionais.
                         </p>
                       ) : (
                         <div className="mt-4 space-y-3">

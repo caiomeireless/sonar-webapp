@@ -1,10 +1,10 @@
 import { WireframeGlobe } from "@/components/ui/WireframeGlobe";
 
-// Ilustracao animada do hero da landing:
+// Ilustração animada do hero da landing:
 // - Escada B&P em contorno neon verde no topo (transparente por dentro)
 // - Ponto emissor pulsando + ondas verdes finas/verticais descendo (4 waves staggered)
 // - 3 cards de bens em outline gold com glow (sem fundo) — perto da escada
-// - Ondas douradas pequenas voltando de cada card (eco proximo)
+// - Ondas douradas pequenas voltando de cada card (eco próximo)
 // Tudo via SMIL (animate/animateTransform) — sem JS no client.
 
 const staircase = [
@@ -112,7 +112,7 @@ function AssetCard({
 }) {
   return (
     <g transform={`translate(${cx} ${cy})`} filter="url(#snr-gold-glow)">
-      {/* Icone — apenas contorno gold, escala 1.8 pra ficar grande igual a fonte do "Sonar" */}
+      {/* Ícone — apenas contorno gold, escala 1.8 pra ficar grande igual à fonte do "Sonar" */}
       <g transform="translate(0 -12) scale(1.8)">
         {icon === "house" && (
           <>
@@ -173,7 +173,7 @@ function AssetCard({
         )}
         {icon === "company" && (
           <>
-            {/* Predio outline */}
+            {/* Prédio outline */}
             <rect
               x="-11"
               y="-12"
@@ -210,7 +210,7 @@ function AssetCard({
               strokeWidth="1.2"
               strokeLinejoin="round"
             />
-            {/* Simbolo $ no centro */}
+            {/* Símbolo $ no centro */}
             <text
               x="0"
               y="5"

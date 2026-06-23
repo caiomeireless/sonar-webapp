@@ -1,8 +1,8 @@
 // Top 5 devedores por valor estimado de bens em rastreio — card do
-// Dashboard da Plataforma (/equipe). Tabela compacta, linha clicavel leva
+// Dashboard da Plataforma (/equipe). Tabela compacta, linha clicável leva
 // a /equipe/devedores/[id]. Server Component: lista + Link, sem Recharts.
 //
-// Recebe dados ja agregados (TopDevedorItem[]) — a page chama
+// Recebe dados já agregados (TopDevedorItem[]) — a page chama
 // obterDadosDashboardPlataforma.
 
 import Link from "next/link";
@@ -18,7 +18,7 @@ export default function Top5DevedoresRastreio({ dados }: Props) {
   return (
     <DashboardCard
       titulo="Top 5 devedores em rastreio"
-      descricao="Maior patrimonio estimado localizado"
+      descricao="Maior patrimônio estimado localizado"
       accent="gold"
     >
       {dados.length === 0 ? (

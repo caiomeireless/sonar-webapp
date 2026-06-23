@@ -1,8 +1,8 @@
 // Monitor de Custos — registro das pesquisas PAGAS de API + IA (server-only).
 import { createAdminClient } from "@/lib/supabase/admin";
 
-// Tipos especificos do Sonar (busca de bens). Adicionar conforme as
-// integracoes forem entrando.
+// Tipos específicos do Sonar (busca de bens). Adicionar conforme as
+// integrações forem entrando.
 export type TipoCusto =
   | "assertiva-pf"
   | "assertiva-pj"
@@ -18,7 +18,7 @@ export type TipoCusto =
   | "ia-resumo";
 
 // Custo aproximado em R$ por tipo (veja pesquisa de custos no projeto).
-// Tipos com custo calculado por tokens passam custo explicito.
+// Tipos com custo calculado por tokens passam custo explícito.
 export const CUSTO_ESTIMADO: Record<TipoCusto, number> = {
   "assertiva-pf": 0.203,
   "assertiva-pj": 0.203,
@@ -39,14 +39,14 @@ export const ROTULO_TIPO: Record<string, string> = {
   "assertiva-pj": "Assertiva — enriquecimento PJ",
   "assertiva-busca": "Assertiva — busca por nome",
   "bigdata-pessoa": "BigDataCorp — dados de pessoa",
-  "bigdata-veiculo": "BigDataCorp — veiculos",
-  "bigdata-imovel": "BigDataCorp — imoveis (rural)",
-  "bigdata-qsa": "BigDataCorp — participacoes societarias",
+  "bigdata-veiculo": "BigDataCorp — veículos",
+  "bigdata-imovel": "BigDataCorp — imóveis (rural)",
+  "bigdata-qsa": "BigDataCorp — participações societárias",
   "bigdata-processos": "BigDataCorp — processos",
-  "edossie-cadastral": "eDossie — Dossie Cadastral",
+  "edossie-cadastral": "eDossie — Dossiê Cadastral",
   "escavador-processos": "Escavador — processos por CPF/CNPJ",
   "datajud": "CNJ DataJud (gratuito)",
-  "ia-resumo": "IA — resumo do dossie",
+  "ia-resumo": "IA — resumo do dossiê",
 };
 
 export interface RegistroCusto {
@@ -58,8 +58,8 @@ export interface RegistroCusto {
   criadoEm: string;
 }
 
-// Registra um custo. Best-effort: nunca derruba a acao principal se falhar
-// (ex.: migracao ainda nao rodada).
+// Registra um custo. Best-effort: nunca derruba a ação principal se falhar
+// (ex.: migração ainda não rodada).
 export async function registrarCusto(input: {
   email: string;
   tipo: TipoCusto;
@@ -75,11 +75,11 @@ export async function registrarCusto(input: {
       custo: input.custo ?? CUSTO_ESTIMADO[input.tipo] ?? 0,
     });
   } catch {
-    /* registro de custo e best-effort */
+    /* registro de custo é best-effort */
   }
 }
 
-// Le os registros (mais recentes primeiro). Resiliente: tabela ausente -> [].
+// Lê os registros (mais recentes primeiro). Resiliente: tabela ausente -> [].
 export async function getCustos(limite = 2000): Promise<RegistroCusto[]> {
   try {
     const admin = createAdminClient();

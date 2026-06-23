@@ -35,11 +35,11 @@ export function NovoDevedorForm({ credores, euQuery }: Props) {
     setErro("");
 
     if (!documento.trim()) {
-      setErro("Documento (CPF/CNPJ) e obrigatorio.");
+      setErro("Documento (CPF/CNPJ) é obrigatório.");
       return;
     }
     if (!nome.trim()) {
-      setErro("Nome e obrigatorio.");
+      setErro("Nome é obrigatório.");
       return;
     }
     if (!credorId) {
@@ -49,7 +49,7 @@ export function NovoDevedorForm({ credores, euQuery }: Props) {
 
     const credorIdNum = Number.parseInt(credorId, 10);
     if (!Number.isFinite(credorIdNum)) {
-      setErro("Credor invalido.");
+      setErro("Credor inválido.");
       return;
     }
 
@@ -57,14 +57,14 @@ export function NovoDevedorForm({ credores, euQuery }: Props) {
     if (valorCredito.trim()) {
       // Parse de moeda BR: "1.234,56" -> 1234.56. Remove separadores de
       // milhar (.) e troca decimal (,) por ponto. Sem isso, "1.234,56"
-      // virava 1.23 silenciosamente (bug grave de corrupcao de dados).
+      // virava 1.23 silenciosamente (bug grave de corrupção de dados).
       const limpo = valorCredito
         .replace(/[^0-9,.-]/g, "")
         .replace(/\./g, "")
         .replace(",", ".");
       const n = Number.parseFloat(limpo);
       if (!Number.isFinite(n)) {
-        setErro("Valor do credito invalido.");
+        setErro("Valor do crédito inválido.");
         return;
       }
       valorBRL = n;
@@ -121,7 +121,7 @@ export function NovoDevedorForm({ credores, euQuery }: Props) {
                     onChange={() => setTipo(t)}
                     className="sr-only"
                   />
-                  {t === "PF" ? "Pessoa Fisica" : "Pessoa Juridica"}
+                  {t === "PF" ? "Pessoa Física" : "Pessoa Jurídica"}
                 </label>
               ))}
             </div>
@@ -159,12 +159,12 @@ export function NovoDevedorForm({ credores, euQuery }: Props) {
           </div>
 
           <label className="flex flex-col gap-2">
-            <span className={labelBase}>Nome / Razao social</span>
+            <span className={labelBase}>Nome / Razão social</span>
             <input
               type="text"
               value={nome}
               onChange={(e) => setNome(e.target.value)}
-              placeholder={tipo === "PF" ? "Nome completo" : "Razao social"}
+              placeholder={tipo === "PF" ? "Nome completo" : "Razão social"}
               className={inputBase}
               required
             />
@@ -174,9 +174,9 @@ export function NovoDevedorForm({ credores, euQuery }: Props) {
 
       <div className="h-px bg-[var(--color-ivory-12)]" />
 
-      {/* ===== Bloco vinculo / caso ===== */}
+      {/* ===== Bloco vínculo / caso ===== */}
       <section>
-        <span className="eyebrow">Vinculo com credor</span>
+        <span className="eyebrow">Vínculo com credor</span>
 
         <div className="mt-5 flex flex-col gap-4">
           <label className="flex flex-col gap-2">
@@ -201,7 +201,7 @@ export function NovoDevedorForm({ credores, euQuery }: Props) {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="flex flex-col gap-2">
-              <span className={labelBase}>Numero do processo (opcional)</span>
+              <span className={labelBase}>Número do processo (opcional)</span>
               <input
                 type="text"
                 value={numeroProcesso}
@@ -213,7 +213,7 @@ export function NovoDevedorForm({ credores, euQuery }: Props) {
             </label>
 
             <label className="flex flex-col gap-2">
-              <span className={labelBase}>Valor do credito (BRL)</span>
+              <span className={labelBase}>Valor do crédito (BRL)</span>
               <input
                 type="text"
                 inputMode="decimal"

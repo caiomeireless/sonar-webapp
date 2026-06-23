@@ -1,12 +1,12 @@
 "use client";
 
-// Linha do tempo financeira — cobranca acumulada (ouro BP) x valor recuperado
-// (verde Sonar) nos ultimos 12 meses. Recharts roda no client.
+// Linha do tempo financeira — cobrança acumulada (ouro BP) x valor recuperado
+// (verde Sonar) nos últimos 12 meses. Recharts roda no client.
 //
-// Recebe os dados ja agregados pelo helper obterDadosDashboardCaso (server).
-// A unica transformacao feita aqui e o ACUMULADO da cobranca: o helper
-// devolve cobranca mensal (linear); a serie do grafico mostra o saldo
-// acumulado mes a mes, que e a leitura natural pra credor.
+// Recebe os dados já agregados pelo helper obterDadosDashboardCaso (server).
+// A única transformação feita aqui é o ACUMULADO da cobrança: o helper
+// devolve cobrança mensal (linear); a série do gráfico mostra o saldo
+// acumulado mês a mês, que é a leitura natural pra credor.
 
 import { useMemo } from "react";
 import {
@@ -66,8 +66,8 @@ const MESES_PT = [
   "dez",
 ] as const;
 
-// 'YYYY-MM' -> 'mmm/yy' (pt-BR curto). Evita Intl pra nao depender de locale
-// no SSR — o helper ja entrega o YYYY-MM canonico.
+// 'YYYY-MM' -> 'mmm/yy' (pt-BR curto). Evita Intl pra não depender de locale
+// no SSR — o helper já entrega o YYYY-MM canônico.
 function rotularMes(ym: string): string {
   const [yyyy, mm] = ym.split("-");
   const idx = Number.parseInt(mm ?? "", 10) - 1;
@@ -91,8 +91,8 @@ function TooltipFinanceiro({
 }: TooltipContentProps<ValueType, NameType>) {
   if (!active || !payload || payload.length === 0) return null;
 
-  // Recharts entrega payload na ordem das <Line>s. Buscar por dataKey e mais
-  // seguro do que confiar em indice.
+  // Recharts entrega payload na ordem das <Line>s. Buscar por dataKey é mais
+  // seguro do que confiar em índice.
   const ponto = (payload[0]?.payload ?? null) as Ponto | null;
   if (!ponto) return null;
 
@@ -109,7 +109,7 @@ function TooltipFinanceiro({
             className="inline-block h-2 w-2 rounded-full"
             style={{ background: CHART_COLOR_GOLD }}
           />
-          <span>Cobranca acumulada</span>
+          <span>Cobrança acumulada</span>
           <span className="ml-auto font-medium tabular-nums">
             {formatBRL(ponto.cobrancaAcumulada)}
           </span>
@@ -155,13 +155,13 @@ export default function LinhaCobrancaRecuperacao({ dados }: Props) {
 
   return (
     <DashboardCard
-      titulo="Cobranca x recuperacao"
-      descricao="Cobranca acumulada e valor recuperado nos ultimos 12 meses."
+      titulo="Cobrança x recuperação"
+      descricao="Cobrança acumulada e valor recuperado nos últimos 12 meses."
       accent="gold"
     >
       {semDados ? (
         <div className="flex h-64 items-center justify-center text-sm text-[var(--color-ivory-66)]">
-          Sem movimentacao financeira no periodo.
+          Sem movimentação financeira no período.
         </div>
       ) : (
         <div className="h-64 w-full">
@@ -213,7 +213,7 @@ export default function LinhaCobrancaRecuperacao({ dados }: Props) {
               <Line
                 type="monotone"
                 dataKey="cobrancaAcumulada"
-                name="Cobranca acumulada"
+                name="Cobrança acumulada"
                 stroke={CHART_COLOR_GOLD}
                 strokeWidth={2}
                 dot={{ r: 2.5, fill: CHART_COLOR_GOLD, strokeWidth: 0 }}

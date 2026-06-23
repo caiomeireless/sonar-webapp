@@ -313,7 +313,7 @@ body {
 }
 
 /* Slider horizontal infinito — usado na faixa PROPÓSITO pra rolar fotos do
-   escritorio. O conteudo é duplicado no JSX e a animacao translada -50% pra
+   escritório. O conteúdo é duplicado no JSX e a animação translada -50% pra
    emendar sem costura. */
 @keyframes scroll-right {
   0%   { transform: translateX(0); }

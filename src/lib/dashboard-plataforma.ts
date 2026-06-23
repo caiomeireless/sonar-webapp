@@ -1,12 +1,12 @@
-// Dashboard da Plataforma — agregacao DO LADO SERVIDOR pra a tela
-// /equipe (visao gerencial da equipe inteira, nao de 1 caso).
+// Dashboard da Plataforma — agregação DO LADO SERVIDOR pra a tela
+// /equipe (visão gerencial da equipe inteira, não de 1 caso).
 //
-// Server-only: usa createAdminClient. Reune dados de credores, devedores,
-// casos, bens_encontrados, medidas_tomadas e custos. NAO faz checagem de
-// papel — decisao do Caio: funcionario ve tudo, incluindo valores.
+// Server-only: usa createAdminClient. Reúne dados de credores, devedores,
+// casos, bens_encontrados, medidas_tomadas e custos. NÃO faz checagem de
+// papel — decisão do Caio: funcionário vê tudo, incluindo valores.
 //
-// REGRA: Toda metrica devolvida ja vem pronta pra UI consumir. A view
-// nao deve fazer agregacao no client.
+// REGRA: Toda métrica devolvida já vem pronta pra UI consumir. A view
+// não deve fazer agregação no client.
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ROTULO_TIPO, type RegistroCusto } from "@/lib/custos";
@@ -15,7 +15,7 @@ import type { TipoBem } from "@/lib/mock-fixtures";
 import type { TipoMedida, ResultadoMedida } from "@/lib/medidas";
 
 // ============================================================
-// TIPOS de saida
+// TIPOS de saída
 // ============================================================
 
 export interface KPIsGerais {
@@ -102,7 +102,7 @@ export interface DashboardPlataforma {
 }
 
 // ============================================================
-// FILTROS (decisao Caio 2026-06-23): periodo, advogado, credor, status
+// FILTROS (decisão Caio 2026-06-23): período, advogado, credor, status
 // ============================================================
 
 export type PeriodoChave = "tudo" | "7d" | "30d" | "90d" | "mes" | "ano";
@@ -124,16 +124,16 @@ export interface OpcoesFiltros {
 // CONFIG
 // ============================================================
 
-// Teto mensal de gasto com APIs — heuristica pra exibir progresso no card.
-// Quando virar configuracao por escritorio, mover pra `preferencias`.
+// Teto mensal de gasto com APIs — heurística pra exibir progresso no card.
+// Quando virar configuração por escritório, mover pra `preferencias`.
 const GASTO_APIS_LIMITE_PADRAO = 5000;
 
-// PostgREST trunca em 1000 linhas por padrao. Quando precisarmos varrer
+// PostgREST trunca em 1000 linhas por padrão. Quando precisarmos varrer
 // tabelas grandes (bens_encontrados, medidas_tomadas, custos), paginamos.
 const PAGINA = 1000;
 
 // ============================================================
-// HELPERS de paginacao + datas
+// HELPERS de paginação + datas
 // ============================================================
 
 async function selecionarTudo<T>(
@@ -141,8 +141,8 @@ async function selecionarTudo<T>(
 ): Promise<T[]> {
   const acc: T[] = [];
   let from = 0;
-  // hard cap defensivo — 50 paginas (50k linhas) ja cobre tudo do Sonar
-  // por anos. Se ultrapassar, e melhor explodir do que silenciar.
+  // hard cap defensivo — 50 páginas (50k linhas) já cobre tudo do Sonar
+  // por anos. Se ultrapassar, é melhor explodir do que silenciar.
   for (let pagina = 0; pagina < 50; pagina++) {
     const to = from + PAGINA - 1;
     const { data, error } = await build(from, to);
@@ -182,7 +182,7 @@ function diasAtrasISO(dias: number): string {
 }
 
 // ============================================================
-// ROWS — formato cru lido do Supabase (so pra tipar sem `any`)
+// ROWS — formato cru lido do Supabase (só pra tipar sem `any`)
 // ============================================================
 
 interface CredorRow {
@@ -232,8 +232,8 @@ interface CustoRow {
 }
 
 // ============================================================
-// LEITURAS (cada uma resiliente — se a tabela ainda nao existir,
-// devolve [] em vez de quebrar a pagina inteira)
+// LEITURAS (cada uma resiliente — se a tabela ainda não existir,
+// devolve [] em vez de quebrar a página inteira)
 // ============================================================
 
 async function lerCredores(): Promise<CredorRow[]> {
@@ -330,7 +330,7 @@ async function lerCustos(): Promise<CustoRow[]> {
 }
 
 // ============================================================
-// AGREGACOES
+// AGREGAÇÕES
 // ============================================================
 
 function agregarKpisGerais(args: {
@@ -353,7 +353,7 @@ function agregarKpisGerais(args: {
     if (m.resultado !== "positivo") return false;
     const ts = m.data ?? m.criado_em;
     if (!ts) return false;
-    return ts >= inicioMes.slice(0, 10); // m.data eh `date` (YYYY-MM-DD)
+    return ts >= inicioMes.slice(0, 10); // m.data é `date` (YYYY-MM-DD)
   }).length;
 
   const breakdown = {
@@ -390,9 +390,9 @@ function agregarEvolucaoMensal(args: {
   const { bens, medidas } = args;
   const meses = ultimos12Meses();
 
-  // Patrimonio localizado por mes = soma de valor_estimado_brl dos bens
-  // cuja `fonte_consultada_em` cai no mes. Heuristica boa o suficiente
-  // pra grafico de evolucao (quando o bem foi "trazido" ao sistema).
+  // Patrimônio localizado por mês = soma de valor_estimado_brl dos bens
+  // cuja `fonte_consultada_em` cai no mês. Heurística boa o suficiente
+  // pra gráfico de evolução (quando o bem foi "trazido" ao sistema).
   const patrPorMes = new Map<string, number>();
   for (const b of bens) {
     if (!b.fonte_consultada_em) continue;
@@ -403,8 +403,8 @@ function agregarEvolucaoMensal(args: {
     patrPorMes.set(k, (patrPorMes.get(k) ?? 0) + v);
   }
 
-  // Penhoras efetivadas por mes = count das medidas penhora_efetivada
-  // com resultado=positivo agrupadas por mes da data da medida.
+  // Penhoras efetivadas por mês = count das medidas penhora_efetivada
+  // com resultado=positivo agrupadas por mês da data da medida.
   const penPorMes = new Map<string, number>();
   for (const m of medidas) {
     if (m.tipo !== "penhora_efetivada") continue;
@@ -436,7 +436,7 @@ function agregarMixBens(bens: BemRow[]): MixBensItem[] {
   for (const [tipo, v] of acc.entries()) {
     out.push({ tipo, qtd: v.qtd, valorBrl: v.valor });
   }
-  // Maior valor primeiro — leitura natural pra grafico de mix.
+  // Maior valor primeiro — leitura natural pra gráfico de mix.
   out.sort((a, b) => b.valorBrl - a.valorBrl);
   return out;
 }
@@ -550,7 +550,7 @@ function agregarTopDevedores(args: {
 
   const out: TopDevedorItem[] = [];
   // candidatos = devedores com pelo menos 1 bem (faz sentido falar em
-  // "patrimonio em rastreio")
+  // "patrimônio em rastreio")
   for (const [devedorId, valor] of valorPorDevedor.entries()) {
     out.push({
       devedorId,
@@ -592,7 +592,7 @@ function agregarCarteiraPorAdvogado(args: {
     acc.set(email, cur);
   }
 
-  // Gasto do mes por email (campo `email` em custos = quem disparou a consulta).
+  // Gasto do mês por email (campo `email` em custos = quem disparou a consulta).
   const inicioMes = inicioDoMesISO();
   for (const cu of custos) {
     if (!cu.criado_em || cu.criado_em < inicioMes) continue;
@@ -673,12 +673,12 @@ function agregarFeedMedidas(args: {
 }
 
 // ============================================================
-// APLICACAO DE FILTROS — filtra os arrays crus em CASCATA antes de agregar.
-// Casos sao o pivot: credor / advogado / status filtram casos primeiro.
+// APLICAÇÃO DE FILTROS — filtra os arrays crus em CASCATA antes de agregar.
+// Casos são o pivot: credor / advogado / status filtram casos primeiro.
 // Daí bens e custos filtram via devedor_id dos casos sobreviventes;
 // medidas filtram via caso_id.
-// Periodo filtra medidas e custos por data; bens nao tem semantica de
-// periodo (e snapshot do que ja foi localizado).
+// Período filtra medidas e custos por data; bens não tem semântica de
+// período (é snapshot do que já foi localizado).
 // ============================================================
 
 function inicioDoPeriodoISO(p: PeriodoChave): string | null {
@@ -736,7 +736,7 @@ function aplicarFiltros(raw: DadosCrus, f: FiltrosPlataforma | undefined): Dados
   let medidas = raw.medidas.filter((m) => casoIds.has(m.caso_id));
   let custos = raw.custos.filter((cu) => cu.devedor_id === null || devedorIds.has(cu.devedor_id));
 
-  // 3. Periodo: filtra medidas (data) e custos (criado_em)
+  // 3. Período: filtra medidas (data) e custos (criado_em)
   if (f.periodo) {
     const corte = inicioDoPeriodoISO(f.periodo);
     if (corte) {
@@ -751,7 +751,7 @@ function aplicarFiltros(raw: DadosCrus, f: FiltrosPlataforma | undefined): Dados
 }
 
 // ============================================================
-// OPCOES PARA UI DOS FILTROS (lista quem aparece nos dropdowns)
+// OPÇÕES PARA UI DOS FILTROS (lista quem aparece nos dropdowns)
 // ============================================================
 
 export async function listarOpcoesFiltros(): Promise<OpcoesFiltros> {

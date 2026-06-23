@@ -1,9 +1,9 @@
-// KPI hero do risco de prescricao intercorrente (CPC art. 921, paragrafo 4).
-// Acentua URGENCIA: vermelho/laranja/amarelo conforme statusRisco. A page
+// KPI hero do risco de prescrição intercorrente (CPC art. 921, parágrafo 4).
+// Acentua URGÊNCIA: vermelho/laranja/amarelo conforme statusRisco. A page
 // agrega tudo no servidor (data_distribuicao, statusRisco e diasRestantes
-// ja chegam prontos). Este componente so renderiza.
+// já chegam prontos). Este componente só renderiza.
 //
-// Mapa de cores (urgencia visual, fora da paleta accent padrao do KPIHero):
+// Mapa de cores (urgência visual, fora da paleta accent padrão do KPIHero):
 //   critico (<=90d)  -> vermelho
 //   alto    (<=180d) -> laranja
 //   medio   (<=365d) -> amarelo
@@ -28,7 +28,7 @@ const URGENCIA: Record<RiscoPrescricaoMetric["statusRisco"], UrgenciaStyle> = {
   critico: {
     color: "#FF5B5B",
     glow: "0 0 24px rgba(255, 91, 91, 0.35)",
-    label: "Critico",
+    label: "Crítico",
   },
   alto: {
     color: "#FF8A3D",
@@ -38,7 +38,7 @@ const URGENCIA: Record<RiscoPrescricaoMetric["statusRisco"], UrgenciaStyle> = {
   medio: {
     color: "#F4C542",
     glow: "0 0 16px rgba(244, 197, 66, 0.25)",
-    label: "Medio",
+    label: "Médio",
   },
   baixo: {
     color: "var(--color-gold)",
@@ -53,14 +53,14 @@ const URGENCIA: Record<RiscoPrescricaoMetric["statusRisco"], UrgenciaStyle> = {
 };
 
 const INFO =
-  "Prescricao intercorrente — CPC art. 921, paragrafo 4:\n" +
-  "decorridos 5 anos da suspensao sem manifestacao util,\n" +
-  "comeca a correr o prazo de prescricao intercorrente.\n\n" +
-  "Janela = data de distribuicao + 5 anos.\n\n" +
+  "Prescrição intercorrente — CPC art. 921, parágrafo 4:\n" +
+  "decorridos 5 anos da suspensão sem manifestação útil,\n" +
+  "começa a correr o prazo de prescrição intercorrente.\n\n" +
+  "Janela = data de distribuição + 5 anos.\n\n" +
   "Faixas de risco:\n" +
-  "  <= 90 dias  critico (acao imediata)\n" +
+  "  <= 90 dias  crítico (ação imediata)\n" +
   "  <= 180 dias alto\n" +
-  "  <= 365 dias medio\n" +
+  "  <= 365 dias médio\n" +
   "  > 365 dias  baixo";
 
 export default function RiscoPrescricao({ metrica }: Props) {
@@ -71,7 +71,7 @@ export default function RiscoPrescricao({ metrica }: Props) {
   if (statusRisco === "sem_dados" || diasRestantes === null) {
     return (
       <DashboardCard
-        titulo="Risco de prescricao"
+        titulo="Risco de prescrição"
         accent="neutral"
         info={INFO}
       >
@@ -80,29 +80,29 @@ export default function RiscoPrescricao({ metrica }: Props) {
             —
           </div>
           <p className="text-xs text-[var(--color-ivory-66)]">
-            Data de distribuicao indisponivel
+            Data de distribuição indisponível
           </p>
         </div>
       </DashboardCard>
     );
   }
 
-  // Ja prescreveu? diasRestantes <= 0.
+  // Já prescreveu? diasRestantes <= 0.
   const prescrito = diasRestantes <= 0;
   const valorPrincipal = prescrito
     ? `${Math.abs(diasRestantes)} dias`
     : `${diasRestantes} dias`;
   const subtitulo = prescrito
     ? "Prazo fatal vencido"
-    : "ate prescrever";
+    : "até prescrever";
 
-  // Accent do card segue a severidade — critico/alto recebem o anel de aviso
-  // gold do DashboardCard pra puxar o olho; baixo fica green pra nao gritar.
+  // Accent do card segue a severidade — crítico/alto recebem o anel de aviso
+  // gold do DashboardCard pra puxar o olho; baixo fica green pra não gritar.
   const cardAccent = statusRisco === "baixo" ? "green" : "gold";
 
   return (
     <DashboardCard
-      titulo="Risco de prescricao"
+      titulo="Risco de prescrição"
       accent={cardAccent}
       info={INFO}
     >
@@ -119,7 +119,7 @@ export default function RiscoPrescricao({ metrica }: Props) {
         <p className="text-xs text-[var(--color-ivory-66)]">
           {subtitulo}
           {dataDistribuicao
-            ? ` · distribuido em ${formatData(dataDistribuicao)}`
+            ? ` · distribuído em ${formatData(dataDistribuicao)}`
             : ""}
         </p>
         <div

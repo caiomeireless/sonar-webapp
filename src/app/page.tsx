@@ -1,5 +1,5 @@
-// Landing publica do Sonar. Comeca limpa, focada em apresentar a plataforma
-// e empurrar pro /login. Sem dashboard ainda (proximo dia).
+// Landing pública do Sonar. Começa limpa, focada em apresentar a plataforma
+// e empurrar pro /login. Sem dashboard ainda (próximo dia).
 import Link from "next/link";
 import { AssistantBot } from "@/components/AssistantBot";
 import { HeaderParticles } from "@/components/HeaderParticles";
@@ -45,7 +45,7 @@ export default function LandingPage() {
         <div className="absolute bottom-0 left-0 top-0 z-20 flex items-center px-6">
           <LogoSvg height={138} />
         </div>
-        {/* Cluster (robo + caption + botoes) pinado no canto direito */}
+        {/* Cluster (robô + caption + botões) pinado no canto direito */}
         <div className="absolute right-6 top-1/2 z-20 flex -translate-y-1/2 flex-col items-end gap-2 sm:right-10">
           <div className="flex items-center gap-3">
             <AssistantBot />
@@ -125,7 +125,7 @@ export default function LandingPage() {
                 />
               </svg>
               )}
-              {/* 4 icones dourados stacked, posicionados a ESQUERDA do texto */}
+              {/* 4 ícones dourados stacked, posicionados à ESQUERDA do texto */}
               <svg
                 className="pointer-events-none absolute right-full top-1/2 mt-[70px] hidden -translate-y-1/2 opacity-65 md:block"
                 width="130"
@@ -150,7 +150,7 @@ export default function LandingPage() {
                   </radialGradient>
                 </defs>
 
-                {/* IMOVEIS — casa em line-art dourado */}
+                {/* IMÓVEIS — casa em line-art dourado */}
                 <g
                   transform="translate(65 15)"
                   stroke="#F0DDA8"
@@ -170,7 +170,7 @@ export default function LandingPage() {
                 </g>
                 <text x="65" y="53" textAnchor="middle" fontSize="7" fontWeight="600" fill="#FFFFFF" fontFamily="JetBrains Mono, monospace" letterSpacing="1">IMÓVEIS</text>
 
-                {/* VEICULOS — sedan em line-art dourado */}
+                {/* VEÍCULOS — sedan em line-art dourado */}
                 <g
                   transform="translate(65 93)"
                   stroke="#F0DDA8"
@@ -208,7 +208,7 @@ export default function LandingPage() {
                 </g>
                 <text x="65" y="223" textAnchor="middle" fontSize="7" fontWeight="600" fill="#FFFFFF" fontFamily="JetBrains Mono, monospace" letterSpacing="1">EMPRESAS</text>
 
-                {/* CREDITOS PROCESSUAIS — documento em line-art dourado */}
+                {/* CRÉDITOS PROCESSUAIS — documento em line-art dourado */}
                 <g
                   transform="translate(65 269)"
                   stroke="#F0DDA8"
@@ -228,7 +228,7 @@ export default function LandingPage() {
                 <text x="65" y="310" textAnchor="middle" fontSize="6.5" fontWeight="600" fill="#FFFFFF" fontFamily="JetBrains Mono, monospace" letterSpacing="0.8">CRÉDITOS</text>
                 <text x="65" y="319" textAnchor="middle" fontSize="6.5" fontWeight="600" fill="#FFFFFF" fontFamily="JetBrains Mono, monospace" letterSpacing="0.8">PROCESSUAIS</text>
               </svg>
-              {/* Emit dourado + ondas verde signal (arcos SMIL suaves, SEM particulas) */}
+              {/* Emit dourado + ondas verde signal (arcos SMIL suaves, SEM partículas) */}
               <svg
                 className="pointer-events-none absolute left-full top-1/2 ml-[-36px] mt-[93px] hidden -translate-y-1/2 md:block"
                 width="260"
@@ -251,7 +251,7 @@ export default function LandingPage() {
                   <animate attributeName="r" values="2;4;2" dur="1.5s" repeatCount="indefinite" />
                   <animate attributeName="opacity" values="1;0.55;1" dur="1.5s" repeatCount="indefinite" />
                 </circle>
-                {/* Ondas verde signal — arcos suaves expandindo a direita */}
+                {/* Ondas verde signal — arcos suaves expandindo à direita */}
                 <g transform="translate(40 170)" filter="url(#sonar-wave-glow)">
                   {[0, 0.65, 1.3, 1.95].map((delay, i) => (
                     <path
@@ -282,7 +282,7 @@ export default function LandingPage() {
                   ))}
                 </g>
               </svg>
-              {/* TEMP OCULTO — escada, ondas, emit, icones vermelhos */}
+              {/* TEMP OCULTO — escada, ondas, emit, ícones vermelhos */}
               {false && (
               <svg
                 className="pointer-events-none absolute left-full top-1/2 ml-[100px] hidden -translate-y-1/2 md:block"
@@ -302,7 +302,7 @@ export default function LandingPage() {
                     </feMerge>
                   </filter>
                 </defs>
-                {/* Escada halftone (mesmo padrao do logo) */}
+                {/* Escada halftone (mesmo padrão do logo) */}
                 <g transform="translate(0 110) scale(5)" filter="url(#band2-glow)">
                   {STAIRCASE_PATTERN.map((r, i) => (
                     <rect
@@ -323,7 +323,7 @@ export default function LandingPage() {
                   <animate attributeName="r" values="2;4;2" dur="1.5s" repeatCount="indefinite" />
                   <animate attributeName="opacity" values="1;0.55;1" dur="1.5s" repeatCount="indefinite" />
                 </circle>
-                {/* 4 icones em neon vermelho abaixo das ondas + legendas */}
+                {/* 4 ícones em neon vermelho abaixo das ondas + legendas */}
                 <g
                   stroke="#FF3D5A"
                   strokeWidth="1.4"
@@ -332,7 +332,7 @@ export default function LandingPage() {
                   fill="none"
                   filter="url(#band2-glow)"
                 >
-                  {/* Imoveis - casa */}
+                  {/* Imóveis - casa */}
                   <g transform="translate(5 415)">
                     <g transform="scale(1.4)">
                       <path d="M -10 -2 L 0 -12 L 10 -2 L 10 8 L -10 8 Z" />
@@ -352,7 +352,7 @@ export default function LandingPage() {
                       IMÓVEIS
                     </text>
                   </g>
-                  {/* Veiculos - carro */}
+                  {/* Veículos - carro */}
                   <g transform="translate(70 418)">
                     <g transform="scale(1.4)">
                       <path d="M -10 1 L -6 -6 L 6 -6 L 10 1 L 10 6 L -10 6 Z" />
@@ -373,7 +373,7 @@ export default function LandingPage() {
                       VEÍCULOS
                     </text>
                   </g>
-                  {/* Empresas - predio */}
+                  {/* Empresas - prédio */}
                   <g transform="translate(135 415)">
                     <g transform="scale(1.4)">
                       <rect x="-8" y="-12" width="16" height="22" />
@@ -400,7 +400,7 @@ export default function LandingPage() {
                       EMPRESAS
                     </text>
                   </g>
-                  {/* Creditos em processos - documento com $ */}
+                  {/* Créditos em processos - documento com $ */}
                   <g transform="translate(200 415)">
                     <g transform="scale(1.4)">
                       <path d="M -8 -12 L 4 -12 L 10 -6 L 10 12 L -8 12 Z" />
@@ -497,7 +497,7 @@ export default function LandingPage() {
       <section id="sobre" className="relative overflow-hidden">
         <HeaderParticles />
         <div className="pointer-events-none relative z-10 mx-auto max-w-[1400px] px-6 py-24 sm:px-10">
-          {/* Painel de vidro envolvendo o titulo + intro */}
+          {/* Painel de vidro envolvendo o título + intro */}
           <div className="max-w-[840px] rounded-2xl border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.7)] p-8 backdrop-blur-md sm:p-10">
             <div className="flex items-center gap-3">
               {/* Radar miniatura girando animado */}
@@ -515,7 +515,7 @@ export default function LandingPage() {
                     <stop offset="100%" stopColor="#3CFF8A" stopOpacity="0" />
                   </linearGradient>
                 </defs>
-                {/* Aneis concentricos */}
+                {/* Anéis concêntricos */}
                 <circle cx="20" cy="20" r="16" fill="none" stroke="#3CFF8A" strokeWidth="0.7" strokeOpacity="0.55" />
                 <circle cx="20" cy="20" r="11" fill="none" stroke="#3CFF8A" strokeWidth="0.6" strokeOpacity="0.45" />
                 <circle cx="20" cy="20" r="6" fill="none" stroke="#3CFF8A" strokeWidth="0.5" strokeOpacity="0.35" />
@@ -583,7 +583,7 @@ export default function LandingPage() {
         {/* Luz "lamp" dourada descendo do topo */}
         <LampLight />
         <div className="relative mx-auto max-w-[1400px] px-6 py-24 sm:px-10 md:py-32">
-          {/* Cabecalho centralizado: eyebrow + logo BP */}
+          {/* Cabeçalho centralizado: eyebrow + logo BP */}
           <div className="flex flex-col items-center text-center">
             <span className="eyebrow mb-8">Propósito</span>
             <div className="-translate-x-16">
@@ -591,7 +591,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Titulo + historia de origem */}
+          {/* Título + história de origem */}
           <div className="mx-auto mt-14 max-w-[780px] text-center">
             <h2 className="font-serif text-[clamp(28px,4vw,46px)] font-medium leading-[1.15] tracking-tight text-ivory">
               Por que o Sonar{" "}
@@ -616,7 +616,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          {/* Slider horizontal infinito com fotos do escritorio */}
+          {/* Slider horizontal infinito com fotos do escritório */}
           <div className="mt-20">
             <ImageAutoSlider
               images={[
@@ -668,7 +668,7 @@ export default function LandingPage() {
 
       {/* Footer — mesmo background e ALTURA da faixa 1 (header) */}
       <footer className="relative h-[170px] overflow-hidden">
-        {/* Quadriculado: mesmo padrao do header */}
+        {/* Quadriculado: mesmo padrão do header */}
         <div
           className="bg-grid-strong animate-grid-pulse absolute inset-0"
           style={{
@@ -726,7 +726,7 @@ function Card({ titulo, descricao, fonte }: { titulo: string; descricao: string;
 }
 
 // Assinatura BP usada na faixa PROPÓSITO — escada dourada + "Battaglia & Pedrosa"
-// + "ADVOGADOS" (mesmo padrao do Logo.tsx, isolado pra nao puxar o wordmark Sonar).
+// + "ADVOGADOS" (mesmo padrão do Logo.tsx, isolado pra não puxar o wordmark Sonar).
 function BPSignature() {
   const cells: { x: number; y: number; o: number }[] = [
     { x: 0, y: -5.4, o: 1.0 },

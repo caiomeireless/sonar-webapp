@@ -1,11 +1,11 @@
 // Reader functions de casos/bens — server-only, usa admin client.
-// Mostra dossie com regra de visibilidade do cliente: ele ve apenas
-// os devedores dos casos onde EHE eh o email_contato do credor.
+// Mostra dossiê com regra de visibilidade do cliente: ele vê apenas
+// os devedores dos casos onde ELE é o email_contato do credor.
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { TipoBem, FonteBusca } from "./mock-fixtures";
 import { CASOS_DEMO } from "./mock-fixtures";
 
-// WORKAROUND PRA DEMO: hidrata o juizo (vara/comarca/UF/genero/classe da acao)
+// WORKAROUND PRA DEMO: hidrata o juízo (vara/comarca/UF/gênero/classe da ação)
 // fazendo overlay com o mock CASOS_DEMO por id. No Sem 2, isso vira do Themis
 // API e este overlay sai daqui.
 export type JuizoInfo = {
@@ -23,7 +23,7 @@ function juizoMockPorId(casoId: number): JuizoInfo | undefined {
 }
 
 // ============================================================
-// TIPOS expostos pras paginas
+// TIPOS expostos pras páginas
 // ============================================================
 
 export interface DevedorResumo {
@@ -88,8 +88,8 @@ export interface Dossie {
   por_tipo: Record<TipoBem, Bem[]>;
 }
 
-// Processo "vindo do Themis" — no demo (Dia 4) le da tabela `casos`.
-// Quando Themis real entrar (Sem 2), substituir por chamada a API
+// Processo "vindo do Themis" — no demo (Dia 4) lê da tabela `casos`.
+// Quando Themis real entrar (Sem 2), substituir por chamada à API
 // preservando esta interface.
 export interface ProcessoThemis {
   caso_id: number;
@@ -130,7 +130,7 @@ function somarBens(bens: { valor_estimado_brl: number | null }[]): number {
 // LEITURA — CLIENTE (filtra por email_contato do credor)
 // ============================================================
 
-// Lista os casos visiveis pro cliente logado (devedores rastreados pelo
+// Lista os casos visíveis pro cliente logado (devedores rastreados pelo
 // credor que tem email_contato = clienteEmail).
 export async function listarCasosDoCliente(clienteEmail: string): Promise<CasoListagem[]> {
   const sb = createAdminClient();
@@ -156,7 +156,7 @@ export async function listarCasosDoCliente(clienteEmail: string): Promise<CasoLi
 
   if (!casos) return [];
 
-  // Pra cada caso, agrega total de bens + valor estimado + ultima atualizacao.
+  // Pra cada caso, agrega total de bens + valor estimado + última atualização.
   const result: CasoListagem[] = [];
   for (const c of casos) {
     const devedor = c.devedor as unknown as DevedorResumo;
@@ -188,13 +188,13 @@ export async function listarCasosDoCliente(clienteEmail: string): Promise<CasoLi
     });
   }
 
-  // Ordena: maior valor primeiro (case maior primeiro chama atencao na lista).
+  // Ordena: maior valor primeiro (case maior primeiro chama atenção na lista).
   result.sort((a, b) => (b.valor_credito_brl ?? 0) - (a.valor_credito_brl ?? 0));
   return result;
 }
 
-// Dossie completo de um devedor PARA o cliente.
-// Retorna null se o cliente nao tem direito a ver (devedor nao esta em
+// Dossiê completo de um devedor PARA o cliente.
+// Retorna null se o cliente não tem direito a ver (devedor não está em
 // nenhum caso do credor dele).
 export async function obterDossieParaCliente(
   devedorId: number,
@@ -203,7 +203,7 @@ export async function obterDossieParaCliente(
   const sb = createAdminClient();
   const email = clienteEmail.toLowerCase().trim();
 
-  // Verifica se este devedor esta em algum caso de credor com esse email.
+  // Verifica se este devedor está em algum caso de credor com esse email.
   const { data: autorizacao } = await sb
     .from("casos")
     .select(`
@@ -224,8 +224,8 @@ export async function obterDossieParaCliente(
 // ============================================================
 
 // Lista TODOS os processos "vindos do Themis" (na demo: tabela casos).
-// Usado pela tela /equipe/themis pra mostrar a fila de execucoes
-// que o escritorio precisa rastrear.
+// Usado pela tela /equipe/themis pra mostrar a fila de execuções
+// que o escritório precisa rastrear.
 export async function listarProcessosThemis(): Promise<ProcessoThemis[]> {
   const sb = createAdminClient();
 
@@ -269,7 +269,7 @@ export async function listarProcessosThemis(): Promise<ProcessoThemis[]> {
   return result;
 }
 
-// Conta bens por fonte pra um devedor — alimenta a animacao das 7
+// Conta bens por fonte pra um devedor — alimenta a animação das 7
 // fontes (cada card mostra "N bens encontrados" no final).
 export async function contarBensPorFonte(
   devedorId: number,
@@ -315,7 +315,7 @@ export interface OutroCasoDoDevedor {
 }
 
 // Devolve TODOS os casos onde este devedor aparece com credores DIFERENTES
-// (filtra fora o credor passado, se houver). Util pra dossie mostrar alerta
+// (filtra fora o credor passado, se houver). Útil pra dossiê mostrar alerta
 // de cross-reference, e pra carteira drill-down mostrar badge.
 export async function outrosCredoresDoDevedor(
   devedorId: number,
@@ -377,7 +377,7 @@ export async function obterDossie(devedorId: number): Promise<Dossie | null> {
 
   const bens = (bensRaw ?? []) as unknown as Bem[];
 
-  // Overlay do juizo a partir do mock — workaround pra demo, vai sair em Sem 2.
+  // Overlay do juízo a partir do mock — workaround pra demo, vai sair em Sem 2.
   const casosHidratados = ((casos ?? []) as unknown as CasoResumo[]).map(
     (c) => ({ ...c, juizo: juizoMockPorId(c.id) }),
   );

@@ -1,7 +1,7 @@
-// Drill-down da carteira — NIVEL 2: casos de UM cliente (credor).
-// Header com dados do cliente + 3 cards de numero + lista de casos.
-// Cada caso = 1 devedor + 1 processo; click leva ao dossie em
-// /equipe/devedores/{devedor_id} (nivel 3, ja existente).
+// Drill-down da carteira — NÍVEL 2: casos de UM cliente (credor).
+// Header com dados do cliente + 3 cards de número + lista de casos.
+// Cada caso = 1 devedor + 1 processo; click leva ao dossiê em
+// /equipe/devedores/{devedor_id} (nível 3, já existente).
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { obterCredorComCasos } from "@/lib/devedores";
@@ -65,13 +65,13 @@ export default async function CredorDrilldownPage({
             href={`/equipe/devedores${linkBase}`}
             className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--color-gold)] transition hover:text-[var(--color-tip-glow)]"
           >
-            ← Carteira do escritorio
+            ← Carteira do escritório
           </Link>
 
           <div className="mt-6 flex items-center gap-3">
             <span className="eyebrow">Cliente</span>
             <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-signal)]">
-              Visao da equipe
+              Visão da equipe
             </span>
           </div>
 
@@ -79,7 +79,7 @@ export default async function CredorDrilldownPage({
             {credor.nome}
           </h1>
           <p className="mt-3 font-mono text-sm text-[var(--color-ivory-66)]">
-            {credor.tipo === "PF" ? "Pessoa Fisica" : "Pessoa Juridica"} ·{" "}
+            {credor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"} ·{" "}
             {docLabel} {credor.documento}
           </p>
 
@@ -98,7 +98,7 @@ export default async function CredorDrilldownPage({
             </p>
           ) : null}
 
-          {/* 3 cards de numero grande */}
+          {/* 3 cards de número grande */}
           <div className="mt-10 grid gap-4 sm:grid-cols-3">
             <CardNumero
               rotulo={totalCasos === 1 ? "Caso" : "Casos"}
@@ -134,7 +134,7 @@ export default async function CredorDrilldownPage({
 
           {casos.length === 0 ? (
             <p className="mt-6 text-sm italic text-[var(--color-ivory-66)]">
-              Este cliente ainda nao tem casos cadastrados.
+              Este cliente ainda não tem casos cadastrados.
             </p>
           ) : (
             <CasosCredorView casos={casos} euQuery={linkBase} />
@@ -162,12 +162,12 @@ function NaoEncontrado({ voltarHref }: { voltarHref: string }) {
   return (
     <main className="relative mx-auto max-w-[1400px] px-6 py-24 sm:px-10">
       <SpotlightCard className="mx-auto max-w-[520px] p-10 text-center">
-        <span className="eyebrow !text-[var(--color-gold)]">Nao encontrado</span>
+        <span className="eyebrow !text-[var(--color-gold)]">Não encontrado</span>
         <h3 className="mt-4 font-serif text-2xl text-ivory">
-          Cliente nao encontrado
+          Cliente não encontrado
         </h3>
         <p className="mt-3 text-sm text-[var(--color-ivory-88)]">
-          O cliente solicitado nao existe ou foi removido da carteira.
+          O cliente solicitado não existe ou foi removido da carteira.
         </p>
         <Link
           href={voltarHref}

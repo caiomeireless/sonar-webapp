@@ -1,10 +1,10 @@
 "use client";
 
-// Barra de acoes de busca paga no DOSSIE — MOCK pra demo (Dia 4-5).
+// Barra de ações de busca paga no DOSSIÊ — MOCK pra demo (Dia 4-5).
 // Mostra os 3 modos: Combo Lead, Combo Documento, Individual (checkbox).
 // Cada clique abre modal com breakdown de custos -> spinner 1.5s -> toast.
-// Diferente do card Themis (que NAVEGA pra animacao), aqui o feedback e
-// inline porque o dossie ja esta aberto.
+// Diferente do card Themis (que NAVEGA pra animação), aqui o feedback é
+// inline porque o dossiê já está aberto.
 //
 // Quando a Sem 2 entregar a Server Action `executarConsultaPaga` real,
 // substituir o handler `executar()` por chamada de verdade. UI fica.
@@ -72,7 +72,7 @@ export function AcoesBuscaMockadas({ devedorNome }: { devedorNome: string }) {
         setExecState("idle");
         if (modal === "individual") setSelecionadas(new Set());
         setToast(
-          `Concluido — ${n} ${n === 1 ? "consulta executada" : "consultas executadas"} · ${formatBRL(total)} debitado`,
+          `Concluído — ${n} ${n === 1 ? "consulta executada" : "consultas executadas"} · ${formatBRL(total)} debitado`,
         );
         setTimeout(() => setToast(null), 4500);
       }, 1100);
@@ -86,22 +86,22 @@ export function AcoesBuscaMockadas({ devedorNome }: { devedorNome: string }) {
 
   return (
     <>
-      {/* ============ BARRA DE ACOES ============ */}
+      {/* ============ BARRA DE AÇÕES ============ */}
       <div className="rounded-xl border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.55)] p-5 backdrop-blur-md">
-        {/* Cabecalho da barra */}
+        {/* Cabeçalho da barra */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-ivory-66)]">
-              Acoes de busca
+              Ações de busca
             </span>
             <p className="mt-1 text-xs text-[var(--color-ivory-66)]">
-              Visivel apenas para a equipe · toda consulta paga e logada no monitor
+              Visível apenas para a equipe · toda consulta paga é logada no monitor
             </p>
           </div>
 
           <div className="flex flex-col items-start gap-1 sm:items-end">
             <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-ivory-66)]">
-              Saldo do mes
+              Saldo do mês
             </span>
             <span className="font-mono text-xs">
               <span className="text-[var(--color-gold)]">
@@ -127,7 +127,7 @@ export function AcoesBuscaMockadas({ devedorNome }: { devedorNome: string }) {
           </div>
         </div>
 
-        {/* Botoes principais */}
+        {/* Botões principais */}
         <div className="mt-5 flex flex-wrap items-center gap-3">
           <button
             type="button"
@@ -298,7 +298,7 @@ export function AcoesBuscaMockadas({ devedorNome }: { devedorNome: string }) {
                   </div>
                   <div className="flex items-center justify-between font-mono text-xs">
                     <span className="text-[var(--color-ivory-66)]">
-                      Saldo do mes apos
+                      Saldo do mês após
                     </span>
                     <span className={vaiEstourar ? "text-red-400" : "text-ivory"}>
                       {formatBRL(saldoDepois)} / {formatBRL(LIMITE_MES)}
@@ -309,17 +309,17 @@ export function AcoesBuscaMockadas({ devedorNome }: { devedorNome: string }) {
                 {/* Alerta combo doc */}
                 {modal === "doc" ? (
                   <p className="mt-4 rounded-lg border border-[var(--color-gold)]/40 bg-[var(--color-gold)]/10 px-4 py-3 font-mono text-[11px] leading-relaxed text-[var(--color-gold)]">
-                    ⚠ Consulta CARA — documentos oficiais com fe publica. Recomenda-se confirmar com socio antes.
+                    ⚠ Consulta CARA — documentos oficiais com fé pública. Recomenda-se confirmar com sócio antes.
                   </p>
                 ) : null}
 
                 {vaiEstourar ? (
                   <p className="mt-3 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 font-mono text-[11px] text-red-300">
-                    ⚠ Esta consulta vai ultrapassar o limite mensal. So aprove se ja conversou com socio.
+                    ⚠ Esta consulta vai ultrapassar o limite mensal. Só aprove se já conversou com sócio.
                   </p>
                 ) : null}
 
-                {/* Botoes */}
+                {/* Botões */}
                 <div className="mt-6 flex justify-end gap-3">
                   <button
                     type="button"
@@ -358,11 +358,11 @@ export function AcoesBuscaMockadas({ devedorNome }: { devedorNome: string }) {
               <div className="py-10 text-center">
                 <p className="text-4xl text-[var(--color-signal)]">✓</p>
                 <p className="mt-5 font-mono text-xs uppercase tracking-[0.32em] text-[var(--color-signal)]">
-                  Consultas concluidas
+                  Consultas concluídas
                 </p>
                 <p className="mt-2 font-mono text-[11px] text-[var(--color-ivory-66)]">
-                  {formatBRL(totalModal)} debitado · dados ja atualizados no
-                  dossie
+                  {formatBRL(totalModal)} debitado · dados já atualizados no
+                  dossiê
                 </p>
               </div>
             )}

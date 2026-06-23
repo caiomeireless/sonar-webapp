@@ -30,10 +30,10 @@ export default async function CasosClientePage({ searchParams }: Props) {
       </h1>
       <p className="mt-6 max-w-[600px] text-base leading-relaxed text-[var(--color-ivory-88)]">
         {casos.length === 0
-          ? "Nenhum devedor sob monitoramento ate o momento."
+          ? "Nenhum devedor sob monitoramento até o momento."
           : `${casos.length} ${
               casos.length === 1 ? "devedor monitorado" : "devedores monitorados"
-            } pelo escritorio.`}
+            } pelo escritório.`}
       </p>
 
       {casos.length === 0 ? (
@@ -41,11 +41,11 @@ export default async function CasosClientePage({ searchParams }: Props) {
           <SpotlightCard className="max-w-[520px] p-10 text-center">
             <span className="eyebrow !text-[var(--color-signal)]">Aguardando</span>
             <h3 className="mt-4 font-serif text-2xl text-ivory">
-              Nenhum caso atribuido ao seu email
+              Nenhum caso atribuído ao seu email
             </h3>
             <p className="mt-3 text-sm text-[var(--color-ivory-88)]">
-              Assim que o escritorio vincular um caso ao seu endereco de contato,
-              ele aparecera aqui.
+              Assim que o escritório vincular um caso ao seu endereço de contato,
+              ele aparecerá aqui.
             </p>
           </SpotlightCard>
         </div>
@@ -75,10 +75,10 @@ function CardCaso({ caso }: { caso: CasoListagem }) {
           </span>
         </div>
         <p className="mt-2 font-mono text-sm leading-tight text-ivory">
-          {caso.numero_processo ?? "Sem numero registrado"}
+          {caso.numero_processo ?? "Sem número registrado"}
         </p>
         <p className="mt-2 text-sm text-[var(--color-ivory-88)]">
-          Credito:{" "}
+          Crédito:{" "}
           <span className="text-ivory">{formatBRL(caso.valor_credito_brl)}</span>
         </p>
 
@@ -92,7 +92,7 @@ function CardCaso({ caso }: { caso: CasoListagem }) {
           {caso.devedor.nome}
         </h3>
         <p className="mt-1 font-mono text-xs text-[var(--color-ivory-66)]">
-          {caso.devedor.tipo === "PF" ? "Pessoa Fisica" : "Pessoa Juridica"} ·{" "}
+          {caso.devedor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"} ·{" "}
           {caso.devedor.documento}
         </p>
 

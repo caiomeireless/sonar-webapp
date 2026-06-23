@@ -1,5 +1,5 @@
-// Dossie patrimonial — visao da EQUIPE. Sem checagem de email_contato:
-// obterDossie() devolve TUDO. Mantem a mesma estrutura visual do dossie
+// Dossiê patrimonial — visão da EQUIPE. Sem checagem de email_contato:
+// obterDossie() devolve TUDO. Mantém a mesma estrutura visual do dossiê
 // do cliente (header + casos + bens por categoria).
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -34,12 +34,12 @@ type Props = {
 };
 
 const TIPO_META: Record<TipoBem, { label: string; icone: string }> = {
-  veiculo: { label: "Veiculos", icone: "V" },
-  imovel: { label: "Imoveis", icone: "I" },
-  empresa: { label: "Participacoes societarias", icone: "E" },
-  processo_credito: { label: "Processos onde e credor", icone: "P" },
-  endereco: { label: "Enderecos confirmados", icone: "A" },
-  vinculo: { label: "Vinculos familiares", icone: "F" },
+  veiculo: { label: "Veículos", icone: "V" },
+  imovel: { label: "Imóveis", icone: "I" },
+  empresa: { label: "Participações societárias", icone: "E" },
+  processo_credito: { label: "Processos onde é credor", icone: "P" },
+  endereco: { label: "Endereços confirmados", icone: "A" },
+  vinculo: { label: "Vínculos familiares", icone: "F" },
 };
 
 const ORDEM: TipoBem[] = [
@@ -107,9 +107,9 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
           </Link>
 
           <div className="mt-6 flex items-center gap-3">
-            <span className="eyebrow">Dossie patrimonial</span>
+            <span className="eyebrow">Dossiê patrimonial</span>
             <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-signal)]">
-              Visao da equipe
+              Visão da equipe
             </span>
           </div>
 
@@ -117,7 +117,7 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
             {devedor.nome}
           </h1>
           <p className="mt-3 font-mono text-sm text-[var(--color-ivory-66)]">
-            {devedor.tipo === "PF" ? "Pessoa Fisica" : "Pessoa Juridica"} ·{" "}
+            {devedor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"} ·{" "}
             {devedor.documento}
             {devedor.data_nascimento
               ? ` · Nasc. ${formatData(devedor.data_nascimento)}`
@@ -126,23 +126,23 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
 
           {devedor.ultima_consulta_em ? (
             <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
-              Ultima consulta {formatTempoRelativo(devedor.ultima_consulta_em)}
+              Última consulta {formatTempoRelativo(devedor.ultima_consulta_em)}
             </p>
           ) : null}
 
-          {/* Link discreto pro dashboard analitico — atalho no topo do dossie.
-              Cor signal pra ficar levemente acima do ruido sem competir com
+          {/* Link discreto pro dashboard analítico — atalho no topo do dossiê.
+              Cor signal pra ficar levemente acima do ruído sem competir com
               os CTAs dourados mais abaixo. */}
           <div className="mt-4">
             <Link
               href={`/equipe/devedores/${devedor.id}/dashboard${linkBase}`}
               className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-[0.18em] text-[var(--color-signal)] transition hover:text-[var(--color-tip-glow)]"
             >
-              Ver dashboard analitico →
+              Ver dashboard analítico →
             </Link>
           </div>
 
-          {/* 3 cards de numero grande */}
+          {/* 3 cards de número grande */}
           <div className="mt-10 grid gap-4 sm:grid-cols-3">
             <CardNumero rotulo="Total de bens" valor={String(total_bens)} />
             <CardNumero
@@ -153,7 +153,7 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
           </div>
 
           {/* Alerta de cross-reference: devedor figura em casos de 2+ clientes
-              diferentes do escritorio. Aumenta o valor estrategico do dossie. */}
+              diferentes do escritório. Aumenta o valor estratégico do dossiê. */}
           {mostrarAlertaCross ? (
             <div className="mt-8">
               <AlertaCrossReference
@@ -164,7 +164,7 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
             </div>
           ) : null}
 
-          {/* Historico de medidas tomadas — timeline horizontal logo apos
+          {/* Histórico de medidas tomadas — timeline horizontal logo após
               o banner cross-detection. Quebra o padding lateral do header
               com -mx-* pra o scroll-x ocupar toda a largura. */}
           <div className="mt-8 -mx-6 sm:-mx-10">
@@ -175,21 +175,21 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
             />
           </div>
 
-          {/* Barra de acoes de busca paga (MOCK Dia 4 — ver memoria
+          {/* Barra de ações de busca paga (MOCK Dia 4 — ver memória
               sonar-consultas-pagas-sob-demanda; real entra Sem 2) */}
           <div className="mt-8">
             <AcoesBuscaMockadas devedorNome={devedor.nome} />
           </div>
 
-          {/* Gerador de pecas — CTA principal (pagina dedicada) + atalho rapido
-              (modal antigo). O botao dourado abaixo e a entrada destacada agora;
+          {/* Gerador de peças — CTA principal (página dedicada) + atalho rápido
+              (modal antigo). O botão dourado abaixo é a entrada destacada agora;
               o BotaoGerarPeca permanece como atalho pra quem prefere o modal. */}
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-stretch">
             <Link
               href={`/equipe/devedores/${devedor.id}/gerador-peca${linkBase}`}
               className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--color-gold)] px-6 py-4 text-sm font-bold uppercase tracking-[0.12em] text-[var(--color-carbon)] shadow-[0_10px_40px_-10px_rgba(201,162,74,0.55)] transition hover:bg-[var(--color-tip-glow)]"
             >
-              🚀 Abrir Gerador de Peca →
+              🚀 Abrir Gerador de Peça →
             </Link>
             <div className="sm:flex-1">
               <BotaoGerarPeca
@@ -207,9 +207,9 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
             </div>
           </div>
 
-          {/* Atualizador de calculo do debito (MOCK Dia 5; real na Sem 5+:
+          {/* Atualizador de cálculo do débito (MOCK Dia 5; real na Sem 5+:
               OCR + tabela TJSP + Lei 14.905/2024 via Debit) — card slim;
-              editor completo + impressao vive em /calculo */}
+              editor completo + impressão vive em /calculo */}
           <div className="mt-6">
             <AtualizadorCalculo devedorId={devedor.id} euQuery={linkBase} />
           </div>
@@ -282,12 +282,12 @@ function AcessoNegado({ voltarHref }: { voltarHref: string }) {
     <main className="mx-auto max-w-[1400px] px-6 py-24 sm:px-10">
       <div className="grid place-items-center">
         <SpotlightCard className="max-w-[520px] p-10 text-center">
-          <span className="eyebrow !text-[var(--color-gold)]">Nao encontrado</span>
+          <span className="eyebrow !text-[var(--color-gold)]">Não encontrado</span>
           <h3 className="mt-4 font-serif text-2xl text-ivory">
-            Devedor nao localizado
+            Devedor não localizado
           </h3>
           <p className="mt-3 text-sm text-[var(--color-ivory-88)]">
-            O identificador informado nao corresponde a nenhum devedor
+            O identificador informado não corresponde a nenhum devedor
             cadastrado.
           </p>
           <Link
@@ -331,14 +331,14 @@ function AlertaCrossReference({
         </span>
         <div className="flex-1">
           <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-amber-300/90">
-            Atencao · Cross-reference
+            Atenção · Cross-reference
           </p>
           <p className="mt-2 text-sm leading-snug text-amber-100">
             Este devedor figura em{" "}
             <span className="font-semibold text-amber-50">
               {outros.length} {outros.length === 1 ? "processo" : "processos"}
             </span>{" "}
-            do escritorio, vinculado a{" "}
+            do escritório, vinculado a{" "}
             <span className="font-semibold text-amber-50">
               {totalCredores} clientes diferentes
             </span>
@@ -391,13 +391,13 @@ function CardCasoVinculado({ caso }: { caso: CasoResumo }) {
           <span className="text-[var(--color-gold)]">{caso.credor.nome}</span>
         </p>
         <p className="mt-1 text-sm text-ivory">
-          Credito:{" "}
+          Crédito:{" "}
           <span className="text-[var(--color-gold)]">
             {formatBRL(caso.valor_credito_brl)}
           </span>
         </p>
         <p className="mt-1 font-mono text-[11px] text-[var(--color-ivory-66)]">
-          Advogado responsavel:{" "}
+          Advogado responsável:{" "}
           <span className="text-ivory">
             {caso.responsavel_email ?? "—"}
           </span>
@@ -435,7 +435,7 @@ function CardBem({ bem }: { bem: Bem }) {
 }
 
 // ============================================================
-// DetalhesRender — renderiza so as chaves uteis por tipo de bem.
+// DetalhesRender — renderiza só as chaves úteis por tipo de bem.
 // ============================================================
 
 function Linha({ rotulo, valor }: { rotulo: string; valor: string | number | undefined | null }) {
@@ -480,11 +480,11 @@ function DetalhesRender({
       return (
         <>
           <Linha rotulo="Placa" valor={placa} />
-          <Linha rotulo="Veiculo" valor={veiculo || undefined} />
+          <Linha rotulo="Veículo" valor={veiculo || undefined} />
           <Linha rotulo="Ano" valor={ano} />
           {restricoes && restricoes.length > 0 ? (
             <Linha
-              rotulo="Restricoes"
+              rotulo="Restrições"
               valor={restricoes.map((r) => String(r)).join("; ")}
             />
           ) : null}
@@ -506,9 +506,9 @@ function DetalhesRender({
           : undefined;
       return (
         <>
-          <Linha rotulo="Localizacao" valor={local || undefined} />
-          <Linha rotulo="Area" valor={area} />
-          <Linha rotulo="Matricula" valor={matricula} />
+          <Linha rotulo="Localização" valor={local || undefined} />
+          <Linha rotulo="Área" valor={area} />
+          <Linha rotulo="Matrícula" valor={matricula} />
         </>
       );
     }
@@ -520,12 +520,12 @@ function DetalhesRender({
       return (
         <>
           <Linha rotulo="CNPJ" valor={cnpj} />
-          <Linha rotulo="Razao social" valor={razao} />
+          <Linha rotulo="Razão social" valor={razao} />
           <Linha
-            rotulo="Participacao"
+            rotulo="Participação"
             valor={pct !== undefined ? `${pct}%` : undefined}
           />
-          <Linha rotulo="Qualificacao" valor={qual} />
+          <Linha rotulo="Qualificação" valor={qual} />
         </>
       );
     }
@@ -563,7 +563,7 @@ function DetalhesRender({
         <>
           <Linha rotulo="Nome" valor={nome} />
           <Linha rotulo="Documento" valor={doc} />
-          <Linha rotulo="Vinculo" valor={tipoVinc} />
+          <Linha rotulo="Vínculo" valor={tipoVinc} />
         </>
       );
     }

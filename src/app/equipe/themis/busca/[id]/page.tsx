@@ -1,11 +1,11 @@
-// Wrapper Server Component da animacao cinematografica.
-// Le `modo` e `apis` da query string (vindos do Server Action
+// Wrapper Server Component da animação cinematográfica.
+// Lê `modo` e `apis` da query string (vindos do Server Action
 // `iniciarBuscaCombo`), busca devedor + contagem real de bens por fonte
 // e passa pro Client Component AnimacaoBusca.
 //
 // Defaults: se ?modo= ausente, assume "lead"; se ?apis= ausente, usa o
 // combo correspondente. Garante fallback seguro mesmo se a URL for
-// digitada na mao.
+// digitada na mão.
 import { redirect } from "next/navigation";
 import { contarBensPorFonte, obterDossie } from "@/lib/casos";
 import { perfilLogado } from "@/lib/perfis-server";
@@ -53,7 +53,7 @@ export default async function BuscaPage({ params, searchParams }: Props) {
 
   const contagem = await contarBensPorFonte(devedorId);
 
-  // Le modo + apis da query (com defaults seguros)
+  // Lê modo + apis da query (com defaults seguros)
   const modoRaw = umDe(sp.modo);
   const apisRaw = umDe(sp.apis);
 

@@ -1,5 +1,5 @@
 // Layout do portal do cliente. Server Component — pega perfil logado pra
-// mostrar email + badge "CLIENTE" + botao Sair no header sticky.
+// mostrar email + badge "CLIENTE" + botão Sair no header sticky.
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -8,11 +8,11 @@ import { perfilLogado } from "@/lib/perfis-server";
 
 export default async function ClienteLayout({ children }: { children: ReactNode }) {
   const perfil = await perfilLogado();
-  // Em producao, sem perfil = login. Em dev, paginas filhas resolvem via ?eu=.
+  // Em produção, sem perfil = login. Em dev, páginas filhas resolvem via ?eu=.
   if (!perfil && process.env.NODE_ENV === "production") {
     redirect("/login");
   }
-  const email = perfil?.email ?? "Cliente Demonstracao";
+  const email = perfil?.email ?? "Cliente Demonstração";
 
   return (
     <div className="min-h-svh bg-onyx text-ivory">
@@ -31,7 +31,7 @@ export default async function ClienteLayout({ children }: { children: ReactNode 
               href="/cliente/preferencias"
               className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--color-gold)] transition hover:text-ivory"
             >
-              Preferencias
+              Preferências
             </Link>
             <form action="/auth/signout" method="post">
               <button

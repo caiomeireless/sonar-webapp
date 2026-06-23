@@ -1,17 +1,17 @@
 "use client";
 
-// Acoes de busca no card de processo da Themis.
-// 3 botoes: Combo Lead, Combo Documento, Buscas Individuais.
+// Ações de busca no card de processo da Themis.
+// 3 botões: Combo Lead, Combo Documento, Buscas Individuais.
 // Cada um abre modal -> "Pagar e executar" submete form -> Server Action
-// redireciona pra /equipe/themis/busca/[id]?modo=&apis= -> animacao
-// cinematografica adapta os cards as APIs envolvidas.
+// redireciona pra /equipe/themis/busca/[id]?modo=&apis= -> animação
+// cinematográfica adapta os cards às APIs envolvidas.
 //
 // IMPORTANTE: o modal usa createPortal porque o componente vive dentro
 // de <SpotlightCard>, que tem backdrop-filter — isso cria um stacking
 // context e prende `position: fixed` dentro do card. Sem o portal, o
-// modal aparece confinado em cada card (bug visivel nos cards de baixo).
+// modal aparece confinado em cada card (bug visível nos cards de baixo).
 //
-// Modo MOCK pra demo: nao faz chamada real. Quando Sem 2 entregar,
+// Modo MOCK pra demo: não faz chamada real. Quando Sem 2 entregar,
 // `executarConsultaPaga` substitui o redirect e os custos viram reais.
 
 import { useEffect, useState } from "react";
@@ -31,7 +31,7 @@ import { iniciarBuscaCombo } from "@/lib/actions/themis-actions";
 
 type ModalKind = "lead" | "doc" | "individual" | null;
 
-const SALDO_USADO = 47.2; // mockado (compartilhado com o dossie)
+const SALDO_USADO = 47.2; // mockado (compartilhado com o dossiê)
 const LIMITE_MES = 500;
 
 type Props = {
@@ -44,7 +44,7 @@ export function AcoesBuscaCardThemis({ devedorId, eu, jaRastreado }: Props) {
   const [modal, setModal] = useState<ModalKind>(null);
   const [selecionadas, setSelecionadas] = useState<Set<string>>(new Set());
   const [dropdownAberto, setDropdownAberto] = useState(false);
-  // Portal precisa de `document.body` — so monta no client.
+  // Portal precisa de `document.body` — só monta no client.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -82,7 +82,7 @@ export function AcoesBuscaCardThemis({ devedorId, eu, jaRastreado }: Props) {
 
   return (
     <>
-      {/* ============ BOTOES PRINCIPAIS ============ */}
+      {/* ============ BOTÕES PRINCIPAIS ============ */}
       <div className="mt-6 flex flex-col items-stretch gap-3 border-t border-[var(--color-ivory-12)] pt-6">
         <div className="flex flex-wrap items-center gap-3">
           <button
@@ -114,7 +114,7 @@ export function AcoesBuscaCardThemis({ devedorId, eu, jaRastreado }: Props) {
               href={`/equipe/devedores/${devedorId}${eu ? `?eu=${encodeURIComponent(eu)}` : ""}`}
               className="ml-auto inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)] transition hover:text-[var(--color-gold)]"
             >
-              Ver dossie atual →
+              Ver dossiê atual →
             </a>
           ) : null}
         </div>
@@ -204,7 +204,7 @@ export function AcoesBuscaCardThemis({ devedorId, eu, jaRastreado }: Props) {
         ) : null}
       </div>
 
-      {/* ============ MODAL DE CONFIRMACAO (via portal pra escapar do
+      {/* ============ MODAL DE CONFIRMAÇÃO (via portal pra escapar do
            backdrop-filter do SpotlightCard pai) ============ */}
       {modal && mounted
         ? createPortal(
@@ -232,7 +232,7 @@ export function AcoesBuscaCardThemis({ devedorId, eu, jaRastreado }: Props) {
                   : "Consultas selecionadas"}
             </h3>
             <p className="mt-1 font-mono text-xs text-[var(--color-ivory-66)]">
-              Em sequencia: confirmar → animacao cinematografica → dossie atualizado
+              Em sequência: confirmar → animação cinematográfica → dossiê atualizado
             </p>
 
             {/* Lista de APIs */}
@@ -270,7 +270,7 @@ export function AcoesBuscaCardThemis({ devedorId, eu, jaRastreado }: Props) {
               </div>
               <div className="flex items-center justify-between font-mono text-xs">
                 <span className="text-[var(--color-ivory-66)]">
-                  Saldo do mes apos
+                  Saldo do mês após
                 </span>
                 <span className={vaiEstourar ? "text-red-400" : "text-ivory"}>
                   {formatBRL(saldoDepois)} / {formatBRL(LIMITE_MES)}
@@ -281,17 +281,17 @@ export function AcoesBuscaCardThemis({ devedorId, eu, jaRastreado }: Props) {
             {/* Alerta combo doc */}
             {modal === "doc" ? (
               <p className="mt-4 rounded-lg border border-[var(--color-gold)]/40 bg-[var(--color-gold)]/10 px-4 py-3 font-mono text-[11px] leading-relaxed text-[var(--color-gold)]">
-                ⚠ Consulta CARA — documentos oficiais com fe publica. Recomenda-se confirmar com socio antes.
+                ⚠ Consulta CARA — documentos oficiais com fé pública. Recomenda-se confirmar com sócio antes.
               </p>
             ) : null}
 
             {vaiEstourar ? (
               <p className="mt-3 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 font-mono text-[11px] text-red-300">
-                ⚠ Esta consulta vai ultrapassar o limite mensal. So aprove se ja conversou com socio.
+                ⚠ Esta consulta vai ultrapassar o limite mensal. Só aprove se já conversou com sócio.
               </p>
             ) : null}
 
-            {/* Botoes */}
+            {/* Botões */}
             <div className="mt-6 flex justify-end gap-3">
               <button
                 type="button"

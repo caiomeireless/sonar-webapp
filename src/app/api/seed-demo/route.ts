@@ -1,14 +1,14 @@
-// POST /api/seed-demo — dispara o seed dos dados de demonstracao.
+// POST /api/seed-demo — dispara o seed dos dados de demonstração.
 // Idempotente: pode chamar quantas vezes quiser, sempre reseta os bens
 // e atualiza credor/devedores/casos via UPSERT.
 //
 // GATES (em ordem):
-//   1. ALLOW_DEMO_SEED=true — env var explicita; sem isso retorna 404
-//      (esconde a existencia da rota). Em prod, deixar desligado por padrao.
-//   2. perfil logado COM papel admin — bloqueia anonimo + cliente + funcionario.
+//   1. ALLOW_DEMO_SEED=true — env var explícita; sem isso retorna 404
+//      (esconde a existência da rota). Em prod, deixar desligado por padrão.
+//   2. perfil logado COM papel admin — bloqueia anônimo + cliente + funcionário.
 //
-// Use POST (nao GET): tem side-effects (DELETE+INSERT em multiplas tabelas)
-// e nao deve ser cacheavel.
+// Use POST (não GET): tem side-effects (DELETE+INSERT em múltiplas tabelas)
+// e não deve ser cacheável.
 import { NextResponse } from "next/server";
 import { seedDemoData } from "@/lib/demo-seed";
 import { perfilLogado } from "@/lib/perfis-server";

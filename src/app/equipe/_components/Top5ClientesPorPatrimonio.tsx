@@ -1,6 +1,6 @@
-// Top 5 credores por patrimonio localizado (Dashboard da Plataforma).
+// Top 5 credores por patrimônio localizado (Dashboard da Plataforma).
 // Server component — sem 'use client', sem fetch interno. A page agrega
-// e injeta os dados ja prontos via `obterDadosDashboardPlataforma`.
+// e injeta os dados já prontos via `obterDadosDashboardPlataforma`.
 import Link from "next/link";
 import { DashboardCard } from "@/components/dashboard/DashboardCard";
 import { formatBRL } from "@/lib/format";
@@ -13,13 +13,13 @@ type Props = {
 export default function Top5ClientesPorPatrimonio({ itens }: Props) {
   return (
     <DashboardCard
-      titulo="Top 5 clientes por patrimonio"
-      descricao="Credores com maior patrimonio localizado em rastreio"
+      titulo="Top 5 clientes por patrimônio"
+      descricao="Credores com maior patrimônio localizado em rastreio"
       accent="gold"
     >
       {itens.length === 0 ? (
         <p className="text-sm text-[var(--color-ivory-66)]">
-          Nenhum credor com patrimonio localizado ainda.
+          Nenhum credor com patrimônio localizado ainda.
         </p>
       ) : (
         <ol className="flex flex-col gap-1">

@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 
 // Glow verde signal que segue o cursor com lerp suave.
 // fixed + mix-blend-mode: screen pra somar luz sobre o fundo escuro.
-// Escondido em mobile (touch nao tem cursor).
+// Escondido em mobile (touch não tem cursor).
 export function CursorGlow() {
   const ref = useRef<HTMLDivElement>(null);
 

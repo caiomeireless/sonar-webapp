@@ -1,37 +1,37 @@
-// KPI ouro do Dashboard da Plataforma — penhoras efetivadas no mes corrente.
-// Inteiro grande + subtitulo "X penhoras este mes" + delta vs mes anterior.
+// KPI ouro do Dashboard da Plataforma — penhoras efetivadas no mês corrente.
+// Inteiro grande + subtítulo "X penhoras este mês" + delta vs mês anterior.
 //
-// Server component puro. Recebe os contadores ja agregados pela page
+// Server component puro. Recebe os contadores já agregados pela page
 // (vem de `obterDadosDashboardPlataforma`: kpisGerais.penhorasEfetivadasMes
-// pro mes atual, e o penultimo item de evolucaoMensal pro mes anterior).
+// pro mês atual, e o penúltimo item de evolucaoMensal pro mês anterior).
 
 import { KPIHero, type KPIDelta } from "@/components/dashboard/KPIHero";
 
 type Props = {
-  /** Penhoras efetivadas no mes corrente. */
+  /** Penhoras efetivadas no mês corrente. */
   mesAtual: number;
-  /** Penhoras efetivadas no mes imediatamente anterior (pro delta). */
+  /** Penhoras efetivadas no mês imediatamente anterior (pro delta). */
   mesAnterior: number;
 };
 
 function formatarDelta(mesAtual: number, mesAnterior: number): KPIDelta {
   const diff = mesAtual - mesAnterior;
 
-  // Sem base de comparacao: ou nao tinha nada antes e ainda nao tem nada,
-  // ou nao tinha nada antes mas tem agora (variacao infinita — mostramos
+  // Sem base de comparação: ou não tinha nada antes e ainda não tem nada,
+  // ou não tinha nada antes mas tem agora (variação infinita — mostramos
   // como "novo" em vez de "+∞%").
   if (mesAnterior === 0) {
     if (mesAtual === 0) {
       return {
         value: "—",
         direction: "neutral",
-        label: "vs. mes anterior",
+        label: "vs. mês anterior",
       };
     }
     return {
       value: `+${mesAtual}`,
       direction: "up",
-      label: "vs. mes anterior (sem base)",
+      label: "vs. mês anterior (sem base)",
     };
   }
 
@@ -40,7 +40,7 @@ function formatarDelta(mesAtual: number, mesAnterior: number): KPIDelta {
   return {
     value: `${sinal}${pct}%`,
     direction: diff > 0 ? "up" : diff < 0 ? "down" : "neutral",
-    label: "vs. mes anterior",
+    label: "vs. mês anterior",
   };
 }
 
@@ -50,7 +50,7 @@ export default function KPIPenhorasEfetivadasMes({
 }: Props) {
   const valor = String(mesAtual);
   const subtitulo =
-    mesAtual === 1 ? "1 penhora este mes" : `${mesAtual} penhoras este mes`;
+    mesAtual === 1 ? "1 penhora este mês" : `${mesAtual} penhoras este mês`;
   const delta = formatarDelta(mesAtual, mesAnterior);
 
   return (

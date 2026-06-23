@@ -1,12 +1,12 @@
 "use client";
 
-// Donut do Dashboard da Plataforma: custos do mes agrupados por API.
+// Donut do Dashboard da Plataforma: custos do mês agrupados por API.
 // Top 5 APIs com maior gasto + fatia "Outros" se houver excedente.
-// Centro = total R$ gasto no mes corrente. Legenda lateral = API + R$ + %.
+// Centro = total R$ gasto no mês corrente. Legenda lateral = API + R$ + %.
 // Client Component por causa do Recharts (ResponsiveContainer mede o DOM).
 //
-// Dados ja vem agregados (CustoApiItem[]) de obterDadosDashboardPlataforma().
-// Este componente NAO consulta Supabase.
+// Dados já vem agregados (CustoApiItem[]) de obterDadosDashboardPlataforma().
+// Este componente NÃO consulta Supabase.
 
 import {
   Cell,
@@ -35,13 +35,13 @@ import {
 // Quantas APIs entram nominalmente — o restante vira "Outros".
 const TOP_N = 5;
 
-// Cor neutra reservada para a fatia "Outros" — fica fora da paleta primaria
-// pra reforcar que e um agregado, nao uma API individual.
+// Cor neutra reservada para a fatia "Outros" — fica fora da paleta primária
+// pra reforçar que é um agregado, não uma API individual.
 const OUTROS_COLOR = "rgba(234, 231, 220, 0.40)";
 const OUTROS_KEY = "__outros__";
 
-// Forma consumida pelo Recharts. `tipo` carrega a chave (pra cor estavel),
-// `name` vira label do tooltip, `value` e a fatia.
+// Forma consumida pelo Recharts. `tipo` carrega a chave (pra cor estável),
+// `name` vira label do tooltip, `value` é a fatia.
 type PieDatum = {
   tipo: string;
   name: string;
@@ -54,6 +54,7 @@ type Props = {
 
 // ============================================================
 // TOOLTIP custom — tipa o payload pra evitar `any` solto.
+
 // ============================================================
 
 function DonutTooltip({
@@ -79,8 +80,8 @@ function DonutTooltip({
 
 export default function CustosPorAPIDonut({ dados }: Props) {
   // `dados` vem ordenado desc por custoBrl (ver agregarCustosPorApi).
-  // Filtramos zerados antes de cortar — Recharts nao desenha fatias com
-  // value=0 e nao queremos pagar slot do top-N com lixo.
+  // Filtramos zerados antes de cortar — Recharts não desenha fatias com
+  // value=0 e não queremos pagar slot do top-N com lixo.
   const positivos = dados.filter((d) => d.custoBrl > 0);
 
   const top = positivos.slice(0, TOP_N);
@@ -107,11 +108,11 @@ export default function CustosPorAPIDonut({ dados }: Props) {
     return (
       <DashboardCard
         titulo="Custos por API"
-        descricao="Gasto do mes por fonte de dados paga"
+        descricao="Gasto do mês por fonte de dados paga"
         accent="gold"
       >
         <div className="flex h-48 items-center justify-center text-sm text-[var(--color-ivory-66)]">
-          Nenhuma consulta paga registrada neste mes.
+          Nenhuma consulta paga registrada neste mês.
         </div>
       </DashboardCard>
     );
@@ -152,10 +153,10 @@ export default function CustosPorAPIDonut({ dados }: Props) {
             </PieChart>
           </ResponsiveContainer>
 
-          {/* CENTRO — total do mes. pointer-events-none pra nao tampar tooltip. */}
+          {/* CENTRO — total do mês. pointer-events-none pra não tampar tooltip. */}
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-[10px] uppercase tracking-[0.12em] text-[var(--color-ivory-66)]">
-              Gasto no mes
+              Gasto no mês
             </span>
             <span className="mt-1 text-2xl font-medium tracking-tight text-[var(--color-ivory)]">
               {formatBRL(total)}

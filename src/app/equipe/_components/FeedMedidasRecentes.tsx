@@ -1,7 +1,7 @@
 // Feed das medidas mais recentes da plataforma — timeline vertical compacta
 // (max 10 itens). Cada item: bolinha colorida do tipo (TIPO_META) +
 // "Advogado fez X em Devedor Y" + badge de resultado + tempo relativo.
-// Linha inteira eh um Link pro caso. Server component — dados ja vem
+// Linha inteira é um Link pro caso. Server component — dados já vem
 // agregados (FeedMedidaItem[]) da page; nenhum fetch nem estado aqui.
 
 import Link from "next/link";
@@ -19,7 +19,7 @@ type Props = {
 };
 
 // Verbo curto por tipo — encaixa em "Advogado <verbo> em Devedor Y".
-// Quando nao houver entrada, cai no label do TIPO_META com prefixo "fez".
+// Quando não houver entrada, cai no label do TIPO_META com prefixo "fez".
 const VERBO_POR_TIPO: Partial<Record<TipoMedida, string>> = {
   sisbajud: "rodou SISBAJUD",
   infojud: "rodou INFOJUD",
@@ -27,13 +27,13 @@ const VERBO_POR_TIPO: Partial<Record<TipoMedida, string>> = {
   arisp: "rodou ARISP",
   serasajud: "rodou SERASAJUD",
   sniper: "rodou SNIPER",
-  oficio_cartorio: "expediu oficio ao cartorio",
-  oficio_junta: "expediu oficio a junta",
+  oficio_cartorio: "expediu ofício ao cartório",
+  oficio_junta: "expediu ofício à junta",
   peticao_penhora: "peticionou penhora",
   penhora_efetivada: "efetivou penhora",
-  audiencia: "compareceu a audiencia",
-  recurso: "interpos recurso",
-  cumprimento_sentenca: "abriu cumprimento de sentenca",
+  audiencia: "compareceu à audiência",
+  recurso: "interpôs recurso",
+  cumprimento_sentenca: "abriu cumprimento de sentença",
   outro: "registrou uma medida",
 };
 
@@ -41,9 +41,9 @@ function verboMedida(tipo: TipoMedida): string {
   return VERBO_POR_TIPO[tipo] ?? `fez ${TIPO_META[tipo].label.toLowerCase()}`;
 }
 
-// FeedMedidaItem so carrega `advogadoEmail` — derivamos um nome de exibicao
-// a partir do local-part do email (mesma heuristica de `nomeOuEmail` sem
-// mapa de perfis, ja que o componente recebe so o agregado).
+// FeedMedidaItem só carrega `advogadoEmail` — derivamos um nome de exibição
+// a partir do local-part do email (mesma heurística de `nomeOuEmail` sem
+// mapa de perfis, já que o componente recebe só o agregado).
 function nomeAdvogado(email: string | null): string {
   const e = (email ?? "").trim().toLowerCase();
   if (!e) return "Equipe";
@@ -61,12 +61,12 @@ export default function FeedMedidasRecentes({ dados }: Props) {
   return (
     <DashboardCard
       titulo="Feed de medidas recentes"
-      descricao="Ultimas providencias registradas pela equipe"
+      descricao="Últimas providências registradas pela equipe"
       accent="green"
     >
       {itens.length === 0 ? (
         <p className="text-sm text-[var(--color-ivory-66)]">
-          Nenhuma medida registrada nas ultimas 24h.
+          Nenhuma medida registrada nas últimas 24h.
         </p>
       ) : (
         <ol className="relative flex flex-col">
@@ -106,7 +106,7 @@ function FeedItem({ item, ehUltimo }: FeedItemProps) {
           "focus-visible:bg-[var(--color-ivory-12)] focus-visible:outline-none",
         ].join(" ")}
       >
-        {/* Coluna 1 — bolinha do tipo + traco vertical da timeline */}
+        {/* Coluna 1 — bolinha do tipo + traço vertical da timeline */}
         <span className="relative flex h-full justify-center pt-1.5">
           <span
             aria-hidden
@@ -124,7 +124,7 @@ function FeedItem({ item, ehUltimo }: FeedItemProps) {
           )}
         </span>
 
-        {/* Coluna 2 — texto principal + linha secundaria */}
+        {/* Coluna 2 — texto principal + linha secundária */}
         <div className="flex min-w-0 flex-col gap-0.5">
           <p className="truncate text-sm leading-snug text-[var(--color-ivory)]">
             <span className="font-medium text-[var(--color-ivory)]">

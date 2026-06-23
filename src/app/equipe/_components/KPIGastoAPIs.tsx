@@ -1,7 +1,7 @@
-// KPI gold do Dashboard da Plataforma: gasto em APIs no mes corrente
+// KPI gold do Dashboard da Plataforma: gasto em APIs no mês corrente
 // com barra de progresso contra o teto mensal. A cor da barra muda em
 // faixas (< 70% verde, 70-90% gold, > 90% vermelho) pra dar leitura
-// imediata de quao perto do estouro a equipe esta.
+// imediata de quão perto do estouro a equipe está.
 
 import { DashboardCard } from "@/components/dashboard/DashboardCard";
 import { formatBRL } from "@/lib/format";
@@ -12,8 +12,8 @@ type Props = {
 };
 
 // Limites das faixas. Acima de 90% vira vermelho — ainda sem estourar
-// o teto, mas ja em alerta. Igual ou maior que 100% trata como vermelho
-// "cheio" (clampa visualmente em 100% pra barra nao transbordar).
+// o teto, mas já em alerta. Igual ou maior que 100% trata como vermelho
+// "cheio" (clampa visualmente em 100% pra barra não transbordar).
 const FAIXA_AVISO = 0.7;
 const FAIXA_ALERTA = 0.9;
 
@@ -31,7 +31,7 @@ export default function KPIGastoAPIs({ gastoMes, limite }: Props) {
   const percentLabel = `${Math.round(razao * 100)}%`;
 
   return (
-    <DashboardCard titulo="Gasto em APIs (mes)" accent="gold">
+    <DashboardCard titulo="Gasto em APIs (mês)" accent="gold">
       <div className="flex flex-col gap-3">
         <div className="text-4xl font-medium leading-none tracking-tight text-[var(--color-ivory)]">
           {formatBRL(gastoMes)}

@@ -15,18 +15,18 @@ interface WireframeGlobeProps {
 const LAND_URL =
   "https://raw.githubusercontent.com/martynafford/natural-earth-geojson/refs/heads/master/110m/physical/ne_110m_land.json";
 
-// Pontos ancora em continentes — [lon, lat] + tipo de icone vermelho
+// Pontos âncora em continentes — [lon, lat] + tipo de ícone vermelho
 type AssetIcon = "house" | "car" | "building" | "money";
 const LAND_ANCHORS: Array<{ lonLat: [number, number]; icon: AssetIcon }> = [
-  { lonLat: [-55, -10], icon: "house" },    // Brasil — imoveis
-  { lonLat: [-95, 40], icon: "car" },       // EUA — veiculos
+  { lonLat: [-55, -10], icon: "house" },    // Brasil — imóveis
+  { lonLat: [-95, 40], icon: "car" },       // EUA — veículos
   { lonLat: [12, 50], icon: "building" },   // Europa — empresas
-  { lonLat: [22, 5], icon: "money" },       // Africa — dinheiro
-  { lonLat: [100, 32], icon: "house" },     // Asia — imoveis
-  { lonLat: [135, -25], icon: "car" },      // Australia — veiculos
+  { lonLat: [22, 5], icon: "money" },       // África — dinheiro
+  { lonLat: [100, 32], icon: "house" },     // Ásia — imóveis
+  { lonLat: [135, -25], icon: "car" },      // Austrália — veículos
 ];
 
-// Desenha icone com fundo vermelho + contorno e detalhes brancos
+// Desenha ícone com fundo vermelho + contorno e detalhes brancos
 function drawAssetIcon(
   ctx: CanvasRenderingContext2D,
   cx: number,
@@ -112,17 +112,17 @@ function drawAssetIcon(
   ctx.restore();
 }
 
-// Fallback para o caso de o elemento [data-emit-anchor] nao existir no DOM
+// Fallback para o caso de o elemento [data-emit-anchor] não existir no DOM
 const FALLBACK_EMIT = { x: 50, y: 350 };
 
-// 20 pontos espalhados pelos continentes — alfinetes de localizacao vermelhos
+// 20 pontos espalhados pelos continentes — alfinetes de localização vermelhos
 const LAND_PIN_LOCATIONS: [number, number][] = [
-  // America do Sul
-  [-46, -23],  // Sao Paulo
+  // América do Sul
+  [-46, -23],  // São Paulo
   [-58, -34],  // Buenos Aires
-  [-74, 4],    // Bogota
+  [-74, 4],    // Bogotá
   [-77, -12],  // Lima
-  // America do Norte
+  // América do Norte
   [-74, 40],   // NYC
   [-118, 34],  // LA
   [-99, 19],   // Mexico City
@@ -133,11 +133,11 @@ const LAND_PIN_LOCATIONS: [number, number][] = [
   [12, 41],    // Rome
   [-3, 40],    // Madrid
   [37, 55],    // Moscow
-  // Africa
+  // África
   [3, 6],      // Lagos
   [31, 30],    // Cairo
   [18, -33],   // Cape Town
-  // Asia
+  // Ásia
   [139, 35],   // Tokyo
   [72, 19],    // Mumbai
   [116, 39],   // Beijing
@@ -146,7 +146,7 @@ const LAND_PIN_LOCATIONS: [number, number][] = [
   [151, -33],  // Sydney
 ];
 
-// Desenha alfinete classico (push pin) centrado em (x, y):
+// Desenha alfinete clássico (push pin) centrado em (x, y):
 // bola vermelha em cima + haste cinza diagonal pra baixo-esquerda + sombrinha
 function drawLocationPin(
   ctx: CanvasRenderingContext2D,
@@ -196,7 +196,7 @@ function drawLocationPin(
   ctx.restore();
 }
 
-// Globo wireframe halftone (adaptado do prompt do usuario) — cores adaptadas
+// Globo wireframe halftone (adaptado do prompt do usuário) — cores adaptadas
 // pra paleta do Sonar (signal-green nas linhas, gold nos dots), auto-rotate
 // sem zoom/drag, sem texto de UI.
 export function WireframeGlobe({
@@ -341,7 +341,7 @@ export function WireframeGlobe({
       });
     };
 
-    // === Camera parallax (mouse moviment leve em rotation y/x) ===
+    // === Câmera parallax (mouse moviment leve em rotation y/x) ===
     const parallax = { x: 0, y: 0 };
     const onParallaxMove = (e: MouseEvent) => {
       parallax.x = (e.clientX / window.innerWidth - 0.5) * 2;
@@ -349,7 +349,7 @@ export function WireframeGlobe({
     };
     window.addEventListener("mousemove", onParallaxMove, { passive: true });
 
-    // Calcula posicao do emit (elemento [data-emit-anchor] no DOM) em coords logicas do canvas.
+    // Calcula posição do emit (elemento [data-emit-anchor] no DOM) em coords lógicas do canvas.
     // Recomputado a cada resize porque o layout muda com a viewport.
     let emitAnchor = { ...FALLBACK_EMIT };
     const computeEmitAnchor = () => {
@@ -376,7 +376,7 @@ export function WireframeGlobe({
       const currentScale = projection.scale();
       const scaleFactor = currentScale / radius;
 
-      // Esfera (outline signal-green, sem fill — sticks vao por cima)
+      // Esfera (outline signal-green, sem fill — sticks vão por cima)
       context.beginPath();
       context.arc(cx, cy, currentScale, 0, 2 * Math.PI);
       context.strokeStyle = "rgba(60, 255, 138, 0.9)";
@@ -428,7 +428,7 @@ export function WireframeGlobe({
         });
       }
 
-      // Alfinetes vermelhos nas localizacoes espalhadas pelos continentes
+      // Alfinetes vermelhos nas localizações espalhadas pelos continentes
       LAND_PIN_LOCATIONS.forEach((coord) => {
         const distance = d3.geoDistance(coord, center);
         if (distance >= Math.PI / 2) return;
@@ -445,7 +445,7 @@ export function WireframeGlobe({
       });
 
       // Shooting sticks — feixes verdes voando entre cidades via great circle.
-      // Renderizados POR ULTIMO pra ficar por cima dos alfinetes/halftone.
+      // Renderizados POR ÚLTIMO pra ficar por cima dos alfinetes/halftone.
       shots.forEach((shot) => {
         const t = Math.min(1, shot.progress / shot.duration);
         // ease-out cubic
@@ -456,7 +456,7 @@ export function WireframeGlobe({
         const projected = projection(point);
         if (!projected) return;
 
-        // Adiciona posicao atual no trail (em front)
+        // Adiciona posição atual no trail (em front)
         shot.trail.unshift([projected[0], projected[1]]);
         if (shot.trail.length > 22) shot.trail.pop();
 
@@ -473,7 +473,7 @@ export function WireframeGlobe({
           context.lineCap = "round";
           context.stroke();
         }
-        // Cabeca brilhante do shot
+        // Cabeça brilhante do shot
         context.beginPath();
         context.arc(
           projected[0],
@@ -509,17 +509,17 @@ export function WireframeGlobe({
         });
         render();
       } catch {
-        // Silenciar erros de fetch — fallback eh a esfera vazia
+        // Silenciar erros de fetch — fallback é a esfera vazia
       }
     };
 
-    // Rotacao inicial — centraliza em ~75°E (India/Asia) com leve tilt pra
-    // mostrar mais o hemisferio norte. Drag do usuario continua funcionando.
+    // Rotação inicial — centraliza em ~75°E (Índia/Ásia) com leve tilt pra
+    // mostrar mais o hemisfério norte. Drag do usuário continua funcionando.
     const rotation: [number, number] = [-75, -15];
     const rotationSpeed = 0.3;
 
-    // Drag-to-rotate por mouse — listener no DOCUMENT, so ativa
-    // dentro da esfera do globo (nao bloqueia eventos do Sonar particle text)
+    // Drag-to-rotate por mouse — listener no DOCUMENT, só ativa
+    // dentro da esfera do globo (não bloqueia eventos do Sonar particle text)
     let isDragging = false;
     let lastX = 0;
     let lastY = 0;
@@ -569,15 +569,15 @@ export function WireframeGlobe({
       const raw = getHeroScroll();
       const eased = 1 - Math.pow(1 - raw, 3);
 
-      // Zoom: scale cresce de 1x ate ~1.7x conforme o usuario rola
+      // Zoom: scale cresce de 1x até ~1.7x conforme o usuário rola
       projection.scale(radius * (1 + eased * 0.7));
 
-      // Auto-rotacao pausada enquanto o usuario arrasta
+      // Auto-rotação pausada enquanto o usuário arrasta
       if (!isDragging) {
         rotation[0] += rotationSpeed * (1 + eased * 2.5);
       }
 
-      // Parallax sutil — adiciona offset em cima da rotacao base
+      // Parallax sutil — adiciona offset em cima da rotação base
       const parallaxRotX = rotation[0] + parallax.x * 4;
       const parallaxRotY = Math.max(
         -85,
@@ -585,7 +585,7 @@ export function WireframeGlobe({
       );
       projection.rotate([parallaxRotX, parallaxRotY]);
 
-      // Avanca os shots e spawna novos
+      // Avança os shots e spawna novos
       for (let i = shots.length - 1; i >= 0; i--) {
         shots[i].progress += dt;
         if (shots[i].progress >= shots[i].duration) {
@@ -593,7 +593,7 @@ export function WireframeGlobe({
         }
       }
       shotSpawnTimer += dt;
-      // spawna a cada 0.5s ate manter ~4 shots no ar
+      // spawna a cada 0.5s até manter ~4 shots no ar
       if (shotSpawnTimer >= 0.5 && shots.length < 4) {
         spawnShot();
         shotSpawnTimer = 0;

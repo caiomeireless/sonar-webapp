@@ -1,10 +1,10 @@
 // Carteira por advogado (Dashboard da Plataforma).
-// BarChart horizontal: cada barra = 1 advogado, X = valor de patrimonio
-// gerido (soma dos bens dos devedores cujos casos estao sob sua
+// BarChart horizontal: cada barra = 1 advogado, X = valor de patrimônio
+// gerido (soma dos bens dos devedores cujos casos estão sob sua
 // responsabilidade), ordenado desc. Tooltip mostra qtd casos + gasto
-// do mes com APIs (tracking de custo individual).
+// do mês com APIs (tracking de custo individual).
 //
-// Client-only por causa do Recharts. Recebe `itens` ja agregados — a
+// Client-only por causa do Recharts. Recebe `itens` já agregados — a
 // page faz a leitura via `obterDadosDashboardPlataforma`.
 "use client";
 
@@ -38,8 +38,8 @@ type Props = {
   itens: CarteiraAdvogadoItem[];
 };
 
-// Compacto pra eixo X: "R$ 1,2 mi" ao inves de "R$ 1.234.567,89" (rotulo
-// curto evita sobreposicao). Mantemos formatBRL no tooltip e na lista.
+// Compacto pra eixo X: "R$ 1,2 mi" ao invés de "R$ 1.234.567,89" (rótulo
+// curto evita sobreposição). Mantemos formatBRL no tooltip e na lista.
 function formatBRLCompacto(value: number): string {
   if (!Number.isFinite(value)) return "—";
   return new Intl.NumberFormat("pt-BR", {
@@ -50,7 +50,7 @@ function formatBRLCompacto(value: number): string {
   }).format(value);
 }
 
-// Trunca nome longo no eixo Y pra evitar overflow (ate ~22 chars cabem
+// Trunca nome longo no eixo Y pra evitar overflow (até ~22 chars cabem
 // na largura de 160px reservada).
 function truncar(nome: string, max = 22): string {
   if (nome.length <= max) return nome;
@@ -74,7 +74,7 @@ function TooltipCarteira({
       <div style={tooltipLabelStyle}>{item.advogadoNome}</div>
       <div className="flex flex-col gap-1">
         <div className="flex items-center justify-between gap-4">
-          <span className="text-[var(--color-ivory-66)]">Patrimonio gerido</span>
+          <span className="text-[var(--color-ivory-66)]">Patrimônio gerido</span>
           <span className="font-medium tabular-nums">
             {formatBRL(item.valorPatrimonioGerido)}
           </span>
@@ -84,7 +84,7 @@ function TooltipCarteira({
           <span className="font-medium tabular-nums">{labelCasos}</span>
         </div>
         <div className="flex items-center justify-between gap-4">
-          <span className="text-[var(--color-ivory-66)]">Gasto do mes</span>
+          <span className="text-[var(--color-ivory-66)]">Gasto do mês</span>
           <span className="font-medium tabular-nums">
             {formatBRL(item.gastoMes)}
           </span>
@@ -99,29 +99,29 @@ export default function CarteiraPorAdvogado({ itens }: Props) {
     return (
       <DashboardCard
         titulo="Carteira por advogado"
-        descricao="Patrimonio sob responsabilidade de cada membro da equipe"
+        descricao="Patrimônio sob responsabilidade de cada membro da equipe"
         accent="gold"
       >
         <p className="text-sm text-[var(--color-ivory-66)]">
-          Nenhum caso atribuido a advogado ainda.
+          Nenhum caso atribuído a advogado ainda.
         </p>
       </DashboardCard>
     );
   }
 
   // Recharts pinta de cima pra baixo na ordem do array em layout vertical.
-  // Como queremos o maior no topo, mantemos a ordem desc que ja vem do agregador.
+  // Como queremos o maior no topo, mantemos a ordem desc que já vem do agregador.
   const data: PayloadItem[] = itens.map((it) => ({
     ...it,
     nomeCurto: truncar(it.advogadoNome),
   }));
 
-  // Domain explicito evita o eixo colapsar quando ha um unico advogado
-  // com valor 0 (escritorio recem-onboardado).
+  // Domain explícito evita o eixo colapsar quando há um único advogado
+  // com valor 0 (escritório recém-onboardado).
   const maxValor = Math.max(...data.map((d) => d.valorPatrimonioGerido), 1);
 
   // Altura adaptativa: 44px por advogado + 32px de margem. Garante que
-  // barras nao fiquem espremidas com 8 pessoas, nem sobre espaco com 2.
+  // barras não fiquem espremidas com 8 pessoas, nem sobre espaço com 2.
   const alturaPx = Math.max(180, data.length * 44 + 32);
 
   return (

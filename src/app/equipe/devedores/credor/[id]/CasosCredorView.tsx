@@ -1,10 +1,10 @@
 "use client";
 
-// NIVEL 2 da carteira — lista os CASOS de um cliente especifico.
-// Cada caso = 1 devedor + 1 processo; click -> dossie em /equipe/devedores/{devedor_id}.
+// NÍVEL 2 da carteira — lista os CASOS de um cliente específico.
+// Cada caso = 1 devedor + 1 processo; click -> dossiê em /equipe/devedores/{devedor_id}.
 //
 // Toggle Cards/Lista persistido em localStorage chave `sonar.credor.casos.view`.
-// Mesmo visual da CarteiraView (consistencia entre os 2 niveis).
+// Mesmo visual da CarteiraView (consistência entre os 2 níveis).
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
@@ -49,7 +49,7 @@ export function CasosCredorView({
       <div className="mt-8 flex justify-end">
         <div
           role="tablist"
-          aria-label="Visualizacao"
+          aria-label="Visualização"
           className="inline-flex items-center gap-1 rounded-lg border border-[var(--color-ivory-12)] bg-[var(--color-onyx-soft)]/40 p-1"
         >
           <ToggleBtn
@@ -142,7 +142,7 @@ function CardCaso({
         </p>
         {caso.valor_credito_brl ? (
           <p className="mt-1 font-mono text-xs text-[var(--color-ivory-88)]">
-            Credito:{" "}
+            Crédito:{" "}
             <span className="text-ivory">
               {formatBRL(caso.valor_credito_brl)}
             </span>
@@ -178,17 +178,17 @@ function CardCaso({
           </span>
         </div>
 
-        {/* Advogado responsavel */}
+        {/* Advogado responsável */}
         <div className="mt-3">
           <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
-            Adv. responsavel:{" "}
+            Adv. responsável:{" "}
             {caso.responsavel_email ? (
               <span className="text-[var(--color-ivory-88)] normal-case tracking-normal">
                 {caso.responsavel_email}
               </span>
             ) : (
               <span className="text-[var(--color-ivory-66)] italic normal-case tracking-normal">
-                sem responsavel atribuido
+                sem responsável atribuído
               </span>
             )}
           </span>
@@ -217,7 +217,7 @@ function ListaCasos({
             <Th>Advogado</Th>
             <Th align="right">Bens</Th>
             <Th align="right">Valor estimado</Th>
-            <Th align="right">Ultima consulta</Th>
+            <Th align="right">Última consulta</Th>
           </tr>
         </thead>
         <tbody>

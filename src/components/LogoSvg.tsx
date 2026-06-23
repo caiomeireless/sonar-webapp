@@ -1,7 +1,7 @@
 // Logo do handoff Claude Design — variante única (v3 refinado).
 // Estrutura: escada verde neon + ondas | "Sonar" + signal dash + (escada BP | "Battaglia & Pedrosa" sobre "ADVOGADOS").
 
-// Padrao da escada verde — mesmo do SonarScene (faixa 2)
+// Padrão da escada verde — mesmo do SonarScene (faixa 2)
 export const STAIRCASE_PATTERN = [
   { x: 0, y: 36, op: 1 },
   { x: 6.8, y: 36, op: 0.55 },
@@ -60,7 +60,7 @@ export function LogoSvg({
         </filter>
       </defs>
 
-      {/* SIMBOLO: escada verde neon + ondas (substitui o radar) */}
+      {/* SÍMBOLO: escada verde neon + ondas (substitui o radar) */}
       {/* Escada halftone — scale 4 → ~160x168 em viewBox 920x300 */}
       <g transform="translate(110 30) scale(4)" filter="url(#lkv-green-glow)">
         {STAIRCASE_PATTERN.map((r, i) => (
@@ -139,9 +139,9 @@ export function LogoSvg({
   );
 }
 
-// Variante vertical com simbolo (escada + emit + ondas ESTATICAS) no topo
+// Variante vertical com símbolo (escada + emit + ondas ESTÁTICAS) no topo
 // e wordmark "Sonar / Battaglia & Pedrosa / ADVOGADOS" abaixo.
-// Usada no footer (ultima faixa).
+// Usada no footer (última faixa).
 export function LogoSymbolStatic({
   height = 240,
   className,
@@ -193,10 +193,10 @@ export function LogoSymbolStatic({
         ))}
       </g>
 
-      {/* Ponto emissor estatico na base da escada */}
+      {/* Ponto emissor estático na base da escada */}
       <circle cx="250" cy="245" r="4" fill="#3CFF8A" filter="url(#lks-green-glow)" />
 
-      {/* 4 ondas verdes concentricas ESTATICAS descendo */}
+      {/* 4 ondas verdes concêntricas ESTÁTICAS descendo */}
       <g transform="translate(250 245)" filter="url(#lks-green-glow)">
         {[1, 1.7, 2.4, 3.0].map((s, i) => (
           <path

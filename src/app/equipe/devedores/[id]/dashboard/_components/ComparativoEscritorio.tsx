@@ -1,9 +1,9 @@
-// Comparativo com a media do escritorio — 3 mini barras horizontais lado a
-// lado: qtd de bens, valor do patrimonio e qtd de medidas. Cada barra mostra
-// "Este caso" vs "Media" + delta percentual. Verde se este caso supera a
-// media (sinal bom), gold quando esta abaixo (sinal de atencao).
+// Comparativo com a média do escritório — 3 mini barras horizontais lado a
+// lado: qtd de bens, valor do patrimônio e qtd de medidas. Cada barra mostra
+// "Este caso" vs "Média" + delta percentual. Verde se este caso supera a
+// média (sinal bom), gold quando está abaixo (sinal de atenção).
 //
-// Server Component: so HTML + CSS, sem Recharts. Recebe dados ja agregados
+// Server Component: só HTML + CSS, sem Recharts. Recebe dados já agregados
 // de calcularComparativoEscritorio (lib/dashboard-caso.ts).
 
 import type { ComparativoEscritorio as ComparativoEscritorioDados } from "@/lib/dashboard-caso";
@@ -28,8 +28,8 @@ type Metrica = {
   formatar: FormatadorValor;
 };
 
-// Numero formatado com 1 casa decimal quando vem fracionado (medias podem
-// vir tipo 4.3), inteiro quando exato. Usa pt-BR pra virgula decimal.
+// Número formatado com 1 casa decimal quando vem fracionado (médias podem
+// vir tipo 4.3), inteiro quando exato. Usa pt-BR pra vírgula decimal.
 function formatarNumero(n: number): string {
   if (!Number.isFinite(n)) return "—";
   const inteiro = Math.abs(n - Math.round(n)) < 0.05;
@@ -39,9 +39,9 @@ function formatarNumero(n: number): string {
   });
 }
 
-// Delta percentual de `este` em relacao a `media`. Quando media=0:
+// Delta percentual de `este` em relação a `média`. Quando média=0:
 //   - este=0  -> 0% (sem dados pra comparar)
-//   - este>0  -> +100% (qualquer coisa contra zero e ganho total)
+//   - este>0  -> +100% (qualquer coisa contra zero é ganho total)
 // Evita Infinity e NaN no render.
 function calcularDeltaPct(este: number, media: number): number {
   if (media <= 0) {
@@ -50,8 +50,8 @@ function calcularDeltaPct(este: number, media: number): number {
   return Math.round(((este - media) / media) * 100);
 }
 
-// Largura proporcional das barras (este vs media) em uma mesma metrica.
-// Base = max(este, media); se ambos forem 0, ambas as barras ficam vazias.
+// Largura proporcional das barras (este vs média) em uma mesma métrica.
+// Base = max(este, média); se ambos forem 0, ambas as barras ficam vazias.
 function calcularLargura(valor: number, base: number): number {
   if (base <= 0) return 0;
   return Math.min(100, Math.max(0, (valor / base) * 100));
@@ -68,7 +68,7 @@ export default function ComparativoEscritorio({ dados }: Props) {
     },
     {
       chave: "valorPatrimonio",
-      rotulo: "Patrimonio (R$)",
+      rotulo: "Patrimônio (R$)",
       este: dados.valorPatrimonio.este,
       media: dados.valorPatrimonio.media,
       formatar: formatBRL,
@@ -84,13 +84,13 @@ export default function ComparativoEscritorio({ dados }: Props) {
 
   return (
     <DashboardCard
-      titulo="Comparativo com o escritorio"
-      descricao="Este caso vs. media dos demais devedores ativos"
+      titulo="Comparativo com o escritório"
+      descricao="Este caso vs. média dos demais devedores ativos"
       accent="neutral"
       info={
-        "Verde: este caso esta acima da media do escritorio.\n" +
-        "Gold: este caso esta abaixo da media — pode indicar oportunidade de prospeccao.\n" +
-        "Media calculada sobre devedores com pelo menos 1 caso ativo (excluindo este)."
+        "Verde: este caso está acima da média do escritório.\n" +
+        "Gold: este caso está abaixo da média — pode indicar oportunidade de prospecção.\n" +
+        "Média calculada sobre devedores com pelo menos 1 caso ativo (excluindo este)."
       }
     >
       <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
@@ -152,11 +152,11 @@ export default function ComparativoEscritorio({ dados }: Props) {
                   </div>
                 </div>
 
-                {/* MEDIA DO ESCRITORIO */}
+                {/* MÉDIA DO ESCRITÓRIO */}
                 <div className="flex flex-col gap-1">
                   <div className="flex items-baseline justify-between gap-3">
                     <span className="text-[11px] text-[var(--color-ivory-66)]">
-                      Media
+                      Média
                     </span>
                     <span className="shrink-0 font-mono text-xs tabular-nums text-[var(--color-ivory-66)]">
                       {m.formatar(m.media)}

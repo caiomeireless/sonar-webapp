@@ -1,5 +1,5 @@
 // Layout do portal da equipe. Server Component — pega perfil logado,
-// mostra email + papel + badge "EQUIPE" (verde signal) e botao Sair.
+// mostra email + papel + badge "EQUIPE" (verde signal) e botão Sair.
 // Se for cliente, redireciona pra /cliente/casos.
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
@@ -12,8 +12,8 @@ export default async function EquipeLayout({ children }: { children: ReactNode }
   if (ehCliente(perfil)) {
     redirect("/cliente/casos");
   }
-  // Em producao, sem perfil = fora. Em dev, paginas podem usar ?eu= e perfil
-  // sera null aqui — chrome mostra placeholder mas pagina filha verifica.
+  // Em produção, sem perfil = fora. Em dev, páginas podem usar ?eu= e perfil
+  // será null aqui — chrome mostra placeholder mas página filha verifica.
   if (!perfil && process.env.NODE_ENV === "production") {
     redirect("/login");
   }

@@ -1,14 +1,14 @@
 "use client";
 
 // Mix de bens por tipo — Dashboard da Plataforma.
-// Donut Recharts agrupando bens pelos 6 TipoBem. Metrica = QUANTIDADE
-// (o gemeo `DonutBensPorValor` do Dashboard do Caso ja mostra valor;
-// aqui a leitura util pra gestao da equipe e "quantos veiculos vs
-// quantos imoveis estamos rastreando" — distribuicao do esforco).
+// Donut Recharts agrupando bens pelos 6 TipoBem. Métrica = QUANTIDADE
+// (o gêmeo `DonutBensPorValor` do Dashboard do Caso já mostra valor;
+// aqui a leitura útil pra gestão da equipe é "quantos veículos vs
+// quantos imóveis estamos rastreando" — distribuição do esforço).
 // Centro = total de bens. Legenda lateral = tipo + qtd + %.
 // Client por causa do Recharts (mede o DOM no ResponsiveContainer).
-// Dados ja vem agregados de obterDadosDashboardPlataforma(); o componente
-// NAO chama Supabase.
+// Dados já vem agregados de obterDadosDashboardPlataforma(); o componente
+// NÃO chama Supabase.
 
 import {
   Cell,
@@ -36,23 +36,23 @@ import {
 } from "@/components/dashboard/ChartTheme";
 
 // ============================================================
-// META — label + icone por tipo de bem.
+// META — label + ícone por tipo de bem.
 // Espelha o mapa usado em DonutBensPorValor / equipe/devedores/[id]
-// pra consistencia visual entre dashboards. Nao ha TIPO_META exportado
-// pra bens em /lib (so existe pra medidas).
+// pra consistência visual entre dashboards. Não há TIPO_META exportado
+// pra bens em /lib (só existe pra medidas).
 // ============================================================
 
 const TIPO_BEM_META: Record<TipoBem, { label: string; icone: string }> = {
-  veiculo: { label: "Veiculos", icone: "V" },
-  imovel: { label: "Imoveis", icone: "I" },
-  empresa: { label: "Participacoes societarias", icone: "E" },
-  processo_credito: { label: "Processos onde e credor", icone: "P" },
-  endereco: { label: "Enderecos confirmados", icone: "A" },
-  vinculo: { label: "Vinculos familiares", icone: "F" },
+  veiculo: { label: "Veículos", icone: "V" },
+  imovel: { label: "Imóveis", icone: "I" },
+  empresa: { label: "Participações societárias", icone: "E" },
+  processo_credito: { label: "Processos onde é credor", icone: "P" },
+  endereco: { label: "Endereços confirmados", icone: "A" },
+  vinculo: { label: "Vínculos familiares", icone: "F" },
 };
 
 // Forma consumida pelo Recharts. `value` = quantidade (eixo do donut).
-// `valorBrl` viaja junto pro tooltip mostrar tambem o patrimonio do tipo.
+// `valorBrl` viaja junto pro tooltip mostrar também o patrimônio do tipo.
 type PieDatum = {
   tipo: TipoBem;
   name: string;
@@ -95,7 +95,7 @@ function DonutTooltip({
 // ============================================================
 
 export default function MixBensPorTipo({ dados }: Props) {
-  // Recharts nao desenha fatias com value=0; filtra antes pra nao
+  // Recharts não desenha fatias com value=0; filtra antes pra não
   // poluir legenda e tooltip com tipos vazios.
   const datums: PieDatum[] = dados
     .filter((d) => d.qtd > 0)
@@ -112,7 +112,7 @@ export default function MixBensPorTipo({ dados }: Props) {
     return (
       <DashboardCard
         titulo="Mix de bens por tipo"
-        descricao="Distribuicao dos bens rastreados por categoria"
+        descricao="Distribuição dos bens rastreados por categoria"
         accent="gold"
       >
         <div className="flex h-48 items-center justify-center text-sm text-[var(--color-ivory-66)]">
@@ -158,7 +158,7 @@ export default function MixBensPorTipo({ dados }: Props) {
           </ResponsiveContainer>
 
           {/* CENTRO — total de bens (count). pointer-events-none pra
-              nao bloquear hover do tooltip nas fatias. */}
+              não bloquear hover do tooltip nas fatias. */}
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-[10px] uppercase tracking-[0.12em] text-[var(--color-ivory-66)]">
               Total de bens

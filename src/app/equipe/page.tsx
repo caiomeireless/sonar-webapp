@@ -1,13 +1,13 @@
 // Dashboard da Plataforma — entry point do portal da equipe.
 //
 // Server Component:
-//   - Checa sessao (perfilLogado): nao equipe → /login
+//   - Checa sessão (perfilLogado): não equipe → /login
 //   - Agrega tudo no servidor (obterDadosDashboardPlataforma)
 //   - Layout grid 12-col Tailwind, mobile cai pra 1 coluna
 //
-// Decisao do Caio: funcionario ve TUDO (valores, equipe inteira). A
-// pagina apenas roteia + monta o grid; cada card e responsavel pelo
-// proprio chrome via DashboardCard/KPIHero.
+// Decisão do Caio: funcionário vê TUDO (valores, equipe inteira). A
+// página apenas roteia + monta o grid; cada card é responsável pelo
+// próprio chrome via DashboardCard/KPIHero.
 
 import { redirect } from "next/navigation";
 import { perfilLogado } from "@/lib/perfis-server";
@@ -74,8 +74,8 @@ export default async function DashboardPlataformaPage({
     listarOpcoesFiltros(),
   ]);
 
-  // Penhoras do mes anterior — penultimo bucket da serie de 12 meses
-  // (o ultimo e o mes corrente). Se a serie for curta por algum motivo,
+  // Penhoras do mês anterior — penúltimo bucket da série de 12 meses
+  // (o último é o mês corrente). Se a série for curta por algum motivo,
   // cai pra 0 sem quebrar o delta.
   const evol = dados.evolucaoMensal;
   const penhorasMesAnterior =
@@ -83,13 +83,13 @@ export default async function DashboardPlataformaPage({
 
   return (
     <main className="mx-auto max-w-[1400px] px-6 py-10 sm:px-10">
-      {/* Cabecalho */}
+      {/* Cabeçalho */}
       <header className="mb-6">
         <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
           Painel da Plataforma
         </p>
         <h1 className="mt-2 text-3xl font-medium tracking-tight text-ivory sm:text-4xl">
-          Visao geral do escritorio
+          Visão geral do escritório
         </h1>
       </header>
 
@@ -127,7 +127,7 @@ export default async function DashboardPlataformaPage({
           />
         </div>
 
-        {/* L2 — Evolucao mensal (full width) */}
+        {/* L2 — Evolução mensal (full width) */}
         <div className="md:col-span-12">
           <EvolucaoPatrimonioMensal dados={dados.evolucaoMensal} />
         </div>

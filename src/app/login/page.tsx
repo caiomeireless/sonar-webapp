@@ -1,5 +1,5 @@
-// Server Component que envolve o form em Suspense (necessario p/ useSearchParams
-// em prerender estatico do Next 16). Toda a interatividade fica em LoginForm.
+// Server Component que envolve o form em Suspense (necessário p/ useSearchParams
+// em prerender estático do Next 16). Toda a interatividade fica em LoginForm.
 import { Suspense } from "react";
 import Link from "next/link";
 import { Logo } from "@/components/Logo";

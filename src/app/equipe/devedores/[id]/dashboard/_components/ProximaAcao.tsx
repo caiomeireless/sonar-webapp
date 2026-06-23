@@ -1,9 +1,9 @@
-// Proxima Acao — card prescritivo do Dashboard do Caso.
-// Mostra a acao sugerida pela engine de regras em obterDadosDashboardCaso(),
-// com motivo curto e um botao secundario que revela 2-3 alternativas
+// Próxima Ação — card prescritivo do Dashboard do Caso.
+// Mostra a ação sugerida pela engine de regras em obterDadosDashboardCaso(),
+// com motivo curto e um botão secundário que revela 2-3 alternativas
 // "default repertoire" pro advogado escolher caminho diferente.
 //
-// CLIENT component: o toggle "Ver outras opcoes" precisa de estado.
+// CLIENT component: o toggle "Ver outras opções" precisa de estado.
 "use client";
 
 import { useState } from "react";
@@ -12,11 +12,11 @@ import { CHART_COLOR_SIGNAL, CHART_COLOR_GOLD } from "@/components/dashboard/Cha
 import type { DashboardProximaAcao } from "@/lib/dashboard-caso";
 
 // ============================================================
-// CATALOGO de acoes — icone + cor + alternativas
+// CATÁLOGO de ações — ícone + cor + alternativas
 // ============================================================
-// As acoes vem do calcularProximaAcao() em dashboard-caso.ts. Aqui mapeamos
-// cada string conhecida pro seu icone, accent e repertorio de alternativas.
-// Quando a acao nao bate com nenhuma chave conhecida, cai no DEFAULT.
+// As ações vêm do calcularProximaAcao() em dashboard-caso.ts. Aqui mapeamos
+// cada string conhecida pro seu ícone, accent e repertório de alternativas.
+// Quando a ação não bate com nenhuma chave conhecida, cai no DEFAULT.
 
 type AcaoMeta = {
   icone: string; // glyph monoespacado (single char)
@@ -29,18 +29,18 @@ const ACOES_CATALOGO: Record<string, AcaoMeta> = {
     icone: "B",
     accent: "green",
     alternativas: [
-      "Atualizar INFOJUD (declaracoes recentes)",
-      "Cruzar RENAJUD para veiculos novos",
-      "Reabrir CCS pra contas em outras instituicoes",
+      "Atualizar INFOJUD (declarações recentes)",
+      "Cruzar RENAJUD para veículos novos",
+      "Reabrir CCS pra contas em outras instituições",
     ],
   },
   "Solicitar matricula no ARISP": {
     icone: "M",
     accent: "gold",
     alternativas: [
-      "Pedir certidao de onus diretamente no RGI",
+      "Pedir certidão de ônus diretamente no RGI",
       "Cruzar CNIB pra indisponibilidades",
-      "Avaliar penhora no rosto dos autos do imovel",
+      "Avaliar penhora no rosto dos autos do imóvel",
     ],
   },
   "Cruzar com Receita Federal": {
@@ -48,8 +48,8 @@ const ACOES_CATALOGO: Record<string, AcaoMeta> = {
     accent: "gold",
     alternativas: [
       "Consultar JUCESP pra contrato social atualizado",
-      "Rodar INFOJUD pra DIRPF do socio",
-      "Pedir desconsideracao da personalidade juridica",
+      "Rodar INFOJUD pra DIRPF do sócio",
+      "Pedir desconsideração da personalidade jurídica",
     ],
   },
   "Avaliar prosseguimento do caso": {
@@ -67,15 +67,17 @@ const ACAO_DEFAULT: AcaoMeta = {
   icone: "•",
   accent: "neutral",
   alternativas: [
-    "Revisar timeline de medidas dos ultimos 12 meses",
-    "Conferir dossie patrimonial completo",
+    "Revisar timeline de medidas dos últimos 12 meses",
+    "Conferir dossiê patrimonial completo",
     "Agendar nova rodada de consultas em 30 dias",
   ],
 };
 
 function metaPara(acao: string): AcaoMeta {
-  // Match prefix-tolerante: a regra default ("Sem proxima acao clara...")
-  // tem texto longo, entao usamos startsWith pra estabilidade.
+  // Match prefix-tolerante: a regra default ("Sem próxima ação clara...")
+  // tem texto longo, então usamos startsWith pra estabilidade.
+  // As chaves do ACOES_CATALOGO ficam SEM acento porque o casamento depende
+  // do texto produzido por calcularProximaAcao() em lib/dashboard-caso.ts.
   for (const [chave, meta] of Object.entries(ACOES_CATALOGO)) {
     if (acao.startsWith(chave)) return meta;
   }
@@ -103,8 +105,8 @@ export default function ProximaAcao({ proximaAcao }: Props) {
 
   return (
     <DashboardCard
-      titulo="Proxima acao sugerida"
-      descricao="Recomendacao prescritiva baseada nas regras do caso"
+      titulo="Próxima ação sugerida"
+      descricao="Recomendação prescritiva baseada nas regras do caso"
       accent={meta.accent}
     >
       <div className="flex items-start gap-4">
@@ -137,7 +139,7 @@ export default function ProximaAcao({ proximaAcao }: Props) {
               className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs text-[var(--color-ivory)] transition-colors hover:bg-[rgba(234,231,220,0.04)]"
               style={{ borderColor: "var(--color-ivory-12)" }}
             >
-              <span>Ver outras opcoes</span>
+              <span>Ver outras opções</span>
               <span
                 aria-hidden
                 className="text-[10px] leading-none transition-transform"

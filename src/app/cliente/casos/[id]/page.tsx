@@ -1,6 +1,6 @@
-// Dossie patrimonial de um devedor para o cliente.
+// Dossiê patrimonial de um devedor para o cliente.
 // Server Component: obterDossieParaCliente faz a checagem de visibilidade
-// (so libera se o devedor pertence a um caso de credor com email_contato = eu).
+// (só libera se o devedor pertence a um caso de credor com email_contato = eu).
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
@@ -25,12 +25,12 @@ type Props = {
 };
 
 const TIPO_META: Record<TipoBem, { label: string; icone: string }> = {
-  veiculo: { label: "Veiculos", icone: "V" },
-  imovel: { label: "Imoveis", icone: "I" },
-  empresa: { label: "Participacoes societarias", icone: "E" },
-  processo_credito: { label: "Processos onde e credor", icone: "P" },
-  endereco: { label: "Enderecos confirmados", icone: "A" },
-  vinculo: { label: "Vinculos familiares", icone: "F" },
+  veiculo: { label: "Veículos", icone: "V" },
+  imovel: { label: "Imóveis", icone: "I" },
+  empresa: { label: "Participações societárias", icone: "E" },
+  processo_credito: { label: "Processos onde é credor", icone: "P" },
+  endereco: { label: "Endereços confirmados", icone: "A" },
+  vinculo: { label: "Vínculos familiares", icone: "F" },
 };
 
 const ORDEM: TipoBem[] = [
@@ -84,12 +84,12 @@ export default async function DossieClientePage({ params, searchParams }: Props)
             ← Voltar
           </Link>
 
-          <span className="eyebrow mt-6 block">Dossie patrimonial</span>
+          <span className="eyebrow mt-6 block">Dossiê patrimonial</span>
           <h1 className="mt-4 font-serif text-[clamp(28px,4vw,46px)] font-medium leading-[1.1] tracking-tight text-ivory">
             {devedor.nome}
           </h1>
           <p className="mt-3 font-mono text-sm text-[var(--color-ivory-66)]">
-            {devedor.tipo === "PF" ? "Pessoa Fisica" : "Pessoa Juridica"} ·{" "}
+            {devedor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"} ·{" "}
             {devedor.documento}
             {devedor.data_nascimento
               ? ` · Nasc. ${formatData(devedor.data_nascimento)}`
@@ -98,11 +98,11 @@ export default async function DossieClientePage({ params, searchParams }: Props)
 
           {devedor.ultima_consulta_em ? (
             <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
-              Ultima consulta {formatTempoRelativo(devedor.ultima_consulta_em)}
+              Última consulta {formatTempoRelativo(devedor.ultima_consulta_em)}
             </p>
           ) : null}
 
-          {/* 3 cards de numero grande */}
+          {/* 3 cards de número grande */}
           <div className="mt-10 grid gap-4 sm:grid-cols-3">
             <CardNumero rotulo="Total de bens" valor={String(total_bens)} />
             <CardNumero
@@ -182,11 +182,11 @@ function AcessoNegado() {
         <SpotlightCard className="max-w-[520px] p-10 text-center">
           <span className="eyebrow !text-[var(--color-gold)]">Restrito</span>
           <h3 className="mt-4 font-serif text-2xl text-ivory">
-            Acesso nao autorizado a este dossie
+            Acesso não autorizado a este dossiê
           </h3>
           <p className="mt-3 text-sm text-[var(--color-ivory-88)]">
-            Este devedor nao consta entre os casos vinculados ao seu email de
-            contato. Se isso esta errado, entre em contato com o escritorio.
+            Este devedor não consta entre os casos vinculados ao seu email de
+            contato. Se isso está errado, entre em contato com o escritório.
           </p>
           <Link
             href="/cliente/casos"
@@ -218,7 +218,7 @@ function CardCasoVinculado({ caso }: { caso: CasoResumo }) {
           {caso.numero_processo || "Sem processo cadastrado"}
         </p>
         <p className="mt-1 text-sm text-ivory">
-          Credito:{" "}
+          Crédito:{" "}
           <span className="text-[var(--color-gold)]">
             {formatBRL(caso.valor_credito_brl)}
           </span>
@@ -256,7 +256,7 @@ function CardBem({ bem }: { bem: Bem }) {
 }
 
 // ============================================================
-// DetalhesRender — renderiza so as chaves uteis por tipo de bem.
+// DetalhesRender — renderiza só as chaves úteis por tipo de bem.
 // ============================================================
 
 function Linha({ rotulo, valor }: { rotulo: string; valor: string | number | undefined | null }) {
@@ -301,11 +301,11 @@ function DetalhesRender({
       return (
         <>
           <Linha rotulo="Placa" valor={placa} />
-          <Linha rotulo="Veiculo" valor={veiculo || undefined} />
+          <Linha rotulo="Veículo" valor={veiculo || undefined} />
           <Linha rotulo="Ano" valor={ano} />
           {restricoes && restricoes.length > 0 ? (
             <Linha
-              rotulo="Restricoes"
+              rotulo="Restrições"
               valor={restricoes.map((r) => String(r)).join("; ")}
             />
           ) : null}
@@ -327,9 +327,9 @@ function DetalhesRender({
           : undefined;
       return (
         <>
-          <Linha rotulo="Localizacao" valor={local || undefined} />
-          <Linha rotulo="Area" valor={area} />
-          <Linha rotulo="Matricula" valor={matricula} />
+          <Linha rotulo="Localização" valor={local || undefined} />
+          <Linha rotulo="Área" valor={area} />
+          <Linha rotulo="Matrícula" valor={matricula} />
         </>
       );
     }
@@ -341,12 +341,12 @@ function DetalhesRender({
       return (
         <>
           <Linha rotulo="CNPJ" valor={cnpj} />
-          <Linha rotulo="Razao social" valor={razao} />
+          <Linha rotulo="Razão social" valor={razao} />
           <Linha
-            rotulo="Participacao"
+            rotulo="Participação"
             valor={pct !== undefined ? `${pct}%` : undefined}
           />
-          <Linha rotulo="Qualificacao" valor={qual} />
+          <Linha rotulo="Qualificação" valor={qual} />
         </>
       );
     }
@@ -384,7 +384,7 @@ function DetalhesRender({
         <>
           <Linha rotulo="Nome" valor={nome} />
           <Linha rotulo="Documento" valor={doc} />
-          <Linha rotulo="Vinculo" valor={tipoVinc} />
+          <Linha rotulo="Vínculo" valor={tipoVinc} />
         </>
       );
     }
