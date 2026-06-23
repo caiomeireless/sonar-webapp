@@ -120,14 +120,14 @@ export default async function ThemisPage({ searchParams }: Props) {
         </div>
       ) : visao === "lista" ? (
         <div className="relative mt-8 overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-1)]">
-          <table className="w-full text-sm">
+          <table className="w-full text-base">
             <thead>
-              <tr className="border-b border-[var(--color-line)] text-left font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
-                <th className="px-4 py-3">Processo</th>
-                <th className="px-4 py-3">Devedor</th>
-                <th className="px-4 py-3">Crédito</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Rastreamento</th>
+              <tr className="border-b border-[var(--color-line)] text-left font-mono text-[14px] uppercase tracking-[0.18em] text-[var(--color-ivory)]">
+                <th className="px-5 py-5">Processo</th>
+                <th className="px-5 py-5">Devedor</th>
+                <th className="px-5 py-5">Crédito</th>
+                <th className="px-5 py-5">Status</th>
+                <th className="px-5 py-5">Rastreamento</th>
               </tr>
             </thead>
             <tbody>
@@ -141,27 +141,27 @@ export default async function ThemisPage({ searchParams }: Props) {
                       (i % 2 === 1 ? "bg-[var(--color-surface-2)]/30" : "")
                     }
                   >
-                    <td className="px-4 py-3 font-mono text-xs text-[var(--color-gold)]">
+                    <td className="px-5 py-5 font-mono text-base text-[var(--color-gold)]">
                       {p.numero_processo ?? "—"}
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="text-ivory">{p.devedor.nome}</div>
-                      <div className="font-mono text-[10px] text-[var(--color-ivory-66)]">
+                    <td className="px-5 py-5">
+                      <div className="text-lg font-medium text-ivory">{p.devedor.nome}</div>
+                      <div className="mt-1 font-mono text-sm text-[var(--color-ivory-88)]">
                         {p.devedor.tipo === "PF" ? "PF" : "PJ"} · {p.devedor.documento}
                       </div>
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-[var(--color-gold)]">
+                    <td className="px-5 py-5 font-mono text-xl text-[var(--color-gold)]">
                       {p.valor_credito_brl !== null ? formatBRL(p.valor_credito_brl) : "—"}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-5 py-5">
                       <span
-                        className="inline-flex rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em]"
+                        className="inline-flex rounded-full border px-3 py-1 font-mono text-[14px] uppercase tracking-[0.14em]"
                         style={{ borderColor: status.color, color: status.color }}
                       >
                         {status.label}
                       </span>
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-[var(--color-ivory-88)]">
+                    <td className="px-5 py-5 font-mono text-lg text-[var(--color-ivory)]">
                       {p.ja_rastreado
                         ? `${p.total_bens} ${p.total_bens === 1 ? "bem" : "bens"}`
                         : "Aguardando"}
