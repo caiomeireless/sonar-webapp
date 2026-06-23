@@ -12,7 +12,7 @@ import { usePathname } from "next/navigation";
 import { ChevronRight, Menu, X } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
-import { Logo } from "./Logo";
+import { LogoSvg } from "./LogoSvg";
 import { ThemeToggle } from "./ThemeToggle";
 
 // --------------------------------------------------------------------------
@@ -180,9 +180,9 @@ function SidebarPanel({
           href={homeHref}
           className="inline-flex items-center rounded-lg outline-none transition
                      focus-visible:ring-2 focus-visible:ring-[var(--color-signal)]"
-          aria-label="Sonar — pagina inicial"
+          aria-label="Sonar — página inicial"
         >
-          <Logo size="sm" />
+          <LogoSvg height={56} />
         </Link>
 
         {isDrawer && (
