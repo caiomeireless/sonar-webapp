@@ -167,8 +167,8 @@ function SidebarPanel({
   // assim o usuário sempre vê o nav inteiro ao rolar, e o background da
   // sidebar continua até o rodapé da página.
   const shellClass = isDrawer
-    ? "glass-side absolute left-0 top-0 z-10 flex h-dvh w-[280px] shrink-0 flex-col px-4 py-6 animate-[slideIn_180ms_ease-out]"
-    : "glass-side hidden w-[280px] shrink-0 self-stretch md:block";
+    ? "glass-side absolute left-0 top-0 z-10 flex h-dvh w-[288px] shrink-0 flex-col px-4 py-6 animate-[slideIn_180ms_ease-out]"
+    : "glass-side hidden w-[288px] shrink-0 self-stretch md:block";
 
   const Wrapper = isDrawer
     ? ({ children }: { children: React.ReactNode }) => <>{children}</>
