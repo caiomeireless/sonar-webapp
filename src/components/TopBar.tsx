@@ -88,11 +88,14 @@ export function TopBar({
   const inicial = (usuario.email[0] || "?").toUpperCase();
 
   return (
-    <header className="relative sticky top-0 z-20 overflow-hidden border-b border-[var(--color-line)] bg-onyx">
+    <header className="relative sticky top-0 z-20 border-b border-[var(--color-line)] bg-onyx">
       {/* Quadriculado verde com fade diagonal — EXATAMENTE igual à faixa
           superior da landing page. Background-attachment: fixed pra que
           as linhas se ALINHEM com o grid do header da sidebar (que também
-          usa fixed), formando uma faixa contínua sem emendas. */}
+          usa fixed), formando uma faixa contínua sem emendas.
+          Wrapper interno tem overflow-hidden pra conter o bg-grid sem
+          cortar dropdowns/popovers que pertencem ao header. */}
+      <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
       <div
         className="bg-grid-strong animate-grid-pulse absolute inset-0"
         style={{
@@ -106,6 +109,7 @@ export function TopBar({
         }}
         aria-hidden="true"
       />
+      </div>
       {/* Vinheta lateral: escurece o quadriculado nas bordas esquerda e
           direita (mesma da landing, mantém peso visual nas pontas). */}
       <div
