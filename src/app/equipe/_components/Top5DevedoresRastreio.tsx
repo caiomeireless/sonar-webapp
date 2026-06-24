@@ -52,7 +52,7 @@ export default function Top5DevedoresRastreio({ dados }: Props) {
                   <Td>
                     <Link
                       href={`/equipe/devedores/${item.devedorId}`}
-                      className="block font-serif text-[17px] leading-[1.2] text-[var(--color-gold)] break-words transition group-hover:underline"
+                      className="block font-serif text-[17px] leading-[1.2] text-[var(--color-devedor)] break-words transition group-hover:underline"
                       title={item.devedorNome}
                     >
                       {item.devedorNome}

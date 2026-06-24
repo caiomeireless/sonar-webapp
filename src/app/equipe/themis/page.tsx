@@ -141,7 +141,7 @@ export default async function ThemisPage({ searchParams }: Props) {
                       {p.numero_processo ?? "—"}
                     </td>
                     <td className="px-5 py-5">
-                      <div className="text-lg font-medium text-ivory">{p.devedor.nome}</div>
+                      <div className="text-lg font-medium text-[var(--color-devedor)]">{p.devedor.nome}</div>
                       <div className="mt-1 font-mono text-sm text-[var(--color-ivory-88)]">
                         {p.devedor.tipo === "PF" ? "PF" : "PJ"} · {p.devedor.documento}
                       </div>
@@ -203,7 +203,7 @@ function CardProcesso({
         <span className="font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-signal)]">
           Processo Themis
         </span>
-        <h3 className="mt-3 font-serif text-[24px] leading-[1.15] text-[var(--color-gold)]">
+        <h3 className="mt-3 font-serif text-[24px] leading-[1.15] text-[var(--color-devedor)]">
           {processo.devedor.nome}
         </h3>
         <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[var(--color-ivory-22)] bg-[var(--color-surface-2)]/60 px-3 py-1.5">
@@ -248,7 +248,7 @@ function CardProcesso({
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
             Credor
           </p>
-          <p className="mt-2 font-medium text-[15px] text-ivory">
+          <p className="mt-2 font-medium text-[15px] text-[var(--color-cliente)]">
             {processo.credor.nome}
           </p>
         </div>
@@ -258,7 +258,7 @@ function CardProcesso({
             Advogado responsável
           </p>
           {processo.responsavel_email ? (
-            <p className="mt-2 font-mono text-[13px] text-ivory">
+            <p className="mt-2 font-mono text-[13px] text-[var(--color-advogado)]">
               {processo.responsavel_email}
             </p>
           ) : (

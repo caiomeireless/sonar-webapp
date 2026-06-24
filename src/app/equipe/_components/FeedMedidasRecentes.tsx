@@ -127,11 +127,11 @@ function FeedItem({ item, ehUltimo }: FeedItemProps) {
         {/* Coluna 2 — texto principal + linha secundária */}
         <div className="flex min-w-0 flex-col gap-0.5">
           <p className="truncate text-xl leading-snug text-[var(--color-ivory)]">
-            <span className="font-medium text-[var(--color-ivory)]">
+            <span className="font-medium text-[var(--color-advogado)]">
               {advogado}
             </span>{" "}
             <span className="text-[var(--color-ivory-66)]">{verbo} em</span>{" "}
-            <span className="font-serif text-[var(--color-gold)] group-hover:underline">
+            <span className="font-serif text-[var(--color-devedor)] group-hover:underline">
               {item.devedorNome}
             </span>
           </p>

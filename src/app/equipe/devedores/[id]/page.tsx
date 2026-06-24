@@ -238,6 +238,7 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
                   rotulo="Responsável no Escritório"
                   valor={responsavelPrincipal(casos)}
                   origem={responsavelPrincipal(casos) ? "MANUAL" : undefined}
+                  valorClassName="text-[var(--color-advogado)]"
                 />
                 <CampoFicha
                   rotulo="Primeira Ocorrência"
@@ -422,7 +423,7 @@ function HeaderDossie({
           )}
         </div>
 
-        <h1 className="mt-5 break-words font-serif text-[clamp(24px,3.5vw,44px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
+        <h1 className="mt-5 break-words font-serif text-[clamp(24px,3.5vw,44px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-devedor)]">
           {devedor.nome}
         </h1>
 
@@ -594,10 +595,12 @@ function CampoFicha({
   rotulo,
   valor,
   origem,
+  valorClassName,
 }: {
   rotulo: string;
   valor: string | null | undefined;
   origem?: OrigemFicha;
+  valorClassName?: string;
 }) {
   const valorFinal = valor && valor.trim() !== "" ? valor : null;
   return (
@@ -609,7 +612,7 @@ function CampoFicha({
         <span
           className={
             valorFinal
-              ? "text-lg text-ivory"
+              ? `text-lg ${valorClassName ?? "text-ivory"}`
               : "text-lg text-[var(--color-ivory-66)]"
           }
         >
@@ -811,7 +814,7 @@ function CardCasoVinculado({ caso }: { caso: CasoResumo }) {
         </p>
         <p className="mt-1 font-mono text-[15px] text-[var(--color-ivory-66)]">
           Advogado responsável:{" "}
-          <span className="text-ivory">
+          <span className="text-[var(--color-advogado)]">
             {caso.responsavel_email ?? "—"}
           </span>
         </p>

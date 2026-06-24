@@ -71,7 +71,12 @@ function TooltipCarteira({
 
   return (
     <div style={tooltipContentStyle}>
-      <div style={tooltipLabelStyle}>{item.advogadoNome}</div>
+      <div
+        style={tooltipLabelStyle}
+        className="text-[var(--color-advogado)]"
+      >
+        {item.advogadoNome}
+      </div>
       <div className="flex flex-col gap-1">
         <div className="flex items-center justify-between gap-4">
           <span className="text-[var(--color-ivory-66)]">Patrimônio gerido</span>
