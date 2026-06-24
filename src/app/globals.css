@@ -1130,3 +1130,37 @@ body {
     0 0 24px rgba(255, 51, 102, 0.65),
     0 0 0 3px rgba(255, 51, 102, 0.40);
 }
+
+/* PulsingCard — cards do login pulsando sincronizados com o radar.
+   Usa CSS animation (relogio absoluto da pagina, igual o
+   <animateTransform> SVG do radar) — garante sincronia perfeita
+   sem drift cumulativo. Pulso ocorre nos primeiros 7% do ciclo (~0.4s)
+   e o resto do tempo fica em estado de repouso. */
+@keyframes pulse-card-signal {
+  0%, 7%, 100% {
+    box-shadow: 0 0 0 0 rgba(60, 255, 138, 0);
+    transform: scale(1);
+  }
+  3.5% {
+    box-shadow: 0 0 32px 6px rgba(60, 255, 138, 0.6), 0 0 80px 12px rgba(60, 255, 138, 0.2);
+    transform: scale(1.015);
+  }
+}
+@keyframes pulse-card-gold {
+  0%, 7%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 217, 61, 0);
+    transform: scale(1);
+  }
+  3.5% {
+    box-shadow: 0 0 32px 6px rgba(255, 217, 61, 0.6), 0 0 80px 12px rgba(255, 217, 61, 0.2);
+    transform: scale(1.015);
+  }
+}
+.pulse-card-signal {
+  animation: pulse-card-signal 5.5s linear infinite;
+  border-radius: 1rem;
+}
+.pulse-card-gold {
+  animation: pulse-card-gold 5.5s linear infinite;
+  border-radius: 1rem;
+}

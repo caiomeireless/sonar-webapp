@@ -52,7 +52,7 @@ export default function LoginPage() {
             Cliente (gold). Mesma UX, accents diferentes pra clareza.
             Cards compactos pra caber tudo dentro do circulo do radar. */}
         <div className="flex flex-col gap-2">
-          <PulsingCard accent="signal" delay={5.0}>
+          <PulsingCard accent="signal" delaySec={-0.38}>
             <Suspense fallback={<div className="glass h-[230px]" />}>
               <LoginForm
                 accent="signal"
@@ -62,7 +62,7 @@ export default function LoginPage() {
               />
             </Suspense>
           </PulsingCard>
-          <PulsingCard accent="gold" delay={0.35}>
+          <PulsingCard accent="gold" delaySec={-5.12}>
             <Suspense fallback={<div className="glass h-[230px]" />}>
               <LoginForm
                 accent="gold"
