@@ -11,13 +11,13 @@ export const dynamic = "force-dynamic";
 export default function LoginPage() {
   return (
     <main className="relative flex min-h-svh items-center justify-center overflow-hidden bg-onyx p-6">
-      {/* Quadriculado verde forte com FADE RADIAL — forte no centro
-          (atras do logo + form), apagando suavemente em todas as bordas
-          via mask-image. Mesma textura da faixa 1 da plataforma. */}
+      {/* Quadriculado verde forte com FADE RADIAL INVERTIDO — dentro do
+          circulo do radar fica preto (transparent no mask), forte FORA
+          do circulo, depois sumindo nas pontas extremas da tela. */}
       <div
         className="bg-grid-strong animate-grid-pulse absolute inset-0
-          [mask-image:radial-gradient(ellipse_60%_70%_at_center,black_15%,rgba(0,0,0,0.6)_55%,transparent_92%)]
-          [-webkit-mask-image:radial-gradient(ellipse_60%_70%_at_center,black_15%,rgba(0,0,0,0.6)_55%,transparent_92%)]"
+          [mask-image:radial-gradient(ellipse_42%_50%_at_center,transparent_30%,rgba(0,0,0,0.6)_60%,black_80%,transparent_100%)]
+          [-webkit-mask-image:radial-gradient(ellipse_42%_50%_at_center,transparent_30%,rgba(0,0,0,0.6)_60%,black_80%,transparent_100%)]"
         aria-hidden="true"
       />
       {/* Vinheta radial signal pra dar foco visual no centro. */}
