@@ -5,6 +5,7 @@ import Link from "next/link";
 import { LogoSvg } from "@/components/LogoSvg";
 import { LoginRadar } from "@/components/login/LoginRadar";
 import { LoginForm } from "./LoginForm";
+import { PulsingCard } from "./PulsingCard";
 
 export const dynamic = "force-dynamic";
 
@@ -51,22 +52,26 @@ export default function LoginPage() {
             Cliente (gold). Mesma UX, accents diferentes pra clareza.
             Cards compactos pra caber tudo dentro do circulo do radar. */}
         <div className="flex flex-col gap-2">
-          <Suspense fallback={<div className="glass h-[230px]" />}>
-            <LoginForm
-              accent="signal"
-              titulo="Acesso da Equipe"
-              subtitulo="Advogados, sócios e funcionários."
-              compacto
-            />
-          </Suspense>
-          <Suspense fallback={<div className="glass h-[230px]" />}>
-            <LoginForm
-              accent="gold"
-              titulo="Acesso do Cliente"
-              subtitulo="Você só visualiza seus próprios casos."
-              compacto
-            />
-          </Suspense>
+          <PulsingCard accent="signal" delay={5.0}>
+            <Suspense fallback={<div className="glass h-[230px]" />}>
+              <LoginForm
+                accent="signal"
+                titulo="Acesso da Equipe"
+                subtitulo="Advogados, sócios e funcionários."
+                compacto
+              />
+            </Suspense>
+          </PulsingCard>
+          <PulsingCard accent="gold" delay={0.35}>
+            <Suspense fallback={<div className="glass h-[230px]" />}>
+              <LoginForm
+                accent="gold"
+                titulo="Acesso do Cliente"
+                subtitulo="Você só visualiza seus próprios casos."
+                compacto
+              />
+            </Suspense>
+          </PulsingCard>
         </div>
       </div>
 
