@@ -32,23 +32,37 @@ export default function LoginPage() {
         <LoginRadar />
       </div>
 
-      <div className="relative z-10 grid w-full max-w-[760px] items-center gap-3 md:grid-cols-[1fr_400px] md:gap-4">
-        {/* Esquerda: marca. -translate-y eleva o logo pra alinhar o traco
-            verde com o input de email do card a direita. */}
-        <div className="flex flex-col items-center text-center md:-translate-y-6 md:items-start md:text-left">
+      <div className="relative z-10 grid w-full max-w-[860px] items-center gap-4 md:grid-cols-[1fr_400px] md:gap-6">
+        {/* Esquerda: marca. Logo grande pra preencher o espaco vertical
+            criado pelos dois cards empilhados a direita. */}
+        <div className="flex flex-col items-center text-center md:items-start md:text-left">
           <Link
             href="/"
             aria-label="Voltar para a landing"
             className="drop-shadow-[0_0_50px_rgba(60,255,138,0.25)]"
           >
-            <LogoSvg height={140} />
+            <LogoSvg height={280} />
           </Link>
         </div>
 
-        {/* Direita: caixa de acesso */}
-        <Suspense fallback={<div className="glass h-[380px]" />}>
-          <LoginForm />
-        </Suspense>
+        {/* Direita: dois cards empilhados — Equipe (signal verde) +
+            Cliente (gold). Mesma UX, accents diferentes pra clareza. */}
+        <div className="flex flex-col gap-3">
+          <Suspense fallback={<div className="glass h-[300px]" />}>
+            <LoginForm
+              accent="signal"
+              titulo="Acesso da Equipe"
+              subtitulo="Advogados, sócios e funcionários."
+            />
+          </Suspense>
+          <Suspense fallback={<div className="glass h-[300px]" />}>
+            <LoginForm
+              accent="gold"
+              titulo="Acesso do Cliente"
+              subtitulo="Você só visualiza seus próprios casos."
+            />
+          </Suspense>
+        </div>
       </div>
 
       {/* Assinatura inferior — igual a landing. Centralizada na base. */}

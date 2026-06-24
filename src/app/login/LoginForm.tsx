@@ -4,7 +4,15 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export function LoginForm() {
+export function LoginForm({
+  accent = "signal",
+  titulo,
+  subtitulo,
+}: {
+  accent?: "signal" | "gold";
+  titulo?: string;
+  subtitulo?: string;
+} = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const erroQuery = searchParams.get("erro");
@@ -21,6 +29,25 @@ export function LoginForm() {
         ? "Link inválido ou expirado. Solicite um novo código."
         : "",
   );
+
+  // Cores por accent — equipe usa SIGNAL VERDE, cliente usa GOLD dourado.
+  // Mesma UX, cor diferente pra dar clareza visual de qual entrada e' qual.
+  const accentColors =
+    accent === "gold"
+      ? {
+          text: "text-[#FFD93D]",
+          ring: "focus:ring-[rgba(255,217,61,0.20)]",
+          border: "focus:border-[#FFD93D]",
+          bg: "bg-[#FFD93D]",
+          bgHover: "hover:bg-[#FFE680]",
+        }
+      : {
+          text: "text-[var(--color-signal)]",
+          ring: "focus:ring-[var(--color-signal-12)]",
+          border: "focus:border-[var(--color-signal)]",
+          bg: "bg-[var(--color-signal)]",
+          bgHover: "hover:bg-[var(--color-tip-glow)]",
+        };
 
   async function enviarCodigo(e: React.FormEvent) {
     e.preventDefault();
@@ -71,20 +98,20 @@ export function LoginForm() {
     }
   }
 
-  const inputBase =
-    "w-full rounded-lg border border-[var(--color-ivory-22)] bg-[var(--color-carbon)] px-4 py-3 text-sm text-ivory outline-none transition placeholder:text-[var(--color-ivory-66)] focus:border-[var(--color-signal)] focus:ring-2 focus:ring-[var(--color-signal-12)]";
-  const btnBase =
-    "w-full rounded-lg bg-[var(--color-signal)] px-4 py-3 text-sm font-semibold text-onyx transition hover:bg-[var(--color-tip-glow)] disabled:opacity-50";
+  const inputBase = `w-full rounded-lg border border-[var(--color-ivory-22)] bg-[var(--color-carbon)] px-4 py-3 text-sm text-ivory outline-none transition placeholder:text-[var(--color-ivory-66)] ${accentColors.border} focus:ring-2 ${accentColors.ring}`;
+  const btnBase = `w-full rounded-lg ${accentColors.bg} px-4 py-3 text-sm font-semibold text-onyx transition ${accentColors.bgHover} disabled:opacity-50`;
 
   return (
     <div className="glass p-7 shadow-[0_20px_60px_-30px_rgba(0,0,0,0.8)]">
-      <span className="eyebrow">Acesso</span>
+      <span className={`eyebrow ${accentColors.text}`}>Acesso</span>
       <h2 className="mt-3 text-lg font-medium text-ivory">
-        {etapa === "email" ? "Entre com seu e-mail" : "Digite o código"}
+        {etapa === "email"
+          ? (titulo ?? "Entre com seu e-mail")
+          : "Digite o código"}
       </h2>
       <p className="mt-1 text-xs text-[var(--color-ivory-66)]">
         {etapa === "email"
-          ? "Equipe ou cliente — o caminho é o mesmo."
+          ? (subtitulo ?? "Equipe ou cliente — o caminho é o mesmo.")
           : `Enviamos um código de 6 dígitos para ${email}.`}
       </p>
 
@@ -93,7 +120,6 @@ export function LoginForm() {
           <input
             type="email"
             required
-            autoFocus
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="seu.email@exemplo.com"
