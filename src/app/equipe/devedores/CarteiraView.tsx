@@ -72,16 +72,16 @@ export function CarteiraView({
         <div className="mx-auto mt-12 w-full max-w-[1100px] min-h-[600px]">
           <CardStack
             items={credores.map((c) => ({ ...c, id: c.id }))}
-            cardWidth={380}
-            cardHeight={460}
-            overlap={0.32}
-            spreadDeg={18}
-            perspectivePx={1200}
-            depthPx={110}
-            tiltXDeg={6}
+            cardWidth={440}
+            cardHeight={540}
+            overlap={0.30}
+            spreadDeg={14}
+            perspectivePx={1800}
+            depthPx={80}
+            tiltXDeg={3}
             activeLiftPx={14}
             activeScale={1.04}
-            inactiveScale={0.9}
+            inactiveScale={0.94}
             springStiffness={280}
             springDamping={28}
             maxVisible={5}
