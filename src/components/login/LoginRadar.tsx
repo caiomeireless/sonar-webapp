@@ -100,11 +100,11 @@ export function LoginRadar() {
             repeatCount="indefinite"
           />
           {/* Cone de ~30 graus: do centro vai ate (380, 0) e fecha em
-              (329.1, -190) — ou seja, abre pra "cima" do raio (sentido
-              anti-horario em coords SVG), criando o efeito de rastro
-              que o raio deixa enquanto gira no sentido horario. */}
+              (329.1, +190) — abre pra "baixo" do raio (lado oposto ao
+              sentido de rotacao). Cria o rastro que aparece atras da
+              linha enquanto ela varre o radar. */}
           <path
-            d="M 0 0 L 380 0 A 380 380 0 0 1 329.1 -190 Z"
+            d="M 0 0 L 380 0 A 380 380 0 0 0 329.1 190 Z"
             fill="url(#radarCone)"
             opacity="0.7"
             filter="url(#neonGlow)"
