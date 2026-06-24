@@ -145,7 +145,7 @@ function CardCaso({
           <span className="font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-signal)]">
             Devedor
           </span>
-          <h3 className="mt-3 font-serif text-[24px] leading-[1.15] text-[var(--color-gold)]">
+          <h3 className="mt-3 font-serif text-[24px] leading-[1.15] text-[var(--color-devedor)]">
             {caso.devedor.nome}
           </h3>
           <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[var(--color-ivory-22)] bg-[var(--color-surface-2)]/60 px-3 py-1.5">
@@ -215,7 +215,7 @@ function CardCaso({
           <div className="flex items-center gap-2">
             <Scale className="h-3.5 w-3.5 flex-none text-[var(--color-ivory-66)]" />
             {caso.responsavel_email ? (
-              <span className="break-all font-mono text-[12px] text-ivory">
+              <span className="break-all font-mono text-[12px] text-[var(--color-advogado)]">
                 {caso.responsavel_email}
               </span>
             ) : (
@@ -284,7 +284,7 @@ function ListaCasos({
               <Td>
                 <Link
                   href={`/equipe/devedores/${c.devedor.id}${euQuery}`}
-                  className="block font-serif text-2xl leading-tight text-[var(--color-gold)] hover:underline"
+                  className="block font-serif text-2xl leading-tight text-[var(--color-devedor)] hover:underline"
                 >
                   {c.devedor.nome}
                 </Link>
@@ -312,7 +312,7 @@ function ListaCasos({
               </Td>
               <Td>
                 {c.responsavel_email ? (
-                  <span className="break-all font-mono text-sm text-ivory">
+                  <span className="break-all font-mono text-sm text-[var(--color-advogado)]">
                     {c.responsavel_email}
                   </span>
                 ) : (

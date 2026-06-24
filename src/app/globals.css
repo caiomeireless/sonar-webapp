@@ -16,6 +16,13 @@
   --color-gold-soft:   #A77A2E;  /* gold on light backgrounds */
   --color-tip-glow:    #E8FFEE;  /* sweep tip highlight */
 
+  /* Cores SEMANTICAS por entidade (regra Caio 2026-06-23):
+     usar SEMPRE estas variaveis ao renderizar o NOME de cada tipo
+     na plataforma — listas, cards, tabelas, headers. */
+  --color-cliente:   #C9A24A;  /* gold do brand — alias de --color-gold */
+  --color-devedor:   #FF3366;  /* vermelho neon */
+  --color-advogado:  #3CFF8A;  /* signal verde — alias de --color-signal */
+
   /* Surfaces (3 niveis — espelho do BP) */
   --color-surface-1:      rgba(232, 228, 214, 0.045);  /* glass nivel 1 — card primario */
   --color-surface-2:      rgba(232, 228, 214, 0.07);   /* glass nivel 2 — sub-card/chip */
@@ -107,6 +114,13 @@
   --color-gold-soft:     #6E5618;     /* gold suave pra texto sobre claro */
   --color-tip-glow:      #C7F2D5;
 
+  /* Cores SEMANTICAS por entidade (regra Caio 2026-06-23):
+     usar SEMPRE estas variaveis ao renderizar o NOME de cada tipo
+     na plataforma — listas, cards, tabelas, headers. */
+  --color-cliente:   #C9A24A;  /* gold do brand — alias de --color-gold */
+  --color-devedor:   #FF3366;  /* vermelho neon */
+  --color-advogado:  #3CFF8A;  /* signal verde — alias de --color-signal */
+
   /* Surfaces — alpha-on-onyx (texto onyx em alpha sobre fundo claro) */
   --color-surface-1:     rgba(10, 12, 11, 0.035);
   --color-surface-2:     rgba(10, 12, 11, 0.06);
@@ -158,6 +172,13 @@
   --color-gold:        #C9A24A;
   --color-gold-soft:   #A77A2E;
   --color-tip-glow:    #E8FFEE;
+
+  /* Cores SEMANTICAS por entidade (regra Caio 2026-06-23):
+     usar SEMPRE estas variaveis ao renderizar o NOME de cada tipo
+     na plataforma — listas, cards, tabelas, headers. */
+  --color-cliente:   #C9A24A;  /* gold do brand — alias de --color-gold */
+  --color-devedor:   #FF3366;  /* vermelho neon */
+  --color-advogado:  #3CFF8A;  /* signal verde — alias de --color-signal */
 
   --color-surface-1:      rgba(232, 228, 214, 0.045);
   --color-surface-2:      rgba(232, 228, 214, 0.07);
@@ -226,6 +247,12 @@
   --color-fg-muted:  var(--color-ivory-66);
   --color-fg-faint:  var(--color-ivory-40);
   --color-surface:   var(--color-surface-1);
+
+  /* Semanticos por entidade — gera utilities text-cliente / text-devedor /
+     text-advogado (e bg-* / border-*) no Tailwind v4. */
+  --color-cliente:   var(--color-cliente);
+  --color-devedor:   var(--color-devedor);
+  --color-advogado:  var(--color-advogado);
 
   --font-sans:  var(--font-manrope), system-ui, -apple-system, sans-serif;
   --font-serif: var(--font-cormorant), Georgia, serif;

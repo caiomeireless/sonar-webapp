@@ -11,13 +11,13 @@ export const dynamic = "force-dynamic";
 export default function LoginPage() {
   return (
     <main className="relative flex min-h-svh items-center justify-center overflow-hidden bg-onyx p-6">
-      {/* Quadriculado verde forte com FADE RADIAL INVERTIDO — dentro do
-          circulo do radar fica preto (transparent no mask), forte FORA
-          do circulo, depois sumindo nas pontas extremas da tela. */}
+      {/* Quadriculado verde forte SOMENTE FORA DOS CIRCULOS DO RADAR.
+          Mask em PIXELS fixos (coincide com o raio do radar 530px) em
+          vez de % (que escalava com a viewport e desalinhava). */}
       <div
         className="bg-grid-strong animate-grid-pulse absolute inset-0
-          [mask-image:radial-gradient(ellipse_42%_50%_at_center,transparent_30%,rgba(0,0,0,0.6)_60%,black_80%,transparent_100%)]
-          [-webkit-mask-image:radial-gradient(ellipse_42%_50%_at_center,transparent_30%,rgba(0,0,0,0.6)_60%,black_80%,transparent_100%)]"
+          [mask-image:radial-gradient(circle_at_center,transparent_530px,rgba(0,0,0,0.7)_580px,black_700px,transparent_940px)]
+          [-webkit-mask-image:radial-gradient(circle_at_center,transparent_530px,rgba(0,0,0,0.7)_580px,black_700px,transparent_940px)]"
         aria-hidden="true"
       />
       {/* Vinheta radial signal pra dar foco visual no centro. */}
@@ -32,16 +32,18 @@ export default function LoginPage() {
         <LoginRadar />
       </div>
 
-      <div className="relative z-10 grid w-full max-w-[860px] items-center gap-4 md:grid-cols-[1fr_400px] md:gap-6">
-        {/* Esquerda: marca. Logo grande pra preencher o espaco vertical
-            criado pelos dois cards empilhados a direita. */}
-        <div className="flex flex-col items-center text-center md:items-start md:text-left">
+      {/* Logo + 2 cards lado a lado, JUNTOS dentro do circulo externo do
+          radar (~1060px). Espaco central entre logo e cards centralizado
+          no eixo do radar. Logo menor (200) pra equilibrar com 2 cards. */}
+      <div className="relative z-10 grid w-full max-w-[920px] items-center gap-8 md:grid-cols-[1fr_380px] md:gap-10">
+        {/* Esquerda: marca */}
+        <div className="flex flex-col items-center text-center md:items-end md:text-left">
           <Link
             href="/"
             aria-label="Voltar para a landing"
             className="drop-shadow-[0_0_50px_rgba(60,255,138,0.25)]"
           >
-            <LogoSvg height={280} />
+            <LogoSvg height={200} />
           </Link>
         </div>
 
