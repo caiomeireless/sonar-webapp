@@ -106,11 +106,14 @@ export function LoginRadar() {
           strokeOpacity="0.08"
         />
 
-        {/* Raio + cone girando. O grupo inteiro rotaciona 360 em loop. */}
+        {/* Raio + cone girando. O grupo inteiro rotaciona 360 em loop.
+            transform-box: view-box + 50% 50% faz o pivot ser o CENTRO
+            do viewBox (0,0 no SVG) e nao o canto sup-esq do bounding
+            box do <g> (que ficava deslocado por nao conter o ponto 0,0). */}
         <motion.g
           animate={{ rotate: 360 }}
           transition={{ duration: 5.5, repeat: Infinity, ease: "linear" }}
-          style={{ transformOrigin: "0px 0px" }}
+          style={{ transformBox: "view-box", transformOrigin: "50% 50%" }}
         >
           {/* Cone de ~30 graus: do centro vai ate (380, 0) e fecha em
               (329.1, -190) — ou seja, abre pra "cima" do raio (sentido
