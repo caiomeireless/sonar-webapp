@@ -86,26 +86,6 @@ export function LoginRadar() {
           strokeOpacity="0.10"
         />
 
-        {/* Cruz dos eixos — bem apagada, so pra dar sensacao de grade. */}
-        <line
-          x1="-380"
-          y1="0"
-          x2="380"
-          y2="0"
-          stroke="#3CFF8A"
-          strokeWidth="1"
-          strokeOpacity="0.08"
-        />
-        <line
-          x1="0"
-          y1="-380"
-          x2="0"
-          y2="380"
-          stroke="#3CFF8A"
-          strokeWidth="1"
-          strokeOpacity="0.08"
-        />
-
         {/* Raio + cone girando. Usamos <animateTransform> SMIL nativo do
             SVG em vez de motion/CSS — assim o pivot e' SEMPRE (0, 0) do
             viewBox (3o e 4o numeros de "from"/"to") em todos os browsers,
