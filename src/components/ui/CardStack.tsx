@@ -305,7 +305,7 @@ export function CardStack<T>({
               type="button"
               aria-label="Anterior"
               onClick={goPrev}
-              className="btn-neon-circle absolute left-2 top-1/2 z-20 -translate-y-1/2"
+              className="btn-neon-circle absolute left-2 top-1/2 z-50 -translate-y-1/2"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
@@ -313,7 +313,7 @@ export function CardStack<T>({
               type="button"
               aria-label="Próximo"
               onClick={goNext}
-              className="btn-neon-circle absolute right-2 top-1/2 z-20 -translate-y-1/2"
+              className="btn-neon-circle absolute right-2 top-1/2 z-50 -translate-y-1/2"
             >
               <ChevronRight className="h-5 w-5" />
             </button>

@@ -283,7 +283,7 @@ export function CardDeck<T extends CardDeckItem>({
               type="button"
               aria-label="Cartao anterior"
               onClick={goPrev}
-              className="btn-neon-circle-red absolute left-4 top-1/2 z-20 -translate-y-1/2"
+              className="btn-neon-circle-red absolute left-4 top-1/2 z-50 -translate-y-1/2"
             >
               <ChevronLeft />
             </button>
@@ -291,7 +291,7 @@ export function CardDeck<T extends CardDeckItem>({
               type="button"
               aria-label="Proximo cartao"
               onClick={goNext}
-              className="btn-neon-circle-red absolute right-4 top-1/2 z-20 -translate-y-1/2"
+              className="btn-neon-circle-red absolute right-4 top-1/2 z-50 -translate-y-1/2"
             >
               <ChevronRight />
             </button>
