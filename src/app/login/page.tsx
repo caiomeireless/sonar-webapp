@@ -10,14 +10,20 @@ export const dynamic = "force-dynamic";
 export default function LoginPage() {
   return (
     <main className="relative flex min-h-svh items-center justify-center overflow-hidden bg-onyx p-6">
-      <div className="bg-grid absolute inset-0 opacity-40" aria-hidden="true" />
+      {/* Quadriculado verde forte da faixa 1 (mesmo da plataforma, atras
+          do logo da sidebar e da TopBar) — agora cobre TODA a tela de login. */}
+      <div
+        className="bg-grid-strong animate-grid-pulse absolute inset-0"
+        aria-hidden="true"
+      />
+      {/* Vinheta radial signal pra dar foco visual no centro. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-1/2 h-[640px] w-[640px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(60,255,138,0.10),transparent_60%)] blur-2xl"
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[640px] w-[640px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(60,255,138,0.18),transparent_65%)] blur-2xl"
       />
 
       <div className="relative z-10 grid w-full max-w-[960px] items-center gap-16 md:grid-cols-[1fr_400px]">
-        {/* Esquerda: marca */}
+        {/* Esquerda: marca (sem subtitulo — pedido do Caio) */}
         <div className="flex flex-col items-center text-center md:items-start md:text-left">
           <Link
             href="/"
@@ -26,9 +32,6 @@ export default function LoginPage() {
           >
             <LogoSvg height={140} />
           </Link>
-          <p className="mt-8 max-w-[360px] text-sm text-[var(--color-ivory-88)]">
-            Acesso por código no e-mail. Sem senha, sem fricção.
-          </p>
         </div>
 
         {/* Direita: caixa de acesso */}
