@@ -24,7 +24,7 @@ export function LoginRadar() {
     <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
       <svg
         viewBox="-400 -400 800 800"
-        className="h-[820px] w-[820px] max-w-none"
+        className="h-[1120px] w-[1120px] max-w-none"
         aria-hidden="true"
       >
         <defs>
