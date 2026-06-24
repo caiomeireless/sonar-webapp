@@ -25,9 +25,10 @@ export default function LoginPage() {
         className="pointer-events-none absolute left-1/2 top-1/2 h-[640px] w-[640px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(60,255,138,0.18),transparent_65%)] blur-2xl"
       />
 
-      <div className="relative z-10 grid w-full max-w-[820px] items-center gap-6 md:grid-cols-[1fr_400px] md:gap-8">
-        {/* Esquerda: marca (sem subtitulo — pedido do Caio) */}
-        <div className="flex flex-col items-center text-center md:items-start md:text-left">
+      <div className="relative z-10 grid w-full max-w-[760px] items-center gap-3 md:grid-cols-[1fr_400px] md:gap-4">
+        {/* Esquerda: marca. -translate-y eleva o logo pra alinhar o traco
+            verde com o input de email do card a direita. */}
+        <div className="flex flex-col items-center text-center md:-translate-y-6 md:items-start md:text-left">
           <Link
             href="/"
             aria-label="Voltar para a landing"
