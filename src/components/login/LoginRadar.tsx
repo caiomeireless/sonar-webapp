@@ -106,15 +106,19 @@ export function LoginRadar() {
           strokeOpacity="0.08"
         />
 
-        {/* Raio + cone girando. O grupo inteiro rotaciona 360 em loop.
-            transform-box: view-box + 50% 50% faz o pivot ser o CENTRO
-            do viewBox (0,0 no SVG) e nao o canto sup-esq do bounding
-            box do <g> (que ficava deslocado por nao conter o ponto 0,0). */}
-        <motion.g
-          animate={{ rotate: 360 }}
-          transition={{ duration: 5.5, repeat: Infinity, ease: "linear" }}
-          style={{ transformBox: "view-box", transformOrigin: "50% 50%" }}
-        >
+        {/* Raio + cone girando. Usamos <animateTransform> SMIL nativo do
+            SVG em vez de motion/CSS — assim o pivot e' SEMPRE (0, 0) do
+            viewBox (3o e 4o numeros de "from"/"to") em todos os browsers,
+            sem depender de transform-box CSS (suporte inconsistente). */}
+        <g>
+          <animateTransform
+            attributeName="transform"
+            type="rotate"
+            from="0 0 0"
+            to="360 0 0"
+            dur="5.5s"
+            repeatCount="indefinite"
+          />
           {/* Cone de ~30 graus: do centro vai ate (380, 0) e fecha em
               (329.1, -190) — ou seja, abre pra "cima" do raio (sentido
               anti-horario em coords SVG), criando o efeito de rastro
@@ -147,7 +151,7 @@ export function LoginRadar() {
             fill="#3CFF8A"
             filter="url(#neonGlow)"
           />
-        </motion.g>
+        </g>
 
         {/* Bolinhas (alvos) no canto inferior direito. Cada uma pisca
             quando o raio passa por cima — delay = (angulo / 360) * 5.5.
