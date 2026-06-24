@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { LogoSvg } from "@/components/LogoSvg";
+import { LoginRadar } from "@/components/login/LoginRadar";
 import { LoginForm } from "./LoginForm";
 
 export const dynamic = "force-dynamic";
@@ -24,6 +25,12 @@ export default function LoginPage() {
         aria-hidden="true"
         className="pointer-events-none absolute left-1/2 top-1/2 h-[640px] w-[640px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(60,255,138,0.18),transparent_65%)] blur-2xl"
       />
+
+      {/* Radar girando atras do logo + card de login. Fica acima do
+          bg-grid mas abaixo do conteudo principal (z-10). */}
+      <div className="pointer-events-none absolute inset-0 z-[1] flex items-center justify-center">
+        <LoginRadar />
+      </div>
 
       <div className="relative z-10 grid w-full max-w-[760px] items-center gap-3 md:grid-cols-[1fr_400px] md:gap-4">
         {/* Esquerda: marca. -translate-y eleva o logo pra alinhar o traco
