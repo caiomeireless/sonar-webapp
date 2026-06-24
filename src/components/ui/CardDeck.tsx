@@ -461,11 +461,16 @@ function DeckCard<T extends CardDeckItem>({
             }
           : undefined
       }
-      style={motionStyle}
+      style={{
+        ...motionStyle,
+        backfaceVisibility: "hidden",
+        WebkitFontSmoothing: "antialiased",
+      }}
       className={cn(
         "rounded-2xl border border-[var(--color-line)]",
         "shadow-[0_30px_60px_-25px_rgba(0,0,0,0.7)]",
-        "overflow-hidden bg-[var(--color-onyx-soft)]/40 backdrop-blur-sm",
+        // backdrop-blur removido — embaca os cards sob transform 3D
+        "overflow-hidden bg-[var(--color-onyx-soft)]/40",
       )}
     >
       {children}

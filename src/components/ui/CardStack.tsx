@@ -467,12 +467,19 @@ function FanCard({
         transformStyle: "preserve-3d",
         transformOrigin: "center bottom",
         willChange: "transform, opacity",
+        // Anti-aliasing nos laterais: backface-visibility hidden +
+        // sub-pixel rendering desligado dao' renderizacao mais nitida
+        // dos textos quando o card e' transformado em 3D.
+        backfaceVisibility: "hidden",
+        WebkitFontSmoothing: "antialiased",
       }}
       whileDrag={{ cursor: "grabbing" }}
       className={cn(
         "rounded-2xl border border-[var(--color-line)]",
         "shadow-[0_30px_60px_-25px_rgba(0,0,0,0.7)]",
-        "overflow-hidden bg-[var(--color-onyx-soft)]/40 backdrop-blur-sm",
+        // backdrop-blur removido — causava embacamento nos cards laterais
+        // sob transform 3D. O SpotlightCard interno ja' cuida do bg/glass.
+        "overflow-hidden bg-[var(--color-onyx-soft)]/40",
       )}
     >
       {children}
