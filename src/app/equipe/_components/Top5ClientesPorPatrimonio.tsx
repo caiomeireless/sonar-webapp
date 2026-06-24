@@ -41,7 +41,7 @@ export default function Top5ClientesPorPatrimonio({ itens }: Props) {
                 >
                   {idx + 1}
                 </span>
-                <span className="truncate text-xl text-[var(--color-ivory)]">
+                <span className="truncate font-serif text-xl text-[var(--color-cliente)]">
                   {item.credorNome}
                 </span>
                 <span className="text-xl font-medium tabular-nums text-[var(--color-ivory)]">

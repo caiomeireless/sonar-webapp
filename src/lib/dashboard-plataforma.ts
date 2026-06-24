@@ -617,6 +617,19 @@ function agregarCarteiraPorAdvogado(args: {
   return out;
 }
 
+// Mock ficticio pro card "Custos por API" do Painel — ate' a tabela
+// real de custos comecar a ser populada pelo dia-a-dia das consultas
+// pagas, esses valores ilustram o comportamento esperado.
+const MOCK_CUSTOS_POR_API: CustoApiItem[] = [
+  { tipo: "assertiva", custoBrl: 1287.4, descricaoRotulo: "Assertiva (Pessoas/Score)" },
+  { tipo: "bigdatacorp", custoBrl: 942.8, descricaoRotulo: "BigDataCorp" },
+  { tipo: "arisp", custoBrl: 615.0, descricaoRotulo: "ARISP (Matrículas SP)" },
+  { tipo: "cenprot", custoBrl: 308.5, descricaoRotulo: "Cenprot (Protestos)" },
+  { tipo: "edossie", custoBrl: 214.0, descricaoRotulo: "eDossiê (Carga Tributária)" },
+  { tipo: "junta_comercial", custoBrl: 178.3, descricaoRotulo: "Junta Comercial" },
+  { tipo: "datajud", custoBrl: 0, descricaoRotulo: "DataJud CNJ (gratuita)" },
+];
+
 function agregarCustosPorApi(custos: CustoRow[]): CustoApiItem[] {
   const acc = new Map<string, number>();
   for (const c of custos) {
@@ -631,6 +644,9 @@ function agregarCustosPorApi(custos: CustoRow[]): CustoApiItem[] {
       descricaoRotulo: ROTULO_TIPO[tipo] ?? tipo,
     });
   }
+  // Fallback: ainda nao ha custos reais registrados — mostra mock
+  // ficticio pra dar materia ao card no Painel (demo).
+  if (out.length === 0) return MOCK_CUSTOS_POR_API;
   out.sort((a, b) => b.custoBrl - a.custoBrl);
   return out;
 }
