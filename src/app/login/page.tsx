@@ -25,7 +25,7 @@ export default function LoginPage() {
         className="pointer-events-none absolute left-1/2 top-1/2 h-[640px] w-[640px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(60,255,138,0.18),transparent_65%)] blur-2xl"
       />
 
-      <div className="relative z-10 grid w-full max-w-[960px] items-center gap-16 md:grid-cols-[1fr_400px]">
+      <div className="relative z-10 grid w-full max-w-[820px] items-center gap-6 md:grid-cols-[1fr_400px] md:gap-8">
         {/* Esquerda: marca (sem subtitulo — pedido do Caio) */}
         <div className="flex flex-col items-center text-center md:items-start md:text-left">
           <Link
@@ -38,7 +38,7 @@ export default function LoginPage() {
         </div>
 
         {/* Direita: caixa de acesso */}
-        <Suspense fallback={<div className="h-[380px] rounded-xl border border-[var(--color-ivory-12)] bg-[var(--color-carbon)]" />}>
+        <Suspense fallback={<div className="glass h-[380px]" />}>
           <LoginForm />
         </Suspense>
       </div>

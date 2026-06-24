@@ -77,7 +77,7 @@ export function LoginForm() {
     "w-full rounded-lg bg-[var(--color-signal)] px-4 py-3 text-sm font-semibold text-onyx transition hover:bg-[var(--color-tip-glow)] disabled:opacity-50";
 
   return (
-    <div className="rounded-xl border border-[var(--color-ivory-12)] bg-[var(--color-carbon)] p-7 shadow-[0_20px_60px_-30px_rgba(0,0,0,0.8)]">
+    <div className="glass p-7 shadow-[0_20px_60px_-30px_rgba(0,0,0,0.8)]">
       <span className="eyebrow">Acesso</span>
       <h2 className="mt-3 text-lg font-medium text-ivory">
         {etapa === "email" ? "Entre com seu e-mail" : "Digite o código"}
