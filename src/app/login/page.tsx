@@ -35,7 +35,7 @@ export default function LoginPage() {
       {/* Logo + 2 cards lado a lado, JUNTOS dentro do circulo externo do
           radar (~1060px). Espaco central entre logo e cards centralizado
           no eixo do radar. Logo menor (200) pra equilibrar com 2 cards. */}
-      <div className="relative z-10 grid w-full max-w-[920px] items-center gap-8 md:grid-cols-[1fr_380px] md:gap-10">
+      <div className="relative z-10 grid w-full max-w-[820px] items-center gap-5 md:grid-cols-[1fr_340px] md:gap-7">
         {/* Esquerda: marca */}
         <div className="flex flex-col items-center text-center md:items-end md:text-left">
           <Link
@@ -43,25 +43,28 @@ export default function LoginPage() {
             aria-label="Voltar para a landing"
             className="drop-shadow-[0_0_50px_rgba(60,255,138,0.25)]"
           >
-            <LogoSvg height={200} />
+            <LogoSvg height={150} />
           </Link>
         </div>
 
         {/* Direita: dois cards empilhados — Equipe (signal verde) +
-            Cliente (gold). Mesma UX, accents diferentes pra clareza. */}
-        <div className="flex flex-col gap-3">
-          <Suspense fallback={<div className="glass h-[300px]" />}>
+            Cliente (gold). Mesma UX, accents diferentes pra clareza.
+            Cards compactos pra caber tudo dentro do circulo do radar. */}
+        <div className="flex flex-col gap-2">
+          <Suspense fallback={<div className="glass h-[230px]" />}>
             <LoginForm
               accent="signal"
               titulo="Acesso da Equipe"
               subtitulo="Advogados, sócios e funcionários."
+              compacto
             />
           </Suspense>
-          <Suspense fallback={<div className="glass h-[300px]" />}>
+          <Suspense fallback={<div className="glass h-[230px]" />}>
             <LoginForm
               accent="gold"
               titulo="Acesso do Cliente"
               subtitulo="Você só visualiza seus próprios casos."
+              compacto
             />
           </Suspense>
         </div>

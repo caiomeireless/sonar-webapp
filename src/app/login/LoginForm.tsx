@@ -8,10 +8,13 @@ export function LoginForm({
   accent = "signal",
   titulo,
   subtitulo,
+  compacto = false,
 }: {
   accent?: "signal" | "gold";
   titulo?: string;
   subtitulo?: string;
+  /** Versao reduzida pra caber 2 cards lado a lado dentro do radar. */
+  compacto?: boolean;
 } = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -98,13 +101,13 @@ export function LoginForm({
     }
   }
 
-  const inputBase = `w-full rounded-lg border border-[var(--color-ivory-22)] bg-[var(--color-carbon)] px-4 py-3 text-sm text-ivory outline-none transition placeholder:text-[var(--color-ivory-66)] ${accentColors.border} focus:ring-2 ${accentColors.ring}`;
-  const btnBase = `w-full rounded-lg ${accentColors.bg} px-4 py-3 text-sm font-semibold text-onyx transition ${accentColors.bgHover} disabled:opacity-50`;
+  const inputBase = `w-full rounded-lg border border-[var(--color-ivory-22)] bg-[var(--color-carbon)] px-4 ${compacto ? "py-2" : "py-3"} text-sm text-ivory outline-none transition placeholder:text-[var(--color-ivory-66)] ${accentColors.border} focus:ring-2 ${accentColors.ring}`;
+  const btnBase = `w-full rounded-lg ${accentColors.bg} px-4 ${compacto ? "py-2" : "py-3"} text-sm font-semibold text-onyx transition ${accentColors.bgHover} disabled:opacity-50`;
 
   return (
-    <div className="glass p-7 shadow-[0_20px_60px_-30px_rgba(0,0,0,0.8)]">
+    <div className={`glass ${compacto ? "p-5" : "p-7"} shadow-[0_20px_60px_-30px_rgba(0,0,0,0.8)]`}>
       <span className={`eyebrow ${accentColors.text}`}>Acesso</span>
-      <h2 className="mt-3 text-lg font-medium text-ivory">
+      <h2 className={`mt-2 ${compacto ? "text-base" : "text-lg"} font-medium text-ivory`}>
         {etapa === "email"
           ? (titulo ?? "Entre com seu e-mail")
           : "Digite o código"}
@@ -116,7 +119,7 @@ export function LoginForm({
       </p>
 
       {etapa === "email" ? (
-        <form onSubmit={enviarCodigo} className="mt-6 flex flex-col gap-3">
+        <form onSubmit={enviarCodigo} className={`${compacto ? "mt-3" : "mt-6"} flex flex-col gap-2`}>
           <input
             type="email"
             required
@@ -165,7 +168,7 @@ export function LoginForm({
         </form>
       )}
 
-      <p className="mt-6 text-center text-[10px] uppercase tracking-[0.24em] text-[var(--color-ivory-66)]">
+      <p className={`${compacto ? "mt-3" : "mt-6"} text-center text-[10px] uppercase tracking-[0.24em] text-[var(--color-ivory-66)]`}>
         Acesso registrado · Confidencial
       </p>
     </div>
