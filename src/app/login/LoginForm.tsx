@@ -168,9 +168,6 @@ export function LoginForm({
         </form>
       )}
 
-      <p className={`${compacto ? "mt-3" : "mt-6"} text-center text-[10px] uppercase tracking-[0.24em] text-[var(--color-ivory-66)]`}>
-        Acesso registrado · Confidencial
-      </p>
     </div>
   );
 }

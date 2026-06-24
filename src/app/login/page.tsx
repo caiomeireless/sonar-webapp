@@ -67,7 +67,7 @@ export default function LoginPage() {
               <LoginForm
                 accent="gold"
                 titulo="Acesso do Cliente"
-                subtitulo="Você só visualiza seus próprios casos."
+                subtitulo="Visualize seus próprios casos e estatísticas."
                 compacto
               />
             </Suspense>
