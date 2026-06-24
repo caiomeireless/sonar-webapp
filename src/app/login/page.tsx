@@ -10,10 +10,13 @@ export const dynamic = "force-dynamic";
 export default function LoginPage() {
   return (
     <main className="relative flex min-h-svh items-center justify-center overflow-hidden bg-onyx p-6">
-      {/* Quadriculado verde forte da faixa 1 (mesmo da plataforma, atras
-          do logo da sidebar e da TopBar) — agora cobre TODA a tela de login. */}
+      {/* Quadriculado verde forte com FADE RADIAL — forte no centro
+          (atras do logo + form), apagando suavemente em todas as bordas
+          via mask-image. Mesma textura da faixa 1 da plataforma. */}
       <div
-        className="bg-grid-strong animate-grid-pulse absolute inset-0"
+        className="bg-grid-strong animate-grid-pulse absolute inset-0
+          [mask-image:radial-gradient(ellipse_60%_70%_at_center,black_15%,rgba(0,0,0,0.6)_55%,transparent_92%)]
+          [-webkit-mask-image:radial-gradient(ellipse_60%_70%_at_center,black_15%,rgba(0,0,0,0.6)_55%,transparent_92%)]"
         aria-hidden="true"
       />
       {/* Vinheta radial signal pra dar foco visual no centro. */}
