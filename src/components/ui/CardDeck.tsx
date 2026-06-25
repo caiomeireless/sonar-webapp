@@ -218,7 +218,7 @@ export function CardDeck<T extends CardDeckItem>({
                 className={cn(
                   "h-1.5 rounded-full transition-all duration-400",
                   isActive
-                    ? "w-8 bg-[#FF3366]"
+                    ? "w-8 bg-[#DC2626]"
                     : "w-1.5 bg-[var(--color-ivory-22)]",
                 )}
               />
@@ -238,7 +238,7 @@ export function CardDeck<T extends CardDeckItem>({
         {/* Background wash atras do deck ------------------------------ */}
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
           <div className="absolute left-1/2 top-1/2 h-[80%] w-[60%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--color-onyx-soft)]/50 blur-3xl" />
-          <div className="absolute left-1/2 top-1/2 h-[50%] w-[35%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#FF3366]/10 blur-2xl" />
+          <div className="absolute left-1/2 top-1/2 h-[50%] w-[35%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#DC2626]/10 blur-2xl" />
         </div>
 
         <AnimatePresence initial={false}>
