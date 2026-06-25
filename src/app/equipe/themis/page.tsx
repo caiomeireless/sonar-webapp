@@ -6,7 +6,7 @@
 // via componente <AcoesBuscaCardThemis>. Cada um abre modal de confirmação
 // e depois redireciona pra animação adaptada ao modo escolhido.
 import { redirect } from "next/navigation";
-import { Clock, FileText, Scale } from "lucide-react";
+import { Clock, Coins, FileText, Scale, User2 } from "lucide-react";
 import { listarProcessosThemis, type ProcessoThemis } from "@/lib/casos";
 import { perfilLogado } from "@/lib/perfis-server";
 import { ehCliente } from "@/lib/perfis";
@@ -115,15 +115,16 @@ export default async function ThemisPage({ searchParams }: Props) {
           </SpotlightCard>
         </div>
       ) : visao === "lista" ? (
-        <div className="relative mt-8 overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-1)]">
-          <table className="w-full text-base">
+        <div className="relative mt-8 overflow-x-auto rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-1)]">
+          <table className="w-full border-collapse text-left text-base">
             <thead>
-              <tr className="border-b border-[var(--color-line)] text-left font-mono text-[14px] uppercase tracking-[0.18em] text-[var(--color-ivory)]">
-                <th className="px-5 py-5">Processo</th>
-                <th className="px-5 py-5">Devedor</th>
-                <th className="px-5 py-5">Crédito</th>
-                <th className="px-5 py-5">Status</th>
-                <th className="px-5 py-5">Rastreamento</th>
+              <tr className="border-b border-[var(--color-line)] text-[var(--color-ivory)]">
+                <Th icon={<FileText className="h-3.5 w-3.5" />}>Processo</Th>
+                <Th icon={<User2 className="h-3.5 w-3.5" />}>Devedor</Th>
+                <Th icon={<Coins className="h-3.5 w-3.5" />}>Crédito</Th>
+                <Th>Status</Th>
+                <Th icon={<Scale className="h-3.5 w-3.5" />}>Advogado</Th>
+                <Th icon={<Clock className="h-3.5 w-3.5" />}>Rastreamento</Th>
               </tr>
             </thead>
             <tbody>
@@ -133,35 +134,60 @@ export default async function ThemisPage({ searchParams }: Props) {
                   <tr
                     key={p.caso_id}
                     className={
-                      "border-b border-[var(--color-line)] transition hover:bg-[var(--color-surface-2)] " +
+                      "group border-b border-[var(--color-line)] transition hover:bg-[var(--color-surface-2)] " +
                       (i % 2 === 1 ? "bg-[var(--color-surface-2)]/30" : "")
                     }
                   >
-                    <td className="px-5 py-5 font-mono text-2xl text-[var(--color-gold)]">
-                      {p.numero_processo ?? "—"}
-                    </td>
-                    <td className="px-5 py-5">
-                      <div className="nome-devedor text-lg font-medium text-[var(--color-devedor)]">{p.devedor.nome}</div>
-                      <div className="mt-1 font-mono text-sm text-[var(--color-ivory-88)]">
-                        {p.devedor.tipo === "PF" ? "PF" : "PJ"} · {p.devedor.documento}
+                    <Td>
+                      <span className="break-all font-mono text-base text-[var(--color-gold)]">
+                        {p.numero_processo ?? "—"}
+                      </span>
+                    </Td>
+                    <Td>
+                      <div className="nome-devedor font-serif text-lg leading-tight text-[var(--color-devedor)]">
+                        {p.devedor.nome}
                       </div>
-                    </td>
-                    <td className="px-5 py-5 font-mono text-3xl text-[var(--color-gold)]">
-                      {p.valor_credito_brl !== null ? formatBRL(p.valor_credito_brl) : "—"}
-                    </td>
-                    <td className="px-5 py-5">
+                      <div className="mt-1 inline-flex items-center gap-1.5 font-mono text-sm text-ivory">
+                        <span className="rounded-full bg-[var(--color-signal-soft)] px-1.5 py-0.5 text-[10px] uppercase tracking-[0.18em] text-[var(--color-signal)]">
+                          {p.devedor.tipo === "PF" ? "PF" : "PJ"}
+                        </span>
+                        {p.devedor.documento}
+                      </div>
+                    </Td>
+                    <Td>
+                      <span className="whitespace-nowrap font-mono text-lg tabular-nums text-[var(--color-gold)]">
+                        {p.valor_credito_brl !== null ? formatBRL(p.valor_credito_brl) : "—"}
+                      </span>
+                    </Td>
+                    <Td>
                       <span
-                        className="inline-flex rounded-full border px-3 py-1 font-mono text-[14px] uppercase tracking-[0.14em]"
-                        style={{ borderColor: status.color, color: status.color }}
+                        className="inline-flex rounded-full border bg-[var(--color-signal-soft)] px-2.5 py-1 font-mono text-[12px] uppercase tracking-[0.14em]"
+                        style={{
+                          borderColor: `${status.color}66`,
+                          color: status.color,
+                        }}
                       >
                         {status.label}
                       </span>
-                    </td>
-                    <td className="px-5 py-5 font-mono text-lg text-[var(--color-ivory)]">
-                      {p.ja_rastreado
-                        ? `${p.total_bens} ${p.total_bens === 1 ? "bem" : "bens"}`
-                        : "Aguardando"}
-                    </td>
+                    </Td>
+                    <Td>
+                      {p.responsavel_email ? (
+                        <span className="break-all font-mono text-sm text-[var(--color-advogado)]">
+                          {p.responsavel_email}
+                        </span>
+                      ) : (
+                        <span className="font-mono text-sm italic text-[var(--color-ivory-66)]">
+                          —
+                        </span>
+                      )}
+                    </Td>
+                    <Td>
+                      <span className="font-mono text-base text-[var(--color-ivory)]">
+                        {p.ja_rastreado
+                          ? `${p.total_bens} ${p.total_bens === 1 ? "bem" : "bens"}`
+                          : "Aguardando"}
+                      </span>
+                    </Td>
                   </tr>
                 );
               })}
@@ -340,5 +366,57 @@ function CardProcesso({
         </div>
       </div>
     </SpotlightCard>
+  );
+}
+
+// ============================================================
+// Helpers da tabela (modo Lista) — espelha padrão ListaCasos
+// ============================================================
+function Th({
+  children,
+  align,
+  icon,
+}: {
+  children: React.ReactNode;
+  align?: "right";
+  icon?: React.ReactNode;
+}) {
+  return (
+    <th
+      className={
+        "px-5 py-5 font-mono text-[12px] uppercase tracking-[0.22em] font-normal " +
+        (align === "right" ? "text-right" : "text-left")
+      }
+    >
+      <span
+        className={
+          "inline-flex items-center gap-1.5 " +
+          (align === "right" ? "flex-row-reverse" : "")
+        }
+      >
+        {icon ? (
+          <span className="text-[var(--color-signal)]/70">{icon}</span>
+        ) : null}
+        {children}
+      </span>
+    </th>
+  );
+}
+
+function Td({
+  children,
+  align,
+}: {
+  children: React.ReactNode;
+  align?: "right";
+}) {
+  return (
+    <td
+      className={
+        "px-5 py-5 align-middle " + (align === "right" ? "text-right" : "")
+      }
+    >
+      {children}
+    </td>
   );
 }

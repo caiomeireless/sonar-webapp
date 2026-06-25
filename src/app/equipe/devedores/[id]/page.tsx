@@ -406,7 +406,7 @@ function HeaderDossie({
             aria-hidden="true"
             className="inline-block h-px w-12 bg-[var(--color-signal)] opacity-70 sm:w-16"
           />
-          <span className="font-mono text-[clamp(20px,2.6vw,32px)] font-medium uppercase tracking-[0.32em] text-[var(--color-signal)]">
+          <span className="font-mono font-medium uppercase tracking-[0.32em] text-[var(--color-signal)] text-[clamp(20px,2.6vw,32px)]">
             Dossiê Patrimonial
           </span>
           <span

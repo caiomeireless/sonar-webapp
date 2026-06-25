@@ -8,7 +8,7 @@
 // Default: cards.
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Mail, Phone, Hash, Clock } from "lucide-react";
+import { Mail, Phone, Hash, Clock, User2, FileText, Coins } from "lucide-react";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { CardStack } from "@/components/ui/CardStack";
 import { formatBRL, formatTempoRelativo } from "@/lib/format";
@@ -268,68 +268,88 @@ function ListaCredores({
   euQuery: string;
 }) {
   return (
-    <div className="mt-6 overflow-x-auto rounded-lg border border-[var(--color-ivory-12)] bg-[var(--color-onyx-soft)]/30">
-      <table className="w-full border-collapse text-left">
+    <div className="mt-8 overflow-x-auto rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-1)]">
+      <table className="w-full border-collapse text-left text-base">
         <thead>
-          <tr className="border-b border-[var(--color-ivory-12)] text-[var(--color-ivory-66)]">
-            <Th>Cliente</Th>
-            <Th>Tipo</Th>
-            <Th>Doc</Th>
-            <Th align="right">Casos</Th>
-            <Th align="right">Devedores</Th>
-            <Th align="right">Bens</Th>
-            <Th align="right">Valor estimado</Th>
-            <Th align="right">Última consulta</Th>
+          <tr className="border-b border-[var(--color-line)] text-[var(--color-ivory)]">
+            <Th icon={<User2 className="h-3.5 w-3.5" />}>Cliente</Th>
+            <Th icon={<FileText className="h-3.5 w-3.5" />}>Tipo</Th>
+            <Th icon={<FileText className="h-3.5 w-3.5" />}>Documento</Th>
+            <Th align="right" icon={<Hash className="h-3.5 w-3.5" />}>
+              Casos
+            </Th>
+            <Th align="right" icon={<Hash className="h-3.5 w-3.5" />}>
+              Devedores
+            </Th>
+            <Th align="right" icon={<Hash className="h-3.5 w-3.5" />}>
+              Bens
+            </Th>
+            <Th align="right" icon={<Coins className="h-3.5 w-3.5" />}>
+              Valor Estimado
+            </Th>
+            <Th align="right" icon={<Clock className="h-3.5 w-3.5" />}>
+              Última Consulta
+            </Th>
           </tr>
         </thead>
         <tbody>
-          {credores.map((c) => (
+          {credores.map((c, i) => (
             <tr
               key={c.id}
-              className="group border-b border-[var(--color-ivory-12)] last:border-b-0 transition hover:bg-[var(--color-ivory-12)]/20"
+              className={
+                "group border-b border-[var(--color-line)] transition hover:bg-[var(--color-surface-2)] " +
+                (i % 2 === 1 ? "bg-[var(--color-surface-2)]/30" : "")
+              }
             >
               <Td>
                 <Link
                   href={`/equipe/devedores/credor/${c.id}${euQuery}`}
-                  className="nome-cliente block font-serif text-[21px] leading-tight text-[var(--color-gold)]"
+                  className="nome-cliente block font-serif text-lg leading-tight text-[var(--color-cliente)] hover:underline"
                 >
                   {c.nome}
                 </Link>
               </Td>
               <Td>
-                <span className="font-mono text-[11px] text-[var(--color-ivory-88)]">
+                <span
+                  className={
+                    "inline-flex rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] " +
+                    (c.tipo === "PF"
+                      ? "border-[var(--color-signal)]/40 bg-[var(--color-signal-soft)] text-[var(--color-signal)]"
+                      : "border-[var(--color-gold)]/40 bg-[var(--color-gold)]/10 text-[var(--color-gold)]")
+                  }
+                >
                   {c.tipo}
                 </span>
               </Td>
               <Td>
-                <span className="font-mono text-[11px] text-[var(--color-ivory-88)]">
+                <span className="font-mono text-sm text-ivory">
                   {c.documento}
                 </span>
               </Td>
               <Td align="right">
-                <span className="font-mono text-[12px] text-ivory">
+                <span className="font-mono text-base tabular-nums text-ivory">
                   {c.total_casos}
                 </span>
               </Td>
               <Td align="right">
-                <span className="font-mono text-[12px] text-ivory">
+                <span className="font-mono text-base tabular-nums text-ivory">
                   {c.total_devedores}
                 </span>
               </Td>
               <Td align="right">
-                <span className="font-mono text-[18px] text-[var(--color-gold)]">
+                <span className="font-serif text-2xl text-[var(--color-gold)]">
                   {c.total_bens}
                 </span>
               </Td>
               <Td align="right">
-                <span className="font-mono text-[12px] text-[var(--color-ivory-88)]">
+                <span className="whitespace-nowrap font-mono text-base tabular-nums text-ivory">
                   {c.valor_estimado_total_brl > 0
                     ? formatBRL(c.valor_estimado_total_brl)
                     : "—"}
                 </span>
               </Td>
               <Td align="right">
-                <span className="font-mono text-[11px] text-[var(--color-ivory-66)]">
+                <span className="font-mono text-sm text-[var(--color-ivory-88)]">
                   {formatTempoRelativo(c.ultima_consulta_em)}
                 </span>
               </Td>
@@ -344,18 +364,30 @@ function ListaCredores({
 function Th({
   children,
   align,
+  icon,
 }: {
   children: React.ReactNode;
   align?: "right";
+  icon?: React.ReactNode;
 }) {
   return (
     <th
       className={
-        "px-3 py-2 font-mono text-[10px] uppercase tracking-[0.28em] font-normal " +
+        "px-5 py-5 font-mono text-[12px] uppercase tracking-[0.22em] font-normal " +
         (align === "right" ? "text-right" : "text-left")
       }
     >
-      {children}
+      <span
+        className={
+          "inline-flex items-center gap-1.5 " +
+          (align === "right" ? "flex-row-reverse" : "")
+        }
+      >
+        {icon ? (
+          <span className="text-[var(--color-signal)]/70">{icon}</span>
+        ) : null}
+        {children}
+      </span>
     </th>
   );
 }
@@ -370,7 +402,7 @@ function Td({
   return (
     <td
       className={
-        "px-3 py-2.5 align-middle " + (align === "right" ? "text-right" : "")
+        "px-5 py-5 align-middle " + (align === "right" ? "text-right" : "")
       }
     >
       {children}
