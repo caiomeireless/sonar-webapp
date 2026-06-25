@@ -11,25 +11,55 @@ import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
 import { NAV_CLIENTE } from "@/lib/nav-cliente";
 import { perfilLogado } from "@/lib/perfis-server";
+import { perfilAtual } from "@/lib/perfis";
+import { previewEuFromParam } from "@/lib/dev-auth";
+import { DEMO_CLIENTE_EMAIL } from "@/lib/mock-fixtures";
 
-export default async function ClienteLayout({ children }: { children: ReactNode }) {
-  const perfil = await perfilLogado();
+export default async function ClienteLayout({
+  children,
+  searchParams,
+}: {
+  children: ReactNode;
+  searchParams?: Promise<{ eu?: string | string[] }>;
+}) {
+  const params = (await searchParams) ?? {};
+  const perfilSessao = await perfilLogado();
   // Em producao, sem perfil = login. Em dev, paginas filhas resolvem via ?eu=.
-  if (!perfil && process.env.NODE_ENV === "production") {
+  if (!perfilSessao && process.env.NODE_ENV === "production") {
     redirect("/login");
   }
 
-  const email = perfil?.email ?? "Cliente Demonstração";
   // Admin/sócio que entrou no portal cliente está em modo visualização.
-  const ehVisualizacao = perfil?.papel === "admin" || perfil?.papel === "socio";
+  const ehVisualizacao =
+    perfilSessao?.papel === "admin" || perfilSessao?.papel === "socio";
+
+  // Resolve o email "efetivo" do portal:
+  // - se admin/sócio passou ?eu=, usa esse;
+  // - se admin/sócio entrou em /cliente direto (sem ?eu=), auto-injeta o
+  //   cliente demo pra todos os links/queries baterem nele;
+  // - senão, cai no email da sessão (cliente real).
+  const euParam = previewEuFromParam(params.eu, perfilSessao);
+  const emailEfetivo =
+    euParam ?? (ehVisualizacao ? DEMO_CLIENTE_EMAIL : perfilSessao?.email ?? null);
+
+  // Em modo visualização, carrega o perfil do cliente que está sendo
+  // simulado (pra Sidebar/TopBar mostrarem nome/email DELE, não do admin).
+  const perfilExibicao =
+    emailEfetivo && emailEfetivo !== perfilSessao?.email
+      ? await perfilAtual(emailEfetivo)
+      : perfilSessao;
+
+  const email = perfilExibicao?.email ?? emailEfetivo ?? "Cliente Demonstração";
 
   // No portal do cliente, o footer da sidebar sempre mostra "CLIENTE" como
   // papel (mesmo quando admin/socio entra em modo visualizacao). O sentido
   // do papel ali eh "voce esta vendo a tela como X", nao "voce eh X".
-  const papel = ehVisualizacao ? "CLIENTE" : (perfil?.papel ?? "cliente").toUpperCase();
+  const papel = ehVisualizacao ? "CLIENTE" : (perfilExibicao?.papel ?? "cliente").toUpperCase();
   const nome =
-    perfil?.nome?.trim() ||
+    perfilExibicao?.nome?.trim() ||
     (() => {
+      // Em modo visualização sem perfil cadastrado, mostra rótulo amigável.
+      if (ehVisualizacao) return "Cliente Demonstração";
       const local = email.split("@")[0] ?? email;
       return local
         .split(/[._-]/)
@@ -38,10 +68,21 @@ export default async function ClienteLayout({ children }: { children: ReactNode 
         .join(" ");
     })();
 
+  // Em modo visualização, propaga ?eu= em TODOS os links da Sidebar pra
+  // que navegar entre Dashboard/Casos/Custos/Preferências não perca o
+  // email efetivo. Cliente real navega sem o param (comportamento atual).
+  const qsEu =
+    ehVisualizacao && emailEfetivo
+      ? "?eu=" + encodeURIComponent(emailEfetivo)
+      : "";
+  const itemsComEu = qsEu
+    ? NAV_CLIENTE.map((it) => ({ ...it, href: it.href + qsEu }))
+    : NAV_CLIENTE;
+
   return (
     <div className="flex min-h-svh bg-onyx text-ivory">
       <Sidebar
-        items={NAV_CLIENTE}
+        items={itemsComEu}
         usuario={{ email, papel, nome }}
         portal="cliente"
       />

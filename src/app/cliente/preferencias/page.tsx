@@ -5,13 +5,15 @@
 import { redirect } from "next/navigation";
 import { perfilLogado } from "@/lib/perfis-server";
 import { perfilAtual, ehCliente } from "@/lib/perfis";
-import { devEuFromParam } from "@/lib/dev-auth";
+import { previewEuFromParam } from "@/lib/dev-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
   obterPreferenciasDoCliente,
   gastoDoMesAtual,
 } from "@/lib/preferencias";
 import { PreferenciasForm } from "./PreferenciasForm";
+
+export const dynamic = "force-dynamic";
 
 type Props = {
   searchParams?: Promise<{ eu?: string | string[] }>;
@@ -20,7 +22,7 @@ type Props = {
 export default async function PreferenciasPage({ searchParams }: Props) {
   const params = (await searchParams) ?? {};
   const perfilSessao = await perfilLogado();
-  const eu = devEuFromParam(params.eu) ?? perfilSessao?.email ?? null;
+  const eu = previewEuFromParam(params.eu, perfilSessao) ?? perfilSessao?.email ?? null;
 
   if (!eu) redirect("/login");
 

@@ -8,6 +8,8 @@ import { previewEuFromParam } from "@/lib/dev-auth";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { CasosClientStack } from "./CasosClientStack";
 
+export const dynamic = "force-dynamic";
+
 type Props = {
   searchParams?: Promise<{ eu?: string | string[] }>;
 };
