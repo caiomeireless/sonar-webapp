@@ -55,9 +55,21 @@ export default async function CasosClientePage({ searchParams }: Props) {
           </SpotlightCard>
         </div>
       ) : (
-        // CardStack 3D fan (substituiu o grid md:grid-cols-2 lg:grid-cols-3).
-        // Server -> Client boundary mora no CasosClientStack ("use client").
-        <CasosClientStack casos={casos} />
+        <>
+          {/* Titulo grande "ESCOLHA O DEVEDOR" em vermelho neon — espelha o
+              padrao do /equipe/devedores/credor/[id] (Carteira do credor). */}
+          <div className="mx-auto mt-10 mb-4 max-w-[1100px] text-center">
+            <p
+              className="font-serif text-[clamp(28px,4vw,42px)] font-medium uppercase tracking-[0.10em] text-[var(--color-devedor)]"
+              style={{ textShadow: "0 0 18px rgba(220,38,38,0.45)" }}
+            >
+              Escolha o Devedor
+            </p>
+          </div>
+          {/* CardStack 3D fan (substituiu o grid md:grid-cols-2 lg:grid-cols-3).
+              Server -> Client boundary mora no CasosClientStack ("use client"). */}
+          <CasosClientStack casos={casos} />
+        </>
       )}
     </main>
   );
