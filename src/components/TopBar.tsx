@@ -47,9 +47,25 @@ const TITULOS_EQUIPE: TitulosMap = {
 };
 
 const TITULOS_CLIENTE: TitulosMap = {
+  "/cliente": {
+    titulo: "Dashboard",
+    subtitulo: "Visão geral dos seus processos",
+  },
   "/cliente/casos": {
     titulo: "Meus Casos",
     subtitulo: "Acompanhamento patrimonial dos seus processos",
+  },
+  "/cliente/consultas": {
+    titulo: "Consultas Pré-Processuais",
+    subtitulo: "Análises de viabilidade preventivas",
+  },
+  "/cliente/custos": {
+    titulo: "Monitor de Custos",
+    subtitulo: "Quanto está sendo investido na sua carteira",
+  },
+  "/cliente/sugestoes": {
+    titulo: "Sugestões e Dúvidas",
+    subtitulo: "Fale com o escritório",
   },
   "/cliente/preferencias": {
     titulo: "Preferências",
@@ -72,6 +88,9 @@ function resolverTitulo(
   }
   if (pathname.startsWith("/equipe")) {
     return { titulo: "Sonar", subtitulo: "Plataforma" };
+  }
+  if (pathname.startsWith("/cliente")) {
+    return { titulo: "Dashboard" };
   }
   return { titulo: "Sonar" };
 }

@@ -272,7 +272,7 @@ export function CardStack<T>({
         <AnimatePresence initial={false}>
           {visible.map(({ item, index, offset }) => (
             <FanCard
-              key={index}
+              key={(item as { id?: string | number }).id ?? index}
               offset={offset}
               maxOffset={maxOffset}
               cardWidth={cardWidth}

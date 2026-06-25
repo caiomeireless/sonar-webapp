@@ -10,7 +10,7 @@ import {
 } from "@/lib/casos";
 import type { TipoBem } from "@/lib/mock-fixtures";
 import { perfilLogado } from "@/lib/perfis-server";
-import { devEuFromParam } from "@/lib/dev-auth";
+import { previewEuFromParam } from "@/lib/dev-auth";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import {
   formatBRL,
@@ -46,7 +46,7 @@ export default async function DossieClientePage({ params, searchParams }: Props)
   const { id } = await params;
   const sp = (await searchParams) ?? {};
   const perfil = await perfilLogado();
-  const eu = devEuFromParam(sp.eu) ?? perfil?.email ?? null;
+  const eu = previewEuFromParam(sp.eu, perfil) ?? perfil?.email ?? null;
   if (!eu) redirect("/login");
 
   if (!/^\d+$/.test(id)) {
