@@ -18,6 +18,16 @@ import {
   type RegistroCusto,
 } from "@/lib/custos";
 import type { Medida, ResultadoMedida, TipoMedida } from "@/lib/medidas";
+import {
+  calcularDistribuicaoGeografica as calcularDistribuicaoGeograficaPura,
+  type BemParaLocalizacao,
+  type DistribuicaoGeografica as DistribuicaoGeograficaPura,
+} from "@/lib/distribuicao-bens";
+
+// Re-exporta pra manter o import-path histórico funcionando — várias
+// telas ainda importam DistribuicaoGeografica daqui.
+export type { BemParaLocalizacao };
+export const calcularDistribuicaoGeografica = calcularDistribuicaoGeograficaPura;
 
 // ============================================================
 // TIPOS de saída
@@ -109,13 +119,8 @@ export interface ConcentracaoPatrimonial {
   indiceHerfindahl: number;
 }
 
-export interface DistribuicaoGeografica {
-  cidade: string;
-  uf: string;
-  qtdBens: number;
-  valorTotalBrl: number;
-  bensIds: number[];
-}
+// Re-exporta o tipo definido em distribuicao-bens (single source of truth).
+export type DistribuicaoGeografica = DistribuicaoGeograficaPura;
 
 export interface VinculoPatrimonial {
   nome: string;
@@ -652,77 +657,9 @@ function calcularConcentracaoPatrimonial(
   };
 }
 
-// (d) Distribuição geográfica.
-// Bens com cidade/uf no banco -> agrupa direto.
-// Bens SEM cidade/uf -> gera mock estável via hash do bemId.
-const CIDADES_MOCK_SP: { cidade: string; uf: string }[] = [
-  { cidade: "São Paulo", uf: "SP" },
-  { cidade: "São Paulo", uf: "SP" },
-  { cidade: "São Paulo", uf: "SP" },
-  { cidade: "Sorocaba", uf: "SP" },
-  { cidade: "Campinas", uf: "SP" },
-  { cidade: "Santos", uf: "SP" },
-  { cidade: "Ribeirão Preto", uf: "SP" },
-  { cidade: "São José dos Campos", uf: "SP" },
-];
-
-const CIDADES_MOCK_FORA: { cidade: string; uf: string }[] = [
-  { cidade: "Rio de Janeiro", uf: "RJ" },
-  { cidade: "Belo Horizonte", uf: "MG" },
-  { cidade: "Curitiba", uf: "PR" },
-  { cidade: "Goiânia", uf: "GO" },
-];
-
-function rotularBemMock(bemId: number): { cidade: string; uf: string } {
-  // Hash determinista: 80% cai em SP (lista SP tem repetição de São Paulo),
-  // 20% sai pra outras UFs.
-  const h = Math.abs(bemId * 2654435761) >>> 0; // Knuth multiplicative hash
-  if (h % 5 === 0) {
-    return CIDADES_MOCK_FORA[h % CIDADES_MOCK_FORA.length];
-  }
-  return CIDADES_MOCK_SP[h % CIDADES_MOCK_SP.length];
-}
-
-// Exposta pra reuso fora do dashboard-do-caso (ex.: Painel da Equipe e do
-// Cliente reaproveitam a mesma agregação por UF/cidade). A assinatura pega
-// só os campos lidos — assim o Painel da Plataforma (que carrega só um
-// subset das colunas de bens_encontrados) consegue chamar sem cast.
-export type BemParaLocalizacao = Pick<Bem, "id" | "valor_estimado_brl"> & {
-  cidade?: string | null;
-  uf?: string | null;
-};
-export function calcularDistribuicaoGeografica(
-  bens: BemParaLocalizacao[],
-): DistribuicaoGeografica[] {
-  type Bucket = { cidade: string; uf: string; valor: number; ids: number[] };
-  const acc = new Map<string, Bucket>();
-  for (const b of bens) {
-    let cidade = (b.cidade ?? "").trim();
-    let uf = (b.uf ?? "").trim();
-    if (!cidade || !uf) {
-      const mock = rotularBemMock(b.id);
-      cidade = mock.cidade;
-      uf = mock.uf;
-    }
-    const key = `${uf}|${cidade}`;
-    const cur = acc.get(key) ?? { cidade, uf, valor: 0, ids: [] };
-    cur.valor += Number(b.valor_estimado_brl) || 0;
-    cur.ids.push(b.id);
-    acc.set(key, cur);
-  }
-  const out: DistribuicaoGeografica[] = [];
-  for (const v of acc.values()) {
-    out.push({
-      cidade: v.cidade,
-      uf: v.uf,
-      qtdBens: v.ids.length,
-      valorTotalBrl: v.valor,
-      bensIds: v.ids,
-    });
-  }
-  out.sort((a, b) => b.valorTotalBrl - a.valorTotalBrl);
-  return out;
-}
+// (d) Distribuição geográfica → implementação em @/lib/distribuicao-bens
+// (extraída pra quebrar ciclo de import com casos.ts). A função e o tipo
+// são re-exportados acima.
 
 // (e) Vínculos patrimoniais — lê bens tipo 'vinculo'.
 function calcularVinculosPatrimoniais(bens: Bem[]): VinculoPatrimonial[] {

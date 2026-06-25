@@ -4,6 +4,10 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { TipoBem, FonteBusca } from "./mock-fixtures";
 import { CASOS_DEMO } from "./mock-fixtures";
+import {
+  calcularDistribuicaoGeografica,
+  type DistribuicaoGeografica,
+} from "./distribuicao-bens";
 
 // WORKAROUND PRA DEMO: hidrata o juízo (vara/comarca/UF/gênero/classe da ação)
 // fazendo overlay com o mock CASOS_DEMO por id. No Sem 2, isso vira do Themis

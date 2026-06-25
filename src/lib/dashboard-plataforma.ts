@@ -13,6 +13,10 @@ import { ROTULO_TIPO, type RegistroCusto } from "@/lib/custos";
 import { perfisPorEmail, nomeOuEmail } from "@/lib/perfis";
 import type { TipoBem } from "@/lib/mock-fixtures";
 import type { TipoMedida, ResultadoMedida } from "@/lib/medidas";
+import {
+  calcularDistribuicaoGeografica,
+  type DistribuicaoGeografica,
+} from "@/lib/distribuicao-bens";
 
 // ============================================================
 // TIPOS de saída
@@ -99,6 +103,9 @@ export interface DashboardPlataforma {
   carteiraPorAdvogado: CarteiraAdvogadoItem[];
   custosPorAPI: CustoApiItem[];
   feedMedidasRecentes: FeedMedidaItem[];
+  // Distribuição geográfica dos bens em rastreio — alimenta o
+  // MapaDistribuicaoBens reutilizado no Painel da Equipe.
+  bensPorLocalizacao: DistribuicaoGeografica[];
 }
 
 // ============================================================
@@ -204,10 +211,15 @@ interface CasoRow {
 }
 
 interface BemRow {
+  id: number;
   devedor_id: number;
   tipo: TipoBem;
   valor_estimado_brl: number | null;
   fonte_consultada_em: string | null;
+  // cidade/uf podem não existir no schema atual; quando ausentes a
+  // distribuição geográfica usa fallback determinístico via hash do id.
+  cidade?: string | null;
+  uf?: string | null;
 }
 
 interface MedidaRow {
@@ -287,7 +299,7 @@ async function lerBens(): Promise<BemRow[]> {
     return await selecionarTudo<BemRow>(async (from, to) => {
       const res = await sb
         .from("bens_encontrados")
-        .select("devedor_id, tipo, valor_estimado_brl, fonte_consultada_em")
+        .select("id, devedor_id, tipo, valor_estimado_brl, fonte_consultada_em")
         .eq("ativo", true)
         .range(from, to);
       return { data: res.data as BemRow[] | null, error: res.error };
@@ -850,6 +862,10 @@ export async function obterDadosDashboardPlataforma(
     casos: filtrado.casos,
     devedores: filtrado.devedores,
   });
+  // Reuso do agregador do dashboard-do-caso: a UI do mapa (MapaDistribuicaoBens)
+  // espera exatamente DistribuicaoGeografica[]. Como BemRow já tem o subset
+  // (id + valor_estimado_brl + cidade/uf opcionais), passa direto sem cast.
+  const bensPorLocalizacao = calcularDistribuicaoGeografica(filtrado.bens);
 
   return {
     kpisGerais,
@@ -861,5 +877,6 @@ export async function obterDadosDashboardPlataforma(
     carteiraPorAdvogado,
     custosPorAPI,
     feedMedidasRecentes,
+    bensPorLocalizacao,
   };
 }
