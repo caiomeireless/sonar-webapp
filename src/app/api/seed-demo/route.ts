@@ -32,8 +32,10 @@ export async function POST() {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error("[seed-demo] erro:", message);
+    // Expoe a mensagem real pro admin/dono — gate de permissao ja garante
+    // que so o dono chega aqui, entao nao ha vazamento pra publico.
     return NextResponse.json(
-      { ok: false, error: "Internal error" },
+      { ok: false, error: message },
       { status: 500 },
     );
   }
