@@ -17,6 +17,7 @@ import {
   Scale,
   MapPin,
   Users2,
+  Hash,
   type LucideIcon,
 } from "lucide-react";
 import {
@@ -832,6 +833,11 @@ function CardCasoVinculado({ caso }: { caso: CasoResumo }) {
         <p className="font-mono text-base text-[var(--color-ivory-66)]">
           {caso.numero_processo || "Sem processo cadastrado"}
         </p>
+        {/* Chip PASTA #X — número da pasta interna do Themis (caso_id) */}
+        <span className="mt-2 inline-flex items-center gap-1 rounded-full border border-[var(--color-ivory-22)] bg-[var(--color-surface-2)]/60 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+          <Hash className="h-3 w-3" />
+          Pasta {caso.id}
+        </span>
         <p className="mt-1 text-xl text-ivory">
           Credor:{" "}
           <span className="text-[var(--color-gold)]">{caso.credor.nome}</span>

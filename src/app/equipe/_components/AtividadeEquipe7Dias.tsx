@@ -146,9 +146,9 @@ export default function AtividadeEquipe7Dias({ dados }: Props) {
           Nenhuma medida registrada nos últimos 7 dias.
         </p>
       ) : (
-        {/* Card agora ocupa a linha inteira (col-span-12), o stacked bar
-            ganha bastante largura — sobe a altura pra ~376px pra ficar
-            proporcional e densifica o eixo Y com mais ticks. */}
+        // Card agora ocupa a linha inteira (col-span-12), o stacked bar
+        // ganha bastante largura — sobe a altura pra ~376px pra ficar
+        // proporcional e densifica o eixo Y com mais ticks.
         <div className="chart-neon-glow h-[376px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart

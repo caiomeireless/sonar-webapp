@@ -57,6 +57,10 @@ export default function Top5DevedoresRastreio({ dados }: Props) {
                     >
                       {item.devedorNome}
                     </Link>
+                    {/* Sub: Pasta = id interno (TopDevedorItem agrega vários casos, exibimos o devedorId como referência rápida) */}
+                    <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+                      Pasta #{item.devedorId}
+                    </p>
                   </Td>
                   <Td align="right">
                     <span className="font-mono text-[14px] tabular-nums text-ivory whitespace-nowrap">

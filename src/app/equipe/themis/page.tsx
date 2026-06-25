@@ -232,9 +232,16 @@ function CardProcesso({
     <SpotlightCard className="p-7">
       {/* === BLOCO 1: IDENTIFICAÇÃO DO DEVEDOR === */}
       <header>
-        <span className="font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-signal)]">
-          Processo Themis
-        </span>
+        <div className="flex items-start justify-between gap-3">
+          <span className="font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-signal)]">
+            Processo Themis
+          </span>
+          {/* Chip PASTA #X — número da pasta interna do Themis */}
+          <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-ivory-22)] bg-[var(--color-surface-2)]/60 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+            <Hash className="h-3 w-3" />
+            Pasta {processo.caso_id}
+          </span>
+        </div>
         <h3 className="nome-devedor mt-3 font-serif text-[24px] leading-[1.15] text-[var(--color-devedor)]">
           {processo.devedor.nome}
         </h3>
