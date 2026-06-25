@@ -12,6 +12,17 @@ import { NAV_EQUIPE } from "@/lib/nav-equipe";
 import { ehCliente } from "@/lib/perfis";
 import { perfilLogado } from "@/lib/perfis-server";
 
+// Fallback: extrai "caio@bp..." -> "Caio". Substitui . _ - por espaco e
+// title-case-ifica. Usado quando o perfil nao tem nome cadastrado.
+function nomeDoEmail(email: string): string {
+  const local = email.split("@")[0] ?? email;
+  return local
+    .split(/[._-]/)
+    .filter(Boolean)
+    .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+    .join(" ");
+}
+
 export default async function EquipeLayout({ children }: { children: ReactNode }) {
   const perfil = await perfilLogado();
   if (ehCliente(perfil)) {
@@ -25,12 +36,13 @@ export default async function EquipeLayout({ children }: { children: ReactNode }
 
   const email = perfil?.email ?? "Equipe";
   const papel = (perfil?.papel ?? "funcionario").toUpperCase();
+  const nome = perfil?.nome?.trim() || nomeDoEmail(email);
 
   return (
     <div className="flex min-h-svh bg-onyx text-ivory">
       <Sidebar
         items={NAV_EQUIPE}
-        usuario={{ email, papel }}
+        usuario={{ email, papel, nome }}
         portal="equipe"
       />
       <div className="relative flex min-w-0 flex-1 flex-col">

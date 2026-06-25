@@ -40,6 +40,8 @@ export type SidebarUsuario = {
   email: string;
   /** ex: "socio", "funcionario", "cliente". */
   papel: string;
+  /** Nome do usuario logado (preferido sobre o email no card do nav). */
+  nome?: string;
 };
 
 export type SidebarPortal = "equipe" | "cliente";
@@ -418,26 +420,35 @@ function SidebarFooter({
   usuario: SidebarUsuario;
   portal: SidebarPortal;
 }) {
+  const nomeExibicao = usuario.nome?.trim() || usuario.email;
   return (
-    <div className="flex flex-col gap-3">
-      {/* Card do usuario */}
+    <div className="flex flex-col items-center gap-3 text-center">
+      {/* Card do usuario — TUDO CENTRALIZADO. Mostra nome (nao email),
+          pill de status da plataforma (Online signal) e nivel de
+          permissao (PortalBadge). */}
       <div
-        className="flex flex-col gap-1.5 rounded-xl border border-[var(--color-line)]
-                   bg-[var(--color-surface-2)] px-3 py-2.5"
+        className="flex w-full flex-col items-center gap-2 rounded-xl border border-[var(--color-line)]
+                   bg-[var(--color-surface-2)] px-3 py-3"
       >
+        {/* Pill "Sistema Online" no topo */}
         <span
-          className="truncate text-[13px] text-[var(--color-fg)]"
+          className="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-signal-soft-2)] bg-[var(--color-signal-soft)] px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.22em] text-[var(--color-signal)]"
+          title="Plataforma online"
+        >
+          <span aria-hidden className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--color-signal)] shadow-[0_0_6px_rgba(60,255,138,0.85)]" />
+          Sistema Online
+        </span>
+        <span
+          className="max-w-full truncate text-[14px] font-medium text-[var(--color-fg)]"
           title={usuario.email}
         >
-          {usuario.email}
+          {nomeExibicao}
         </span>
-        <div className="flex items-center gap-2">
-          <PortalBadge portal={portal} papel={usuario.papel} />
-        </div>
+        <PortalBadge portal={portal} papel={usuario.papel} />
       </div>
 
       {/* Acoes em linha: tema + sair */}
-      <div className="flex items-center gap-2">
+      <div className="flex w-full items-center justify-center gap-2">
         <ThemeToggle />
 
         <form action="/auth/signout" method="post" className="flex-1">
@@ -457,9 +468,9 @@ function SidebarFooter({
         </form>
       </div>
 
-      {/* Assinatura — projeto BETA + autoria */}
-      <div className="flex flex-col gap-0.5 px-1">
-        <div className="flex items-center gap-1.5">
+      {/* Assinatura — projeto BETA + autoria (centralizada) */}
+      <div className="flex flex-col items-center gap-1 px-1">
+        <div className="flex items-center justify-center gap-1.5">
           <span className="inline-flex items-center rounded-full border border-[var(--color-signal-soft-2)] bg-[var(--color-signal-soft)] px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-[0.18em] text-[var(--color-signal)]">
             Beta
           </span>
@@ -467,7 +478,7 @@ function SidebarFooter({
             Sonar &middot; Battaglia &amp; Pedrosa
           </span>
         </div>
-        <p className="text-[10px] text-[var(--color-gold)]">
+        <p className="text-center text-[10px] text-[var(--color-gold)]">
           Projeto conduzido por Caio Vicentino
         </p>
       </div>

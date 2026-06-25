@@ -21,6 +21,16 @@ export default async function ClienteLayout({ children }: { children: ReactNode 
 
   const email = perfil?.email ?? "Cliente Demonstração";
   const papel = (perfil?.papel ?? "cliente").toUpperCase();
+  const nome =
+    perfil?.nome?.trim() ||
+    (() => {
+      const local = email.split("@")[0] ?? email;
+      return local
+        .split(/[._-]/)
+        .filter(Boolean)
+        .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+        .join(" ");
+    })();
 
   // Admin/sócio que entrou no portal cliente está em modo visualização.
   const ehVisualizacao = perfil?.papel === "admin" || perfil?.papel === "socio";
@@ -29,7 +39,7 @@ export default async function ClienteLayout({ children }: { children: ReactNode 
     <div className="flex min-h-svh bg-onyx text-ivory">
       <Sidebar
         items={NAV_CLIENTE}
-        usuario={{ email, papel }}
+        usuario={{ email, papel, nome }}
         portal="cliente"
       />
       <div className="relative flex min-w-0 flex-1 flex-col">
