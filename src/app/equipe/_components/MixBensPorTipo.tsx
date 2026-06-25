@@ -1,21 +1,23 @@
 "use client";
 
 // Mix de bens por tipo — Dashboard da Plataforma.
-// Donut Recharts agrupando bens pelos 6 TipoBem. Métrica = QUANTIDADE
-// (o gêmeo `DonutBensPorValor` do Dashboard do Caso já mostra valor;
-// aqui a leitura útil pra gestão da equipe é "quantos veículos vs
-// quantos imóveis estamos rastreando" — distribuição do esforço).
-// Centro = total de bens. Legenda lateral = tipo + qtd + %.
-// Client por causa do Recharts (mede o DOM no ResponsiveContainer).
-// Dados já vem agregados de obterDadosDashboardPlataforma(); o componente
-// NÃO chama Supabase.
+// Antes: donut Recharts + legenda lateral. Caio reclamou que ficava
+// vertical e os nomes longos (ex. "Processos onde é credor") cortavam.
+// Agora: BAR CHART HORIZONTAL Recharts — categoria no eixo Y, qtd no X,
+// uma cor por TipoBem. Muito mais legivel pros 6 nomes longos.
+// Mantemos o estilo signal+glow do dashboard, accent gold no card,
+// total de bens no topo do conteudo (substitui o "centro" do donut).
+// Dados ja' vem agregados de obterDadosDashboardPlataforma().
 
 import {
+  Bar,
+  BarChart,
   Cell,
-  Pie,
-  PieChart,
+  LabelList,
   ResponsiveContainer,
   Tooltip,
+  XAxis,
+  YAxis,
   type TooltipContentProps,
 } from "recharts";
 import type {
@@ -30,6 +32,9 @@ import { formatBRL } from "@/lib/format";
 import { DashboardCard } from "@/components/dashboard/DashboardCard";
 import {
   TIPO_BEM_COLORS,
+  axisLineStyle,
+  axisTickStyle,
+  num,
   tooltipContentStyle,
   tooltipItemStyle,
   tooltipLabelStyle,
@@ -37,23 +42,18 @@ import {
 
 // ============================================================
 // META — label + ícone por tipo de bem.
-// Espelha o mapa usado em DonutBensPorValor / equipe/devedores/[id]
-// pra consistência visual entre dashboards. Não há TIPO_META exportado
-// pra bens em /lib (só existe pra medidas).
 // ============================================================
 
-const TIPO_BEM_META: Record<TipoBem, { label: string; icone: string }> = {
-  veiculo: { label: "Veículos", icone: "V" },
-  imovel: { label: "Imóveis", icone: "I" },
-  empresa: { label: "Participações societárias", icone: "E" },
-  processo_credito: { label: "Processos onde é credor", icone: "P" },
-  endereco: { label: "Endereços confirmados", icone: "A" },
-  vinculo: { label: "Vínculos familiares", icone: "F" },
+const TIPO_BEM_META: Record<TipoBem, { label: string }> = {
+  veiculo: { label: "Veículos" },
+  imovel: { label: "Imóveis" },
+  empresa: { label: "Participações Societárias" },
+  processo_credito: { label: "Processos Onde é Credor" },
+  endereco: { label: "Endereços Confirmados" },
+  vinculo: { label: "Vínculos Familiares" },
 };
 
-// Forma consumida pelo Recharts. `value` = quantidade (eixo do donut).
-// `valorBrl` viaja junto pro tooltip mostrar também o patrimônio do tipo.
-type PieDatum = {
+type BarDatum = {
   tipo: TipoBem;
   name: string;
   value: number;
@@ -65,15 +65,15 @@ type Props = {
 };
 
 // ============================================================
-// TOOLTIP custom — tipa o payload pra evitar any/unknown solto.
+// TOOLTIP custom — mostra qtd + valor estimado.
 // ============================================================
 
-function DonutTooltip({
+function BarTooltip({
   active,
   payload,
 }: TooltipContentProps<ValueType, NameType>) {
   if (!active || !payload || payload.length === 0) return null;
-  const datum = payload[0]?.payload as PieDatum | undefined;
+  const datum = payload[0]?.payload as BarDatum | undefined;
   if (!datum) return null;
   return (
     <div style={tooltipContentStyle}>
@@ -95,16 +95,16 @@ function DonutTooltip({
 // ============================================================
 
 export default function MixBensPorTipo({ dados }: Props) {
-  // Recharts não desenha fatias com value=0; filtra antes pra não
-  // poluir legenda e tooltip com tipos vazios.
-  const datums: PieDatum[] = dados
+  // Filtra zeros + ordena DESC por qtd (maior em cima da barra).
+  const datums: BarDatum[] = dados
     .filter((d) => d.qtd > 0)
     .map((d) => ({
       tipo: d.tipo,
       name: TIPO_BEM_META[d.tipo]?.label ?? d.tipo,
       value: d.qtd,
       valorBrl: d.valorBrl,
-    }));
+    }))
+    .sort((a, b) => b.value - a.value);
 
   const total = datums.reduce((s, d) => s + d.value, 0);
 
@@ -122,95 +122,73 @@ export default function MixBensPorTipo({ dados }: Props) {
     );
   }
 
+  // Altura proporcional ao numero de categorias (cada barra ~44px).
+  const altura = Math.max(220, datums.length * 44 + 40);
+
   return (
     <DashboardCard
       titulo="Mix de bens por tipo"
-      descricao="Distribuicao dos bens rastreados por categoria"
+      descricao="Distribuição dos bens rastreados por categoria"
       accent="gold"
     >
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-center">
-        {/* DONUT */}
-        <div className="chart-neon-glow relative h-64 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={datums}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                innerRadius="62%"
-                outerRadius="92%"
-                paddingAngle={2}
-                stroke="var(--color-carbon)"
-                strokeWidth={2}
-                isAnimationActive={false}
-              >
-                {datums.map((d) => (
-                  <Cell
-                    key={d.tipo}
-                    fill={TIPO_BEM_COLORS[d.tipo] ?? "#EAE7DC"}
-                  />
-                ))}
-              </Pie>
-              <Tooltip content={(props) => <DonutTooltip {...props} />} />
-            </PieChart>
-          </ResponsiveContainer>
-
-          {/* CENTRO — total de bens (count). pointer-events-none pra
-              não bloquear hover do tooltip nas fatias. */}
-          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-[10px] uppercase tracking-[0.12em] text-[var(--color-ivory-66)]">
-              Total de bens
-            </span>
-            <span className="mt-1 text-3xl font-medium tracking-tight tabular-nums text-[var(--color-ivory)]">
-              {total}
-            </span>
-            <span className="mt-0.5 text-[10px] text-[var(--color-ivory-66)]">
-              {datums.length} {datums.length === 1 ? "tipo" : "tipos"}
-            </span>
-          </div>
+      {/* Header com total */}
+      <div className="mb-4 flex items-baseline justify-between gap-3">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+            Total de Bens
+          </p>
+          <p className="mt-0.5 font-serif text-3xl leading-none tabular-nums text-[var(--color-gold)]">
+            {total}
+          </p>
         </div>
+        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+          {datums.length} {datums.length === 1 ? "tipo" : "tipos"}
+        </p>
+      </div>
 
-        {/* LEGENDA */}
-        <ul className="flex flex-col gap-2">
-          {datums.map((d) => {
-            const pct = total > 0 ? (d.value / total) * 100 : 0;
-            const cor = TIPO_BEM_COLORS[d.tipo] ?? "#EAE7DC";
-            const meta = TIPO_BEM_META[d.tipo];
-            return (
-              <li
-                key={d.tipo}
-                className="flex items-center justify-between gap-3 rounded-md border border-[var(--color-ivory-12)] px-3 py-2"
-              >
-                <div className="flex min-w-0 items-center gap-2.5">
-                  <span
-                    aria-hidden
-                    className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded text-[10px] font-semibold"
-                    style={{
-                      background: `${cor}22`,
-                      color: cor,
-                      border: `1px solid ${cor}55`,
-                    }}
-                  >
-                    {meta?.icone ?? "?"}
-                  </span>
-                  <span className="whitespace-normal text-sm leading-tight text-[var(--color-ivory)]">
-                    {d.name}
-                  </span>
-                </div>
-                <div className="flex shrink-0 items-baseline gap-2">
-                  <span className="text-sm tabular-nums text-[var(--color-ivory)]">
-                    {d.value}
-                  </span>
-                  <span className="w-12 text-right text-[11px] tabular-nums text-[var(--color-ivory-66)]">
-                    {pct.toFixed(1)}%
-                  </span>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+      <div
+        className="chart-neon-glow relative w-full"
+        style={{ height: altura }}
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            data={datums}
+            layout="vertical"
+            margin={{ top: 4, right: 56, bottom: 4, left: 0 }}
+          >
+            <XAxis
+              type="number"
+              hide
+              domain={[0, Math.max(...datums.map((d) => d.value)) * 1.15]}
+            />
+            <YAxis
+              type="category"
+              dataKey="name"
+              width={170}
+              tick={axisTickStyle}
+              axisLine={axisLineStyle}
+              tickLine={false}
+              interval={0}
+            />
+            <Tooltip
+              content={(props) => <BarTooltip {...props} />}
+              cursor={{ fill: "rgba(60,255,138,0.05)" }}
+            />
+            <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={20}>
+              {datums.map((d) => (
+                <Cell key={d.tipo} fill={TIPO_BEM_COLORS[d.tipo] ?? "#EAE7DC"} />
+              ))}
+              <LabelList
+                dataKey="value"
+                position="right"
+                formatter={(v: ValueType) => num(Number(v))}
+                fill="var(--color-ivory)"
+                fontSize={13}
+                fontFamily="var(--font-jetbrains), ui-monospace, monospace"
+              />
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
       </div>
     </DashboardCard>
   );
