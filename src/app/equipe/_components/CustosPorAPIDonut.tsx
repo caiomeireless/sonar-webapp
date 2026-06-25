@@ -153,15 +153,16 @@ export default function CustosPorAPIDonut({ dados }: Props) {
             </PieChart>
           </ResponsiveContainer>
 
-          {/* CENTRO — total do mês. pointer-events-none pra não tampar tooltip. */}
-          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-[10px] uppercase tracking-[0.12em] text-[var(--color-ivory-66)]">
+          {/* CENTRO — total do mês. px-8 + valor menor + nowrap pra nao
+              encostar na borda do anel do donut (Caio: estava cortado). */}
+          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-8 text-center">
+            <span className="whitespace-nowrap text-[10px] uppercase tracking-[0.12em] text-[var(--color-ivory-66)]">
               Gasto no mês
             </span>
-            <span className="mt-1 text-2xl font-medium tracking-tight text-[var(--color-ivory)]">
+            <span className="mt-1 whitespace-nowrap text-lg font-medium tabular-nums tracking-normal text-[var(--color-ivory)]">
               {formatBRL(total)}
             </span>
-            <span className="mt-0.5 text-[10px] text-[var(--color-ivory-66)]">
+            <span className="mt-0.5 whitespace-nowrap text-[10px] text-[var(--color-ivory-66)]">
               {datums.length} {datums.length === 1 ? "fonte" : "fontes"}
             </span>
           </div>
@@ -183,7 +184,7 @@ export default function CustosPorAPIDonut({ dados }: Props) {
                     className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
                     style={{ background: cor }}
                   />
-                  <span className="truncate text-sm text-[var(--color-ivory)]">
+                  <span className="text-sm leading-tight text-[var(--color-ivory)]">
                     {d.name}
                   </span>
                 </div>

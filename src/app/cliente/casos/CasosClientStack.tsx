@@ -69,10 +69,10 @@ function CardCaso({ caso, active }: { caso: CasoListagem; active: boolean }) {
       <SpotlightCard className="h-full cursor-pointer p-7">
       {/* === BLOCO 1: IDENTIFICAÇÃO === */}
       <header>
-        <span className="font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-signal)]">
+        <span className="font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-devedor)]">
           Devedor
         </span>
-        <h3 className="mt-3 font-serif text-[24px] leading-[1.15] text-[var(--color-devedor)]">
+        <h3 className="nome-devedor mt-3 font-serif text-[24px] leading-[1.15] text-[var(--color-devedor)]">
           {caso.devedor.nome}
         </h3>
         <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[var(--color-ivory-22)] bg-[var(--color-surface-2)]/60 px-3 py-1.5">

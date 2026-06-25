@@ -112,20 +112,28 @@ export default async function CredorDrilldownPage({
       <section className="border-t border-[var(--color-ivory-12)]">
         <div className="mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
           <span className="eyebrow">Casos deste cliente</span>
-          <h2 className="mt-4 font-serif text-3xl text-ivory">
-            {casos.length === 0
-              ? "Nenhum caso vinculado"
-              : `${casos.length} ${
-                  casos.length === 1 ? "caso" : "casos"
-                } na carteira`}
-          </h2>
 
           {casos.length === 0 ? (
-            <p className="mt-6 text-sm italic text-[var(--color-ivory-66)]">
-              Este cliente ainda não tem casos cadastrados.
-            </p>
+            <>
+              <h2 className="mt-4 font-serif text-3xl text-ivory">
+                Nenhum caso vinculado
+              </h2>
+              <p className="mt-6 text-sm italic text-[var(--color-ivory-66)]">
+                Este cliente ainda não tem casos cadastrados.
+              </p>
+            </>
           ) : (
-            <CasosCredorView casos={casos} euQuery={linkBase} />
+            <>
+              <div className="mx-auto mt-10 mb-4 max-w-[1100px] text-center">
+                <p
+                  className="font-serif text-[clamp(28px,4vw,42px)] font-medium uppercase tracking-[0.10em] text-[var(--color-devedor)]"
+                  style={{ textShadow: "0 0 18px rgba(220,38,38,0.45)" }}
+                >
+                  Escolha o Devedor
+                </p>
+              </div>
+              <CasosCredorView casos={casos} euQuery={linkBase} />
+            </>
           )}
         </div>
       </section>

@@ -30,7 +30,7 @@ export default function Top5DevedoresRastreio({ dados }: Props) {
           <thead>
             <tr className="border-b border-[var(--color-ivory-12)] text-[var(--color-ivory-66)]">
               <Th className="w-[36px]">#</Th>
-              <Th>Devedor</Th>
+              <Th className="text-[var(--color-devedor)]">Devedor</Th>
               <Th align="right" className="w-[140px]">Valor</Th>
               <Th align="right" className="w-[56px]">Casos</Th>
               <Th align="right" className="w-[64px]">Medidas</Th>
@@ -52,7 +52,7 @@ export default function Top5DevedoresRastreio({ dados }: Props) {
                   <Td>
                     <Link
                       href={`/equipe/devedores/${item.devedorId}`}
-                      className="block font-serif text-[17px] leading-[1.2] text-[var(--color-devedor)] break-words transition group-hover:underline"
+                      className="nome-devedor block font-serif text-[17px] leading-[1.2] text-[var(--color-devedor)] break-words transition group-hover:underline"
                       title={item.devedorNome}
                     >
                       {item.devedorNome}

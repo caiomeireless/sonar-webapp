@@ -398,19 +398,20 @@ function HeaderDossie({
 }) {
   return (
     <header className="mt-10">
-      {/* Eyebrow gigante DOSSIÊ PATRIMONIAL */}
-      <div className="flex flex-col items-center text-center">
-        <div className="inline-flex items-center gap-3">
+      {/* Quadro de vidro opaco envolvendo todo o cabecalho do dossie */}
+      <div className="glass mx-auto flex max-w-[1100px] flex-col items-center rounded-3xl px-8 py-10 text-center sm:px-12 sm:py-12">
+        {/* Eyebrow gigante DOSSIÊ PATRIMONIAL */}
+        <div className="inline-flex items-center gap-4">
           <span
             aria-hidden="true"
-            className="inline-block h-px w-10 bg-[var(--color-signal)] opacity-70"
+            className="inline-block h-px w-12 bg-[var(--color-signal)] opacity-70 sm:w-16"
           />
-          <span className="font-mono text-[14px] uppercase tracking-[0.32em] text-[var(--color-signal)]">
+          <span className="font-mono text-[clamp(20px,2.6vw,32px)] font-medium uppercase tracking-[0.32em] text-[var(--color-signal)]">
             Dossiê Patrimonial
           </span>
           <span
             aria-hidden="true"
-            className="inline-block h-px w-10 bg-[var(--color-signal)] opacity-70"
+            className="inline-block h-px w-12 bg-[var(--color-signal)] opacity-70 sm:w-16"
           />
         </div>
 

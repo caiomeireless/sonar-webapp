@@ -126,7 +126,17 @@ export default async function DevedoresEquipePage({ searchParams }: Props) {
           </SpotlightCard>
         </div>
       ) : (
-        <CarteiraView credores={credores} euQuery={linkBase} />
+        <>
+          <div className="mx-auto mt-10 mb-4 max-w-[1100px] text-center">
+            <p
+              className="font-serif text-[clamp(28px,4vw,42px)] font-medium uppercase tracking-[0.10em] text-[var(--color-signal)]"
+              style={{ textShadow: "0 0 18px rgba(60,255,138,0.45)" }}
+            >
+              Escolha o Cliente
+            </p>
+          </div>
+          <CarteiraView credores={credores} euQuery={linkBase} />
+        </>
       )}
     </main>
   );

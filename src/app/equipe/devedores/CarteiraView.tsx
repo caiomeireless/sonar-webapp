@@ -152,7 +152,7 @@ function CardCredor({
           <span className="font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-signal)]">
             Cliente
           </span>
-          <h3 className="mt-3 font-serif text-[26px] leading-[1.15] text-[var(--color-gold)]">
+          <h3 className="nome-cliente mt-3 font-serif text-[26px] leading-[1.15] text-[var(--color-gold)]">
             {credor.nome}
           </h3>
 
@@ -291,7 +291,7 @@ function ListaCredores({
               <Td>
                 <Link
                   href={`/equipe/devedores/credor/${c.id}${euQuery}`}
-                  className="block font-serif text-[21px] leading-tight text-[var(--color-gold)]"
+                  className="nome-cliente block font-serif text-[21px] leading-tight text-[var(--color-gold)]"
                 >
                   {c.nome}
                 </Link>
