@@ -7,7 +7,18 @@
 // 10) banner cross-detection.
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Building2, User, Pencil, ArrowRight } from "lucide-react";
+import {
+  Building2,
+  User,
+  Pencil,
+  ArrowRight,
+  Car,
+  Briefcase,
+  Scale,
+  MapPin,
+  Users2,
+  type LucideIcon,
+} from "lucide-react";
 import {
   obterDossie,
   outrosCredoresDoDevedor,
@@ -29,6 +40,7 @@ import {
 import { AcoesBuscaMockadas } from "./AcoesBuscaMockadas";
 import { BotaoGerarPeca } from "./BotaoGerarPeca";
 import { AtualizadorCalculo } from "./AtualizadorCalculo";
+import { DocumentosAPI } from "./DocumentosAPI";
 import { TimelineMedidas } from "./TimelineMedidas";
 import { listarMedidasPorDevedor } from "@/lib/medidas";
 import { templatesSugeridos } from "@/lib/pecas-templates";
@@ -38,13 +50,13 @@ type Props = {
   searchParams?: Promise<{ eu?: string | string[] }>;
 };
 
-const TIPO_META: Record<TipoBem, { label: string; icone: string }> = {
-  veiculo: { label: "Veículos", icone: "V" },
-  imovel: { label: "Imóveis", icone: "I" },
-  empresa: { label: "Participações Societárias", icone: "E" },
-  processo_credito: { label: "Processos Onde é Credor", icone: "P" },
-  endereco: { label: "Endereços Confirmados", icone: "A" },
-  vinculo: { label: "Vínculos Familiares", icone: "F" },
+const TIPO_META: Record<TipoBem, { label: string; Icon: LucideIcon }> = {
+  veiculo: { label: "Veículos", Icon: Car },
+  imovel: { label: "Imóveis", Icon: Building2 },
+  empresa: { label: "Participações Societárias", Icon: Briefcase },
+  processo_credito: { label: "Processos Onde é Credor", Icon: Scale },
+  endereco: { label: "Endereços Confirmados", Icon: MapPin },
+  vinculo: { label: "Vínculos Familiares", Icon: Users2 },
 };
 
 const ORDEM: TipoBem[] = [
@@ -293,28 +305,32 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
         <div className="mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
           <SectionTitle texto="Bens Encontrados por Categoria" eyebrow="Bens Encontrados" />
 
-          <div className="mt-12 space-y-12">
+          <div className="mt-12 space-y-16">
             {ORDEM.map((tipo) => {
               const bens = por_tipo[tipo];
               const meta = TIPO_META[tipo];
+              const Icon = meta.Icon;
               return (
                 <div key={tipo}>
-                  <div className="flex items-center gap-3">
-                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[var(--color-ivory-12)] font-mono text-sm text-[var(--color-gold)]">
-                      {meta.icone}
+                  {/* Header da categoria: icone Lucide + titulo serif gold uppercase + contador mono */}
+                  <div className="flex items-center gap-4 border-b border-[var(--color-ivory-12)] pb-4">
+                    <span className="inline-flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl border border-[var(--color-gold)]/35 bg-gradient-to-br from-[rgba(201,162,74,0.18)] to-[rgba(201,162,74,0.04)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+                      <Icon className="h-6 w-6 text-[var(--color-gold)]" />
                     </span>
-                    <h3 className="font-serif text-xl text-ivory">{meta.label}</h3>
-                    <span className="ml-auto font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+                    <h2 className="font-serif text-2xl uppercase tracking-[0.06em] text-[var(--color-gold)]">
+                      {meta.label}
+                    </h2>
+                    <span className="ml-auto inline-flex items-center rounded-full border border-[var(--color-ivory-22)] bg-white/5 px-3 py-1 font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
                       {bens.length} {bens.length === 1 ? "item" : "itens"}
                     </span>
                   </div>
 
                   {bens.length === 0 ? (
-                    <p className="mt-4 pl-12 text-sm italic text-[var(--color-ivory-66)]">
+                    <p className="mt-6 text-sm italic text-[var(--color-ivory-66)]">
                       Nenhum item encontrado.
                     </p>
                   ) : (
-                    <div className="mt-4 grid gap-3 pl-12">
+                    <div className="mt-6 grid gap-4 md:grid-cols-2">
                       {bens.map((bem) => (
                         <CardBem key={bem.id} bem={bem} />
                       ))}
@@ -323,6 +339,19 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
                 </div>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* ============ DOCUMENTOS API ============ */}
+      <section className="border-t border-[var(--color-ivory-12)]">
+        <div className="mx-auto max-w-[1400px] px-6 py-12 sm:px-10">
+          <SectionTitle texto="Documentos Disponíveis (API)" />
+          <p className="mt-2 text-sm text-[var(--color-ivory-66)]">
+            Documentos que a plataforma pode puxar automaticamente. Toque pra revelar e fazer download.
+          </p>
+          <div className="mt-6">
+            <DocumentosAPI devedorNome={devedor.nome} />
           </div>
         </div>
       </section>
@@ -399,7 +428,7 @@ function HeaderDossie({
   return (
     <header className="mt-10">
       {/* Quadro de vidro opaco envolvendo todo o cabecalho do dossie */}
-      <div className="glass mx-auto flex max-w-[1100px] flex-col items-center rounded-3xl px-8 py-10 text-center sm:px-12 sm:py-12">
+      <div className="glass mx-auto max-w-[1100px] px-8 py-10 sm:px-12 sm:py-12 text-center">
         {/* Eyebrow gigante DOSSIÊ PATRIMONIAL */}
         <div className="inline-flex items-center gap-4">
           <span
@@ -830,23 +859,131 @@ function CardCasoVinculado({ caso }: { caso: CasoResumo }) {
   );
 }
 
+// Identificação principal por tipo (placa/matricula/CNPJ/endereco/CNJ/nome).
+// Se nada relevante, cai pro bem.titulo.
+function identificacaoPrincipal(bem: Bem): string {
+  const d = bem.detalhes;
+  switch (bem.tipo) {
+    case "veiculo":
+      return getStr(d, "placa") ?? bem.titulo;
+    case "imovel":
+      return getStr(d, "matricula") ?? bem.titulo;
+    case "empresa":
+      return getStr(d, "cnpj") ?? getStr(d, "razao_social") ?? bem.titulo;
+    case "processo_credito":
+      return getStr(d, "numero_cnj") ?? bem.titulo;
+    case "endereco": {
+      const log = getStr(d, "logradouro");
+      const cidade = getStr(d, "cidade");
+      const uf = getStr(d, "uf");
+      const partes = [log, [cidade, uf].filter(Boolean).join("/")].filter(
+        (p) => p && p.length > 0,
+      );
+      return partes.length > 0 ? partes.join(" — ") : bem.titulo;
+    }
+    case "vinculo":
+      return getStr(d, "nome") ?? bem.titulo;
+    default:
+      return bem.titulo;
+  }
+}
+
+// Mapeia FonteBusca pra origem visual:
+// Themis -> VIA THEMIS (amber), Assertiva -> VIA ASSERTIVA (signal),
+// DataJud -> VIA DATAJUD (gold), Manual -> MANUAL (ivory),
+// demais cadastros (BigDataCorp, minhareceita, SICAR, ARISP, Escavador)
+// caem em "VIA <NOME>" com cor ivory neutra.
+type ChipBemOrigem = {
+  label: string;
+  color: string;
+  bg: string;
+  border: string;
+};
+
+function origemDoBem(fonte: string): ChipBemOrigem {
+  switch (fonte) {
+    case "Themis":
+      return {
+        label: "VIA THEMIS",
+        color: "rgb(244,197,66)",
+        bg: "rgba(244,197,66,0.15)",
+        border: "rgba(244,197,66,0.45)",
+      };
+    case "Assertiva":
+      return {
+        label: "VIA ASSERTIVA",
+        color: "var(--color-signal)",
+        bg: "rgba(60,255,138,0.10)",
+        border: "rgba(60,255,138,0.45)",
+      };
+    case "DataJud":
+      return {
+        label: "VIA DATAJUD",
+        color: "var(--color-gold)",
+        bg: "rgba(201,162,74,0.12)",
+        border: "rgba(201,162,74,0.45)",
+      };
+    case "Manual":
+      return {
+        label: "MANUAL",
+        color: "var(--color-ivory-88)",
+        bg: "rgba(245,243,238,0.06)",
+        border: "rgba(245,243,238,0.30)",
+      };
+    default:
+      return {
+        label: `VIA ${fonte.toUpperCase()}`,
+        color: "var(--color-ivory-88)",
+        bg: "rgba(245,243,238,0.06)",
+        border: "rgba(245,243,238,0.22)",
+      };
+  }
+}
+
 function CardBem({ bem }: { bem: Bem }) {
+  const titulo = identificacaoPrincipal(bem);
+  const origem = origemDoBem(bem.fonte);
   return (
-    <div className="rounded-lg border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.4)] p-5 transition hover:border-[var(--color-gold)]/60 hover:bg-[rgba(5,7,6,0.6)]">
+    <div className="glass group rounded-2xl p-6 transition duration-200 hover:scale-[1.01] hover:border-[var(--color-signal)]/40 hover:shadow-[0_0_30px_-8px_rgba(60,255,138,0.25)]">
+      {/* Identificação no topo: titulo serif gold + chip origem + valor */}
       <div className="flex items-start justify-between gap-4">
-        <div className="flex-1">
-          <p className="font-medium text-ivory">{bem.titulo}</p>
-          <DetalhesRender tipo={bem.tipo} detalhes={bem.detalhes} />
+        <div className="min-w-0 flex-1">
+          <p
+            className="truncate font-serif text-lg uppercase tracking-[0.04em] text-[var(--color-gold)]"
+            title={titulo}
+          >
+            {titulo}
+          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <span
+              className="inline-flex items-center rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em]"
+              style={{
+                borderColor: origem.border,
+                color: origem.color,
+                backgroundColor: origem.bg,
+              }}
+            >
+              {origem.label}
+            </span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+              {formatData(bem.fonte_consultada_em)}
+            </span>
+          </div>
         </div>
         {bem.valor_estimado_brl !== null ? (
-          <span className="whitespace-nowrap font-mono text-xl text-[var(--color-gold)]">
+          <span className="whitespace-nowrap font-mono text-lg text-[var(--color-gold)]">
             {formatBRL(bem.valor_estimado_brl)}
           </span>
         ) : null}
       </div>
-      <p className="mt-4 font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
-        {bem.fonte} · {formatData(bem.fonte_consultada_em)}
-      </p>
+
+      {/* Divider sutil */}
+      <div className="my-4 h-px bg-[var(--color-ivory-12)]" />
+
+      {/* Detalhes em grid 2-col */}
+      <div className="grid gap-x-4 gap-y-3 sm:grid-cols-2">
+        <DetalhesRender tipo={bem.tipo} detalhes={bem.detalhes} />
+      </div>
     </div>
   );
 }
@@ -858,9 +995,12 @@ function CardBem({ bem }: { bem: Bem }) {
 function Linha({ rotulo, valor }: { rotulo: string; valor: string | number | undefined | null }) {
   if (valor === undefined || valor === null || valor === "") return null;
   return (
-    <p className="mt-1 text-xs text-[var(--color-ivory-66)]">
-      {rotulo}: <span className="text-ivory">{valor}</span>
-    </p>
+    <div>
+      <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+        {rotulo}
+      </p>
+      <p className="mt-1 text-sm text-ivory">{valor}</p>
+    </div>
   );
 }
 

@@ -214,6 +214,19 @@ function corDoScore(score: ScoreSolvencia): string {
   }
 }
 
+// Hex + RGB triple por score — pro chip preenchido neon (precisamos
+// montar rgba() em runtime pro glow).
+function corDoScoreNeon(score: ScoreSolvencia): { solid: string; rgb: string } {
+  switch (score) {
+    case "alta":
+      return { solid: "#3CFF8A", rgb: "60, 255, 138" };
+    case "media":
+      return { solid: "#FFD93D", rgb: "255, 217, 61" };
+    case "baixa":
+      return { solid: "#DC2626", rgb: "220, 38, 38" };
+  }
+}
+
 function labelDoScore(score: ScoreSolvencia): string {
   switch (score) {
     case "alta":
@@ -226,21 +239,17 @@ function labelDoScore(score: ScoreSolvencia): string {
 }
 
 function ChipScore({ score }: { score: ScoreSolvencia }) {
-  const color = corDoScore(score);
+  const { solid, rgb } = corDoScoreNeon(score);
   return (
     <span
-      className="inline-flex items-center gap-2 rounded-full border px-3 py-1 font-mono text-[12px] uppercase tracking-[0.22em]"
+      className="inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 font-mono text-[12px] font-bold uppercase tracking-[0.20em]"
       style={{
-        borderColor: color,
-        color,
-        backgroundColor: "rgba(255,255,255,0.04)",
+        backgroundColor: solid,
+        borderColor: solid,
+        color: "var(--color-onyx)",
+        boxShadow: `0 4px 18px rgba(${rgb}, 0.45), 0 0 8px rgba(${rgb}, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.28)`,
       }}
     >
-      <span
-        aria-hidden="true"
-        className="inline-block h-1.5 w-1.5 rounded-full"
-        style={{ backgroundColor: color, boxShadow: `0 0 8px ${color}` }}
-      />
       {labelDoScore(score)}
     </span>
   );
