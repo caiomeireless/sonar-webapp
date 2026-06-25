@@ -13,9 +13,11 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Bell, Camera, ChevronDown, Eye, LogOut, RefreshCw, Trash2 } from "lucide-react";
+import { Camera, ChevronDown, Eye, LogOut, RefreshCw, Trash2 } from "lucide-react";
 
 import { AssistantBot } from "./AssistantBot";
+import { SinoNotificacoes } from "./SinoNotificacoes";
+import type { Notificacao } from "@/lib/notificacoes";
 
 const FOTO_STORAGE_KEY = "sonar-user-photo";
 
@@ -44,6 +46,10 @@ const TITULOS_EQUIPE: TitulosMap = {
     titulo: "Configurações",
     subtitulo: "Administração da plataforma",
   },
+  "/equipe/notificacoes": {
+    titulo: "Central de Notificações",
+    subtitulo: "Eventos do escritório em ordem cronológica",
+  },
 };
 
 const TITULOS_CLIENTE: TitulosMap = {
@@ -70,6 +76,10 @@ const TITULOS_CLIENTE: TitulosMap = {
   "/cliente/preferencias": {
     titulo: "Preferências",
     subtitulo: "Limites de gasto e regras de consulta",
+  },
+  "/cliente/notificacoes": {
+    titulo: "Central de Notificações",
+    subtitulo: "Tudo que aconteceu na sua carteira",
   },
 };
 
@@ -98,9 +108,15 @@ function resolverTitulo(
 export function TopBar({
   usuario,
   portal,
+  notificacoes,
+  naoLidas,
+  emailCliente,
 }: {
   usuario: Usuario;
   portal: "equipe" | "cliente";
+  notificacoes: Notificacao[];
+  naoLidas: number;
+  emailCliente?: string | null;
 }) {
   const pathname = usePathname();
   const mapa = portal === "equipe" ? TITULOS_EQUIPE : TITULOS_CLIENTE;
@@ -172,7 +188,12 @@ export function TopBar({
         <div className="ml-auto flex items-center gap-3">
           <AssistantBot solido />
           <BotaoSincronizar />
-          <BotaoSino />
+          <SinoNotificacoes
+            portal={portal}
+            notificacoes={notificacoes}
+            naoLidas={naoLidas}
+            emailCliente={emailCliente}
+          />
           <AvatarMenu usuario={usuario} inicial={inicial} />
         </div>
       </div>
@@ -209,25 +230,6 @@ function BotaoSincronizar() {
         aria-hidden="true"
       />
       Sincronizar
-    </button>
-  );
-}
-
-// --------------------------------------------------------------------------
-
-function BotaoSino() {
-  return (
-    <button
-      type="button"
-      aria-label="Notificações"
-      className="
-        relative inline-flex h-14 w-14 items-center justify-center rounded-xl
-        border border-[var(--color-line)] bg-[var(--color-surface-2)] text-[var(--color-fg-muted)]
-        transition hover:border-[var(--color-signal-soft-2)] hover:text-[var(--color-fg)]
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-signal-soft-2)]
-      "
-    >
-      <Bell className="h-6 w-6" aria-hidden="true" />
     </button>
   );
 }
@@ -380,7 +382,7 @@ function AvatarMenu({
               que está em modo visualização). */}
           {(usuario.papel === "ADMIN" || usuario.papel === "SOCIO") && (
             <Link
-              href="/cliente/casos?eu=cliente.demo@battaglia.com.br"
+              href="/cliente?eu=cliente.demo@battaglia.com.br"
               className="
                 flex items-center gap-2 border-b border-[var(--color-line)]
                 px-4 py-2.5 text-sm text-[var(--color-fg-muted)] transition

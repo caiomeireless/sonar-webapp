@@ -14,6 +14,10 @@ import { perfilLogado } from "@/lib/perfis-server";
 import { perfilAtual } from "@/lib/perfis";
 import { previewEuFromParam } from "@/lib/dev-auth";
 import { DEMO_CLIENTE_EMAIL } from "@/lib/mock-fixtures";
+import {
+  contarNaoLidas,
+  listarNotificacoesCliente,
+} from "@/lib/notificacoes";
 
 export default async function ClienteLayout({
   children,
@@ -79,6 +83,13 @@ export default async function ClienteLayout({
     ? NAV_CLIENTE.map((it) => ({ ...it, href: it.href + qsEu }))
     : NAV_CLIENTE;
 
+  // Notificacoes do canal CLIENTE — filtradas pelo email efetivo (admin/socio
+  // em modo visualizacao herda o filtro do cliente demo).
+  const [notificacoes, naoLidas] = await Promise.all([
+    listarNotificacoesCliente(emailEfetivo),
+    contarNaoLidas("cliente", emailEfetivo),
+  ]);
+
   return (
     <div className="flex min-h-svh bg-onyx text-ivory">
       <Sidebar
@@ -119,7 +130,13 @@ export default async function ClienteLayout({
             </Link>
           </div>
         )}
-        <TopBar usuario={{ email, papel }} portal="cliente" />
+        <TopBar
+          usuario={{ email, papel }}
+          portal="cliente"
+          notificacoes={notificacoes}
+          naoLidas={naoLidas}
+          emailCliente={emailEfetivo}
+        />
         <main className="flex-1">{children}</main>
         </div>
       </div>

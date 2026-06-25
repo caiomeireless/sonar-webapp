@@ -11,6 +11,10 @@ import { TopBar } from "@/components/TopBar";
 import { NAV_EQUIPE } from "@/lib/nav-equipe";
 import { ehCliente } from "@/lib/perfis";
 import { perfilLogado } from "@/lib/perfis-server";
+import {
+  contarNaoLidas,
+  listarNotificacoesEquipe,
+} from "@/lib/notificacoes";
 
 // Fallback: extrai "caio@bp..." -> "Caio". Substitui . _ - por espaco e
 // title-case-ifica. Usado quando o perfil nao tem nome cadastrado.
@@ -38,6 +42,12 @@ export default async function EquipeLayout({ children }: { children: ReactNode }
   const papel = (perfil?.papel ?? "funcionario").toUpperCase();
   const nome = perfil?.nome?.trim() || nomeDoEmail(email);
 
+  // Notificacoes do canal EQUIPE — leitura in-memory, sem custo de I/O.
+  const [notificacoes, naoLidas] = await Promise.all([
+    listarNotificacoesEquipe(),
+    contarNaoLidas("equipe"),
+  ]);
+
   return (
     <div className="flex min-h-svh bg-onyx text-ivory">
       <Sidebar
@@ -63,7 +73,12 @@ export default async function EquipeLayout({ children }: { children: ReactNode }
           />
         </div>
         <div className="relative z-10 flex min-w-0 flex-1 flex-col">
-          <TopBar usuario={{ email, papel }} portal="equipe" />
+          <TopBar
+            usuario={{ email, papel }}
+            portal="equipe"
+            notificacoes={notificacoes}
+            naoLidas={naoLidas}
+          />
           <main className="flex-1">{children}</main>
         </div>
       </div>
