@@ -147,81 +147,112 @@ function CardConsulta({
   qsBase: string;
 }) {
   const score = corScore(consulta.score);
+  const docLabel = consulta.devedor.tipo === "PF" ? "CPF" : "CNPJ";
   return (
     <Link
       href={`/cliente/consultas/${consulta.id}${qsBase}`}
-      className="glass-2 group block rounded-xl p-6 transition hover:border-[var(--color-signal-soft-2)]"
+      className="group block cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-signal)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-onyx)]"
     >
-      {/* Tipo do devedor + documento */}
-      <div className="flex items-center justify-between gap-3">
-        <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
-          {consulta.devedor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"}
-        </span>
-        <span
-          className="rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em]"
-          style={{ borderColor: score, color: score }}
-        >
-          {labelScore(consulta.score)}
-        </span>
-      </div>
-
-      {/* Nome do devedor */}
-      <h3
-        className="mt-3 font-serif text-xl leading-tight text-ivory"
-        style={{ color: "var(--color-devedor)" }}
-      >
-        {consulta.devedor.nome}
-      </h3>
-      <p className="mt-1 font-mono text-xs text-[var(--color-ivory-66)]">
-        {consulta.devedor.documento}
-      </p>
-
-      {/* Métricas principais */}
-      <div className="mt-5 grid grid-cols-2 gap-3 border-t border-[var(--color-ivory-12)] pt-4">
-        <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
-            Valor da causa
-          </p>
-          <p className="mt-1 font-mono tabular-nums text-[var(--color-gold)]">
-            {formatBRL(consulta.valorCausaBrl)}
-          </p>
+      <div className="glass flex h-full flex-col gap-5 p-7 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-[0_24px_48px_-12px_rgba(60,255,138,0.18)]">
+        {/* === EYEBROW + SCORE === */}
+        <div className="flex items-start justify-between gap-3">
+          <span className="font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-signal)]">
+            Consulta Pré-Processual
+          </span>
+          <span
+            className="inline-flex items-center gap-2 rounded-full border px-3 py-1 font-mono text-[12px] uppercase tracking-[0.22em]"
+            style={{
+              borderColor: score,
+              color: score,
+              backgroundColor: "rgba(255,255,255,0.04)",
+            }}
+          >
+            <span
+              aria-hidden="true"
+              className="inline-block h-1.5 w-1.5 rounded-full"
+              style={{ backgroundColor: score, boxShadow: `0 0 8px ${score}` }}
+            />
+            {labelScore(consulta.score)}
+          </span>
         </div>
-        <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
-            Patrimônio estimado
-          </p>
-          <p className="mt-1 font-mono tabular-nums text-[var(--color-signal)]">
-            {formatBRL(consulta.patrimonioEstimadoBrl)}
-          </p>
+
+        {/* === IDENTIFICAÇÃO DO DEVEDOR === */}
+        <header>
+          <h3 className="font-serif text-[26px] leading-[1.15] text-[var(--color-devedor)]">
+            {consulta.devedor.nome}
+          </h3>
+
+          {/* Chip do documento — mesmo padrão do CarteiraView */}
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[var(--color-ivory-22)] bg-[var(--color-surface-2)]/60 px-3 py-1.5">
+            <span className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-signal)]">
+              {consulta.devedor.tipo}
+            </span>
+            <span className="h-3 w-px bg-[var(--color-ivory-22)]" />
+            <span className="font-mono text-[12px] text-ivory">
+              {docLabel} {consulta.devedor.documento}
+            </span>
+          </div>
+        </header>
+
+        {/* === DIVIDER SUTIL === */}
+        <div className="h-px bg-[var(--color-ivory-12)]" />
+
+        {/* === VALORES (cliente: causa + patrimônio) === */}
+        <div className="grid grid-cols-2 gap-3 rounded-xl border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.45)] px-4 py-4">
+          <div className="flex flex-col items-center text-center">
+            <span className="font-serif text-[22px] leading-none tabular-nums text-[var(--color-gold)]">
+              {formatBRL(consulta.valorCausaBrl)}
+            </span>
+            <span className="mt-2 font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+              Valor da Causa
+            </span>
+          </div>
+          <div className="flex flex-col items-center text-center">
+            <span className="font-serif text-[22px] leading-none tabular-nums text-[var(--color-signal)]">
+              {formatBRL(consulta.patrimonioEstimadoBrl)}
+            </span>
+            <span className="mt-2 font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+              Patrimônio Estimado
+            </span>
+          </div>
+        </div>
+
+        {/* === STATS GRID 3-COL === */}
+        <div className="grid grid-cols-3 gap-3 rounded-xl border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.45)] px-4 py-4">
+          <div className="flex flex-col items-center text-center">
+            <span className="font-serif text-4xl leading-none tabular-nums text-[var(--color-devedor)]">
+              {consulta.outrasExecucoes.length}
+            </span>
+            <span className="mt-2 font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+              Outras Execuções
+            </span>
+          </div>
+          <div className="flex flex-col items-center text-center">
+            <span className="font-serif text-4xl leading-none tabular-nums text-[var(--color-gold)]">
+              {consulta.restricoes.length}
+            </span>
+            <span className="mt-2 font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+              Restrições
+            </span>
+          </div>
+          <div className="flex flex-col items-center text-center">
+            <span className="font-serif text-4xl leading-none tabular-nums text-[var(--color-signal)]">
+              {consulta.bensAparentes.length}
+            </span>
+            <span className="mt-2 font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+              Bens Aparentes
+            </span>
+          </div>
+        </div>
+
+        {/* === DIVIDER SUTIL === */}
+        <div className="h-px bg-[var(--color-ivory-12)]" />
+
+        {/* === FOOTER: data da análise === */}
+        <div className="mt-auto font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+          Análise concluída {formatTempoRelativo(consulta.dataConsulta)}
         </div>
       </div>
-
-      {/* Resumo de evidências */}
-      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[var(--color-ivory-88)]">
-        <span>
-          {consulta.outrasExecucoes.length}{" "}
-          {consulta.outrasExecucoes.length === 1 ? "execução" : "execuções"}
-        </span>
-        <span aria-hidden="true" className="text-[var(--color-ivory-12)]">
-          ·
-        </span>
-        <span>
-          {consulta.restricoes.length}{" "}
-          {consulta.restricoes.length === 1 ? "restrição" : "restrições"}
-        </span>
-        <span aria-hidden="true" className="text-[var(--color-ivory-12)]">
-          ·
-        </span>
-        <span>
-          {consulta.bensAparentes.length}{" "}
-          {consulta.bensAparentes.length === 1 ? "bem" : "bens"} aparentes
-        </span>
-      </div>
-
-      {/* Rodapé: data da consulta */}
-      <p className="mt-5 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
-        Análise concluída {formatTempoRelativo(consulta.dataConsulta)}
-      </p>
     </Link>
   );
 }

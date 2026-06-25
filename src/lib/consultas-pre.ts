@@ -34,6 +34,19 @@ export type BemAparente = {
   localizacao?: string;
 };
 
+// Cada API executada dentro de uma consulta pré-processual.
+// Usado pra mostrar no detalhe da consulta quais fontes foram cruzadas,
+// quanto custou cada uma e se a resposta veio com dados ou vazia.
+// Quando a Sem 2 entregar `executarConsultaPaga` real, esta entidade
+// vira a tabela `consultas_pre_apis` (FK pra consultas_pre + apis_sonar).
+export type ConsultaApi = {
+  api: string; // id do catálogo sonar-apis.ts (ex.: "assertiva.enderecos")
+  rotulo: string; // nome amigável (ex.: "Assertiva — Pessoas")
+  custoBrl: number;
+  status: "ok" | "falhou" | "sem_dados";
+  dataConsulta: string; // ISO
+};
+
 export type ConsultaPreProcessual = {
   id: number;
   credorId: number;
@@ -58,6 +71,10 @@ export type ConsultaPreProcessual = {
   restricoes: Restricao[];
   bensAparentes: BemAparente[];
   observacoes: string;
+  // APIs cruzadas pra montar esta consulta. Score alto = menos APIs (devedor
+  // já se revelou cedo); score baixo = mais APIs (precisamos cavar fundo).
+  // Opcional pra não quebrar fixtures antigas.
+  buscasRealizadas?: ConsultaApi[];
 };
 
 // ============================================================
@@ -160,6 +177,15 @@ const CONSULTAS_MOCK: ConsultaPreProcessual[] = [
     bensAparentes: [],
     observacoes:
       "Devedor com perfil de inadimplência crônica: 4 execuções em curso (2 ativas, 1 suspensa, 1 em juizado especial) e 5 negativações ativas somando mais de R$ 62 mil. Não foram localizados imóveis, veículos ou participação societária em seu nome. Renda estimada compatível com 1 salário mínimo e meio. A execução, ainda que procedente, tende a esbarrar na ausência de patrimônio penhorável, com risco real de prescrição intercorrente. Recomenda-se priorizar tentativa de acordo extrajudicial com desconto agressivo ou descartar a cobrança.",
+    // Score baixa = cavamos fundo: 6 fontes pra confirmar ausência de patrimônio
+    buscasRealizadas: [
+      { api: "assertiva.enderecos", rotulo: "Assertiva — endereços/telefones", custoBrl: 0.3, status: "ok", dataConsulta: "2026-06-12T10:24:00-03:00" },
+      { api: "bigdatacorp.veiculos", rotulo: "BigDataCorp — veículos", custoBrl: 0.4, status: "sem_dados", dataConsulta: "2026-06-12T10:24:08-03:00" },
+      { api: "bigdatacorp.vinculos", rotulo: "BigDataCorp — vínculos", custoBrl: 0.05, status: "ok", dataConsulta: "2026-06-12T10:24:12-03:00" },
+      { api: "datajud.processos", rotulo: "DataJud — processos CNJ", custoBrl: 0, status: "ok", dataConsulta: "2026-06-12T10:24:18-03:00" },
+      { api: "cenprot.protestos", rotulo: "Cenprot — protestos consolidados", custoBrl: 15.0, status: "ok", dataConsulta: "2026-06-12T10:24:30-03:00" },
+      { api: "bigdatacorp.aeronaves", rotulo: "BigDataCorp — aeronaves/embarcações", custoBrl: 0.05, status: "sem_dados", dataConsulta: "2026-06-12T10:24:35-03:00" },
+    ],
   },
 
   // --------------------------------------------------------
@@ -229,6 +255,13 @@ const CONSULTAS_MOCK: ConsultaPreProcessual[] = [
     ],
     observacoes:
       "Construtora ativa há mais de 12 anos, sem restrições atuais em Serasa, SPC ou Boa Vista. A única execução pretérita foi integralmente satisfeita em 2023. Patrimônio imobilizado robusto (três imóveis com matrícula livre de gravames) e frota operacional de alto valor. Faturamento estimado superior a R$ 18 milhões/ano. Caso de execução de baixo risco, com elevada probabilidade de satisfação rápida via penhora online ou penhora dos imóveis. Recomenda-se ajuizamento imediato com pedido de arresto preventivo.",
+    // Score alta + combo doc: 4 fontes incluindo matrícula oficial pra anexar na peça
+    buscasRealizadas: [
+      { api: "minhareceita.cnpj", rotulo: "minhareceita — CNPJ + QSA", custoBrl: 0, status: "ok", dataConsulta: "2026-06-15T14:08:00-03:00" },
+      { api: "datajud.processos", rotulo: "DataJud — processos CNJ", custoBrl: 0, status: "ok", dataConsulta: "2026-06-15T14:08:09-03:00" },
+      { api: "onr.matricula", rotulo: "ONR — matrícula urbana BR (nacional)", custoBrl: 35.0, status: "ok", dataConsulta: "2026-06-15T14:08:42-03:00" },
+      { api: "junta.certidao", rotulo: "Junta Comercial — certidão + atos PJ", custoBrl: 50.0, status: "ok", dataConsulta: "2026-06-15T14:09:18-03:00" },
+    ],
   },
 
   // --------------------------------------------------------
@@ -291,6 +324,14 @@ const CONSULTAS_MOCK: ConsultaPreProcessual[] = [
     ],
     observacoes:
       "Servidora pública estadual com vínculo estável e renda compatível, mas com sinais recentes de aperto: duas execuções em andamento e negativação em aberto no Serasa. Possui um imóvel financiado pela Caixa, com saldo devedor estimado em R$ 95 mil — penhora possível, mas sujeita ao limite de impenhorabilidade do bem de família (a depender de outras propriedades). Recomenda-se ajuizamento condicionado a tentativa prévia de acordo, dado o porte da causa (R$ 32 mil) frente ao risco de disputa sobre impenhorabilidade.",
+    // Score média: 5 fontes — combo lead completo
+    buscasRealizadas: [
+      { api: "assertiva.enderecos", rotulo: "Assertiva — endereços/telefones", custoBrl: 0.3, status: "ok", dataConsulta: "2026-06-17T09:42:00-03:00" },
+      { api: "bigdatacorp.veiculos", rotulo: "BigDataCorp — veículos", custoBrl: 0.4, status: "sem_dados", dataConsulta: "2026-06-17T09:42:06-03:00" },
+      { api: "bigdatacorp.vinculos", rotulo: "BigDataCorp — vínculos", custoBrl: 0.05, status: "ok", dataConsulta: "2026-06-17T09:42:11-03:00" },
+      { api: "datajud.processos", rotulo: "DataJud — processos CNJ", custoBrl: 0, status: "ok", dataConsulta: "2026-06-17T09:42:17-03:00" },
+      { api: "arisp.matricula", rotulo: "ARISP — matrícula urbana SP", custoBrl: 30.0, status: "ok", dataConsulta: "2026-06-17T09:42:48-03:00" },
+    ],
   },
 
   // --------------------------------------------------------
@@ -393,6 +434,15 @@ const CONSULTAS_MOCK: ConsultaPreProcessual[] = [
     bensAparentes: [],
     observacoes:
       "Cenário extremo de insolvência: 7 execuções (5 ativas, 1 suspensa, 1 arquivada) e 8 protestos cartorários acumulados em três anos, totalizando passivo conhecido superior a R$ 170 mil. Nenhum imóvel, veículo ou participação societária localizado. Renda informal estimada em torno de 2 salários mínimos. A relação custo/benefício da execução é claramente desfavorável: o valor da causa (R$ 18 mil) é menor do que o custo médio processual somado ao risco de prescrição. Recomenda-se desconsiderar a execução judicial e direcionar o crédito para baixa contábil ou cessão a terceiros.",
+    // Score baixa = cavamos máximo: 6 fontes pra documentar a inviabilidade
+    buscasRealizadas: [
+      { api: "assertiva.enderecos", rotulo: "Assertiva — endereços/telefones", custoBrl: 0.3, status: "ok", dataConsulta: "2026-06-18T16:55:00-03:00" },
+      { api: "bigdatacorp.veiculos", rotulo: "BigDataCorp — veículos", custoBrl: 0.4, status: "sem_dados", dataConsulta: "2026-06-18T16:55:08-03:00" },
+      { api: "bigdatacorp.vinculos", rotulo: "BigDataCorp — vínculos", custoBrl: 0.05, status: "ok", dataConsulta: "2026-06-18T16:55:13-03:00" },
+      { api: "bigdatacorp.aeronaves", rotulo: "BigDataCorp — aeronaves/embarcações", custoBrl: 0.05, status: "sem_dados", dataConsulta: "2026-06-18T16:55:17-03:00" },
+      { api: "datajud.processos", rotulo: "DataJud — processos CNJ", custoBrl: 0, status: "ok", dataConsulta: "2026-06-18T16:55:25-03:00" },
+      { api: "cenprot.protestos", rotulo: "Cenprot — protestos consolidados", custoBrl: 15.0, status: "ok", dataConsulta: "2026-06-18T16:55:42-03:00" },
+    ],
   },
 
   // --------------------------------------------------------
@@ -446,6 +496,13 @@ const CONSULTAS_MOCK: ConsultaPreProcessual[] = [
     ],
     observacoes:
       "Indústria alimentícia de grande porte, em plena operação, sem qualquer registro de execução, protesto ou negativação. Faturamento anual estimado em R$ 142 milhões (12 meses de SPED Fiscal). Patrimônio imobilizado consolidado, com matrículas livres e movimentação bancária compatível com o porte. Risco de inadimplência da execução tende a zero — o passivo de R$ 1,2 milhão representa fração desprezível do giro mensal. Recomenda-se ajuizamento imediato; é altamente provável que o pagamento ocorra ainda na fase de citação, sem necessidade de constrição de bens.",
+    // Score alta + combo doc premium: matrícula + Junta + eDossie pra blindar a peça
+    buscasRealizadas: [
+      { api: "minhareceita.cnpj", rotulo: "minhareceita — CNPJ + QSA", custoBrl: 0, status: "ok", dataConsulta: "2026-06-20T11:17:00-03:00" },
+      { api: "onr.matricula", rotulo: "ONR — matrícula urbana BR (nacional)", custoBrl: 35.0, status: "ok", dataConsulta: "2026-06-20T11:17:35-03:00" },
+      { api: "junta.certidao", rotulo: "Junta Comercial — certidão + atos PJ", custoBrl: 50.0, status: "ok", dataConsulta: "2026-06-20T11:18:14-03:00" },
+      { api: "edossie.completo", rotulo: "eDossie Pro — ônus + ações", custoBrl: 500.0, status: "ok", dataConsulta: "2026-06-20T11:19:02-03:00" },
+    ],
   },
 
   // --------------------------------------------------------
@@ -505,6 +562,13 @@ const CONSULTAS_MOCK: ConsultaPreProcessual[] = [
     ],
     observacoes:
       "Autônomo do setor de representação comercial, com renda razoavelmente estável mas perfil de endividamento em ascensão (uma execução recente e duas negativações nos últimos 9 meses). Possui um veículo em nome próprio sem gravame de alienação, suficiente para cobrir o valor da causa em caso de penhora. Não há imóveis registrados. Recomenda-se tentativa prévia de acordo extrajudicial (em geral aceita por devedores deste perfil para evitar restrição do único bem útil); persistindo a recusa, ajuizamento com pedido direto de penhora do veículo via Renajud.",
+    // Score média: 4 fontes — lead enxuto pra confirmar o veículo
+    buscasRealizadas: [
+      { api: "assertiva.enderecos", rotulo: "Assertiva — endereços/telefones", custoBrl: 0.3, status: "ok", dataConsulta: "2026-06-21T13:30:00-03:00" },
+      { api: "bigdatacorp.veiculos", rotulo: "BigDataCorp — veículos", custoBrl: 0.4, status: "ok", dataConsulta: "2026-06-21T13:30:05-03:00" },
+      { api: "bigdatacorp.vinculos", rotulo: "BigDataCorp — vínculos", custoBrl: 0.05, status: "ok", dataConsulta: "2026-06-21T13:30:10-03:00" },
+      { api: "datajud.processos", rotulo: "DataJud — processos CNJ", custoBrl: 0, status: "ok", dataConsulta: "2026-06-21T13:30:16-03:00" },
+    ],
   },
 ];
 

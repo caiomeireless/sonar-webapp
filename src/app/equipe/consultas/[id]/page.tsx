@@ -7,6 +7,7 @@ import { Building2, User } from "lucide-react";
 import {
   obterConsultaPre,
   type ConsultaPreProcessual,
+  type ConsultaApi,
   type OutraExecucao,
   type Restricao,
   type BemAparente,
@@ -18,6 +19,7 @@ import { ehCliente } from "@/lib/perfis";
 import { devEuFromParam } from "@/lib/dev-auth";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { formatBRL, formatData } from "@/lib/format";
+import { BuscarMaisConsulta } from "./BuscarMaisConsulta";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -86,6 +88,25 @@ export default async function DetalheConsultaPage({
           </div>
         </div>
       </section>
+
+      {/* ============ BUSCAS REALIZADAS ============ */}
+      {consulta.buscasRealizadas && consulta.buscasRealizadas.length > 0 ? (
+        <section className="border-t border-[var(--color-ivory-12)]">
+          <div className="mx-auto max-w-[1400px] px-6 py-12 sm:px-10">
+            <SectionTitle
+              texto="Buscas Realizadas Nesta Consulta"
+              eyebrow={`${consulta.buscasRealizadas.length} ${
+                consulta.buscasRealizadas.length === 1 ? "fonte cruzada" : "fontes cruzadas"
+              } · ${formatBRL(
+                consulta.buscasRealizadas.reduce((s, b) => s + b.custoBrl, 0),
+              )}`}
+            />
+            <div className="mt-6">
+              <GridBuscas buscas={consulta.buscasRealizadas} />
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {/* ============ OUTRAS EXECUÇÕES ============ */}
       <section className="border-t border-[var(--color-ivory-12)]">
@@ -198,6 +219,23 @@ export default async function DetalheConsultaPage({
                 valor={formatBRL(consulta.rendaEstimadaMensalBrl)}
               />
             ) : null}
+          </div>
+        </div>
+      </section>
+
+      {/* ============ BUSCAR MAIS (enriquecer consulta) ============ */}
+      <section className="border-t border-[var(--color-ivory-12)]">
+        <div className="mx-auto max-w-[1400px] px-6 py-12 sm:px-10">
+          <SectionTitle
+            texto="Buscar Mais"
+            eyebrow="Enriquecer esta consulta com APIs adicionais"
+          />
+          <div className="mt-6">
+            <BuscarMaisConsulta
+              consultaId={consulta.id}
+              devedorNome={consulta.devedor.nome}
+              advogadoEmail={consulta.advogadoEmail}
+            />
           </div>
         </div>
       </section>
@@ -627,6 +665,84 @@ function GridBens({ bens }: { bens: BemAparente[] }) {
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+// ----- Buscas realizadas (APIs já cruzadas) -----
+
+function labelStatusBusca(status: ConsultaApi["status"]): {
+  label: string;
+  color: string;
+  bg: string;
+} {
+  switch (status) {
+    case "ok":
+      return {
+        label: "OK",
+        color: "var(--color-signal)",
+        bg: "rgba(60,255,138,0.10)",
+      };
+    case "sem_dados":
+      return {
+        label: "Sem Dados",
+        color: "var(--color-ivory-66)",
+        bg: "rgba(255,255,255,0.04)",
+      };
+    case "falhou":
+      return {
+        label: "Falhou",
+        color: "var(--color-devedor)",
+        bg: "rgba(220,80,80,0.10)",
+      };
+  }
+}
+
+function GridBuscas({ buscas }: { buscas: ConsultaApi[] }) {
+  return (
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {buscas.map((b, idx) => {
+        const s = labelStatusBusca(b.status);
+        return (
+          <div
+            key={idx}
+            className="flex flex-col gap-3 rounded-xl border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.55)] p-5 transition hover:border-[var(--color-signal)]/40"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <span
+                className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[12px] uppercase tracking-[0.22em]"
+                style={{
+                  borderColor: s.color,
+                  color: s.color,
+                  backgroundColor: s.bg,
+                }}
+              >
+                <span
+                  aria-hidden="true"
+                  className="inline-block h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: s.color }}
+                />
+                {s.label}
+              </span>
+              <span
+                className="whitespace-nowrap font-mono text-xs"
+                style={{
+                  color:
+                    b.custoBrl === 0
+                      ? "var(--color-signal)"
+                      : "var(--color-gold)",
+                }}
+              >
+                {b.custoBrl === 0 ? "grátis" : formatBRL(b.custoBrl)}
+              </span>
+            </div>
+            <p className="text-sm text-ivory">{b.rotulo}</p>
+            <p className="mt-auto font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+              {formatData(b.dataConsulta)}
+            </p>
+          </div>
+        );
+      })}
     </div>
   );
 }

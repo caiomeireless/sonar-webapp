@@ -17,7 +17,7 @@ import { perfilLogado } from "@/lib/perfis-server";
 import { ehCliente } from "@/lib/perfis";
 import { devEuFromParam } from "@/lib/dev-auth";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
-import { formatBRL, formatData } from "@/lib/format";
+import { formatBRL, formatTempoRelativo } from "@/lib/format";
 
 type Props = {
   searchParams?: Promise<{ eu?: string | string[] }>;
@@ -118,35 +118,50 @@ function CardConsulta({
   euQuery: string;
 }) {
   const { devedor } = consulta;
+  const docLabel = devedor.tipo === "PF" ? "CPF" : "CNPJ";
   return (
     <Link
       href={`/equipe/consultas/${consulta.id}${euQuery}`}
-      className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-signal)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-onyx)]"
+      className="group block cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-signal)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-onyx)]"
     >
-      <SpotlightCard className="flex h-full flex-col gap-4 p-6 transition group-hover:-translate-y-0.5">
+      <div className="glass flex h-full flex-col gap-5 p-7 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-[0_24px_48px_-12px_rgba(60,255,138,0.18)]">
+        {/* === EYEBROW + SCORE === */}
         <div className="flex items-start justify-between gap-3">
-          <span className="font-mono text-[11px] uppercase tracking-[0.28em] text-[var(--color-signal)]">
+          <span className="font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-signal)]">
             Consulta Pré-Processual
           </span>
           <ChipScore score={consulta.score} />
         </div>
 
-        <h3 className="font-serif text-[22px] leading-[1.15] text-[var(--color-devedor)]">
-          {devedor.nome}
-        </h3>
+        {/* === IDENTIFICAÇÃO DO DEVEDOR === */}
+        <header>
+          <h3 className="font-serif text-[26px] leading-[1.15] text-[var(--color-devedor)]">
+            {devedor.nome}
+          </h3>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <ChipBase
-            label={devedor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"}
-            color="var(--color-gold)"
-          />
-          <ChipBase label={devedor.documento} color="var(--color-ivory-66)" mono />
-        </div>
+          {/* Chip do documento — mesmo padrão do CarteiraView */}
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[var(--color-ivory-22)] bg-[var(--color-surface-2)]/60 px-3 py-1.5">
+            <span className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-signal)]">
+              {devedor.tipo}
+            </span>
+            <span className="h-3 w-px bg-[var(--color-ivory-22)]" />
+            <span className="font-mono text-[12px] text-ivory">
+              {docLabel} {devedor.documento}
+            </span>
+          </div>
+        </header>
 
-        <div className="grid grid-cols-3 gap-2 rounded-lg border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.45)] px-3 py-3">
+        {/* === DIVIDER SUTIL === */}
+        <div className="h-px bg-[var(--color-ivory-12)]" />
+
+        {/* === RECOMENDAÇÃO (pill abaixo do score, antes dos stats) === */}
+        <PillRecomendacao recomendacao={consulta.recomendacao} />
+
+        {/* === STATS GRID 3-COL === */}
+        <div className="grid grid-cols-3 gap-3 rounded-xl border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.45)] px-4 py-4">
           <StatMini
             valor={String(consulta.outrasExecucoes.length)}
-            label="Execuções"
+            label="Outras Execuções"
             color="var(--color-devedor)"
           />
           <StatMini
@@ -156,18 +171,30 @@ function CardConsulta({
           />
           <StatMini
             valor={String(consulta.bensAparentes.length)}
-            label="Bens"
+            label="Bens Aparentes"
             color="var(--color-signal)"
           />
         </div>
 
-        <PillRecomendacao recomendacao={consulta.recomendacao} />
+        {/* === DIVIDER SUTIL === */}
+        <div className="h-px bg-[var(--color-ivory-12)]" />
 
-        <div className="mt-auto flex items-center justify-between border-t border-[var(--color-ivory-12)] pt-3 font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
-          <span>{formatData(consulta.dataConsulta)}</span>
-          <span>{formatBRL(consulta.custoBrl)}</span>
+        {/* === FOOTER: data + custo + advogado === */}
+        <div className="mt-auto space-y-2">
+          <div className="flex items-center justify-between font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+            <span>{formatTempoRelativo(consulta.dataConsulta)}</span>
+            <span className="tabular-nums text-[var(--color-gold)]">
+              {formatBRL(consulta.custoBrl)}
+            </span>
+          </div>
+          <div
+            className="break-all font-mono text-[12px]"
+            style={{ color: "var(--color-advogado)" }}
+          >
+            {consulta.advogadoEmail}
+          </div>
         </div>
-      </SpotlightCard>
+      </div>
     </Link>
   );
 }
@@ -190,11 +217,11 @@ function corDoScore(score: ScoreSolvencia): string {
 function labelDoScore(score: ScoreSolvencia): string {
   switch (score) {
     case "alta":
-      return "Alta";
+      return "Solvência Alta";
     case "media":
-      return "Média";
+      return "Solvência Média";
     case "baixa":
-      return "Baixa";
+      return "Solvência Baixa";
   }
 }
 
@@ -202,11 +229,11 @@ function ChipScore({ score }: { score: ScoreSolvencia }) {
   const color = corDoScore(score);
   return (
     <span
-      className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[11px] uppercase tracking-[0.22em]"
+      className="inline-flex items-center gap-2 rounded-full border px-3 py-1 font-mono text-[12px] uppercase tracking-[0.22em]"
       style={{
         borderColor: color,
         color,
-        backgroundColor: "rgba(255,255,255,0.03)",
+        backgroundColor: "rgba(255,255,255,0.04)",
       }}
     >
       <span
@@ -214,32 +241,7 @@ function ChipScore({ score }: { score: ScoreSolvencia }) {
         className="inline-block h-1.5 w-1.5 rounded-full"
         style={{ backgroundColor: color, boxShadow: `0 0 8px ${color}` }}
       />
-      Score {labelDoScore(score)}
-    </span>
-  );
-}
-
-function ChipBase({
-  label,
-  color,
-  mono,
-}: {
-  label: string;
-  color: string;
-  mono?: boolean;
-}) {
-  return (
-    <span
-      className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] uppercase tracking-[0.18em] ${
-        mono ? "font-mono" : "font-mono"
-      }`}
-      style={{
-        borderColor: color,
-        color,
-        backgroundColor: "rgba(255,255,255,0.03)",
-      }}
-    >
-      {label}
+      {labelDoScore(score)}
     </span>
   );
 }
@@ -256,12 +258,12 @@ function StatMini({
   return (
     <div className="flex flex-col items-center text-center">
       <span
-        className="font-serif text-2xl leading-none"
+        className="font-serif text-4xl leading-none tabular-nums"
         style={{ color }}
       >
         {valor}
       </span>
-      <span className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+      <span className="mt-2 font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
         {label}
       </span>
     </div>
@@ -276,17 +278,18 @@ function PillRecomendacao({
   const meta = metaRecomendacao(recomendacao);
   return (
     <div
-      className="inline-flex items-center gap-2 self-start rounded-full border px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.22em]"
+      className="inline-flex items-center gap-2 self-start rounded-full border px-3 py-1.5 font-mono text-[12px] uppercase tracking-[0.22em]"
       style={{
         borderColor: meta.color,
         color: meta.color,
         backgroundColor: meta.bg,
+        boxShadow: `inset 0 1px 0 rgba(255,255,255,0.04)`,
       }}
     >
       <span
         aria-hidden="true"
         className="inline-block h-1.5 w-1.5 rounded-full"
-        style={{ backgroundColor: meta.color }}
+        style={{ backgroundColor: meta.color, boxShadow: `0 0 8px ${meta.color}` }}
       />
       {meta.label}
     </div>
