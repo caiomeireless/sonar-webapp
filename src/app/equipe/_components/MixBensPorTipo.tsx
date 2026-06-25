@@ -181,7 +181,7 @@ export default function MixBensPorTipo({ dados }: Props) {
               <LabelList
                 dataKey="value"
                 position="right"
-                formatter={(v: ValueType) => num(Number(v))}
+                formatter={(v) => (v != null ? num(Number(v)) : "")}
                 style={{
                   fill: "var(--color-ivory)",
                   fontSize: 13,

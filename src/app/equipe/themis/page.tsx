@@ -330,8 +330,7 @@ function LinhaProcesso({
   const dossieHref = `/equipe/devedores/${p.devedor.id}${linkBase}`;
 
   return (
-    <Link
-      href={dossieHref}
+    <div
       className="glass group flex flex-col gap-3 p-5 transition hover:bg-[var(--color-surface-2)]/40 lg:grid lg:grid-cols-[auto_minmax(0,2.4fr)_minmax(0,1.6fr)_auto] lg:items-center lg:gap-5"
     >
       {/* COL 1: AVATAR + Pasta # (advogado responsável) */}
@@ -352,9 +351,14 @@ function LinhaProcesso({
 
       {/* COL 2: DEVEDOR + processo + doc */}
       <div className="min-w-0">
-        <h3 className="nome-devedor truncate font-serif text-xl leading-tight text-[var(--color-devedor)]">
-          {p.devedor.nome}
-        </h3>
+        <Link
+          href={dossieHref}
+          className="block"
+        >
+          <h3 className="nome-devedor truncate font-serif text-xl leading-tight text-[var(--color-devedor)] transition group-hover:underline">
+            {p.devedor.nome}
+          </h3>
+        </Link>
         <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
           <span className="inline-flex items-center rounded-full bg-[var(--color-signal-soft)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-signal)]">
             {tipoLabel}
@@ -403,19 +407,17 @@ function LinhaProcesso({
         </div>
       </div>
 
-      {/* COL 4: 3 botões de busca. Linha inteira clica pra dossiê — esses
-          botões dentro abrem modais (stopPropagation interno) e nao precisam
-          de "Dossie" duplicado. */}
-      <div
-        className="flex shrink-0 items-center justify-end"
-        onClick={(e) => e.stopPropagation()}
-      >
+      {/* COL 4: link Dossie + 3 botoes de busca */}
+      <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+        <Link href={dossieHref} className="btn-neon-gold text-[10px]">
+          Dossiê
+        </Link>
         <AcoesBuscaCardThemis
           devedorId={p.devedor.id}
           eu={eu ?? ""}
           jaRastreado={p.ja_rastreado}
         />
       </div>
-    </Link>
+    </div>
   );
 }

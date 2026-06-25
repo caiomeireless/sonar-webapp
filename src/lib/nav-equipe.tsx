@@ -5,6 +5,7 @@
 // passar funções de Server -> Client.
 
 import {
+  Bug,
   Clock,
   DollarSign,
   LayoutDashboard,
@@ -23,5 +24,6 @@ export const NAV_EQUIPE: SidebarItem[] = [
   { href: "/equipe/consultas", label: "Consultas Pre-Processuais", icon: <Clock className={ICON_CLASS} /> },
   { href: "/equipe/themis", label: "Fila Themis · Execuções", icon: <Search className={ICON_CLASS} /> },
   { href: "/equipe/custos", label: "Monitor de custos", icon: <DollarSign className={ICON_CLASS} /> },
+  { href: "/equipe/bugs", label: "Comunicação de Bugs", icon: <Bug className={ICON_CLASS} /> },
   { href: "/equipe/configuracoes", label: "Configurações", icon: <Settings className={ICON_CLASS} /> },
 ];

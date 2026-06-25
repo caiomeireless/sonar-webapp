@@ -7,6 +7,7 @@
 // (alta/média/baixa) e recomendação (recomendado/avaliar/não recomendado).
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Clock } from "lucide-react";
 import {
   listarConsultasPre,
   type ConsultaPreProcessual,
@@ -44,7 +45,21 @@ export default async function ConsultasPreEquipePage({ searchParams }: Props) {
   return (
     <main className="relative mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
       {/* ============ HEADER CENTRALIZADO ============ */}
-      <header className="title-shield mb-6 text-center">
+      <header className="title-shield mb-6 flex flex-col items-center text-center">
+        {/* Icone Relogio dourado acima do titulo. */}
+        <div
+          className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--color-gold)]/45 bg-[var(--color-gold)]/10"
+          style={{
+            boxShadow:
+              "0 0 20px rgba(201,162,74,0.30), inset 0 0 12px rgba(201,162,74,0.10)",
+          }}
+        >
+          <Clock
+            className="h-7 w-7 text-[var(--color-gold)]"
+            style={{ filter: "drop-shadow(0 0 8px rgba(201,162,74,0.7))" }}
+            aria-hidden="true"
+          />
+        </div>
         <p className="font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-signal)]">
           Equipe · Análise de Efetividade
         </p>

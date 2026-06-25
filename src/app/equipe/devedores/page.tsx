@@ -6,6 +6,7 @@
 // Server Component. Em dev/preview, aceita ?eu=email pra simular login.
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Search } from "lucide-react";
 import { listarCredoresComResumo } from "@/lib/devedores";
 import { perfilLogado } from "@/lib/perfis-server";
 import { ehCliente } from "@/lib/perfis";
@@ -70,7 +71,21 @@ export default async function DevedoresEquipePage({ searchParams }: Props) {
 
   return (
     <main className="relative mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
-      <header className="title-shield mb-6 text-center">
+      <header className="title-shield mb-6 flex flex-col items-center text-center">
+        {/* Icone Lupa dourada acima do titulo. */}
+        <div
+          className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--color-gold)]/45 bg-[var(--color-gold)]/10"
+          style={{
+            boxShadow:
+              "0 0 20px rgba(201,162,74,0.30), inset 0 0 12px rgba(201,162,74,0.10)",
+          }}
+        >
+          <Search
+            className="h-7 w-7 text-[var(--color-gold)]"
+            style={{ filter: "drop-shadow(0 0 8px rgba(201,162,74,0.7))" }}
+            aria-hidden="true"
+          />
+        </div>
         <h1 className="font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
           Banco de Devedores Separado por Cliente
         </h1>
