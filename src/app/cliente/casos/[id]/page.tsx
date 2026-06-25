@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
+  obterDossie,
   obterDossieParaCliente,
   type Bem,
   type CasoResumo,
@@ -57,7 +58,13 @@ export default async function DossieClientePage({ params, searchParams }: Props)
     return <AcessoNegado />;
   }
 
-  const dossie = await obterDossieParaCliente(devedorId, eu);
+  let dossie = await obterDossieParaCliente(devedorId, eu);
+  // Fallback admin/socio: se autorizacao por email falhar mas o perfil
+  // logado tem papel privilegiado (modo visualizacao sem ?eu= correto),
+  // libera o dossie direto. Defesa em profundidade do fix do CardStack.
+  if (!dossie && (perfil?.papel === "admin" || perfil?.papel === "socio")) {
+    dossie = await obterDossie(devedorId);
+  }
   if (!dossie) {
     return <AcessoNegado />;
   }
