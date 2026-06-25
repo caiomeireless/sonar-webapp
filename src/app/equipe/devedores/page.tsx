@@ -107,39 +107,37 @@ export default async function DevedoresEquipePage({ searchParams }: Props) {
         </p>
       </header>
 
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        {/* Busca: nome de devedor, nome de cliente ou CNPJ/CPF */}
-        <div className="flex-1">
-          <BuscaCarteira />
-        </div>
-
-        <Link
-          href={novoHref}
-          className="inline-flex items-center gap-2 self-start rounded-xl bg-[var(--color-signal)]/85 px-6 py-3.5 text-base font-semibold text-onyx shadow-[0_4px_24px_rgba(60,255,138,0.28)] ring-1 ring-[var(--color-signal)]/60 backdrop-blur-md transition hover:bg-[var(--color-tip-glow)]/90"
-        >
-          + Novo Devedor
-        </Link>
-      </div>
-
       {credores.length === 0 ? (
-        <div className="mt-12 grid place-items-center">
-          <SpotlightCard className="max-w-[520px] p-10 text-center">
-            <span className="eyebrow !text-[var(--color-signal)]">Vazio</span>
-            <h3 className="mt-4 font-serif text-2xl text-ivory">
-              Nenhum cliente na carteira ainda
-            </h3>
-            <p className="mt-3 text-sm text-[var(--color-ivory-88)]">
-              Cadastre o primeiro devedor e vincule a um credor (cliente).
-
-            </p>
+        <>
+          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex-1">
+              <BuscaCarteira />
+            </div>
             <Link
               href={novoHref}
-              className="mt-6 inline-block rounded-lg border border-[var(--color-signal)]/50 bg-[var(--color-signal)]/10 px-4 py-2 text-xs font-medium text-[var(--color-signal)] transition hover:bg-[var(--color-signal)]/20"
+              className="inline-flex items-center gap-2 self-start rounded-xl bg-[var(--color-signal)]/85 px-6 py-3.5 text-base font-semibold text-onyx shadow-[0_4px_24px_rgba(60,255,138,0.28)] ring-1 ring-[var(--color-signal)]/60 backdrop-blur-md transition hover:bg-[var(--color-tip-glow)]/90"
             >
-              + Cadastrar devedor
+              + Novo Devedor
             </Link>
-          </SpotlightCard>
-        </div>
+          </div>
+          <div className="mt-12 grid place-items-center">
+            <SpotlightCard className="max-w-[520px] p-10 text-center">
+              <span className="eyebrow !text-[var(--color-signal)]">Vazio</span>
+              <h3 className="mt-4 font-serif text-2xl text-ivory">
+                Nenhum cliente na carteira ainda
+              </h3>
+              <p className="mt-3 text-sm text-[var(--color-ivory-88)]">
+                Cadastre o primeiro devedor e vincule a um credor (cliente).
+              </p>
+              <Link
+                href={novoHref}
+                className="mt-6 inline-block rounded-lg border border-[var(--color-signal)]/50 bg-[var(--color-signal)]/10 px-4 py-2 text-xs font-medium text-[var(--color-signal)] transition hover:bg-[var(--color-signal)]/20"
+              >
+                + Cadastrar devedor
+              </Link>
+            </SpotlightCard>
+          </div>
+        </>
       ) : (
         <>
           <div className="mx-auto mt-10 mb-4 max-w-[1100px] text-center">
@@ -149,6 +147,19 @@ export default async function DevedoresEquipePage({ searchParams }: Props) {
             >
               Escolha o Cliente
             </p>
+          </div>
+          {/* Busca + Novo Devedor — agora EMBAIXO do texto verde
+              "Escolha o Cliente" (pedido do Caio). */}
+          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex-1">
+              <BuscaCarteira />
+            </div>
+            <Link
+              href={novoHref}
+              className="inline-flex items-center gap-2 self-start rounded-xl bg-[var(--color-signal)]/85 px-6 py-3.5 text-base font-semibold text-onyx shadow-[0_4px_24px_rgba(60,255,138,0.28)] ring-1 ring-[var(--color-signal)]/60 backdrop-blur-md transition hover:bg-[var(--color-tip-glow)]/90"
+            >
+              + Novo Devedor
+            </Link>
           </div>
           <CarteiraView credores={credores} euQuery={linkBase} />
         </>
