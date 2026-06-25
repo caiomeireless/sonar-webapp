@@ -23,13 +23,11 @@ import {
   AlertTriangle,
   Bell,
   Calendar,
-  CalendarClock,
   FileText,
   Gavel,
   Gem,
   Landmark,
   MessageSquare,
-  Scale,
   Settings,
   TrendingUp,
   UserPlus,
@@ -55,9 +53,7 @@ export type NotificacaoCategoriaEquipe =
 
 export type NotificacaoCategoriaCliente =
   | "patrimonio-encontrado"
-  | "andamento-processo"
   | "recuperacao-efetivada"
-  | "audiencia-agendada"
   | "relatorio-mensal"
   | "mensagem-escritorio"
   | "limite-consultas";
@@ -170,25 +166,11 @@ export const CATEGORIAS_CLIENTE: ReadonlyArray<
     corNome: "signal",
   },
   {
-    chave: "andamento-processo",
-    rotulo: "Andamento do Processo",
-    icone: Scale,
-    cor: "var(--color-gold)",
-    corNome: "gold",
-  },
-  {
     chave: "recuperacao-efetivada",
     rotulo: "Recuperação Efetivada",
     icone: TrendingUp,
     cor: "var(--color-signal)",
     corNome: "signal",
-  },
-  {
-    chave: "audiencia-agendada",
-    rotulo: "Audiência Agendada",
-    icone: CalendarClock,
-    cor: "var(--color-gold)",
-    corNome: "gold",
   },
   {
     chave: "relatorio-mensal",

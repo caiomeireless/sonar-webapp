@@ -175,7 +175,7 @@ function CardConsulta({
             const { solid, rgb } = corScoreNeon(consulta.score);
             return (
               <span
-                className="inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 font-mono text-[12px] font-bold uppercase tracking-[0.20em]"
+                className="inline-flex items-center justify-center gap-2 rounded-full border px-3.5 py-1.5 text-center font-mono text-[12px] font-bold uppercase tracking-[0.20em]"
                 style={{
                   backgroundColor: solid,
                   borderColor: solid,
