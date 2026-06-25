@@ -1166,15 +1166,19 @@ body {
 }
 
 /* Nomes de entidade em font-serif — peso maior + text-shadow leve
-   pra reforcar legibilidade em fundos escuros (Caio: estava fino demais). */
+   pra reforcar legibilidade em fundos escuros (Caio: estava fino demais).
+   text-align: center aplicado por padrao em TODOS os usos (Caio:
+   sempre centralize). */
 .nome-cliente {
   font-weight: 600;
+  text-align: center;
   text-shadow:
     0 0 1px rgba(201, 162, 74, 0.7),
     0 0 12px rgba(201, 162, 74, 0.18);
 }
 .nome-devedor {
   font-weight: 600;
+  text-align: center;
   text-shadow:
     0 0 1px rgba(220, 38, 38, 0.7),
     0 0 12px rgba(220, 38, 38, 0.18);
