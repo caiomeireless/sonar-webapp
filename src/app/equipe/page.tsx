@@ -113,14 +113,14 @@ export default async function DashboardPlataformaPage({
             Painel da Plataforma
           </p>
         </header>
-      </div>
 
-      {/* Barra de filtros FULL WIDTH — encosta lateral a lateral da área
-          principal (após a sidebar). Fora do container 1400 propositalmente. */}
-      <FiltrosPlataformaUI
-        advogados={opcoes.advogados}
-        credores={opcoes.credores}
-      />
+        {/* Barra de filtros DENTRO do container 1400 — alinhada com os cards.
+            Estilo .glass igual o do Monitor de Custos. */}
+        <FiltrosPlataformaUI
+          advogados={opcoes.advogados}
+          credores={opcoes.credores}
+        />
+      </div>
 
       {/* Grid principal centralizado */}
       <div className="mx-auto grid max-w-[1400px] grid-cols-1 gap-4 px-6 sm:px-10 md:grid-cols-12">

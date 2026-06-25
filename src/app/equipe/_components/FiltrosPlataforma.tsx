@@ -87,7 +87,7 @@ export default function FiltrosPlataforma({
 
   return (
     <div
-      className="sticky top-[122px] z-10 mb-6 border-b border-[var(--color-line)] bg-[var(--color-surface-2)]/80 px-6 py-3 backdrop-blur-2xl sm:px-10"
+      className="glass mb-6 flex flex-wrap items-center gap-4 p-4"
       data-pending={pending ? "1" : "0"}
     >
       <div className="flex flex-wrap items-center gap-3">
