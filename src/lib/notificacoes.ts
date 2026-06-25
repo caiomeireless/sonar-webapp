@@ -489,44 +489,15 @@ const MOCKS_CLIENTE: MockInput[] = [
     categoria: "recuperacao-efetivada",
     titulo: "Penhora Efetivada em Conta de Carlos Eduardo",
     resumo:
-      "Bloqueio via SISBAJUD recuperou R$ 187.430,12 em contas bancárias do devedor.",
+      "Bloqueio judicial recuperou R$ 187.430,12 em contas bancárias do devedor.",
     corpo:
-      "Boa notícia para a sua carteira: o pedido de bloqueio via SISBAJUD contra Carlos Eduardo Mendes Albuquerque foi atendido integralmente e R$ 187.430,12 já estão bloqueados em contas bancárias do devedor.\n\nO valor representa cerca de 22% do crédito atualizado deste processo. O bloqueio incidiu sobre três contas: duas em bancos digitais e uma em banco tradicional, sendo a maior parcela proveniente de uma conta corrente vinculada à atividade profissional do executado.\n\nO próximo passo é o pedido de conversão em penhora, que costuma ser deferido em até 15 dias. Assim que houver o despacho, vamos solicitar a transferência para a conta judicial vinculada ao processo. A previsão de liberação para o seu CNPJ, contando todos os trâmites, é de 60 a 90 dias.\n\nVocê pode acompanhar todos os detalhes na ficha do caso, incluindo cópias dos extratos e o cálculo atualizado do saldo devedor.",
+      "Boa notícia para a sua carteira: o pedido de bloqueio judicial contra Carlos Eduardo Mendes Albuquerque foi atendido integralmente e R$ 187.430,12 já estão bloqueados em contas bancárias do devedor.\n\nO valor representa cerca de 22% do crédito atualizado deste processo. O bloqueio incidiu sobre três contas: duas em bancos digitais e uma em banco tradicional, sendo a maior parcela proveniente de uma conta corrente vinculada à atividade profissional do executado.\n\nO próximo passo é o pedido de conversão em penhora, que costuma ser deferido em até 15 dias. Assim que houver o despacho, vamos solicitar a transferência para a conta judicial vinculada ao processo. A previsão de liberação para o seu CNPJ, contando todos os trâmites, é de 60 a 90 dias.\n\nVocê pode acompanhar todos os detalhes na ficha do caso, incluindo cópias dos extratos e o cálculo atualizado do saldo devedor.",
     relativaEm: "há 3 horas",
     lida: false,
     referencias: {
       caso_id: 871,
       devedor_nome: "Carlos Eduardo Mendes Albuquerque",
       valor_brl: 187430.12,
-    },
-  },
-  {
-    id: "cli-audiencia-maria",
-    categoria: "audiencia-agendada",
-    titulo: "Audiência de Conciliação Marcada para 14 de Julho",
-    resumo:
-      "A 4ª Vara Cível de Campinas pautou audiência no processo contra Maria Aparecida para 14/07 às 14h30.",
-    corpo:
-      "A 4ª Vara Cível de Campinas pautou audiência de conciliação no processo movido contra Maria Aparecida da Silva Ribeiro para o dia 14 de julho de 2026, às 14h30, em formato virtual.\n\nO escritório vai representar você integralmente na audiência, então sua presença não é necessária. Caso queira acompanhar de forma remota, podemos enviar o link com antecedência.\n\nAntes da data, o escritório vai preparar uma proposta de acordo realista com base no patrimônio já mapeado da devedora, levando em conta também a capacidade de pagamento parcelado. Se você tiver alguma preferência sobre teto mínimo de proposta, prazo máximo de parcelamento ou exigência de garantias, é só sinalizar até dia 10 de julho.\n\nUm resumo completo será enviado no dia útil seguinte à audiência, com o desfecho e os próximos passos.",
-    relativaEm: "há 8 horas",
-    lida: false,
-    referencias: {
-      caso_id: 654,
-      devedor_nome: "Maria Aparecida da Silva Ribeiro",
-    },
-  },
-  {
-    id: "cli-valor-atualizado-horizonte",
-    categoria: "andamento-processo",
-    titulo: "Valor Estimado da Carteira Recalculado",
-    resumo:
-      "Com novos bens mapeados e atualização monetária, sua expectativa de recuperação subiu 18% no mês.",
-    corpo:
-      "A revisão mensal dos seus processos atualizou o valor estimado de recuperação da sua carteira. Considerando os bens mapeados nos últimos 30 dias, mais a correção monetária pelos índices contratuais, a expectativa subiu de R$ 4,1 milhões para R$ 4,84 milhões, um ganho de 18%.\n\nA maior contribuição veio do caso da Construtora Horizonte, com o terreno em Vinhedo recém-identificado. Os processos contra Carlos Eduardo Mendes e Maria Aparecida também tiveram leve incremento, principalmente pela correção pelo IGP-M.\n\nVale lembrar que o valor estimado leva em conta um deságio prudencial: trabalhamos com 60% a 70% da avaliação de mercado, considerando custas, prazos de leilão e eventuais embargos. O número final pode ser maior ou menor dependendo do desfecho de cada caso.\n\nO relatório completo, com o cálculo caso a caso, está disponível na aba Meus Casos.",
-    relativaEm: "há 1 dia",
-    lida: true,
-    referencias: {
-      valor_brl: 4840000,
     },
   },
   {
@@ -557,21 +528,6 @@ const MOCKS_CLIENTE: MockInput[] = [
     lida: true,
   },
   {
-    id: "cli-medida-protesto-maria",
-    categoria: "andamento-processo",
-    titulo: "Protesto de Sentença Concluído",
-    resumo:
-      "A sentença contra Maria Aparecida foi protestada no cartório, ampliando a pressão para regularização.",
-    corpo:
-      "O protesto extrajudicial da sentença transitada em julgado contra Maria Aparecida da Silva Ribeiro foi concluído no 2º Tabelionato de Protesto de Campinas.\n\nA partir de agora, a dívida aparece no SPC, Serasa e no sistema do Banco Central, dificultando significativamente operações de crédito, abertura de contas, financiamentos e até locações comerciais por parte da devedora.\n\nNa prática, esse tipo de medida tende a acelerar a busca por acordo. Em casos similares, costuma haver retomada de negociação em até 45 dias após o protesto efetivo, especialmente quando o devedor depende de crédito para a atividade profissional.\n\nO escritório vai monitorar movimentações de defesa, eventual ação anulatória ou contato direto da devedora para propor pagamento.",
-    relativaEm: "há 3 dias",
-    lida: true,
-    referencias: {
-      caso_id: 654,
-      devedor_nome: "Maria Aparecida da Silva Ribeiro",
-    },
-  },
-  {
     id: "cli-mensagem-estrategia",
     categoria: "mensagem-escritorio",
     titulo: "Estratégia para Construtora Horizonte Disponível",
@@ -587,21 +543,6 @@ const MOCKS_CLIENTE: MockInput[] = [
     },
   },
   {
-    id: "cli-status-arresto",
-    categoria: "andamento-processo",
-    titulo: "Pedido de Arresto Deferido pelo Juízo",
-    resumo:
-      "O juízo deferiu o pedido de arresto de bens no processo contra Carlos Eduardo. Cumprimento em andamento.",
-    corpo:
-      "O juízo da 2ª Vara Cível de Jundiaí deferiu o pedido de arresto cautelar de bens no processo movido contra Carlos Eduardo Mendes Albuquerque.\n\nO arresto autoriza a apreensão preventiva de patrimônio antes mesmo da penhora definitiva, justamente para evitar que o devedor dilapide bens durante o curso processual. A decisão menciona expressamente os veículos já localizados via RENAJUD e o saldo bancário detectado.\n\nO oficial de justiça já foi designado para cumprimento, com prazo de 30 dias para diligenciar nos endereços conhecidos do devedor. Vamos acompanhar de perto e relatar cada etapa do cumprimento.\n\nDecisões dessa natureza costumam aumentar bastante o poder de barganha em eventual proposta de acordo, já que o devedor passa a ter ativos efetivamente comprometidos.",
-    relativaEm: "há 4 dias",
-    lida: true,
-    referencias: {
-      caso_id: 871,
-      devedor_nome: "Carlos Eduardo Mendes Albuquerque",
-    },
-  },
-  {
     id: "cli-limite-consultas",
     categoria: "limite-consultas",
     titulo: "Carteira Atingiu 80% do Limite Mensal de Consultas",
@@ -613,22 +554,6 @@ const MOCKS_CLIENTE: MockInput[] = [
     lida: true,
     referencias: {
       valor_brl: 4180,
-    },
-  },
-  {
-    id: "cli-novo-processo",
-    categoria: "andamento-processo",
-    titulo: "Novo Processo Incorporado à Sua Carteira",
-    resumo:
-      "Adicionamos o processo de execução de duplicata contra Carlos Eduardo, valor original R$ 92.400.",
-    corpo:
-      "Um novo processo foi incorporado à sua carteira de cobrança patrimonial e já está sendo rastreado pelo escritório.\n\nTrata-se de execução de título extrajudicial, lastreada em duplicata mercantil emitida contra Carlos Eduardo Mendes Albuquerque, com valor original de R$ 92.400,00 e atualização até hoje totalizando R$ 117.840,55. O processo foi distribuído na 1ª Vara Cível de Campinas e já tem citação positiva confirmada.\n\nComo o devedor já figura em outro processo seu, o escritório aproveita as varreduras patrimoniais já realizadas e consolida tudo em uma única ficha. Bloqueios e penhoras eventualmente obtidas podem ser estendidas ao novo crédito mediante simples petição, com economia importante de custas.\n\nA expectativa inicial é de que este novo processo siga o ritmo do anterior, com primeiras medidas constritivas em até 45 dias.",
-    relativaEm: "há 5 dias",
-    lida: true,
-    referencias: {
-      caso_id: 882,
-      devedor_nome: "Carlos Eduardo Mendes Albuquerque",
-      valor_brl: 117840.55,
     },
   },
   {

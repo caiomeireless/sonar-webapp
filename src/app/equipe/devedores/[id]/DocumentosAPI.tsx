@@ -75,9 +75,9 @@ export function DocumentosAPI({
         "Sociedade Limitada\nCapital social: R$ 500.000 (integralizado)\nSócios:\n- João Silva (51%)\n- Maria Souza (49%)\nAtividade principal: comércio varejista\nÚltima alteração: 14/03/2025",
     },
     {
-      id: "ir-infojud",
-      titulo: "Última Declaração IR (INFOJUD)",
-      fonte: "INFOJUD",
+      id: "ir-edossie",
+      titulo: "Última Declaração IR (eDossiê)",
+      fonte: "eDossiê",
       custoBrl: 0,
       conteudo:
         "DECLARAÇÃO 2024 (ano-base 2023)\nRendimentos tributáveis: R$ 248.000\nRendimentos isentos: R$ 18.500\nBens declarados: R$ 1.890.000\nIRPF apurado: R$ 67.420\nRestituição/imposto a pagar: R$ 12.840 (paga)",

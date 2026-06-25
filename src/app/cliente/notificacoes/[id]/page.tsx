@@ -48,14 +48,6 @@ function acaoPrimaria(
       return casoId
         ? { label: "Ver Meu Caso", href: `/cliente/casos/${casoId}${qsEu}` }
         : { label: "Ver Meus Casos", href: `/cliente/casos${qsEu}` };
-    case "audiencia-agendada":
-      return casoId
-        ? { label: "Abrir Caso da Audiência", href: `/cliente/casos/${casoId}${qsEu}` }
-        : null;
-    case "andamento-processo":
-      return casoId
-        ? { label: "Ver Caso Completo", href: `/cliente/casos/${casoId}${qsEu}` }
-        : { label: "Ver Meus Casos", href: `/cliente/casos${qsEu}` };
     case "relatorio-mensal":
       return { label: "Abrir Meus Casos", href: `/cliente/casos${qsEu}` };
     case "mensagem-escritorio":

@@ -518,36 +518,36 @@ export const BENS_DEMO = [
 // ============================================================
 export const MEDIDAS_DEMO = [
   // Caso 1 (Vertice x Carlos): historico longo
-  { id: 1, caso_id: 1, data: '2025-08-15', tipo: 'sisbajud',  resultado: 'negativo', titulo: 'SISBAJUD inicial', detalhes: 'Sem ativos financeiros localizados.', advogado_email: 'caio@bpadvogados.com.br' },
-  { id: 2, caso_id: 1, data: '2025-11-22', tipo: 'infojud',   resultado: 'parcial',  titulo: 'INFOJUD',          detalhes: 'Declaracao IR 2024 obtida — patrimonio declarado 1.2M.', advogado_email: 'caio@bpadvogados.com.br' },
-  { id: 3, caso_id: 1, data: '2026-02-10', tipo: 'renajud',   resultado: 'positivo', titulo: 'RENAJUD veiculo Honda Civic', detalhes: 'Bloqueio de transferencia averbado.', advogado_email: 'caio@bpadvogados.com.br' },
+  { id: 1, caso_id: 1, data: '2025-08-15', tipo: 'sniper',          resultado: 'negativo', titulo: 'BigDataCorp ficha cadastral inicial', detalhes: 'Ficha consultada — perfil sem ativos visiveis.', advogado_email: 'caio@bpadvogados.com.br' },
+  { id: 2, caso_id: 1, data: '2025-11-22', tipo: 'outro',           resultado: 'parcial',  titulo: 'eDossiê — carga tributaria', detalhes: 'Relatorio fiscal completo obtido via eDossie.', advogado_email: 'caio@bpadvogados.com.br' },
+  { id: 3, caso_id: 1, data: '2026-02-10', tipo: 'sniper',          resultado: 'positivo', titulo: 'BigDataCorp localizacao veiculos', detalhes: 'Honda Civic 2019 localizado no nome do devedor.', advogado_email: 'caio@bpadvogados.com.br' },
   { id: 4, caso_id: 1, data: '2026-04-03', tipo: 'arisp',     resultado: 'aguardando', titulo: 'ARISP — pedido matriculas SP', detalhes: 'Aguardando retorno do cartorio.', advogado_email: 'caio@bpadvogados.com.br' },
   { id: 5, caso_id: 1, data: '2026-05-20', tipo: 'peticao_penhora', resultado: 'aguardando', titulo: 'Peticao de penhora de cotas Albuquerque Consultoria', detalhes: 'Aguardando decisao do juizo.', advogado_email: 'caio@bpadvogados.com.br' },
   // Caso 2 (Vertice x Construtora): empresa
-  { id: 6, caso_id: 2, data: '2025-12-08', tipo: 'sisbajud', resultado: 'parcial', titulo: 'SISBAJUD CNPJ Horizonte', detalhes: 'R$ 12.450,00 bloqueado.', advogado_email: 'caio@bpadvogados.com.br' },
+  { id: 6, caso_id: 2, data: '2025-12-08', tipo: 'sniper',          resultado: 'parcial', titulo: 'BigDataCorp ficha CNPJ Horizonte', detalhes: 'QSA + faturamento estimado obtidos.', advogado_email: 'caio@bpadvogados.com.br' },
   { id: 7, caso_id: 2, data: '2026-03-15', tipo: 'peticao_penhora', resultado: 'positivo', titulo: 'Penhora galpao industrial SP', detalhes: 'Termo de penhora expedido. Averbado na matricula 98.765.', advogado_email: 'caio@bpadvogados.com.br' },
   // Caso 3 (Vertice x Maria): caso dificil
-  { id: 8, caso_id: 3, data: '2025-10-01', tipo: 'sisbajud', resultado: 'negativo', titulo: 'SISBAJUD 1', detalhes: 'Nenhum ativo.', advogado_email: 'caio@bpadvogados.com.br' },
+  { id: 8, caso_id: 3, data: '2025-10-01', tipo: 'sniper',          resultado: 'negativo', titulo: 'BigDataCorp ficha inicial Maria', detalhes: 'Sem ativos visiveis no perfil consultado.', advogado_email: 'caio@bpadvogados.com.br' },
   { id: 9, caso_id: 3, data: '2026-01-15', tipo: 'sniper',   resultado: 'parcial',  titulo: 'SNIPER — vinculos familiares', detalhes: 'Familiares identificados — investigar transferencias.', advogado_email: 'caio@bpadvogados.com.br' },
   // Caso 4 (Construtora Oeste x Carlos): cross-detection
-  { id: 10, caso_id: 4, data: '2025-09-12', tipo: 'sisbajud', resultado: 'negativo', titulo: 'SISBAJUD Carlos (Oeste)', detalhes: 'Negativo.', advogado_email: 'caio@bpadvogados.com.br' },
+  { id: 10, caso_id: 4, data: '2025-09-12', tipo: 'oficio_cartorio', resultado: 'negativo', titulo: 'Cenprot Carlos (Oeste)', detalhes: 'Sem protestos ativos.', advogado_email: 'caio@bpadvogados.com.br' },
   // ============================================================
   // ATIVIDADE RECENTE — ultimos 7 dias, distribuida entre 4 advogados
   // pra alimentar o card "Atividade da Equipe — 7 dias" do Painel.
   // Datas geradas a partir de "hoje" (ISO atual). Mantemos "data" e
   // "criado_em" iguais; o agregador usa o que tiver mais recente.
   // ============================================================
-  { id: 11, caso_id: 1, data: hojeMenos(0), criado_em: hojeMenos(0), tipo: 'sisbajud',        resultado: 'parcial',    titulo: 'SISBAJUD reforco Carlos',    detalhes: 'R$ 4.200 bloqueado em conta secundaria.',         advogado_email: 'paulo@bpadvogados.com.br' },
-  { id: 12, caso_id: 1, data: hojeMenos(1), criado_em: hojeMenos(1), tipo: 'renajud',         resultado: 'positivo',   titulo: 'RENAJUD Toyota Hilux',       detalhes: 'Bloqueio averbado.',                              advogado_email: 'paulo@bpadvogados.com.br' },
+  { id: 11, caso_id: 1, data: hojeMenos(0), criado_em: hojeMenos(0), tipo: 'oficio_cartorio', resultado: 'parcial',    titulo: 'Cenprot reforco Carlos',     detalhes: '2 protestos cartorarios novos identificados.',    advogado_email: 'paulo@bpadvogados.com.br' },
+  { id: 12, caso_id: 1, data: hojeMenos(1), criado_em: hojeMenos(1), tipo: 'outro',           resultado: 'positivo',   titulo: 'BigDataCorp veiculos — Toyota Hilux', detalhes: 'Veiculo localizado no nome do devedor.',  advogado_email: 'paulo@bpadvogados.com.br' },
   { id: 13, caso_id: 2, data: hojeMenos(1), criado_em: hojeMenos(1), tipo: 'arisp',           resultado: 'positivo',   titulo: 'ARISP — matricula SP',      detalhes: 'Imovel em Pinheiros localizado.',                  advogado_email: 'remo@bpadvogados.com.br' },
   { id: 14, caso_id: 2, data: hojeMenos(2), criado_em: hojeMenos(2), tipo: 'peticao_penhora', resultado: 'aguardando', titulo: 'Penhora imovel Pinheiros',  detalhes: 'Aguardando decisao.',                              advogado_email: 'remo@bpadvogados.com.br' },
-  { id: 15, caso_id: 3, data: hojeMenos(2), criado_em: hojeMenos(2), tipo: 'infojud',         resultado: 'parcial',    titulo: 'INFOJUD Maria',             detalhes: 'IR 2024 obtida — patrimonio R$ 380k.',             advogado_email: 'igor@bpadvogados.com.br' },
+  { id: 15, caso_id: 3, data: hojeMenos(2), criado_em: hojeMenos(2), tipo: 'outro',           resultado: 'parcial',    titulo: 'eDossiê tributario Maria',  detalhes: 'Carga tributaria completa via eDossie.',           advogado_email: 'igor@bpadvogados.com.br' },
   { id: 16, caso_id: 3, data: hojeMenos(3), criado_em: hojeMenos(3), tipo: 'sniper',          resultado: 'parcial',    titulo: 'SNIPER vinculos Maria',     detalhes: '2 familiares identificados.',                      advogado_email: 'hugo@bpadvogados.com.br' },
   { id: 17, caso_id: 1, data: hojeMenos(3), criado_em: hojeMenos(3), tipo: 'arisp',           resultado: 'aguardando', titulo: 'ARISP — pedido Cardoso',    detalhes: 'Solicitacao protocolada.',                         advogado_email: 'caio@bpadvogados.com.br' },
-  { id: 18, caso_id: 4, data: hojeMenos(4), criado_em: hojeMenos(4), tipo: 'sisbajud',        resultado: 'negativo',   titulo: 'SISBAJUD Construtora',      detalhes: 'Sem ativos em PJ.',                                advogado_email: 'paulo@bpadvogados.com.br' },
+  { id: 18, caso_id: 4, data: hojeMenos(4), criado_em: hojeMenos(4), tipo: 'oficio_cartorio', resultado: 'negativo',   titulo: 'Cenprot Construtora',       detalhes: 'Sem protestos ativos no CNPJ.',                    advogado_email: 'paulo@bpadvogados.com.br' },
   { id: 19, caso_id: 2, data: hojeMenos(4), criado_em: hojeMenos(4), tipo: 'outro',           resultado: 'positivo',   titulo: 'Consulta BigDataCorp',      detalhes: 'Ficha cadastral completa obtida.',                 advogado_email: 'remo@bpadvogados.com.br' },
   { id: 20, caso_id: 1, data: hojeMenos(5), criado_em: hojeMenos(5), tipo: 'peticao_penhora', resultado: 'positivo',   titulo: 'Penhora cotas Albuquerque', detalhes: 'Deferida pelo juizo, termo expedido.',             advogado_email: 'caio@bpadvogados.com.br' },
-  { id: 21, caso_id: 3, data: hojeMenos(5), criado_em: hojeMenos(5), tipo: 'renajud',         resultado: 'negativo',   titulo: 'RENAJUD Maria',             detalhes: 'Sem veiculos em nome dela.',                       advogado_email: 'fabiane@bpadvogados.com.br' },
+  { id: 21, caso_id: 3, data: hojeMenos(5), criado_em: hojeMenos(5), tipo: 'outro',           resultado: 'negativo',   titulo: 'BigDataCorp veiculos Maria',detalhes: 'Sem veiculos no nome dela.',                       advogado_email: 'fabiane@bpadvogados.com.br' },
   { id: 22, caso_id: 4, data: hojeMenos(6), criado_em: hojeMenos(6), tipo: 'arisp',           resultado: 'parcial',    titulo: 'ARISP Construtora',         detalhes: '1 imovel encontrado.',                             advogado_email: 'remo@bpadvogados.com.br' },
   { id: 23, caso_id: 2, data: hojeMenos(6), criado_em: hojeMenos(6), tipo: 'sniper',          resultado: 'aguardando', titulo: 'SNIPER Horizonte',          detalhes: 'Buscando vinculos com a Albuquerque Consultoria.', advogado_email: 'paulo@bpadvogados.com.br' },
   { id: 24, caso_id: 3, data: hojeMenos(1), criado_em: hojeMenos(1), tipo: 'serasajud',       resultado: 'parcial',    titulo: 'SERASAJUD Maria',           detalhes: '2 protestos cartorarios localizados.',             advogado_email: 'katia@bpadvogados.com.br' },
