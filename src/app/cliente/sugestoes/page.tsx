@@ -44,7 +44,7 @@ export default async function SugestoesPage({ searchParams }: Props) {
         </h1>
         <p className="mx-auto mt-3 max-w-[640px] font-mono text-[13px] text-[var(--color-ivory-88)]">
           Tem uma ideia pra melhorar a plataforma ou uma d&uacute;vida sobre algum
-          caso? Escreva aqui e o Caio recebe direto no e-mail.
+          caso? Escreva aqui e um de nossos especialistas recebe direto no e-mail.
         </p>
       </header>
 
@@ -57,8 +57,8 @@ export default async function SugestoesPage({ searchParams }: Props) {
               Enviado
             </p>
             <p className="text-sm text-[var(--color-ivory-88)]">
-              O Caio receber&aacute; por e-mail e dar&aacute; retorno no acompanhamento
-              abaixo.
+              Um de nossos especialistas receber&aacute; por e-mail e dar&aacute;
+              retorno no acompanhamento abaixo.
             </p>
           </div>
         </div>
