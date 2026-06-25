@@ -74,7 +74,10 @@ const ADVOGADOS = [
   { email: "caio@bpadvogados.com.br", nome: "Caio Vicentino" },
   { email: "paulo@bpadvogados.com.br", nome: "Paulo André" },
   { email: "remo@bpadvogados.com.br", nome: "Remo Battaglia" },
-  { email: "filipe@bpadvogados.com.br", nome: "Filipe Garcia" },
+  { email: "igor@bpadvogados.com.br", nome: "Igor" },
+  { email: "hugo@bpadvogados.com.br", nome: "Hugo" },
+  { email: "fabiane@bpadvogados.com.br", nome: "Fabiane" },
+  { email: "katia@bpadvogados.com.br", nome: "Katia" },
 ] as const;
 
 const CLIENTES = [

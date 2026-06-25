@@ -52,8 +52,8 @@ const _bugs: BugReport[] = [
     descricao:
       "Devedor PF Carlos Eduardo — fiz a busca combo doc 2x, ARISP e Cenprot retornaram OK mas BigDataCorp veio sem telefones.",
     screenshots: [],
-    reportadoPorEmail: "filipe@bpadvogados.com.br",
-    reportadoPorNome: "Filipe Garcia",
+    reportadoPorEmail: "igor@bpadvogados.com.br",
+    reportadoPorNome: "Igor",
     criadoEm: "2026-06-21T16:45:00.000Z",
     status: "resolvido",
   },

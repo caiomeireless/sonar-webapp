@@ -54,7 +54,7 @@ export async function seedDemoData(): Promise<SeedResult> {
     if (error) throw new Error(`Erro ao semear perfil cliente: ${error.message}`);
   }
 
-  // 2.b Perfis de equipe demo (Paulo, Remo, Filipe).
+  // 2.b Perfis de equipe demo (Paulo, Remo, Igor, Hugo, Fabiane, Katia).
   // INSERT com ignoreDuplicates: se ja existir, deixa do jeito que esta
   // (preserva o papel/acessos que o Caio configurou manualmente).
   for (const p of PERFIS_EQUIPE_DEMO) {
@@ -140,9 +140,10 @@ export async function seedDemoData(): Promise<SeedResult> {
 
   // 6.b Medidas tomadas: DELETE + INSERT idempotente.
   // Preserva o advogado_email do mock SE o perfil existir no banco
-  // (Paulo Andre, Remo, Filipe — pra o grafico "Atividade da Equipe"
-  // mostrar carteira distribuida). Cai pro responsavelEmail se o
-  // perfil ainda nao foi liberado (evita FK violation).
+  // (Paulo, Remo, Igor, Hugo, Fabiane, Katia — pra o grafico
+  // "Atividade da Equipe" mostrar carteira distribuida). Cai pro
+  // responsavelEmail se o perfil ainda nao foi liberado (evita FK
+  // violation).
   {
     const casoIds = CASOS_DEMO.map((c) => c.id);
     const { error: delErr } = await sb

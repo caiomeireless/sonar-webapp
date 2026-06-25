@@ -4,7 +4,7 @@
 // ALLOW_DEMO_SEED=true estiver setada (rota retorna 404 senao). Util
 // principalmente pra apresentacao: reseta credores/devedores/casos/
 // bens/medidas pros valores de demo, com os advogados certos
-// (Paulo/Remo/Filipe) preservados das medidas mock.
+// (Paulo/Remo/Igor/Hugo/Fabiane/Katia) preservados das medidas mock.
 
 import { useState } from "react";
 import { Database, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
@@ -105,8 +105,8 @@ export default function BotaoReseedDemo() {
               <div>
                 Seed concluido. {estado.total_medidas} medidas e{" "}
                 {estado.total_bens} bens inseridos. O gr&aacute;fico &quot;Atividade da
-                Equipe&quot; ja deve mostrar Paulo, Remo e Filipe ao recarregar o
-                painel.
+                Equipe&quot; ja deve mostrar Paulo, Remo, Igor, Hugo, Fabiane e
+                Katia ao recarregar o painel.
               </div>
             </div>
           ) : null}
