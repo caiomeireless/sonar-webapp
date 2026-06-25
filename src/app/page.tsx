@@ -66,7 +66,7 @@ export default function LandingPage() {
               </Link>
             </nav>
           </div>
-          <p className="mt-4 whitespace-nowrap text-[8px] font-mono uppercase tracking-[0.22em] text-white">
+          <p className="mt-4 whitespace-nowrap text-[8px] font-mono uppercase tracking-[0.22em] text-[var(--color-gold)]">
             Projeto conduzido por Caio Vicentino
           </p>
         </div>
@@ -693,7 +693,7 @@ export default function LandingPage() {
             <div className="translate-x-3">
               <LogoSymbolStatic height={110} />
             </div>
-            <p className="mt-1 whitespace-nowrap text-xs font-mono uppercase tracking-[0.22em] text-white">
+            <p className="mt-1 whitespace-nowrap text-xs font-mono uppercase tracking-[0.22em] text-[var(--color-gold)]">
               Projeto conduzido por Caio Vicentino
             </p>
             <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-[var(--color-signal)]">

@@ -467,7 +467,7 @@ function SidebarFooter({
             Sonar &middot; Battaglia &amp; Pedrosa
           </span>
         </div>
-        <p className="text-[10px] text-[var(--color-ivory-40)]">
+        <p className="text-[10px] text-[var(--color-gold)]">
           Projeto conduzido por Caio Vicentino
         </p>
       </div>

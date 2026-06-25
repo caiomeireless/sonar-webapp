@@ -77,7 +77,7 @@ export default function LoginPage() {
 
       {/* Assinatura inferior — igual a landing. Centralizada na base. */}
       <div className="pointer-events-none absolute inset-x-0 bottom-6 z-10 flex flex-col items-center gap-1">
-        <p className="whitespace-nowrap font-mono text-xs uppercase tracking-[0.22em] text-white">
+        <p className="whitespace-nowrap font-mono text-xs uppercase tracking-[0.22em] text-[var(--color-gold)]">
           Projeto conduzido por Caio Vicentino
         </p>
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-signal)]">
