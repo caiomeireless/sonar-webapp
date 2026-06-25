@@ -10,6 +10,7 @@
 // substituir o handler `executar()` por chamada de verdade. UI fica.
 
 import { useState } from "react";
+import { AlertTriangle, CheckCircle2, Clock, XCircle } from "lucide-react";
 import {
   APIS,
   COMBO_DOC,
@@ -18,12 +19,95 @@ import {
   TOTAL_LEAD,
   formatBRL,
 } from "@/lib/sonar-apis";
+import { formatTempoRelativo } from "@/lib/format";
 
 const SALDO_USADO_INICIAL = 47.20;
 const LIMITE_MES = 500;
 
 type ModalKind = "lead" | "doc" | "individual" | null;
 type ExecState = "idle" | "executing" | "done";
+
+// Mock de pesquisas ja feitas — so UI, sem persistencia (Dia 4-5 demo).
+// Quando a Sem 2 plugar a tabela `consultas_executadas`, esse array vira
+// uma prop tipada vinda do server. O layout aqui ja absorve o shape final.
+type ResultadoBusca = "positivo" | "parcial" | "negativo" | "pendente";
+type BuscaFeita = {
+  api: string;
+  rotulo: string;
+  resultado: ResultadoBusca;
+  data: string;
+  resumo: string;
+};
+
+const BUSCAS_MOCK: BuscaFeita[] = [
+  {
+    api: "assertiva-pessoas",
+    rotulo: "Assertiva Pessoas",
+    resultado: "positivo",
+    data: "2026-06-22T10:30:00Z",
+    resumo: "3 enderecos + 2 telefones",
+  },
+  {
+    api: "bigdatacorp-patrimonio",
+    rotulo: "BigDataCorp",
+    resultado: "positivo",
+    data: "2026-06-22T10:31:00Z",
+    resumo: "Renda estimada R$ 18.500",
+  },
+  {
+    api: "cenprot",
+    rotulo: "Cenprot Protestos",
+    resultado: "negativo",
+    data: "2026-06-22T10:32:00Z",
+    resumo: "Sem protestos",
+  },
+  {
+    api: "arisp",
+    rotulo: "ARISP Matriculas SP",
+    resultado: "parcial",
+    data: "2026-06-23T14:15:00Z",
+    resumo: "1 imovel localizado",
+  },
+  {
+    api: "edossie",
+    rotulo: "eDossie Receita",
+    resultado: "pendente",
+    data: "",
+    resumo: "Aguardando consulta",
+  },
+  {
+    api: "junta-comercial",
+    rotulo: "Junta Comercial SP",
+    resultado: "pendente",
+    data: "",
+    resumo: "Aguardando consulta",
+  },
+  {
+    api: "datajud",
+    rotulo: "DataJud CNJ",
+    resultado: "positivo",
+    data: "2026-06-24T09:00:00Z",
+    resumo: "5 processos ativos",
+  },
+];
+
+// Cor por resultado — usa tokens CSS (signal/gold/devedor/ivory-66).
+const COR_RESULTADO: Record<ResultadoBusca, string> = {
+  positivo: "var(--color-signal)",
+  parcial: "var(--color-gold)",
+  negativo: "var(--color-devedor)",
+  pendente: "var(--color-ivory-66)",
+};
+
+const ICONE_RESULTADO: Record<
+  ResultadoBusca,
+  typeof CheckCircle2
+> = {
+  positivo: CheckCircle2,
+  parcial: AlertTriangle,
+  negativo: XCircle,
+  pendente: Clock,
+};
 
 export function AcoesBuscaMockadas({ devedorNome }: { devedorNome: string }) {
   const [modal, setModal] = useState<ModalKind>(null);
@@ -49,6 +133,16 @@ export function AcoesBuscaMockadas({ devedorNome }: { devedorNome: string }) {
   const percSaldo = Math.min(100, (saldoUsado / LIMITE_MES) * 100);
   const saldoDepois = saldoUsado + totalModal;
   const vaiEstourar = saldoDepois > LIMITE_MES;
+
+  // Resumo das buscas ja feitas — agrupado por resultado pros contadores
+  // e percentual de progresso geral (consultadas / total).
+  const totalBuscas = BUSCAS_MOCK.length;
+  const consultadas = BUSCAS_MOCK.filter((b) => b.resultado !== "pendente").length;
+  const pctConsultadas = totalBuscas === 0 ? 0 : Math.round((consultadas / totalBuscas) * 100);
+  const nPositivos = BUSCAS_MOCK.filter((b) => b.resultado === "positivo").length;
+  const nParciais = BUSCAS_MOCK.filter((b) => b.resultado === "parcial").length;
+  const nNegativos = BUSCAS_MOCK.filter((b) => b.resultado === "negativo").length;
+  const nPendentes = BUSCAS_MOCK.filter((b) => b.resultado === "pendente").length;
 
   function toggleApi(id: string) {
     setSelecionadas((prev) => {
@@ -124,6 +218,113 @@ export function AcoesBuscaMockadas({ devedorNome }: { devedorNome: string }) {
                 }}
               />
             </div>
+          </div>
+        </div>
+
+        {/* ============ RESUMO DE PESQUISAS JA FEITAS ============ */}
+        {/* Mostra de relance o que ja foi consultado pra esse devedor:
+            progresso geral, contadores por resultado e mini-cards por API.
+            Fica entre o cabecalho (saldo) e os botoes de acao. */}
+        <div className="mt-5 rounded-lg border border-[var(--color-ivory-12)] bg-[rgba(0,0,0,0.28)] p-4">
+          {/* A) Barra de progresso */}
+          <div className="flex items-center justify-between gap-3">
+            <span className="font-mono text-[11px] uppercase tracking-[0.28em] text-[var(--color-ivory-66)]">
+              {consultadas} de {totalBuscas} APIs ja consultadas
+            </span>
+            <span className="font-mono text-[11px] text-[var(--color-ivory-66)]">
+              {pctConsultadas}%
+            </span>
+          </div>
+          <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-[var(--color-ivory-12)]">
+            <div
+              className="h-full rounded-full bg-[var(--color-signal)] shadow-[0_0_10px_rgba(60,255,138,0.5)] transition-[width] duration-500"
+              style={{ width: `${pctConsultadas}%` }}
+            />
+          </div>
+
+          {/* C) Contadores rapidos por resultado */}
+          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
+            <span className="inline-flex items-center gap-2">
+              <span
+                className="h-2 w-2 rounded-full bg-[var(--color-signal)]"
+                style={{ boxShadow: "0 0 8px rgba(60,255,138,0.65)" }}
+              />
+              <span className="font-serif text-base text-[var(--color-signal)]">
+                {nPositivos}
+              </span>
+              <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+                positivos
+              </span>
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <span
+                className="h-2 w-2 rounded-full bg-[var(--color-gold)]"
+                style={{ boxShadow: "0 0 8px rgba(201,162,74,0.65)" }}
+              />
+              <span className="font-serif text-base text-[var(--color-gold)]">
+                {nParciais}
+              </span>
+              <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+                parciais
+              </span>
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <span
+                className="h-2 w-2 rounded-full bg-[var(--color-devedor)]"
+                style={{ boxShadow: "0 0 8px rgba(220,38,38,0.65)" }}
+              />
+              <span className="font-serif text-base text-[var(--color-devedor)]">
+                {nNegativos}
+              </span>
+              <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+                negativos
+              </span>
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-[var(--color-ivory-22)]" />
+              <span className="font-serif text-base text-[var(--color-ivory-66)]">
+                {nPendentes}
+              </span>
+              <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+                pendentes
+              </span>
+            </span>
+          </div>
+
+          {/* B) Grid de mini-cards por API */}
+          <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {BUSCAS_MOCK.map((b) => {
+              const cor = COR_RESULTADO[b.resultado];
+              const Icone = ICONE_RESULTADO[b.resultado];
+              return (
+                <div
+                  key={b.api}
+                  className="glass rounded-lg p-3"
+                  style={{ borderColor: "var(--color-ivory-12)" }}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span
+                      className="truncate font-mono text-[10px] uppercase tracking-[0.18em]"
+                      style={{ color: cor }}
+                      title={b.rotulo}
+                    >
+                      {b.rotulo}
+                    </span>
+                    <Icone
+                      size={14}
+                      style={{ color: cor, flexShrink: 0 }}
+                      aria-hidden="true"
+                    />
+                  </div>
+                  <p className="mt-2 text-xs leading-snug text-ivory">
+                    {b.resumo}
+                  </p>
+                  <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+                    {b.data ? formatTempoRelativo(b.data) : "Aguardando"}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </div>
 

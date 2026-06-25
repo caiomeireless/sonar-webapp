@@ -443,28 +443,31 @@ function HeaderDossie({
     <header className="mt-10">
       {/* Quadro de vidro opaco envolvendo todo o cabecalho do dossie */}
       <div className="glass mx-auto max-w-[1100px] px-8 py-10 sm:px-12 sm:py-12 text-center">
-        {/* Eyebrow gigante DOSSIÊ PATRIMONIAL */}
-        <div className="inline-flex items-center gap-4">
-          <span
-            aria-hidden="true"
-            className="inline-block h-px w-12 bg-[var(--color-signal)] opacity-70 sm:w-16"
-          />
-          <span className="font-mono font-medium uppercase tracking-[0.32em] text-[var(--color-signal)] text-[clamp(20px,2.6vw,32px)]">
-            Dossiê Patrimonial
-          </span>
-          <span
-            aria-hidden="true"
-            className="inline-block h-px w-12 bg-[var(--color-signal)] opacity-70 sm:w-16"
-          />
-        </div>
+        {/* Bloco vertical: icone PF/PJ ACIMA do eyebrow DOSSIÊ PATRIMONIAL */}
+        <div className="flex flex-col items-center gap-3">
+          {/* Icone PF/PJ — chip arredondado dourado */}
+          <div className="inline-flex h-14 w-14 items-center justify-center rounded-xl border border-[var(--color-gold)]/35 bg-gradient-to-br from-[rgba(201,162,74,0.18)] to-[rgba(201,162,74,0.04)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+            {devedor.tipo === "PJ" ? (
+              <Building2 className="h-6 w-6 text-[var(--color-gold)]" />
+            ) : (
+              <User className="h-6 w-6 text-[var(--color-gold)]" />
+            )}
+          </div>
 
-        {/* Icone PF/PJ + nome serif gold uppercase */}
-        <div className="mt-6 inline-flex h-14 w-14 items-center justify-center rounded-xl border border-[var(--color-gold)]/35 bg-gradient-to-br from-[rgba(201,162,74,0.18)] to-[rgba(201,162,74,0.04)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-          {devedor.tipo === "PJ" ? (
-            <Building2 className="h-6 w-6 text-[var(--color-gold)]" />
-          ) : (
-            <User className="h-6 w-6 text-[var(--color-gold)]" />
-          )}
+          {/* Eyebrow gigante DOSSIÊ PATRIMONIAL com linhas decorativas */}
+          <div className="inline-flex items-center gap-4">
+            <span
+              aria-hidden="true"
+              className="inline-block h-px w-12 bg-[var(--color-signal)] opacity-70 sm:w-16"
+            />
+            <span className="font-mono font-medium uppercase tracking-[0.32em] text-[var(--color-signal)] text-[clamp(20px,2.6vw,32px)]">
+              Dossiê Patrimonial
+            </span>
+            <span
+              aria-hidden="true"
+              className="inline-block h-px w-12 bg-[var(--color-signal)] opacity-70 sm:w-16"
+            />
+          </div>
         </div>
 
         <h1 className="mt-5 break-words font-serif text-[clamp(24px,3.5vw,44px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-devedor)]">

@@ -6,10 +6,16 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { FileText, Layers, Coins, Banknote, ArrowRight } from "lucide-react";
 
-import { listarCasosDoCliente } from "@/lib/casos";
+import {
+  listarCasosDoCliente,
+  listarBensPorLocalizacaoDoCliente,
+} from "@/lib/casos";
 import { perfilLogado } from "@/lib/perfis-server";
 import { previewEuFromParam } from "@/lib/dev-auth";
 import { formatBRL } from "@/lib/format";
+// Mesmo mapa interativo do dashboard analítico do devedor — reaproveitado
+// pra que o cliente veja onde estão os bens dos seus processos.
+import MapaDistribuicaoBens from "@/app/equipe/devedores/[id]/dashboard/_components/MapaDistribuicaoBens";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +29,10 @@ export default async function DashboardClientePage({ searchParams }: Props) {
   const eu = previewEuFromParam(params.eu, perfil) ?? perfil?.email ?? null;
   if (!eu) redirect("/login");
 
-  const casos = await listarCasosDoCliente(eu);
+  const [casos, bensPorLocalizacao] = await Promise.all([
+    listarCasosDoCliente(eu),
+    listarBensPorLocalizacaoDoCliente(eu),
+  ]);
 
   const totalCasos = casos.length;
   const devedoresUnicos = new Set(casos.map((c) => c.devedor.id)).size;
@@ -158,6 +167,18 @@ export default async function DashboardClientePage({ searchParams }: Props) {
           </div>
         )}
       </section>
+
+      {/* Mapa do Brasil — mesmo componente do dashboard analítico do devedor,
+          aqui filtrado pelos bens dos devedores nos processos do cliente. */}
+      {bensPorLocalizacao.length > 0 && (
+        <section className="mt-8">
+          <MapaDistribuicaoBens
+            distribuicao={bensPorLocalizacao}
+            titulo="Onde Estão Meus Bens Rastreados"
+            descricao="Distribuição geográfica dos bens identificados nos seus processos."
+          />
+        </section>
+      )}
     </main>
   );
 }
