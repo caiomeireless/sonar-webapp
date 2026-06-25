@@ -444,7 +444,7 @@ const BENS_DEVEDOR_2 = [
     fonte: "DataJud" as FonteBusca,
     fonte_consultada_em: "2026-06-13T11:05:00Z",
     titulo: "Exequente em ação monitória — R$ 180.000",
-    valor_estimado_brl: 4_500,
+    valor_estimado_brl: 3_500,
     detalhes: {
       numero_cnj: "0876543-32.2024.8.26.0200",
       tribunal: "TJSP",
