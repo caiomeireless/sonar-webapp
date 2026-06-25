@@ -683,18 +683,22 @@ function rotularBemMock(bemId: number): { cidade: string; uf: string } {
   return CIDADES_MOCK_SP[h % CIDADES_MOCK_SP.length];
 }
 
-function calcularDistribuicaoGeografica(
-  bens: Bem[],
+// Exposta pra reuso fora do dashboard-do-caso (ex.: Painel da Equipe e do
+// Cliente reaproveitam a mesma agregação por UF/cidade). A assinatura pega
+// só os campos lidos — assim o Painel da Plataforma (que carrega só um
+// subset das colunas de bens_encontrados) consegue chamar sem cast.
+export type BemParaLocalizacao = Pick<Bem, "id" | "valor_estimado_brl"> & {
+  cidade?: string | null;
+  uf?: string | null;
+};
+export function calcularDistribuicaoGeografica(
+  bens: BemParaLocalizacao[],
 ): DistribuicaoGeografica[] {
   type Bucket = { cidade: string; uf: string; valor: number; ids: number[] };
   const acc = new Map<string, Bucket>();
   for (const b of bens) {
-    const ext = b as Bem & {
-      cidade?: string | null;
-      uf?: string | null;
-    };
-    let cidade = (ext.cidade ?? "").trim();
-    let uf = (ext.uf ?? "").trim();
+    let cidade = (b.cidade ?? "").trim();
+    let uf = (b.uf ?? "").trim();
     if (!cidade || !uf) {
       const mock = rotularBemMock(b.id);
       cidade = mock.cidade;

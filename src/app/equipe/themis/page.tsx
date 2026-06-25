@@ -5,8 +5,9 @@
 // Cada card tem 3 botões de busca (Combo Lead, Combo Documento, Individual)
 // via componente <AcoesBuscaCardThemis>. Cada um abre modal de confirmação
 // e depois redireciona pra animação adaptada ao modo escolhido.
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Clock, Coins, FileText, Hash, Scale, User2 } from "lucide-react";
+import { Clock, FileText, Hash, Scale } from "lucide-react";
 import { listarProcessosThemis, type ProcessoThemis } from "@/lib/casos";
 import { perfilLogado } from "@/lib/perfis-server";
 import { ehCliente } from "@/lib/perfis";
@@ -115,90 +116,10 @@ export default async function ThemisPage({ searchParams }: Props) {
           </SpotlightCard>
         </div>
       ) : visao === "lista" ? (
-        <div className="relative mt-8 overflow-x-auto rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-1)]">
-          <table className="w-full border-collapse text-left text-base">
-            <thead>
-              <tr className="border-b border-[var(--color-line)] text-[var(--color-ivory)]">
-                <Th icon={<FileText className="h-3.5 w-3.5" />}>Processo</Th>
-                <Th icon={<Hash className="h-3.5 w-3.5" />}>Pasta</Th>
-                <Th icon={<User2 className="h-3.5 w-3.5" />}>Devedor</Th>
-                <Th icon={<Coins className="h-3.5 w-3.5" />}>Crédito</Th>
-                <Th>Status</Th>
-                <Th icon={<Scale className="h-3.5 w-3.5" />}>Advogado</Th>
-                <Th icon={<Clock className="h-3.5 w-3.5" />}>Rastreamento</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {processos.map((p, i) => {
-                const status = formatStatus(p.status);
-                return (
-                  <tr
-                    key={p.caso_id}
-                    className={
-                      "group border-b border-[var(--color-line)] transition hover:bg-[var(--color-surface-2)] " +
-                      (i % 2 === 1 ? "bg-[var(--color-surface-2)]/30" : "")
-                    }
-                  >
-                    <Td>
-                      <span className="break-all font-mono text-base text-[var(--color-gold)]">
-                        {p.numero_processo ?? "—"}
-                      </span>
-                    </Td>
-                    <Td>
-                      <span className="font-mono text-sm tabular-nums text-[var(--color-gold)]">
-                        #{p.caso_id}
-                      </span>
-                    </Td>
-                    <Td>
-                      <div className="nome-devedor font-serif text-lg leading-tight text-[var(--color-devedor)]">
-                        {p.devedor.nome}
-                      </div>
-                      <div className="mt-1 inline-flex items-center gap-1.5 font-mono text-sm text-ivory">
-                        <span className="rounded-full bg-[var(--color-signal-soft)] px-1.5 py-0.5 text-[10px] uppercase tracking-[0.18em] text-[var(--color-signal)]">
-                          {p.devedor.tipo === "PF" ? "PF" : "PJ"}
-                        </span>
-                        {p.devedor.documento}
-                      </div>
-                    </Td>
-                    <Td>
-                      <span className="whitespace-nowrap font-mono text-lg tabular-nums text-[var(--color-gold)]">
-                        {p.valor_credito_brl !== null ? formatBRL(p.valor_credito_brl) : "—"}
-                      </span>
-                    </Td>
-                    <Td>
-                      <span
-                        className="inline-flex rounded-full border bg-[var(--color-signal-soft)] px-2.5 py-1 font-mono text-[12px] uppercase tracking-[0.14em]"
-                        style={{
-                          borderColor: `${status.color}66`,
-                          color: status.color,
-                        }}
-                      >
-                        {status.label}
-                      </span>
-                    </Td>
-                    <Td>
-                      {p.responsavel_email ? (
-                        <span className="break-all font-mono text-sm text-[var(--color-advogado)]">
-                          {p.responsavel_email}
-                        </span>
-                      ) : (
-                        <span className="font-mono text-sm italic text-[var(--color-ivory-66)]">
-                          —
-                        </span>
-                      )}
-                    </Td>
-                    <Td>
-                      <span className="font-mono text-base text-[var(--color-ivory)]">
-                        {p.ja_rastreado
-                          ? `${p.total_bens} ${p.total_bens === 1 ? "bem" : "bens"}`
-                          : "Aguardando"}
-                      </span>
-                    </Td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className="mt-8 flex flex-col gap-3">
+          {processos.map((p) => (
+            <LinhaProcesso key={p.caso_id} processo={p} eu={euDev} linkBase={linkBase} />
+          ))}
         </div>
       ) : (
         <div className="relative mt-12 space-y-4">
@@ -383,53 +304,115 @@ function CardProcesso({
 }
 
 // ============================================================
-// Helpers da tabela (modo Lista) — espelha padrão ListaCasos
+// Helpers do modo Lista — linhas inspiradas no painel real do Themis
+// (avatar do responsável à esquerda, dados ao centro, ações à direita).
+// Reaproveita <AcoesBuscaCardThemis> pra manter os 3 botões de busca.
 // ============================================================
-function Th({
-  children,
-  align,
-  icon,
-}: {
-  children: React.ReactNode;
-  align?: "right";
-  icon?: React.ReactNode;
-}) {
-  return (
-    <th
-      className={
-        "px-5 py-5 font-mono text-[12px] uppercase tracking-[0.22em] font-normal " +
-        (align === "right" ? "text-right" : "text-left")
-      }
-    >
-      <span
-        className={
-          "inline-flex items-center gap-1.5 " +
-          (align === "right" ? "flex-row-reverse" : "")
-        }
-      >
-        {icon ? (
-          <span className="text-[var(--color-signal)]/70">{icon}</span>
-        ) : null}
-        {children}
-      </span>
-    </th>
-  );
+function iniciais(email?: string): string {
+  const local = (email ?? "").split("@")[0] ?? "";
+  const partes = local.split(/[._-]/).filter(Boolean);
+  if (partes.length >= 2) return (partes[0][0] + partes[1][0]).toUpperCase();
+  return local.slice(0, 2).toUpperCase() || "?";
 }
 
-function Td({
-  children,
-  align,
+function LinhaProcesso({
+  processo: p,
+  eu,
+  linkBase,
 }: {
-  children: React.ReactNode;
-  align?: "right";
+  processo: ProcessoThemis;
+  eu?: string;
+  linkBase: string;
 }) {
+  const status = formatStatus(p.status);
+  const tipoLabel = p.devedor.tipo === "PF" ? "PF" : "PJ";
+  const emailLocal = (p.responsavel_email ?? "").split("@")[0] ?? "";
+  const dossieHref = `/equipe/devedores/${p.devedor.id}${linkBase}`;
+
   return (
-    <td
-      className={
-        "px-5 py-5 align-middle " + (align === "right" ? "text-right" : "")
-      }
-    >
-      {children}
-    </td>
+    <div className="glass flex items-stretch gap-5 p-5 transition hover:bg-[var(--color-surface-2)]/40">
+      {/* AVATAR — advogado responsável */}
+      <div className="flex shrink-0 flex-col items-center gap-2">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[var(--color-signal)]/40 bg-[var(--color-signal-soft)] font-mono text-base font-bold text-[var(--color-signal)]">
+          {iniciais(p.responsavel_email ?? undefined)}
+        </div>
+        <span className="max-w-[80px] truncate text-[10px] text-[var(--color-advogado)]">
+          {emailLocal || "—"}
+        </span>
+      </div>
+
+      {/* CENTRO — info do processo */}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="nome-devedor truncate font-serif text-xl text-[var(--color-devedor)]">
+            {p.devedor.nome}
+          </h3>
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--color-ivory-22)] bg-[var(--color-surface-2)]/60 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+            <Hash className="h-3 w-3" />
+            Pasta #{p.caso_id}
+          </span>
+        </div>
+
+        {/* Linha 1: tipo + documento + numero processo */}
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center rounded-full bg-[var(--color-signal-soft)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-signal)]">
+            {tipoLabel}
+          </span>
+          <span className="font-mono text-[12px] text-[var(--color-ivory-88)]">
+            {p.devedor.documento}
+          </span>
+          <span className="inline-flex items-center gap-1 font-mono text-[12px] text-[var(--color-gold)]">
+            <FileText className="h-3 w-3 text-[var(--color-signal)]/70" />
+            {p.numero_processo ?? "Sem número"}
+          </span>
+        </div>
+
+        {/* Linha 2: credor + crédito */}
+        <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <span className="nome-cliente font-serif text-[15px] text-[var(--color-cliente)]">
+            {p.credor.nome}
+          </span>
+          <span className="font-mono text-[14px] tabular-nums text-[var(--color-gold)]">
+            {p.valor_credito_brl !== null ? formatBRL(p.valor_credito_brl) : "—"}
+          </span>
+        </div>
+
+        {/* Linha 3: status + bens + tempo */}
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <span
+            className="inline-flex rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em]"
+            style={{
+              borderColor: `${status.color}66`,
+              backgroundColor: `${status.color}14`,
+              color: status.color,
+            }}
+          >
+            {status.label}
+          </span>
+          <span className="inline-flex items-center gap-1 font-mono text-[11px] text-[var(--color-ivory-88)]">
+            <Scale className="h-3 w-3 text-[var(--color-signal)]/70" />
+            {p.ja_rastreado
+              ? `${p.total_bens} ${p.total_bens === 1 ? "bem" : "bens"}`
+              : "Aguardando busca"}
+          </span>
+          <span className="inline-flex items-center gap-1 font-mono text-[11px] text-[var(--color-ivory-66)]">
+            <Clock className="h-3 w-3" />
+            {formatTempoRelativo(p.recebido_em)}
+          </span>
+        </div>
+      </div>
+
+      {/* DIREITA — ações (dossiê + 3 botões de busca) */}
+      <div className="flex shrink-0 flex-col items-end justify-between gap-3">
+        <Link href={dossieHref} className="btn-neon-gold text-[10px]">
+          Dossiê
+        </Link>
+        <AcoesBuscaCardThemis
+          devedorId={p.devedor.id}
+          eu={eu ?? ""}
+          jaRastreado={p.ja_rastreado}
+        />
+      </div>
+    </div>
   );
 }

@@ -1,4 +1,5 @@
-// Timeline horizontal das medidas tomadas nos casos do devedor.
+// Timeline vertical das medidas tomadas nos casos do devedor — linha verde
+// signal com pontos coloridos por resultado a esquerda, card glass a direita.
 // Server Component (puro markup) — recebe `medidas` e `casos` como prop,
 // sem fetch interno. A parte interativa (estado local, modal de adicionar)
 // vive no client component AdicionarMedidaForm, que também renderiza os

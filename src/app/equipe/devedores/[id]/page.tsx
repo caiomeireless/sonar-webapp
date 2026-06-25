@@ -5,6 +5,7 @@
 // 6) dados cadastrais com chips de origem por campo (THEMIS/ASSERTIVA/MANUAL),
 // 7) casos vinculados, 8) bens por categoria, 9) timeline,
 // 10) banner cross-detection.
+import type { ComponentType } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
@@ -12,6 +13,7 @@ import {
   User,
   Pencil,
   ArrowRight,
+  BarChart3,
   Car,
   Briefcase,
   Scale,
@@ -58,6 +60,16 @@ const TIPO_META: Record<TipoBem, { label: string; Icon: LucideIcon }> = {
   processo_credito: { label: "Processos Onde é Credor", Icon: Scale },
   endereco: { label: "Endereços Confirmados", Icon: MapPin },
   vinculo: { label: "Vínculos Familiares", Icon: Users2 },
+};
+
+// Map de icones por tipo de bem (usado no header da categoria "Bens por Categoria").
+const ICONES_TIPO_BEM: Record<TipoBem, ComponentType<{ className?: string }>> = {
+  veiculo: Car,
+  imovel: Building2,
+  empresa: Briefcase,
+  processo_credito: Scale,
+  endereco: MapPin,
+  vinculo: Users2,
 };
 
 const ORDEM: TipoBem[] = [
@@ -309,21 +321,22 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
           <div className="mt-12 space-y-16">
             {ORDEM.map((tipo) => {
               const bens = por_tipo[tipo];
-              const meta = TIPO_META[tipo];
-              const Icon = meta.Icon;
+              const Icone = ICONES_TIPO_BEM[tipo];
               return (
                 <div key={tipo}>
-                  {/* Header da categoria: icone Lucide + titulo serif gold uppercase + contador mono */}
-                  <div className="flex items-center gap-4 border-b border-[var(--color-ivory-12)] pb-4">
-                    <span className="inline-flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl border border-[var(--color-gold)]/35 bg-gradient-to-br from-[rgba(201,162,74,0.18)] to-[rgba(201,162,74,0.04)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-                      <Icon className="h-6 w-6 text-[var(--color-gold)]" />
-                    </span>
-                    <h2 className="font-serif text-2xl uppercase tracking-[0.06em] text-[var(--color-gold)]">
-                      {meta.label}
-                    </h2>
-                    <span className="ml-auto inline-flex items-center rounded-full border border-[var(--color-ivory-22)] bg-white/5 px-3 py-1 font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
-                      {bens.length} {bens.length === 1 ? "item" : "itens"}
-                    </span>
+                  {/* Header da categoria: icone + titulo serif gold uppercase + contador mono */}
+                  <div className="mb-6 flex items-center gap-4">
+                    <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)]">
+                      <Icone className="h-6 w-6 text-[var(--color-gold)]" />
+                    </div>
+                    <div>
+                      <h2 className="font-serif text-2xl uppercase tracking-[0.08em] text-[var(--color-gold)]">
+                        {TIPO_META[tipo].label}
+                      </h2>
+                      <p className="font-mono text-xs uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+                        {bens.length} {bens.length === 1 ? "item encontrado" : "itens encontrados"}
+                      </p>
+                    </div>
                   </div>
 
                   {bens.length === 0 ? (
@@ -473,8 +486,18 @@ function HeaderDossie({
           ) : null}
         </div>
 
-        {/* Atalho Dashboard Analítico — neon signal solido (igual + Novo Devedor) */}
+        {/* Atalho Dashboard Analítico — botao neon signal com icone de
+            grafico em barras LARANJA neon a esquerda pra sinalizar. */}
         <Link href={dashboardHref} className="btn-neon-signal group mt-6">
+          <BarChart3
+            className="h-5 w-5"
+            style={{
+              color: "#FF6B00",
+              filter:
+                "drop-shadow(0 0 6px rgba(255,107,0,0.85)) drop-shadow(0 0 12px rgba(255,107,0,0.45))",
+            }}
+            aria-hidden="true"
+          />
           Dashboard Analítico
           <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
         </Link>
@@ -950,7 +973,7 @@ function CardBem({ bem }: { bem: Bem }) {
   const titulo = identificacaoPrincipal(bem);
   const origem = origemDoBem(bem.fonte);
   return (
-    <div className="glass group rounded-2xl p-6 transition duration-200 hover:scale-[1.01] hover:border-[var(--color-signal)]/40 hover:shadow-[0_0_30px_-8px_rgba(60,255,138,0.25)]">
+    <div className="glass p-6">
       {/* Identificação no topo: titulo serif gold + chip origem + valor */}
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">

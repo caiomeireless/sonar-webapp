@@ -12,17 +12,18 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
+  Activity,
   Banknote,
   Building2,
   Car,
+  Crosshair,
+  FileSearch,
   FileSignature,
   FileText,
   Gavel,
-  Landmark,
   Mic,
   Search,
   Stamp,
-  Target,
   Undo2,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -38,13 +39,15 @@ import {
 } from "@/lib/medidas";
 
 // Icone por tipo de medida — Lucide. Mapeamento centralizado pra timeline.
+// Os tipos "principais" (sisbajud/renajud/infojud/arisp/sniper) seguem o
+// brief do timeline; os demais reusam o vocabulario de icones do mesmo set.
 const TIPO_ICONE: Record<TipoMedida, LucideIcon> = {
   sisbajud: Banknote,
-  infojud: Landmark,
+  infojud: FileSearch,
   renajud: Car,
   arisp: Building2,
   serasajud: Search,
-  sniper: Target,
+  sniper: Crosshair,
   oficio_cartorio: Stamp,
   oficio_junta: FileSignature,
   peticao_penhora: FileText,
@@ -52,26 +55,42 @@ const TIPO_ICONE: Record<TipoMedida, LucideIcon> = {
   audiencia: Mic,
   recurso: Undo2,
   cumprimento_sentenca: Gavel,
-  outro: FileText,
+  outro: Activity,
 };
 
-// Cor "pill" do resultado, mapeada nos tokens do design system.
-// signal verde / gold / vermelho devedor / mono ivory-66.
+// Cor + glow do resultado, mapeados nos tokens do design system.
+// dotGlow = halo do ponto sobre a linha (mais discreto).
+// pillGlow = halo do chip "resultado" (mais brilho pra leitura rapida).
+// Aguardando/N/A nao usam glow — ficam neutros.
 const RESULTADO_TOKEN: Record<
   ResultadoMedida,
-  { cor: string; glow: string | null }
+  { cor: string; dotGlow: string | null; pillGlow: string | null }
 > = {
   positivo: {
     cor: "var(--color-signal)",
-    glow: "0 0 12px rgba(60,255,138,0.55)",
+    dotGlow: "0 0 8px rgba(60,255,138,0.6)",
+    pillGlow: "0 0 12px rgba(60,255,138,0.55)",
   },
   parcial: {
     cor: "var(--color-gold)",
-    glow: "0 0 12px rgba(201,162,74,0.55)",
+    dotGlow: "0 0 8px rgba(201,162,74,0.55)",
+    pillGlow: "0 0 12px rgba(201,162,74,0.55)",
   },
-  negativo: { cor: "var(--color-devedor)", glow: null },
-  aguardando: { cor: "var(--color-ivory-66)", glow: null },
-  nao_aplica: { cor: "var(--color-ivory-66)", glow: null },
+  negativo: {
+    cor: "#DC2626",
+    dotGlow: null,
+    pillGlow: null,
+  },
+  aguardando: {
+    cor: "var(--color-ivory-66)",
+    dotGlow: null,
+    pillGlow: null,
+  },
+  nao_aplica: {
+    cor: "var(--color-ivory-66)",
+    dotGlow: null,
+    pillGlow: null,
+  },
 };
 
 type CasoOption = {
@@ -199,20 +218,22 @@ export function AdicionarMedidaForm({
           </p>
         </div>
       ) : (
-        <ol className="relative mt-8 ml-2 flex flex-col gap-6">
+        <div className="relative mt-8 pl-10">
           {/* Linha vertical signal verde — corre por toda a altura, atras dos pontos */}
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute left-[5px] top-2 bottom-2 w-px bg-[var(--color-signal)]/30"
+            className="pointer-events-none absolute left-3 top-2 bottom-2 w-px bg-[var(--color-signal)]/30"
           />
-          {medidas.map((m) => (
-            <CardMedida
-              key={m.id}
-              medida={m}
-              numeroProcesso={casoNumeroPorId[m.caso_id] ?? null}
-            />
-          ))}
-        </ol>
+          <ol className="m-0 list-none p-0">
+            {medidas.map((m) => (
+              <CardMedida
+                key={m.id}
+                medida={m}
+                numeroProcesso={casoNumeroPorId[m.caso_id] ?? null}
+              />
+            ))}
+          </ol>
+        </div>
       )}
 
       {/* Modal de adicionar medida (createPortal pra escapar de containers com backdrop-filter) */}
@@ -375,7 +396,10 @@ export function AdicionarMedidaForm({
 }
 
 // ============================================================
-// Item de timeline vertical: ponto sobre a linha + card a direita.
+// Item de timeline vertical: ponto colorido sobre a linha + card glass a direita.
+// O dot e posicionado RELATIVO ao card (que tem padding ~ p-5) e empurrado
+// pra esquerda com `-left-[2.05rem]` ate cair em cima da linha vertical em
+// `left-3` do container pai (offset = pl-10 do pai - p-5 do card ≈ 2.05rem).
 // Cor do ponto e do chip "resultado" mapeada via RESULTADO_TOKEN.
 // Icone do tipo via TIPO_ICONE (Lucide).
 // ============================================================
@@ -392,84 +416,73 @@ function CardMedida({
   const Icone = TIPO_ICONE[medida.tipo];
 
   return (
-    <li className="relative pl-8">
-      {/* Ponto colorido sobre a linha vertical (alinhado a `left-[5px]` da linha) */}
+    <li className="relative mb-6 list-none last:mb-0">
+      {/* Ponto colorido sobre a linha vertical */}
       <span
         aria-hidden="true"
-        className="absolute left-0 top-2 h-3 w-3 rounded-full"
+        className="absolute -left-[2.05rem] top-3 h-3 w-3 rounded-full"
         style={{
           backgroundColor: resToken.cor,
-          boxShadow: resToken.glow ?? "none",
+          boxShadow: resToken.dotGlow ?? "none",
         }}
       />
 
-      <div className="rounded-lg border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.55)] p-4 transition hover:border-[var(--color-gold)]/60 hover:bg-[rgba(5,7,6,0.75)]">
+      <div className="glass p-5 transition hover:border-[var(--color-gold)]/40">
         {/* Topo: data + chip resultado */}
-        <div className="flex items-center justify-between gap-3">
-          <span
-            className="font-mono text-[11px] uppercase tracking-[0.18em]"
-            style={{ color: "var(--color-signal)" }}
-          >
+        <div className="mb-2 flex items-baseline justify-between gap-3">
+          <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--color-signal)]">
             {formatData(medida.data)}
           </span>
           <span
-            className="rounded-full px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em]"
+            className="rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em]"
             style={{
               color: resToken.cor,
-              borderColor: resToken.cor,
-              borderWidth: 1,
-              borderStyle: "solid",
+              borderColor: `color-mix(in srgb, ${resToken.cor} 40%, transparent)`,
               backgroundColor: `color-mix(in srgb, ${resToken.cor} 10%, transparent)`,
-              boxShadow: resToken.glow ?? "none",
+              boxShadow: resToken.pillGlow ?? "none",
             }}
           >
             {resultadoMeta.label}
           </span>
         </div>
 
-        {/* Titulo com icone do tipo */}
-        <div className="mt-3 flex items-start gap-2.5">
-          <span
-            className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md"
-            style={{
-              backgroundColor: `${tipoMeta.cor}1a`,
-              border: `1px solid ${tipoMeta.cor}55`,
-              color: tipoMeta.cor,
-            }}
-            title={tipoMeta.label}
-          >
-            <Icone size={14} strokeWidth={1.75} />
-          </span>
+        {/* Titulo com icone do tipo (inline, mono) */}
+        <div
+          className="mb-2 flex items-center gap-2"
+          title={tipoMeta.label}
+        >
+          <Icone
+            className="h-4 w-4 shrink-0 text-[var(--color-ivory-66)]"
+            strokeWidth={1.75}
+          />
           <h3 className="font-serif text-base leading-snug text-ivory">
             {medida.titulo}
           </h3>
         </div>
 
         {/* Detalhes */}
-        <p className="mt-2 text-sm leading-snug text-[var(--color-ivory-88)]">
-          {medida.detalhes || "Sem detalhes."}
-        </p>
+        {medida.detalhes ? (
+          <p className="text-sm leading-snug text-[var(--color-ivory-88)]">
+            {medida.detalhes}
+          </p>
+        ) : null}
 
-        {/* Rodape: advogado + numero processo */}
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
-          {medida.advogado_email ? (
-            <span
-              className="truncate font-mono text-[11px]"
-              style={{ color: "var(--color-advogado)" }}
-            >
-              {medida.advogado_email}
-            </span>
-          ) : (
-            <span className="font-mono text-[11px] text-[var(--color-ivory-66)]">
-              sem advogado
-            </span>
-          )}
-          {numeroProcesso ? (
-            <span className="truncate font-mono text-[11px] text-[var(--color-ivory-66)]">
-              {numeroProcesso}
-            </span>
-          ) : null}
-        </div>
+        {/* Advogado responsavel */}
+        {medida.advogado_email ? (
+          <p
+            className="mt-2 truncate font-mono text-xs"
+            style={{ color: "var(--color-advogado)" }}
+          >
+            {medida.advogado_email}
+          </p>
+        ) : null}
+
+        {/* Numero do processo (subtil, embaixo) */}
+        {numeroProcesso ? (
+          <p className="mt-1 truncate font-mono text-[11px] text-[var(--color-ivory-66)]">
+            {numeroProcesso}
+          </p>
+        ) : null}
       </div>
     </li>
   );
