@@ -220,7 +220,7 @@ function SidebarPanel({
   // sidebar continua até o rodapé da página.
   const shellClass = isDrawer
     ? "glass-side absolute left-0 top-0 z-10 flex h-dvh w-[288px] shrink-0 flex-col px-4 py-6 animate-[slideIn_180ms_ease-out]"
-    : "glass-side hidden w-[288px] shrink-0 self-stretch md:block";
+    : "glass-side relative hidden w-[288px] shrink-0 self-stretch md:block";
 
   const Wrapper = isDrawer
     ? ({ children }: { children: React.ReactNode }) => <>{children}</>
@@ -274,24 +274,29 @@ function SidebarPanel({
               <X className="h-4 w-4" aria-hidden="true" />
             </button>
           )}
-          {!isDrawer && onRecolher && (
-            <button
-              type="button"
-              onClick={onRecolher}
-              aria-label="Recolher menu lateral"
-              title="Recolher menu lateral"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg
-                         border border-[var(--color-signal)]/40 bg-[var(--color-onyx)]/60
-                         text-[var(--color-signal)] backdrop-blur-md transition
-                         hover:scale-105 hover:border-[var(--color-signal)]
-                         hover:bg-[var(--color-signal)]/15
-                         hover:shadow-[0_0_16px_rgba(60,255,138,0.45)]"
-            >
-              <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-            </button>
-          )}
         </div>
       </div>
+
+      {/* Botao recolher — flutuante no MEIO da borda direita do aside.
+          Sai do header e fica colado na borda externa pra ficar acessivel
+          mesmo com a sidebar recolhida (icone aparece na transicao). */}
+      {!isDrawer && onRecolher && (
+        <button
+          type="button"
+          onClick={onRecolher}
+          aria-label="Recolher menu lateral"
+          title="Recolher menu lateral"
+          className="absolute right-0 top-1/2 z-30 inline-flex h-9 w-9 -translate-y-1/2 translate-x-1/2
+                     items-center justify-center rounded-full
+                     border border-[var(--color-signal)]/40 bg-[var(--color-onyx)]/85
+                     text-[var(--color-signal)] backdrop-blur-md transition
+                     hover:scale-110 hover:border-[var(--color-signal)]
+                     hover:bg-[var(--color-signal)]/15
+                     hover:shadow-[0_0_16px_rgba(60,255,138,0.45)]"
+        >
+          <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+        </button>
+      )}
 
       {/* Nav — fundo cinza herdado do glass-side (NAO leva o quadriculado) */}
       <nav className="flex flex-col gap-1 overflow-y-auto">
