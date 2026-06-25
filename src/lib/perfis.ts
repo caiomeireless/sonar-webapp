@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { ALLOWED_DOMAIN } from "@/lib/config";
 
 export const AVATAR_BUCKET = "avatares";
 
@@ -36,18 +37,66 @@ const vazio = (email: string): Perfil => ({
   acessos: [],
 });
 
+// Deriva um nome legivel do email: "paulo.andre@..." -> "Paulo Andre".
+// Quebra em separadores comuns (. _ -), capitaliza cada parte, junta com espaco.
+function nomeDoEmail(email: string): string {
+  const local = (email.split("@")[0] ?? "").trim();
+  if (!local) return "";
+  return local
+    .split(/[._-]+/)
+    .filter(Boolean)
+    .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+    .join(" ");
+}
+
+// Auto-cria perfil para emails do dominio do escritorio que ainda nao
+// existem na tabela. Defaults seguros (papel funcionario, sem acessos).
+// Admin/socio promovem depois pelas configuracoes. Para emails externos
+// (clientes), NAO auto-cria — eles tem que ser cadastrados pelo admin
+// (regra ja imposta no middleware via isEmailAutorizado).
+async function autoCriarPerfilEquipe(
+  sb: ReturnType<typeof createAdminClient>,
+  email: string,
+): Promise<void> {
+  if (!email.endsWith("@" + ALLOWED_DOMAIN)) return;
+  await sb.from("perfis").upsert(
+    {
+      email,
+      nome: nomeDoEmail(email),
+      papel: "funcionario",
+      acessos: [],
+    },
+    { onConflict: "email", ignoreDuplicates: true },
+  );
+}
+
 // Resiliente: se a tabela/colunas ainda não existem (migração não rodada) ou
 // o e-mail não tem perfil, devolve um perfil "vazio" (funcionário sem foto).
+// Para emails @ALLOWED_DOMAIN, auto-cria o registro na primeira leitura para
+// que o usuario passe a aparecer em listas (carteira, atividade, etc).
 export async function perfilAtual(email: string | null | undefined): Promise<Perfil | null> {
   if (!email) return null;
   const e = email.toLowerCase();
   try {
     const sb = createAdminClient();
-    const { data, error } = await sb
+    let { data, error } = await sb
       .from("perfis")
       .select("email, nome, foto_path, papel, acessos")
       .eq("email", e)
       .maybeSingle();
+
+    // Nao encontrou: tenta auto-criar (so funciona pra email do dominio).
+    if (!error && !data) {
+      await autoCriarPerfilEquipe(sb, e);
+      const releitura = await sb
+        .from("perfis")
+        .select("email, nome, foto_path, papel, acessos")
+        .eq("email", e)
+        .maybeSingle();
+      data = releitura.data;
+      error = releitura.error;
+    }
+
     if (error || !data) return vazio(e);
 
     const fotoPath = (data.foto_path as string) ?? null;
