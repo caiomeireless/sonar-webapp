@@ -330,88 +330,90 @@ function LinhaProcesso({
   const dossieHref = `/equipe/devedores/${p.devedor.id}${linkBase}`;
 
   return (
-    <div
-      className="glass group flex flex-col gap-3 p-5 transition hover:bg-[var(--color-surface-2)]/40 lg:grid lg:grid-cols-[auto_minmax(0,2.4fr)_minmax(0,1.6fr)_auto] lg:items-center lg:gap-5"
-    >
-      {/* COL 1: AVATAR + Pasta # (advogado responsável) */}
-      <div className="flex shrink-0 flex-row items-center gap-3 lg:flex-col lg:gap-1.5">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[var(--color-signal)]/40 bg-[var(--color-signal-soft)] font-mono text-base font-bold text-[var(--color-signal)]">
-          {iniciais(p.responsavel_email ?? undefined)}
-        </div>
-        <div className="flex flex-col items-start gap-1 lg:items-center">
-          <span className="max-w-[110px] truncate font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-advogado)]">
+    <div className="glass group flex flex-col gap-4 p-5 transition hover:bg-[var(--color-surface-2)]/40">
+      {/* CABECALHO — 3 colunas: avatar | info do processo | (espaco) */}
+      <div className="flex items-start gap-4">
+        {/* AVATAR + advogado + Pasta */}
+        <div className="flex shrink-0 flex-col items-center gap-1.5">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[var(--color-signal)]/40 bg-[var(--color-signal-soft)] font-mono text-base font-bold text-[var(--color-signal)]">
+            {iniciais(p.responsavel_email ?? undefined)}
+          </div>
+          <span className="max-w-[100px] truncate font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-advogado)]">
             {emailLocal || "—"}
           </span>
-          <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-ivory-22)] bg-[var(--color-surface-2)]/60 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
-            <Hash className="h-3 w-3" />
-            Pasta #{p.caso_id}
+          <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-ivory-22)] bg-[var(--color-surface-2)]/60 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+            <Hash className="h-2.5 w-2.5" />#{p.caso_id}
           </span>
+        </div>
+
+        {/* INFO DO PROCESSO — empilhado em linhas claras */}
+        <div className="min-w-0 flex-1 space-y-2">
+          {/* Linha 1: nome devedor (clicavel) */}
+          <Link href={dossieHref} className="block min-w-0">
+            <h3 className="nome-devedor truncate font-serif text-xl leading-tight text-[var(--color-devedor)] transition group-hover:underline">
+              {p.devedor.nome}
+            </h3>
+          </Link>
+
+          {/* Linha 2: tipo + doc + numero processo */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span className="inline-flex items-center rounded-full bg-[var(--color-signal-soft)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-signal)]">
+              {tipoLabel}
+            </span>
+            <span className="font-mono text-[12px] text-[var(--color-ivory-88)]">
+              {p.devedor.documento}
+            </span>
+            <span className="inline-flex items-center gap-1 font-mono text-[12px] text-[var(--color-gold)]">
+              <FileText className="h-3 w-3 text-[var(--color-signal)]/70" />
+              {p.numero_processo ?? "Sem número"}
+            </span>
+          </div>
+
+          {/* Linha 3: credor + credito */}
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+              Credor:
+            </span>
+            <span className="nome-cliente truncate font-serif text-[15px] text-[var(--color-cliente)]">
+              {p.credor.nome}
+            </span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+              Crédito:
+            </span>
+            <span className="font-mono text-[14px] tabular-nums text-[var(--color-gold)] whitespace-nowrap">
+              {p.valor_credito_brl !== null ? formatBRL(p.valor_credito_brl) : "—"}
+            </span>
+          </div>
+
+          {/* Linha 4: status + bens + tempo */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className="inline-flex rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em]"
+              style={{
+                borderColor: `${status.color}66`,
+                backgroundColor: `${status.color}14`,
+                color: status.color,
+              }}
+            >
+              {status.label}
+            </span>
+            <span className="inline-flex items-center gap-1 font-mono text-[11px] text-[var(--color-ivory-88)]">
+              <Scale className="h-3 w-3 text-[var(--color-signal)]/70" />
+              {p.ja_rastreado
+                ? `${p.total_bens} ${p.total_bens === 1 ? "bem" : "bens"}`
+                : "Aguardando busca"}
+            </span>
+            <span className="inline-flex items-center gap-1 font-mono text-[11px] text-[var(--color-ivory-66)]">
+              <Clock className="h-3 w-3" />
+              {formatTempoRelativo(p.recebido_em)}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* COL 2: DEVEDOR + processo + doc */}
-      <div className="min-w-0">
-        <Link
-          href={dossieHref}
-          className="block"
-        >
-          <h3 className="nome-devedor truncate font-serif text-xl leading-tight text-[var(--color-devedor)] transition group-hover:underline">
-            {p.devedor.nome}
-          </h3>
-        </Link>
-        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
-          <span className="inline-flex items-center rounded-full bg-[var(--color-signal-soft)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-signal)]">
-            {tipoLabel}
-          </span>
-          <span className="font-mono text-[12px] text-[var(--color-ivory-88)]">
-            {p.devedor.documento}
-          </span>
-          <span className="inline-flex items-center gap-1 font-mono text-[12px] text-[var(--color-gold)]">
-            <FileText className="h-3 w-3 text-[var(--color-signal)]/70" />
-            {p.numero_processo ?? "Sem número"}
-          </span>
-        </div>
-      </div>
-
-      {/* COL 3: CREDOR + crédito + status/bens/tempo */}
-      <div className="min-w-0">
-        <div className="flex flex-wrap items-baseline gap-x-3">
-          <span className="nome-cliente truncate font-serif text-[15px] text-[var(--color-cliente)]">
-            {p.credor.nome}
-          </span>
-          <span className="font-mono text-[14px] tabular-nums text-[var(--color-gold)] whitespace-nowrap">
-            {p.valor_credito_brl !== null ? formatBRL(p.valor_credito_brl) : "—"}
-          </span>
-        </div>
-        <div className="mt-1 flex flex-wrap items-center gap-2">
-          <span
-            className="inline-flex rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em]"
-            style={{
-              borderColor: `${status.color}66`,
-              backgroundColor: `${status.color}14`,
-              color: status.color,
-            }}
-          >
-            {status.label}
-          </span>
-          <span className="inline-flex items-center gap-1 font-mono text-[11px] text-[var(--color-ivory-88)]">
-            <Scale className="h-3 w-3 text-[var(--color-signal)]/70" />
-            {p.ja_rastreado
-              ? `${p.total_bens} ${p.total_bens === 1 ? "bem" : "bens"}`
-              : "Aguardando busca"}
-          </span>
-          <span className="inline-flex items-center gap-1 font-mono text-[11px] text-[var(--color-ivory-66)]">
-            <Clock className="h-3 w-3" />
-            {formatTempoRelativo(p.recebido_em)}
-          </span>
-        </div>
-      </div>
-
-      {/* COL 4: link Dossie + 3 botoes de busca */}
-      <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
-        <Link href={dossieHref} className="btn-neon-gold text-[10px]">
-          Dossiê
-        </Link>
+      {/* RODAPE — 3 botoes de busca (AcoesBuscaCardThemis ja' inclui "Ver
+          Dossiê Atual →" no proprio rodape, sem duplicar). */}
+      <div className="border-t border-[var(--color-ivory-12)] pt-3">
         <AcoesBuscaCardThemis
           devedorId={p.devedor.id}
           eu={eu ?? ""}
