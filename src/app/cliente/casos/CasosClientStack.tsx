@@ -104,6 +104,10 @@ function CardCaso({ caso, active }: { caso: CasoListagem; active: boolean }) {
             </span>
           </p>
         ) : null}
+        {/* === PASTA (caso_id Themis) === */}
+        <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+          Pasta #{caso.caso_id}
+        </p>
       </div>
 
       <div className="my-6 h-px bg-[var(--color-ivory-12)]" />

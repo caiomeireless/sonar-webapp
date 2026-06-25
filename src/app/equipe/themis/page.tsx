@@ -6,7 +6,7 @@
 // via componente <AcoesBuscaCardThemis>. Cada um abre modal de confirmação
 // e depois redireciona pra animação adaptada ao modo escolhido.
 import { redirect } from "next/navigation";
-import { Clock, Coins, FileText, Scale, User2 } from "lucide-react";
+import { Clock, Coins, FileText, Hash, Scale, User2 } from "lucide-react";
 import { listarProcessosThemis, type ProcessoThemis } from "@/lib/casos";
 import { perfilLogado } from "@/lib/perfis-server";
 import { ehCliente } from "@/lib/perfis";
@@ -120,6 +120,7 @@ export default async function ThemisPage({ searchParams }: Props) {
             <thead>
               <tr className="border-b border-[var(--color-line)] text-[var(--color-ivory)]">
                 <Th icon={<FileText className="h-3.5 w-3.5" />}>Processo</Th>
+                <Th icon={<Hash className="h-3.5 w-3.5" />}>Pasta</Th>
                 <Th icon={<User2 className="h-3.5 w-3.5" />}>Devedor</Th>
                 <Th icon={<Coins className="h-3.5 w-3.5" />}>Crédito</Th>
                 <Th>Status</Th>
@@ -141,6 +142,11 @@ export default async function ThemisPage({ searchParams }: Props) {
                     <Td>
                       <span className="break-all font-mono text-base text-[var(--color-gold)]">
                         {p.numero_processo ?? "—"}
+                      </span>
+                    </Td>
+                    <Td>
+                      <span className="font-mono text-sm tabular-nums text-[var(--color-gold)]">
+                        #{p.caso_id}
                       </span>
                     </Td>
                     <Td>

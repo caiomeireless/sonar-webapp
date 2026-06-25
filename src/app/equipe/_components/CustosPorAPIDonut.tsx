@@ -184,7 +184,7 @@ export default function CustosPorAPIDonut({ dados }: Props) {
                     className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
                     style={{ background: cor }}
                   />
-                  <span className="text-sm leading-tight text-[var(--color-ivory)]">
+                  <span className="whitespace-normal text-sm leading-tight text-[var(--color-ivory)]">
                     {d.name}
                   </span>
                 </div>

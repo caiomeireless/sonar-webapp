@@ -146,11 +146,14 @@ export default function AtividadeEquipe7Dias({ dados }: Props) {
           Nenhuma medida registrada nos últimos 7 dias.
         </p>
       ) : (
-        <div className="chart-neon-glow h-72 w-full">
+        {/* Card agora ocupa a linha inteira (col-span-12), o stacked bar
+            ganha bastante largura — sobe a altura pra ~376px pra ficar
+            proporcional e densifica o eixo Y com mais ticks. */}
+        <div className="chart-neon-glow h-[376px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={linhas}
-              margin={{ top: 8, right: 16, bottom: 4, left: 0 }}
+              margin={{ top: 12, right: 24, bottom: 4, left: 0 }}
               barCategoryGap="22%"
             >
               <XAxis
@@ -167,7 +170,8 @@ export default function AtividadeEquipe7Dias({ dados }: Props) {
                 tick={axisTickStyle}
                 axisLine={axisLineStyle}
                 tickLine={false}
-                width={28}
+                width={32}
+                tickCount={8}
               />
               <Tooltip
                 cursor={{ fill: tooltipCursorFill }}

@@ -7,7 +7,7 @@
 // Mesmo visual da CarteiraView (consistência entre os 2 níveis).
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { FileText, User2, Coins, Clock, Scale } from "lucide-react";
+import { FileText, User2, Coins, Clock, Scale, Hash } from "lucide-react";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { CardDeck } from "@/components/ui/CardDeck";
 import { formatBRL, formatTempoRelativo } from "@/lib/format";
@@ -175,6 +175,10 @@ function CardCaso({
               <span className="tabular-nums">{formatBRL(caso.valor_credito_brl)}</span>
             </p>
           ) : null}
+          {/* === PASTA (caso_id Themis) === */}
+          <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+            Pasta #{caso.caso_id}
+          </p>
         </div>
 
         <div className="my-6 h-px bg-[var(--color-ivory-12)]" />
@@ -260,6 +264,7 @@ function ListaCasos({
           <tr className="border-b border-[var(--color-line)] text-[var(--color-ivory)]">
             <Th icon={<User2 className="h-3.5 w-3.5" />}>Devedor</Th>
             <Th>Documento</Th>
+            <Th icon={<Hash className="h-3.5 w-3.5" />}>Pasta</Th>
             <Th icon={<FileText className="h-3.5 w-3.5" />}>Processo</Th>
             <Th>Status</Th>
             <Th icon={<Scale className="h-3.5 w-3.5" />}>Advogado</Th>
@@ -295,6 +300,11 @@ function ListaCasos({
                     {c.devedor.tipo}
                   </span>
                   {c.devedor.documento}
+                </span>
+              </Td>
+              <Td>
+                <span className="font-mono text-sm tabular-nums text-[var(--color-gold)]">
+                  #{c.caso_id}
                 </span>
               </Td>
               <Td>

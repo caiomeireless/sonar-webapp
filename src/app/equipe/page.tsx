@@ -135,15 +135,17 @@ export default async function DashboardPlataformaPage({
           <EvolucaoPatrimonioMensal dados={dados.evolucaoMensal} />
         </div>
 
-        {/* L3 — Mix (4) + Atividade (5) + Custos (3) */}
-        <div className="md:col-span-4">
+        {/* L3 — Mix (6) + Custos (6) na mesma linha; Atividade (12) full-width
+            embaixo. Donuts ganham o dobro de espaço horizontal pra legendas
+            respirarem sem cortar, e o stacked bar usa a largura inteira. */}
+        <div className="md:col-span-6">
           <MixBensPorTipo dados={dados.mixBensPorTipo} />
         </div>
-        <div className="md:col-span-5">
-          <AtividadeEquipe7Dias dados={dados.atividadeEquipe7Dias} />
-        </div>
-        <div className="md:col-span-3">
+        <div className="md:col-span-6">
           <CustosPorAPIDonut dados={dados.custosPorAPI} />
+        </div>
+        <div className="md:col-span-12">
+          <AtividadeEquipe7Dias dados={dados.atividadeEquipe7Dias} />
         </div>
 
         {/* L4 — Rankings (6 + 6) */}

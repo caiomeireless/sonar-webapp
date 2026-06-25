@@ -195,7 +195,7 @@ export default function MixBensPorTipo({ dados }: Props) {
                   >
                     {meta?.icone ?? "?"}
                   </span>
-                  <span className="text-sm leading-tight text-[var(--color-ivory)]">
+                  <span className="whitespace-normal text-sm leading-tight text-[var(--color-ivory)]">
                     {d.name}
                   </span>
                 </div>
