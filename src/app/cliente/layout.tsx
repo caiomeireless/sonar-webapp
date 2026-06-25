@@ -20,7 +20,13 @@ export default async function ClienteLayout({ children }: { children: ReactNode 
   }
 
   const email = perfil?.email ?? "Cliente Demonstração";
-  const papel = (perfil?.papel ?? "cliente").toUpperCase();
+  // Admin/sócio que entrou no portal cliente está em modo visualização.
+  const ehVisualizacao = perfil?.papel === "admin" || perfil?.papel === "socio";
+
+  // No portal do cliente, o footer da sidebar sempre mostra "CLIENTE" como
+  // papel (mesmo quando admin/socio entra em modo visualizacao). O sentido
+  // do papel ali eh "voce esta vendo a tela como X", nao "voce eh X".
+  const papel = ehVisualizacao ? "CLIENTE" : (perfil?.papel ?? "cliente").toUpperCase();
   const nome =
     perfil?.nome?.trim() ||
     (() => {
@@ -31,9 +37,6 @@ export default async function ClienteLayout({ children }: { children: ReactNode 
         .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
         .join(" ");
     })();
-
-  // Admin/sócio que entrou no portal cliente está em modo visualização.
-  const ehVisualizacao = perfil?.papel === "admin" || perfil?.papel === "socio";
 
   return (
     <div className="flex min-h-svh bg-onyx text-ivory">
