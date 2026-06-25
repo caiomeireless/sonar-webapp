@@ -29,7 +29,6 @@ export default function Top5DevedoresRastreio({ dados }: Props) {
         <table className="w-full border-collapse text-left">
           <thead>
             <tr className="border-b border-[var(--color-ivory-12)] text-[var(--color-ivory-66)]">
-              <Th className="w-[36px]">#</Th>
               <Th className="text-[var(--color-devedor)]">Devedor</Th>
               <Th align="right" className="w-[140px]">Valor</Th>
               <Th align="right" className="w-[56px]">Casos</Th>
@@ -37,18 +36,12 @@ export default function Top5DevedoresRastreio({ dados }: Props) {
             </tr>
           </thead>
           <tbody>
-            {dados.map((item, idx) => {
-              const rank = idx + 1;
+            {dados.map((item) => {
               return (
                 <tr
                   key={item.devedorId}
                   className="group border-b border-[var(--color-ivory-12)] last:border-b-0 transition hover:bg-[var(--color-ivory-12)]/20"
                 >
-                  <Td>
-                    <span className="font-mono text-[15px] text-[var(--color-ivory-66)] tabular-nums">
-                      {rank}
-                    </span>
-                  </Td>
                   <Td>
                     <Link
                       href={`/equipe/devedores/${item.devedorId}`}
