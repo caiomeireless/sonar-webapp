@@ -408,17 +408,17 @@ export function PreferenciasForm({
             role="switch"
             aria-checked={bloquear ? "true" : "false"}
             onClick={() => setBloquear(!bloquear)}
-            className={`relative mt-1 h-6 w-11 shrink-0 rounded-full border transition-colors ${
+            className={`relative mt-0.5 inline-flex h-7 w-12 shrink-0 items-center rounded-full border transition-colors ${
               bloquear
-                ? "border-[var(--color-gold)] bg-[var(--color-gold)]/30"
-                : "border-[var(--color-ivory-22)] bg-white/5"
+                ? "border-[var(--color-gold)] bg-[var(--color-gold)]/80"
+                : "border-[var(--color-ivory-22)] bg-white/10"
             }`}
           >
             <span
-              className={`absolute top-0.5 h-4 w-4 rounded-full transition-transform ${
+              className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-[var(--color-onyx)] shadow-md ring-1 transition-transform ${
                 bloquear
-                  ? "translate-x-[22px] bg-[var(--color-gold)]"
-                  : "translate-x-0.5 bg-[var(--color-ivory-66)]"
+                  ? "translate-x-6 ring-[var(--color-gold)]"
+                  : "translate-x-0.5 ring-[var(--color-ivory-22)]"
               }`}
             />
           </button>
