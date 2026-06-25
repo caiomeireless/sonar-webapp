@@ -36,6 +36,18 @@ export type GastoPorEntidade = {
   consultas: number;
 };
 
+// Devedor traz o breakdown por API e a última consulta — usado no painel
+// do cliente, onde queremos mostrar onde cada real foi gasto em cima de
+// CADA devedor do portfólio, não só por API agregada.
+export type GastoPorDevedor = {
+  id: string;
+  nome: string;
+  totalBrl: number;
+  consultas: number;
+  ultimaConsulta: string; // ISO
+  porAPI: GastoPorEntidade[]; // ordenado por totalBrl desc
+};
+
 export type GastoPorDia = { dia: string; totalBrl: number };
 
 // Período aceito como filtro. "tudo" = sem corte temporal (janela completa
@@ -59,6 +71,7 @@ export type DashboardCustos = {
   porCliente: GastoPorEntidade[];
   porAdvogado: GastoPorEntidade[];
   porAPI: GastoPorEntidade[];
+  porDevedor: GastoPorDevedor[];
   consultas: ConsultaCusto[]; // últimas 50
 };
 
@@ -253,6 +266,69 @@ function agruparPor<T extends { id: string | number; nome: string }>(
   return out;
 }
 
+// Agrega por devedor com breakdown por API e timestamp da última consulta.
+// Usado no painel do cliente — quem mais "custou" no portfólio, em que
+// API e quando foi a última vez. Devedores ordenados por totalBrl desc;
+// o breakdown interno também vem ordenado por totalBrl desc.
+function agruparPorDevedor(consultas: ConsultaCusto[]): GastoPorDevedor[] {
+  const acc = new Map<
+    string,
+    {
+      nome: string;
+      totalBrl: number;
+      consultas: number;
+      ultimaConsulta: string;
+      porAPI: Map<string, { nome: string; totalBrl: number; consultas: number }>;
+    }
+  >();
+  for (const c of consultas) {
+    const id = c.devedorNome;
+    const cur =
+      acc.get(id) ?? {
+        nome: c.devedorNome,
+        totalBrl: 0,
+        consultas: 0,
+        ultimaConsulta: c.data,
+        porAPI: new Map(),
+      };
+    cur.totalBrl += c.custoBrl;
+    cur.consultas += 1;
+    if (c.data > cur.ultimaConsulta) cur.ultimaConsulta = c.data;
+    const api = cur.porAPI.get(c.apiTipo) ?? {
+      nome: c.apiRotulo,
+      totalBrl: 0,
+      consultas: 0,
+    };
+    api.totalBrl += c.custoBrl;
+    api.consultas += 1;
+    cur.porAPI.set(c.apiTipo, api);
+    acc.set(id, cur);
+  }
+  const out: GastoPorDevedor[] = [];
+  for (const [id, v] of acc.entries()) {
+    const porAPI: GastoPorEntidade[] = [];
+    for (const [apiId, a] of v.porAPI.entries()) {
+      porAPI.push({
+        id: apiId,
+        nome: a.nome,
+        totalBrl: a.totalBrl,
+        consultas: a.consultas,
+      });
+    }
+    porAPI.sort((a, b) => b.totalBrl - a.totalBrl);
+    out.push({
+      id,
+      nome: v.nome,
+      totalBrl: v.totalBrl,
+      consultas: v.consultas,
+      ultimaConsulta: v.ultimaConsulta,
+      porAPI,
+    });
+  }
+  out.sort((a, b) => b.totalBrl - a.totalBrl);
+  return out;
+}
+
 function ultimas50(consultas: ConsultaCusto[]): ConsultaCusto[] {
   return [...consultas]
     .sort((a, b) => b.data.localeCompare(a.data))
@@ -336,6 +412,7 @@ export async function obterDashboardCustos(
     id: c.apiTipo,
     nome: c.apiRotulo,
   }));
+  const porDevedor = agruparPorDevedor(consultas);
 
   return {
     totalMesBrl: totalMes(consultas),
@@ -348,6 +425,7 @@ export async function obterDashboardCustos(
     porCliente,
     porAdvogado,
     porAPI,
+    porDevedor,
     consultas: ultimas50(consultas),
   };
 }

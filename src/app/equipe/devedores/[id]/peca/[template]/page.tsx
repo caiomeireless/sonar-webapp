@@ -208,7 +208,7 @@ function BarraTopo({
   casoId?: number;
 }) {
   return (
-    <div className="sticky top-[57px] z-20 border-b border-[var(--color-ivory-12)] bg-[rgba(10,12,11,0.85)] backdrop-blur-md print:hidden">
+    <div className="sticky top-0 z-20 border-b border-[var(--color-ivory-12)] bg-[rgba(10,12,11,0.85)] backdrop-blur-md print:hidden">
       <div className="mx-auto flex max-w-[920px] items-center justify-between gap-3 px-4 py-3 sm:px-8">
         <Link
           href={`/equipe/devedores/${devedorId}${euQuery}`}

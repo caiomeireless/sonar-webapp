@@ -15,22 +15,64 @@
 
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { DollarSign, ArrowRight, TrendingUp, Activity } from "lucide-react";
+import { DollarSign, ArrowRight, TrendingUp, Activity, Users } from "lucide-react";
 
 import { perfilLogado } from "@/lib/perfis-server";
 import { previewEuFromParam } from "@/lib/dev-auth";
 import { formatBRL } from "@/lib/format";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { obterDashboardCustos } from "@/lib/dashboard-custos";
+import {
+  obterDashboardCustos,
+  type PeriodoCustos,
+} from "@/lib/dashboard-custos";
 import { DEMO_CLIENTE_EMAIL } from "@/lib/mock-fixtures";
 
 import GastosPorDiaChart from "./GastosPorDiaChart";
+import FiltrosClienteCustos from "./_components/FiltrosClienteCustos";
 
 export const dynamic = "force-dynamic";
 
 type Props = {
-  searchParams?: Promise<{ eu?: string | string[] }>;
+  searchParams?: Promise<{
+    eu?: string | string[];
+    periodo?: string | string[];
+  }>;
 };
+
+const PERIODOS_VALIDOS: ReadonlySet<PeriodoCustos> = new Set([
+  "tudo",
+  "7d",
+  "30d",
+  "90d",
+  "mes",
+  "ano",
+]);
+
+function parsePeriodo(raw: string | string[] | undefined): PeriodoCustos {
+  const v = Array.isArray(raw) ? raw[0] : raw;
+  if (v && PERIODOS_VALIDOS.has(v as PeriodoCustos)) return v as PeriodoCustos;
+  return "tudo";
+}
+
+// Mostra "há X min/h/dias" pra cada devedor. Mantém a UI leve e fácil
+// de ler — data absoluta seria ruído nessa seção, o cliente só quer
+// saber se foi recente ou antigo.
+function tempoRelativo(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  const diffMs = Date.now() - d.getTime();
+  const min = Math.floor(diffMs / 60000);
+  if (min < 1) return "agora";
+  if (min < 60) return `há ${min} min`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return `há ${h} h`;
+  const dias = Math.floor(h / 24);
+  if (dias === 1) return "há 1 dia";
+  if (dias < 30) return `há ${dias} dias`;
+  const meses = Math.floor(dias / 30);
+  if (meses === 1) return "há 1 mês";
+  return `há ${meses} meses`;
+}
 
 // Acha o credor pelo email_contato. Devolve null se não encontrar — quem
 // chama decide o fallback. Resiliente a tabela ausente (devolve null).
@@ -63,12 +105,21 @@ export default async function CustosClientePage({ searchParams }: Props) {
   // Sem credor vinculado: ainda renderiza a página, mas com dashboard vazio.
   // Usar id=-1 garante que `obterDashboardCustos` devolve zerado (não casa
   // com nenhum devedor) em vez de quebrar.
+  const periodo = parsePeriodo(params.periodo);
   const dashboard = await obterDashboardCustos({
     credorId: credorId ?? -1,
+    periodo,
   });
 
-  const { totalMesBrl, limiteMesBrl, totalConsultas, apiMaisUsada, gastosPorDia, porAPI } =
-    dashboard;
+  const {
+    totalMesBrl,
+    limiteMesBrl,
+    totalConsultas,
+    apiMaisUsada,
+    gastosPorDia,
+    porAPI,
+    porDevedor,
+  } = dashboard;
   const pct = limiteMesBrl > 0
     ? Math.min(100, Math.round((totalMesBrl / limiteMesBrl) * 100))
     : 0;
@@ -96,6 +147,10 @@ export default async function CustosClientePage({ searchParams }: Props) {
           Monitor de Custos
         </p>
       </header>
+
+      {/* FILTRO — só período. Sem cliente (sempre é ele mesmo) nem
+          advogado (privacidade). URL-driven (?periodo=). */}
+      <FiltrosClienteCustos />
 
       {/* KPIs — três cards lado a lado (Total do Mês, Total Consultas, Top API) */}
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -178,6 +233,112 @@ export default async function CustosClientePage({ searchParams }: Props) {
           </div>
         </header>
         <GastosPorDiaChart dados={gastosPorDia} />
+      </section>
+
+      {/* DETALHES POR DEVEDOR — onde o investimento se concentra, por
+          devedor do portfólio. Cada bloco mostra total, número de
+          consultas, última pesquisa e o breakdown por API (quanto foi
+          gasto na Assertiva, BigDataCorp etc para AQUELE devedor).
+          Substitui o "ranking opaco por API" por algo concreto pro
+          cliente — ele reconhece os nomes dos próprios devedores. */}
+      <section className="glass mt-6 p-6">
+        <header className="mb-4 flex items-center justify-between gap-4">
+          <div>
+            <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-gold)]">
+              Investimento por Devedor
+            </p>
+            <p className="mt-1 text-xs text-[var(--color-ivory-66)]">
+              Quanto foi gasto em pesquisas pagas em cada devedor do seu
+              portfólio, com o detalhamento por fonte de dados.
+            </p>
+          </div>
+          <Users className="h-5 w-5 text-[var(--color-devedor)]" />
+        </header>
+
+        {porDevedor.length === 0 ? (
+          <div className="flex h-32 items-center justify-center text-sm text-[var(--color-ivory-66)]">
+            Nenhum devedor com consultas pagas no período selecionado.
+          </div>
+        ) : (
+          <ul className="flex flex-col gap-3">
+            {porDevedor.map((dev) => {
+              const participacaoTotal = porDevedor.reduce(
+                (s, d) => s + d.totalBrl,
+                0,
+              );
+              const pctDevedor =
+                participacaoTotal > 0
+                  ? (dev.totalBrl / participacaoTotal) * 100
+                  : 0;
+              return (
+                <li
+                  key={dev.id}
+                  className="rounded-md border border-[var(--color-ivory-12)] bg-[var(--color-surface-1)] p-4"
+                >
+                  {/* Linha 1 — nome do devedor + total + número de consultas */}
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span className="nome-devedor font-serif text-base text-[var(--color-devedor)]">
+                      {dev.nome}
+                    </span>
+                    <div className="flex shrink-0 items-baseline gap-3">
+                      <span className="font-mono text-[12px] text-[var(--color-ivory-66)]">
+                        {dev.consultas.toLocaleString("pt-BR")}{" "}
+                        {dev.consultas === 1 ? "consulta" : "consultas"}
+                      </span>
+                      <span className="font-serif text-base tabular-nums text-[var(--color-signal)]">
+                        {formatBRL(dev.totalBrl)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Barra de participação % deste devedor no total */}
+                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--color-surface-2)]">
+                    <div
+                      className="h-full rounded-full bg-[var(--color-gold)] transition-all"
+                      style={{ width: `${pctDevedor}%` }}
+                    />
+                  </div>
+
+                  {/* Linha 2 — última consulta + % do investimento */}
+                  <div className="mt-2 flex flex-wrap items-center justify-between gap-2 font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+                    <span>Última consulta: {tempoRelativo(dev.ultimaConsulta)}</span>
+                    <span>{pctDevedor.toFixed(1)}% do investimento</span>
+                  </div>
+
+                  {/* Breakdown por API para ESTE devedor */}
+                  {dev.porAPI.length > 0 && (
+                    <div className="mt-3 border-t border-[var(--color-ivory-12)] pt-3">
+                      <p className="mb-2 font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+                        Distribuição por fonte de dados
+                      </p>
+                      <ul className="flex flex-col gap-1.5">
+                        {dev.porAPI.map((api) => (
+                          <li
+                            key={String(api.id)}
+                            className="flex items-baseline justify-between gap-3 text-sm"
+                          >
+                            <span className="font-mono uppercase tracking-[0.06em] text-[var(--color-ivory)]">
+                              {api.nome}
+                            </span>
+                            <div className="flex shrink-0 items-baseline gap-3">
+                              <span className="font-mono text-[12px] text-[var(--color-ivory-66)]">
+                                {api.consultas.toLocaleString("pt-BR")}{" "}
+                                {api.consultas === 1 ? "consulta" : "consultas"}
+                              </span>
+                              <span className="tabular-nums text-[var(--color-gold)]">
+                                {api.totalBrl > 0 ? formatBRL(api.totalBrl) : "—"}
+                              </span>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </section>
 
       {/* RANKING POR API — sem mostrar advogados */}
