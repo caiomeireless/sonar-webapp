@@ -89,7 +89,7 @@ export function KPIHero({
         />
       ) : null}
       <p
-        className="mt-3 text-4xl font-medium leading-none tabular-nums tracking-tight md:text-5xl"
+        className="mt-3 break-all text-2xl font-medium leading-none tabular-nums tracking-tight sm:text-3xl md:text-4xl"
         style={{ color: valueColor }}
       >
         {valor}

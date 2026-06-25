@@ -213,9 +213,27 @@ export async function listarCasosDoCliente(clienteEmail: string): Promise<CasoLi
     });
   }
 
+  // Deduplica por DEVEDOR (nao por caso): se o mesmo devedor aparece em
+  // multiplos casos/credores, mostra apenas o caso de MAIOR valor. Sem isso,
+  // o CardStack 3D do portal cliente renderiza Carlos Eduardo Mendes
+  // Albuquerque 2-3x quando o mock tem ele em 3 casos diferentes.
+  const porDevedor = new Map<number, CasoListagem>();
+  for (const c of result) {
+    const atual = porDevedor.get(c.devedor.id);
+    if (!atual) {
+      porDevedor.set(c.devedor.id, c);
+      continue;
+    }
+    // Mantem o de maior credito (mais relevante visualmente).
+    const valorAtual = atual.valor_credito_brl ?? 0;
+    const valorNovo = c.valor_credito_brl ?? 0;
+    if (valorNovo > valorAtual) porDevedor.set(c.devedor.id, c);
+  }
+  const unicos = Array.from(porDevedor.values());
+
   // Ordena: maior valor primeiro (case maior primeiro chama atenção na lista).
-  result.sort((a, b) => (b.valor_credito_brl ?? 0) - (a.valor_credito_brl ?? 0));
-  return result;
+  unicos.sort((a, b) => (b.valor_credito_brl ?? 0) - (a.valor_credito_brl ?? 0));
+  return unicos;
 }
 
 // Dossiê completo de um devedor PARA o cliente.

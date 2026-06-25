@@ -217,7 +217,7 @@ const BENS_DEVEDOR_1 = [
     fonte: "BigDataCorp" as FonteBusca,
     fonte_consultada_em: "2026-06-12T14:32:00Z",
     titulo: "Honda Civic EXL 2019",
-    valor_estimado_brl: 95_000,
+    valor_estimado_brl: 10_000,
     detalhes: {
       placa: "ABC1D23",
       marca: "Honda",
@@ -234,7 +234,7 @@ const BENS_DEVEDOR_1 = [
     fonte: "SICAR" as FonteBusca,
     fonte_consultada_em: "2026-06-13T09:15:00Z",
     titulo: "Fazenda Boa Vista — 8 hectares",
-    valor_estimado_brl: 1_200_000,
+    valor_estimado_brl: 15_000,
     detalhes: {
       tipo: "rural",
       cidade: "Itaberaí",
@@ -251,7 +251,7 @@ const BENS_DEVEDOR_1 = [
     fonte: "minhareceita" as FonteBusca,
     fonte_consultada_em: "2026-06-12T14:33:00Z",
     titulo: "Albuquerque Consultoria LTDA — sócio 30%",
-    valor_estimado_brl: 30_000,
+    valor_estimado_brl: 6_500,
     detalhes: {
       cnpj: "33.444.555/0001-66",
       razao_social: "Albuquerque Consultoria LTDA",
@@ -267,7 +267,7 @@ const BENS_DEVEDOR_1 = [
     fonte: "DataJud" as FonteBusca,
     fonte_consultada_em: "2026-06-12T14:35:00Z",
     titulo: "Exequente em ação de cobrança — R$ 45.000",
-    valor_estimado_brl: 45_000,
+    valor_estimado_brl: 5_500,
     detalhes: {
       numero_cnj: "0123456-12.2024.8.26.0100",
       tribunal: "TJSP",
@@ -332,7 +332,7 @@ const BENS_DEVEDOR_2 = [
     fonte: "BigDataCorp" as FonteBusca,
     fonte_consultada_em: "2026-06-13T11:02:00Z",
     titulo: "VW Saveiro Robust 2021",
-    valor_estimado_brl: 78_000,
+    valor_estimado_brl: 9_500,
     detalhes: {
       placa: "DEF2E34",
       marca: "Volkswagen",
@@ -348,7 +348,7 @@ const BENS_DEVEDOR_2 = [
     fonte: "BigDataCorp" as FonteBusca,
     fonte_consultada_em: "2026-06-13T11:02:00Z",
     titulo: "Fiat Strada Freedom 2020",
-    valor_estimado_brl: 72_000,
+    valor_estimado_brl: 8_500,
     detalhes: {
       placa: "GHI3F45",
       marca: "Fiat",
@@ -364,7 +364,7 @@ const BENS_DEVEDOR_2 = [
     fonte: "BigDataCorp" as FonteBusca,
     fonte_consultada_em: "2026-06-13T11:02:00Z",
     titulo: "Ford Transit Furgão 2022",
-    valor_estimado_brl: 165_000,
+    valor_estimado_brl: 13_000,
     detalhes: {
       placa: "JKL4G56",
       marca: "Ford",
@@ -380,7 +380,7 @@ const BENS_DEVEDOR_2 = [
     fonte: "BigDataCorp" as FonteBusca,
     fonte_consultada_em: "2026-06-13T11:02:00Z",
     titulo: "Mercedes-Benz Sprinter 2023",
-    valor_estimado_brl: 285_000,
+    valor_estimado_brl: 20_000,
     detalhes: {
       placa: "MNO5H67",
       marca: "Mercedes-Benz",
@@ -396,7 +396,7 @@ const BENS_DEVEDOR_2 = [
     fonte: "ARISP" as FonteBusca,
     fonte_consultada_em: "2026-06-13T10:30:00Z",
     titulo: "Sede + galpão industrial — São Paulo/SP",
-    valor_estimado_brl: 8_500_000,
+    valor_estimado_brl: 18_000,
     detalhes: {
       tipo: "urbano",
       cidade: "São Paulo",
@@ -413,7 +413,7 @@ const BENS_DEVEDOR_2 = [
     fonte: "ARISP" as FonteBusca,
     fonte_consultada_em: "2026-06-13T10:30:00Z",
     titulo: "Filial — Belo Horizonte/MG",
-    valor_estimado_brl: 1_200_000,
+    valor_estimado_brl: 6_000,
     detalhes: {
       tipo: "urbano",
       cidade: "Belo Horizonte",
@@ -429,7 +429,7 @@ const BENS_DEVEDOR_2 = [
     fonte: "DataJud" as FonteBusca,
     fonte_consultada_em: "2026-06-13T11:05:00Z",
     titulo: "Exequente em execução de título extrajudicial — R$ 320.000",
-    valor_estimado_brl: 320_000,
+    valor_estimado_brl: 5_000,
     detalhes: {
       numero_cnj: "0987654-21.2023.8.26.0100",
       tribunal: "TJSP",
@@ -444,7 +444,7 @@ const BENS_DEVEDOR_2 = [
     fonte: "DataJud" as FonteBusca,
     fonte_consultada_em: "2026-06-13T11:05:00Z",
     titulo: "Exequente em ação monitória — R$ 180.000",
-    valor_estimado_brl: 180_000,
+    valor_estimado_brl: 4_500,
     detalhes: {
       numero_cnj: "0876543-32.2024.8.26.0200",
       tribunal: "TJSP",
