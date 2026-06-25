@@ -5,41 +5,23 @@
 // 6) dados cadastrais com chips de origem por campo (THEMIS/ASSERTIVA/MANUAL),
 // 7) casos vinculados, 8) bens por categoria, 9) timeline,
 // 10) banner cross-detection.
-import type { ComponentType } from "react";
+//
+// Componentes de cabecalho/bens/casos/ficha foram extraidos pra
+// src/app/_shared/dossie/ (jun/2026) — reaproveitados pelo dossie do cliente
+// (paridade visual). Esta pagina mantem o que e EXCLUSIVO da equipe:
+// Acoes de Busca, Gerar Peca, Calculo, Cross-Reference.
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import {
-  Building2,
-  User,
-  Pencil,
-  ArrowRight,
-  BarChart3,
-  Car,
-  Briefcase,
-  Scale,
-  MapPin,
-  Users2,
-  Hash,
-  type LucideIcon,
-} from "lucide-react";
+import { ArrowRight, Pencil } from "lucide-react";
 import {
   obterDossie,
   outrosCredoresDoDevedor,
-  type Bem,
-  type CasoResumo,
   type OutroCasoDoDevedor,
 } from "@/lib/casos";
-import type { TipoBem } from "@/lib/mock-fixtures";
 import { perfilLogado } from "@/lib/perfis-server";
 import { ehCliente } from "@/lib/perfis";
 import { devEuFromParam } from "@/lib/dev-auth";
-import { SpotlightCard } from "@/components/ui/SpotlightCard";
-import {
-  formatBRL,
-  formatData,
-  formatStatus,
-  formatTempoRelativo,
-} from "@/lib/format";
+import { formatBRL, formatData } from "@/lib/format";
 import { AcoesBuscaMockadas } from "./AcoesBuscaMockadas";
 import { BotaoGerarPeca } from "./BotaoGerarPeca";
 import { AtualizadorCalculo } from "./AtualizadorCalculo";
@@ -48,38 +30,33 @@ import { TimelineMedidas } from "./TimelineMedidas";
 import { listarMedidasPorDevedor } from "@/lib/medidas";
 import { templatesSugeridos } from "@/lib/pecas-templates";
 
+// ---- Componentes compartilhados (cliente + advogado) ----
+import { HeaderDossie } from "@/app/_shared/dossie/HeaderDossie";
+import { EstatisticasGrid } from "@/app/_shared/dossie/EstatisticasGrid";
+import { SectionTitle } from "@/app/_shared/dossie/SectionTitle";
+import {
+  SecaoFicha,
+  CampoFicha,
+} from "@/app/_shared/dossie/SecaoFicha";
+import { CardCasoVinculado } from "@/app/_shared/dossie/CardCasoVinculado";
+import { CardBem } from "@/app/_shared/dossie/CardBem";
+import { AcessoNegado } from "@/app/_shared/dossie/AcessoNegado";
+import {
+  TIPO_META,
+  ICONES_TIPO_BEM,
+  ORDEM,
+} from "@/app/_shared/dossie/icones-tipo-bem";
+import {
+  primeiroEndereco,
+  responsavelPrincipal,
+  areasDoDevedor,
+  somaCredito,
+} from "@/app/_shared/dossie/helpers-ficha";
+
 type Props = {
   params: Promise<{ id: string }>;
   searchParams?: Promise<{ eu?: string | string[] }>;
 };
-
-const TIPO_META: Record<TipoBem, { label: string; Icon: LucideIcon }> = {
-  veiculo: { label: "Veículos", Icon: Car },
-  imovel: { label: "Imóveis", Icon: Building2 },
-  empresa: { label: "Participações Societárias", Icon: Briefcase },
-  processo_credito: { label: "Processos Onde é Credor", Icon: Scale },
-  endereco: { label: "Endereços Confirmados", Icon: MapPin },
-  vinculo: { label: "Vínculos Familiares", Icon: Users2 },
-};
-
-// Map de icones por tipo de bem (usado no header da categoria "Bens por Categoria").
-const ICONES_TIPO_BEM: Record<TipoBem, ComponentType<{ className?: string }>> = {
-  veiculo: Car,
-  imovel: Building2,
-  empresa: Briefcase,
-  processo_credito: Scale,
-  endereco: MapPin,
-  vinculo: Users2,
-};
-
-const ORDEM: TipoBem[] = [
-  "veiculo",
-  "imovel",
-  "empresa",
-  "processo_credito",
-  "endereco",
-  "vinculo",
-];
 
 export default async function DossieEquipePage({ params, searchParams }: Props) {
   const { id } = await params;
@@ -408,129 +385,8 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
 }
 
 // ============================================================
-// COMPONENTES INTERNOS
+// COMPONENTES LOCAIS (exclusivos da equipe)
 // ============================================================
-
-// ---------- Tipos ----------
-
-type OrigemFicha = "VIA THEMIS" | "VIA ASSERTIVA" | "MANUAL";
-
-type DevedorBasico = {
-  id: number;
-  nome: string;
-  tipo: "PF" | "PJ";
-  documento: string;
-  data_nascimento?: string | null;
-  nome_mae?: string | null;
-  criado_em: string;
-  ultima_consulta_em?: string | null;
-};
-
-// ---------- HeaderDossie ----------
-
-function HeaderDossie({
-  devedor,
-  statusLabel,
-  statusColor,
-  dashboardHref,
-}: {
-  devedor: DevedorBasico;
-  statusLabel: string;
-  statusColor: string;
-  dashboardHref: string;
-}) {
-  return (
-    <header className="mt-10">
-      {/* Quadro de vidro opaco envolvendo todo o cabecalho do dossie */}
-      <div className="glass mx-auto max-w-[1100px] px-8 py-10 sm:px-12 sm:py-12 text-center">
-        {/* Bloco vertical: icone PF/PJ ACIMA do eyebrow DOSSIÊ PATRIMONIAL */}
-        <div className="flex flex-col items-center gap-3">
-          {/* Icone PF/PJ — chip arredondado dourado */}
-          <div className="inline-flex h-14 w-14 items-center justify-center rounded-xl border border-[var(--color-gold)]/35 bg-gradient-to-br from-[rgba(201,162,74,0.18)] to-[rgba(201,162,74,0.04)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-            {devedor.tipo === "PJ" ? (
-              <Building2 className="h-6 w-6 text-[var(--color-gold)]" />
-            ) : (
-              <User className="h-6 w-6 text-[var(--color-gold)]" />
-            )}
-          </div>
-
-          {/* Eyebrow gigante DOSSIÊ PATRIMONIAL com linhas decorativas */}
-          <div className="inline-flex items-center gap-4">
-            <span
-              aria-hidden="true"
-              className="inline-block h-px w-12 bg-[var(--color-signal)] opacity-70 sm:w-16"
-            />
-            <span className="font-mono font-medium uppercase tracking-[0.32em] text-[var(--color-signal)] text-[clamp(20px,2.6vw,32px)]">
-              Dossiê Patrimonial
-            </span>
-            <span
-              aria-hidden="true"
-              className="inline-block h-px w-12 bg-[var(--color-signal)] opacity-70 sm:w-16"
-            />
-          </div>
-        </div>
-
-        <h1 className="nome-devedor mt-5 break-words font-serif text-[clamp(24px,3.5vw,44px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-devedor)]">
-          {devedor.nome}
-        </h1>
-
-        {/* Linha de status: badges + ultima consulta */}
-        <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-          <BadgeFicha
-            label={devedor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"}
-            color="var(--color-gold)"
-          />
-          <BadgeFicha label={statusLabel} color={statusColor} dot />
-          {devedor.ultima_consulta_em ? (
-            <BadgeFicha
-              label={`Última Consulta ${formatTempoRelativo(devedor.ultima_consulta_em)}`}
-              color="var(--color-ivory-66)"
-            />
-          ) : null}
-        </div>
-
-        {/* Atalho Dashboard Analítico — botao neon signal com icone de
-            grafico em barras LARANJA neon a esquerda pra sinalizar. */}
-        <Link href={dashboardHref} className="btn-neon-signal group mt-6">
-          <BarChart3
-            className="h-5 w-5"
-            style={{
-              color: "#FF6B00",
-              filter:
-                "drop-shadow(0 0 6px rgba(255,107,0,0.85)) drop-shadow(0 0 12px rgba(255,107,0,0.45))",
-            }}
-            aria-hidden="true"
-          />
-          Dashboard Analítico
-          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-        </Link>
-      </div>
-    </header>
-  );
-}
-
-// ---------- EstatisticasGrid ----------
-
-function EstatisticasGrid({
-  totalBens,
-  valorEstimado,
-  casosVinculados,
-}: {
-  totalBens: number;
-  valorEstimado: number;
-  casosVinculados: number;
-}) {
-  return (
-    <div className="mt-10 grid gap-4 sm:grid-cols-3">
-      <CardNumero rotulo="Total de Bens" valor={String(totalBens)} />
-      <CardNumero
-        rotulo="Valor Estimado Total"
-        valor={formatBRL(valorEstimado)}
-      />
-      <CardNumero rotulo="Casos Vinculados" valor={String(casosVinculados)} />
-    </div>
-  );
-}
 
 // ---------- BlocoAcao (wrapper com barra vertical signal) ----------
 
@@ -557,232 +413,7 @@ function BlocoAcao({
   );
 }
 
-// ---------- SectionTitle (titulos de blocos grandes) ----------
-
-function SectionTitle({
-  texto,
-  eyebrow,
-  eyebrowColor = "var(--color-signal)",
-}: {
-  texto: string;
-  eyebrow?: string;
-  eyebrowColor?: string;
-}) {
-  return (
-    <div>
-      {eyebrow ? (
-        <span
-          className="font-mono text-[12px] uppercase tracking-[0.32em]"
-          style={{ color: eyebrowColor }}
-        >
-          {eyebrow}
-        </span>
-      ) : null}
-      <h2 className="mt-2 font-serif text-3xl text-ivory">{texto}</h2>
-    </div>
-  );
-}
-
-// ---------- BadgeFicha ----------
-
-function BadgeFicha({
-  label,
-  color,
-  dot = false,
-}: {
-  label: string;
-  color: string;
-  dot?: boolean;
-}) {
-  return (
-    <span
-      className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[12px] uppercase tracking-[0.22em]"
-      style={{
-        borderColor: color,
-        color,
-        backgroundColor: "rgba(255,255,255,0.03)",
-      }}
-    >
-      {dot ? (
-        <span
-          aria-hidden="true"
-          className="inline-block h-1.5 w-1.5 rounded-full"
-          style={{ backgroundColor: color, boxShadow: `0 0 8px ${color}` }}
-        />
-      ) : null}
-      {label}
-    </span>
-  );
-}
-
-// ---------- SecaoFicha (card glass com eyebrow vertical signal) ----------
-
-function SecaoFicha({
-  titulo,
-  children,
-  eyebrowColor = "var(--color-signal)",
-}: {
-  titulo: string;
-  children: React.ReactNode;
-  eyebrowColor?: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.6)] p-6 sm:p-7">
-      <div className="relative pl-4">
-        <span
-          aria-hidden="true"
-          className="absolute left-0 top-0 h-6 w-1 rounded-full"
-          style={{ backgroundColor: eyebrowColor }}
-        />
-        <h3
-          className="font-mono text-[13px] uppercase tracking-[0.32em]"
-          style={{ color: eyebrowColor }}
-        >
-          {titulo}
-        </h3>
-      </div>
-      <div className="mt-5 space-y-5">{children}</div>
-    </div>
-  );
-}
-
-// ---------- CampoFicha + ChipOrigem ----------
-
-function CampoFicha({
-  rotulo,
-  valor,
-  origem,
-  valorClassName,
-}: {
-  rotulo: string;
-  valor: string | null | undefined;
-  origem?: OrigemFicha;
-  valorClassName?: string;
-}) {
-  const valorFinal = valor && valor.trim() !== "" ? valor : null;
-  return (
-    <div>
-      <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
-        {rotulo}
-      </p>
-      <div className="mt-2 flex flex-wrap items-center gap-2">
-        <span
-          className={
-            valorFinal
-              ? `text-lg ${valorClassName ?? "text-ivory"}`
-              : "text-lg text-[var(--color-ivory-66)]"
-          }
-        >
-          {valorFinal ?? "—"}
-        </span>
-        {valorFinal && origem ? <ChipOrigem origem={origem} /> : null}
-      </div>
-    </div>
-  );
-}
-
-function ChipOrigem({ origem }: { origem: OrigemFicha }) {
-  const map: Record<
-    OrigemFicha,
-    { color: string; bg: string; border: string }
-  > = {
-    "VIA THEMIS": {
-      color: "rgb(244,197,66)",
-      bg: "rgba(244,197,66,0.15)",
-      border: "rgba(244,197,66,0.45)",
-    },
-    "VIA ASSERTIVA": {
-      color: "var(--color-signal)",
-      bg: "rgba(60,255,138,0.10)",
-      border: "rgba(60,255,138,0.45)",
-    },
-    MANUAL: {
-      color: "var(--color-gold)",
-      bg: "rgba(201,162,74,0.10)",
-      border: "rgba(201,162,74,0.45)",
-    },
-  };
-  const { color, bg, border } = map[origem];
-  return (
-    <span
-      className="inline-flex items-center rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em]"
-      style={{ borderColor: border, color, backgroundColor: bg }}
-    >
-      {origem}
-    </span>
-  );
-}
-
-// ---------- Helpers de derivação de dados pra Ficha ----------
-
-function primeiroEndereco(bens: Bem[]): string | null {
-  const end = bens.find((b) => b.tipo === "endereco");
-  if (!end) return null;
-  const d = end.detalhes;
-  const log = typeof d.logradouro === "string" ? d.logradouro : null;
-  const cidade = typeof d.cidade === "string" ? d.cidade : null;
-  const uf = typeof d.uf === "string" ? d.uf : null;
-  const partes: string[] = [];
-  if (log) partes.push(log);
-  if (cidade && uf) partes.push(`${cidade}/${uf}`);
-  else if (cidade) partes.push(cidade);
-  else if (uf) partes.push(uf);
-  return partes.length > 0 ? partes.join(" — ") : null;
-}
-
-function responsavelPrincipal(casos: CasoResumo[]): string | null {
-  const c = casos.find((x) => x.responsavel_email);
-  return c?.responsavel_email ?? null;
-}
-
-function areasDoDevedor(casos: CasoResumo[]): string | null {
-  // No demo nao temos campo "area" no CasoResumo; mostra um placeholder
-  // quando houver pelo menos um caso, vazio caso contrario. Real entra Sem 2.
-  if (casos.length === 0) return null;
-  return "Recuperação de Crédito";
-}
-
-function somaCredito(casos: CasoResumo[]): number {
-  return casos.reduce((acc, c) => acc + (c.valor_credito_brl ?? 0), 0);
-}
-
-// ---------- Componentes herdados ----------
-
-function AcessoNegado({ voltarHref }: { voltarHref: string }) {
-  return (
-    <main className="mx-auto max-w-[1400px] px-6 py-24 sm:px-10">
-      <div className="grid place-items-center">
-        <SpotlightCard className="max-w-[520px] p-10 text-center">
-          <span className="eyebrow !text-[var(--color-gold)]">Não encontrado</span>
-          <h3 className="mt-4 font-serif text-2xl text-ivory">
-            Devedor não localizado
-          </h3>
-          <p className="mt-3 text-sm text-[var(--color-ivory-88)]">
-            O identificador informado não corresponde a nenhum devedor
-            cadastrado.
-          </p>
-          <Link
-            href={voltarHref}
-            className="mt-6 inline-block rounded-lg border border-[var(--color-ivory-22)] bg-white/5 px-4 py-2 text-xs font-medium text-ivory transition hover:border-[var(--color-signal)] hover:text-[var(--color-signal)]"
-          >
-            ← Voltar para devedores
-          </Link>
-        </SpotlightCard>
-      </div>
-    </main>
-  );
-}
-
-function CardNumero({ rotulo, valor }: { rotulo: string; valor: string }) {
-  return (
-    <SpotlightCard className="p-8">
-      <span className="font-mono text-[13px] uppercase tracking-[0.28em] text-[var(--color-ivory-66)]">
-        {rotulo}
-      </span>
-      <p className="mt-3 font-serif text-4xl text-[var(--color-gold)]">{valor}</p>
-    </SpotlightCard>
-  );
-}
+// ---------- AlertaCrossReference (exclusivo da equipe) ----------
 
 function AlertaCrossReference({
   outros,
@@ -849,314 +480,4 @@ function AlertaCrossReference({
       </div>
     </div>
   );
-}
-
-function CardCasoVinculado({ caso }: { caso: CasoResumo }) {
-  const status = formatStatus(caso.status);
-  return (
-    <div className="flex flex-col gap-3 rounded-lg border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.5)] p-4 sm:flex-row sm:items-center sm:justify-between">
-      <div>
-        <p className="font-mono text-base text-[var(--color-ivory-66)]">
-          {caso.numero_processo || "Sem processo cadastrado"}
-        </p>
-        {/* Chip PASTA #X — número da pasta interna do Themis (caso_id) */}
-        <span className="mt-2 inline-flex items-center gap-1 rounded-full border border-[var(--color-ivory-22)] bg-[var(--color-surface-2)]/60 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
-          <Hash className="h-3 w-3" />
-          Pasta {caso.id}
-        </span>
-        <p className="mt-1 text-xl text-ivory">
-          Credor:{" "}
-          <span className="text-[var(--color-gold)]">{caso.credor.nome}</span>
-        </p>
-        <p className="mt-1 text-xl text-ivory">
-          Crédito:{" "}
-          <span className="text-[var(--color-gold)]">
-            {formatBRL(caso.valor_credito_brl)}
-          </span>
-        </p>
-        <p className="mt-1 font-mono text-[15px] text-[var(--color-ivory-66)]">
-          Advogado responsável:{" "}
-          <span className="text-[var(--color-advogado)]">
-            {caso.responsavel_email ?? "—"}
-          </span>
-        </p>
-      </div>
-      <span
-        className="self-start rounded-full border px-3 py-1 font-mono text-[12px] uppercase tracking-[0.18em] sm:self-auto"
-        style={{ borderColor: status.color, color: status.color }}
-      >
-        {status.label}
-      </span>
-    </div>
-  );
-}
-
-// Identificação principal por tipo (placa/matricula/CNPJ/endereco/CNJ/nome).
-// Se nada relevante, cai pro bem.titulo.
-function identificacaoPrincipal(bem: Bem): string {
-  const d = bem.detalhes;
-  switch (bem.tipo) {
-    case "veiculo":
-      return getStr(d, "placa") ?? bem.titulo;
-    case "imovel":
-      return getStr(d, "matricula") ?? bem.titulo;
-    case "empresa":
-      return getStr(d, "cnpj") ?? getStr(d, "razao_social") ?? bem.titulo;
-    case "processo_credito":
-      return getStr(d, "numero_cnj") ?? bem.titulo;
-    case "endereco": {
-      const log = getStr(d, "logradouro");
-      const cidade = getStr(d, "cidade");
-      const uf = getStr(d, "uf");
-      const partes = [log, [cidade, uf].filter(Boolean).join("/")].filter(
-        (p) => p && p.length > 0,
-      );
-      return partes.length > 0 ? partes.join(" — ") : bem.titulo;
-    }
-    case "vinculo":
-      return getStr(d, "nome") ?? bem.titulo;
-    default:
-      return bem.titulo;
-  }
-}
-
-// Mapeia FonteBusca pra origem visual:
-// Themis -> VIA THEMIS (amber), Assertiva -> VIA ASSERTIVA (signal),
-// DataJud -> VIA DATAJUD (gold), Manual -> MANUAL (ivory),
-// demais cadastros (BigDataCorp, minhareceita, SICAR, ARISP, Escavador)
-// caem em "VIA <NOME>" com cor ivory neutra.
-type ChipBemOrigem = {
-  label: string;
-  color: string;
-  bg: string;
-  border: string;
-};
-
-function origemDoBem(fonte: string): ChipBemOrigem {
-  switch (fonte) {
-    case "Themis":
-      return {
-        label: "VIA THEMIS",
-        color: "rgb(244,197,66)",
-        bg: "rgba(244,197,66,0.15)",
-        border: "rgba(244,197,66,0.45)",
-      };
-    case "Assertiva":
-      return {
-        label: "VIA ASSERTIVA",
-        color: "var(--color-signal)",
-        bg: "rgba(60,255,138,0.10)",
-        border: "rgba(60,255,138,0.45)",
-      };
-    case "DataJud":
-      return {
-        label: "VIA DATAJUD",
-        color: "var(--color-gold)",
-        bg: "rgba(201,162,74,0.12)",
-        border: "rgba(201,162,74,0.45)",
-      };
-    case "Manual":
-      return {
-        label: "MANUAL",
-        color: "var(--color-ivory-88)",
-        bg: "rgba(245,243,238,0.06)",
-        border: "rgba(245,243,238,0.30)",
-      };
-    default:
-      return {
-        label: `VIA ${fonte.toUpperCase()}`,
-        color: "var(--color-ivory-88)",
-        bg: "rgba(245,243,238,0.06)",
-        border: "rgba(245,243,238,0.22)",
-      };
-  }
-}
-
-function CardBem({ bem }: { bem: Bem }) {
-  const titulo = identificacaoPrincipal(bem);
-  const origem = origemDoBem(bem.fonte);
-  return (
-    <div className="glass p-6">
-      {/* Identificação no topo: titulo serif gold + chip origem + valor */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0 flex-1">
-          <p
-            className="truncate font-serif text-lg uppercase tracking-[0.04em] text-[var(--color-gold)]"
-            title={titulo}
-          >
-            {titulo}
-          </p>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            <span
-              className="inline-flex items-center rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em]"
-              style={{
-                borderColor: origem.border,
-                color: origem.color,
-                backgroundColor: origem.bg,
-              }}
-            >
-              {origem.label}
-            </span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
-              {formatData(bem.fonte_consultada_em)}
-            </span>
-          </div>
-        </div>
-        {bem.valor_estimado_brl !== null ? (
-          <span className="whitespace-nowrap font-mono text-lg text-[var(--color-gold)]">
-            {formatBRL(bem.valor_estimado_brl)}
-          </span>
-        ) : null}
-      </div>
-
-      {/* Divider sutil */}
-      <div className="my-4 h-px bg-[var(--color-ivory-12)]" />
-
-      {/* Detalhes em grid 2-col */}
-      <div className="grid gap-x-4 gap-y-3 sm:grid-cols-2">
-        <DetalhesRender tipo={bem.tipo} detalhes={bem.detalhes} />
-      </div>
-    </div>
-  );
-}
-
-// ============================================================
-// DetalhesRender — renderiza só as chaves úteis por tipo de bem.
-// ============================================================
-
-function Linha({ rotulo, valor }: { rotulo: string; valor: string | number | undefined | null }) {
-  if (valor === undefined || valor === null || valor === "") return null;
-  return (
-    <div>
-      <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
-        {rotulo}
-      </p>
-      <p className="mt-1 text-sm text-ivory">{valor}</p>
-    </div>
-  );
-}
-
-function getStr(obj: Record<string, unknown>, key: string): string | undefined {
-  const v = obj[key];
-  return typeof v === "string" ? v : undefined;
-}
-
-function getNum(obj: Record<string, unknown>, key: string): number | undefined {
-  const v = obj[key];
-  return typeof v === "number" ? v : undefined;
-}
-
-function getArr(obj: Record<string, unknown>, key: string): unknown[] | undefined {
-  const v = obj[key];
-  return Array.isArray(v) ? v : undefined;
-}
-
-function DetalhesRender({
-  tipo,
-  detalhes,
-}: {
-  tipo: TipoBem;
-  detalhes: Record<string, unknown>;
-}) {
-  switch (tipo) {
-    case "veiculo": {
-      const placa = getStr(detalhes, "placa");
-      const marca = getStr(detalhes, "marca");
-      const modelo = getStr(detalhes, "modelo");
-      const ano = getNum(detalhes, "ano_modelo");
-      const restricoes = getArr(detalhes, "restricoes");
-      const veiculo = [marca, modelo].filter(Boolean).join(" ");
-      return (
-        <>
-          <Linha rotulo="Placa" valor={placa} />
-          <Linha rotulo="Veículo" valor={veiculo || undefined} />
-          <Linha rotulo="Ano" valor={ano} />
-          {restricoes && restricoes.length > 0 ? (
-            <Linha
-              rotulo="Restrições"
-              valor={restricoes.map((r) => String(r)).join("; ")}
-            />
-          ) : null}
-        </>
-      );
-    }
-    case "imovel": {
-      const cidade = getStr(detalhes, "cidade");
-      const uf = getStr(detalhes, "uf");
-      const areaH = getNum(detalhes, "area_hectares");
-      const areaM = getNum(detalhes, "area_m2");
-      const matricula = getStr(detalhes, "matricula");
-      const local = [cidade, uf].filter(Boolean).join(" / ");
-      const area =
-        areaH !== undefined
-          ? `${areaH} ha`
-          : areaM !== undefined
-          ? `${areaM} m²`
-          : undefined;
-      return (
-        <>
-          <Linha rotulo="Localização" valor={local || undefined} />
-          <Linha rotulo="Área" valor={area} />
-          <Linha rotulo="Matrícula" valor={matricula} />
-        </>
-      );
-    }
-    case "empresa": {
-      const cnpj = getStr(detalhes, "cnpj");
-      const razao = getStr(detalhes, "razao_social");
-      const pct = getNum(detalhes, "percent_participacao");
-      const qual = getStr(detalhes, "qual");
-      return (
-        <>
-          <Linha rotulo="CNPJ" valor={cnpj} />
-          <Linha rotulo="Razão social" valor={razao} />
-          <Linha
-            rotulo="Participação"
-            valor={pct !== undefined ? `${pct}%` : undefined}
-          />
-          <Linha rotulo="Qualificação" valor={qual} />
-        </>
-      );
-    }
-    case "processo_credito": {
-      const cnj = getStr(detalhes, "numero_cnj");
-      const tribunal = getStr(detalhes, "tribunal");
-      const classe = getStr(detalhes, "classe");
-      return (
-        <>
-          <Linha rotulo="CNJ" valor={cnj} />
-          <Linha rotulo="Tribunal" valor={tribunal} />
-          <Linha rotulo="Classe" valor={classe} />
-        </>
-      );
-    }
-    case "endereco": {
-      const log = getStr(detalhes, "logradouro");
-      const cidade = getStr(detalhes, "cidade");
-      const uf = getStr(detalhes, "uf");
-      const tipoEnd = getStr(detalhes, "tipo");
-      const local = [cidade, uf].filter(Boolean).join(" / ");
-      return (
-        <>
-          <Linha rotulo="Logradouro" valor={log} />
-          <Linha rotulo="Cidade" valor={local || undefined} />
-          <Linha rotulo="Tipo" valor={tipoEnd} />
-        </>
-      );
-    }
-    case "vinculo": {
-      const nome = getStr(detalhes, "nome");
-      const doc = getStr(detalhes, "documento");
-      const tipoVinc = getStr(detalhes, "tipo_vinculo");
-      return (
-        <>
-          <Linha rotulo="Nome" valor={nome} />
-          <Linha rotulo="Documento" valor={doc} />
-          <Linha rotulo="Vínculo" valor={tipoVinc} />
-        </>
-      );
-    }
-    default:
-      return null;
-  }
 }

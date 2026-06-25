@@ -1,47 +1,59 @@
-// Dossiê patrimonial de um devedor para o cliente.
+// Dossie patrimonial do devedor — VISAO DO CLIENTE.
 // Server Component: obterDossieParaCliente faz a checagem de visibilidade
-// (só libera se o devedor pertence a um caso de credor com email_contato = eu).
+// (so libera se o devedor pertence a um caso de credor com email_contato = eu).
+// Fallback admin/socio (defesa em profundidade) — preservado.
+//
+// Layout reescrito (jun/2026) pra dar PARIDADE VISUAL com o dossie do
+// advogado (/equipe/devedores/[id]). Reusa _shared/dossie/* — esconde so o
+// que e exclusivo do escritorio: gerador de peca, calculo, acoes de busca,
+// chips de origem (THEMIS/ASSERTIVA/DATAJUD), custos das APIs,
+// email do advogado responsavel, cross-reference, dashboard analitico.
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   obterDossie,
   obterDossieParaCliente,
-  type Bem,
-  type CasoResumo,
 } from "@/lib/casos";
-import type { TipoBem } from "@/lib/mock-fixtures";
 import { perfilLogado } from "@/lib/perfis-server";
 import { previewEuFromParam } from "@/lib/dev-auth";
-import { SpotlightCard } from "@/components/ui/SpotlightCard";
+import { formatData } from "@/lib/format";
+import { listarMedidasPorDevedor } from "@/lib/medidas";
+import { DocumentosAPI } from "@/app/equipe/devedores/[id]/DocumentosAPI";
+import { TimelineMedidas } from "@/app/equipe/devedores/[id]/TimelineMedidas";
+
+// ---- Componentes compartilhados ----
+import { HeaderDossie } from "@/app/_shared/dossie/HeaderDossie";
+import { EstatisticasGrid } from "@/app/_shared/dossie/EstatisticasGrid";
+import { SectionTitle } from "@/app/_shared/dossie/SectionTitle";
+import { SecaoFicha, CampoFicha } from "@/app/_shared/dossie/SecaoFicha";
+import { CardCasoVinculado } from "@/app/_shared/dossie/CardCasoVinculado";
+import { CardBem } from "@/app/_shared/dossie/CardBem";
+import { AcessoNegado } from "@/app/_shared/dossie/AcessoNegado";
 import {
-  formatBRL,
-  formatData,
-  formatStatus,
-  formatTempoRelativo,
-} from "@/lib/format";
+  TIPO_META,
+  ICONES_TIPO_BEM,
+  ORDEM,
+} from "@/app/_shared/dossie/icones-tipo-bem";
+import { primeiroEndereco } from "@/app/_shared/dossie/helpers-ficha";
 
 type Props = {
   params: Promise<{ id: string }>;
   searchParams?: Promise<{ eu?: string | string[] }>;
 };
 
-const TIPO_META: Record<TipoBem, { label: string; icone: string }> = {
-  veiculo: { label: "Veículos", icone: "V" },
-  imovel: { label: "Imóveis", icone: "I" },
-  empresa: { label: "Participações societárias", icone: "E" },
-  processo_credito: { label: "Processos onde é credor", icone: "P" },
-  endereco: { label: "Endereços confirmados", icone: "A" },
-  vinculo: { label: "Vínculos familiares", icone: "F" },
-};
-
-const ORDEM: TipoBem[] = [
-  "veiculo",
-  "imovel",
-  "empresa",
-  "processo_credito",
-  "endereco",
-  "vinculo",
-];
+// Fallback de "acesso negado" — copy especifica do cliente (autorizacao
+// por email_contato).
+function AcessoNegadoCliente() {
+  return (
+    <AcessoNegado
+      eyebrow="Restrito"
+      titulo="Acesso não autorizado a este dossiê"
+      copy="Este devedor não consta entre os casos vinculados ao seu email de contato. Se isso está errado, entre em contato com o escritório."
+      voltarHref="/cliente/casos"
+      voltarLabel="← Voltar para casos"
+    />
+  );
+}
 
 export default async function DossieClientePage({ params, searchParams }: Props) {
   const { id } = await params;
@@ -51,11 +63,11 @@ export default async function DossieClientePage({ params, searchParams }: Props)
   if (!eu) redirect("/login");
 
   if (!/^\d+$/.test(id)) {
-    return <AcessoNegado />;
+    return <AcessoNegadoCliente />;
   }
   const devedorId = Number.parseInt(id, 10);
   if (!Number.isFinite(devedorId)) {
-    return <AcessoNegado />;
+    return <AcessoNegadoCliente />;
   }
 
   let dossie = await obterDossieParaCliente(devedorId, eu);
@@ -66,51 +78,141 @@ export default async function DossieClientePage({ params, searchParams }: Props)
     dossie = await obterDossie(devedorId);
   }
   if (!dossie) {
-    return <AcessoNegado />;
+    return <AcessoNegadoCliente />;
   }
 
   const { devedor, casos, por_tipo, total_bens, valor_estimado_total_brl } = dossie;
+
+  // Medidas tomadas (timeline) — todas dos casos que o cliente ja enxerga.
+  // obterDossieParaCliente filtra `casos` pelo email_contato do credor;
+  // como medidas vivem dentro desses casos, nao ha vazamento.
+  const medidas = await listarMedidasPorDevedor(devedorId);
+
+  // Status do devedor — replica logica do advogado.
+  const algumAtivo = casos.some((c) => c.status === "ativo");
+  const statusLabel = algumAtivo ? "Ativo" : "Pausado";
+  const statusColor = algumAtivo
+    ? "var(--color-signal)"
+    : "var(--color-ivory-66)";
 
   return (
     <main>
       {/* ============ HEADER ============ */}
       <section className="relative overflow-hidden">
-        {/* Glow gold removido — fundo unico (AetherBackground do layout). */}
-        <div className="relative mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
-          <Link href="/cliente/casos" className="btn-neon-gold">
-            ← Voltar
-          </Link>
+        <div className="relative mx-auto max-w-[1400px] px-6 py-14 sm:px-10">
+          {/* Top bar: Voltar (esq). Sem botao Editar pra cliente. */}
+          <div className="flex items-center justify-between">
+            <Link
+              href="/cliente/casos"
+              className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-[0.18em] text-[var(--color-gold)] transition hover:text-[var(--color-tip-glow)]"
+            >
+              ← Voltar aos Casos
+            </Link>
+          </div>
 
-          <header className="title-shield mb-6 mt-6 text-center">
-            <h1 className="font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
-              {devedor.nome}
-            </h1>
-            <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
-              Dossiê Patrimonial
-            </p>
-            <p className="mt-3 font-mono text-sm text-[var(--color-signal)]">
-              {devedor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"} ·{" "}
-              {devedor.documento}
-              {devedor.data_nascimento
-                ? ` · Nasc. ${formatData(devedor.data_nascimento)}`
-                : ""}
-            </p>
+          {/* ============ HEADER DOSSIÊ ============ */}
+          {/* dashboardHref=null esconde o atalho Dashboard Analitico (cliente nao tem). */}
+          <HeaderDossie
+            devedor={devedor}
+            statusLabel={statusLabel}
+            statusColor={statusColor}
+            dashboardHref={null}
+          />
 
-            {devedor.ultima_consulta_em ? (
-              <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
-                Última consulta {formatTempoRelativo(devedor.ultima_consulta_em)}
-              </p>
-            ) : null}
-          </header>
+          {/* ============ ESTATÍSTICAS ============ */}
+          <EstatisticasGrid
+            totalBens={total_bens}
+            valorEstimado={valor_estimado_total_brl}
+            casosVinculados={casos.length}
+          />
 
-          {/* 3 cards de número grande */}
-          <div className="mt-10 grid gap-4 sm:grid-cols-3">
-            <CardNumero rotulo="Total de bens" valor={String(total_bens)} />
-            <CardNumero
-              rotulo="Valor estimado"
-              valor={formatBRL(valor_estimado_total_brl)}
-            />
-            <CardNumero rotulo="Casos vinculados" valor={String(casos.length)} />
+          {/* ============ DADOS CADASTRAIS ============ */}
+          {/* Cliente nao ve: Responsavel no Escritorio, Areas Envolvidas,
+              Valor Total em Credito. ChipOrigem omitido em todos os campos. */}
+          <div className="mt-12">
+            <SectionTitle texto="Dados Cadastrais" />
+
+            <div className="mt-6 grid gap-5 md:grid-cols-2">
+              <SecaoFicha titulo="Identificação">
+                <CampoFicha
+                  rotulo={devedor.tipo === "PF" ? "CPF" : "CNPJ"}
+                  valor={devedor.documento}
+                  mostrarChipOrigem={false}
+                />
+                <CampoFicha
+                  rotulo={devedor.tipo === "PF" ? "RG" : "IE"}
+                  valor={null}
+                  mostrarChipOrigem={false}
+                />
+                {devedor.tipo === "PF" ? (
+                  <CampoFicha
+                    rotulo="Data de Nascimento"
+                    valor={
+                      devedor.data_nascimento
+                        ? formatData(devedor.data_nascimento)
+                        : null
+                    }
+                    mostrarChipOrigem={false}
+                  />
+                ) : null}
+                {devedor.tipo === "PF" ? (
+                  <CampoFicha
+                    rotulo="Nome da Mãe"
+                    valor={devedor.nome_mae}
+                    mostrarChipOrigem={false}
+                  />
+                ) : null}
+              </SecaoFicha>
+
+              <SecaoFicha titulo="Contato">
+                <CampoFicha
+                  rotulo="E-mail"
+                  valor={null}
+                  mostrarChipOrigem={false}
+                />
+                <CampoFicha
+                  rotulo="Telefone"
+                  valor={null}
+                  mostrarChipOrigem={false}
+                />
+                <CampoFicha
+                  rotulo="Redes Sociais"
+                  valor={null}
+                  mostrarChipOrigem={false}
+                />
+              </SecaoFicha>
+
+              <div className="md:col-span-2">
+                <SecaoFicha titulo="Endereço">
+                  <CampoFicha
+                    rotulo="Endereço Completo"
+                    valor={primeiroEndereco(dossie.bens)}
+                    mostrarChipOrigem={false}
+                  />
+                </SecaoFicha>
+              </div>
+
+              <SecaoFicha titulo="Relacionamento">
+                <CampoFicha
+                  rotulo="Primeira Ocorrência"
+                  valor={formatData(devedor.criado_em)}
+                  mostrarChipOrigem={false}
+                />
+                <CampoFicha
+                  rotulo="Casos Vinculados"
+                  valor={String(casos.length)}
+                  mostrarChipOrigem={false}
+                />
+              </SecaoFicha>
+
+              <SecaoFicha titulo="Perfil Jurídico">
+                <CampoFicha
+                  rotulo="Status Geral"
+                  valor={statusLabel}
+                  mostrarChipOrigem={false}
+                />
+              </SecaoFicha>
+            </div>
           </div>
         </div>
       </section>
@@ -119,46 +221,66 @@ export default async function DossieClientePage({ params, searchParams }: Props)
       {casos.length > 0 ? (
         <section className="border-t border-[var(--color-ivory-12)]">
           <div className="mx-auto max-w-[1400px] px-6 py-12 sm:px-10">
-            <span className="eyebrow">Casos onde este devedor aparece</span>
+            <SectionTitle
+              texto="Casos Vinculados"
+              eyebrow="Casos Onde Este Devedor Aparece"
+            />
             <div className="mt-6 space-y-3">
               {casos.map((c) => (
-                <CardCasoVinculado key={c.id} caso={c} />
+                <CardCasoVinculado
+                  key={c.id}
+                  caso={c}
+                  mostrarAdvogado={false}
+                />
               ))}
             </div>
           </div>
         </section>
       ) : null}
 
-      {/* ============ CATEGORIAS ============ */}
+      {/* ============ CATEGORIAS DE BENS ============ */}
       <section className="border-t border-[var(--color-ivory-12)]">
         <div className="mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
-          <span className="eyebrow">Bens encontrados</span>
-          <h2 className="mt-4 font-serif text-3xl text-ivory">Por categoria</h2>
+          <SectionTitle
+            texto="Bens Encontrados por Categoria"
+            eyebrow="Bens Encontrados"
+          />
 
-          <div className="mt-12 space-y-12">
+          <div className="mt-12 space-y-16">
             {ORDEM.map((tipo) => {
               const bens = por_tipo[tipo];
-              const meta = TIPO_META[tipo];
+              const Icone = ICONES_TIPO_BEM[tipo];
               return (
                 <div key={tipo}>
-                  <div className="flex items-center gap-3">
-                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[var(--color-ivory-12)] font-mono text-sm text-[var(--color-gold)]">
-                      {meta.icone}
-                    </span>
-                    <h3 className="font-serif text-xl text-ivory">{meta.label}</h3>
-                    <span className="ml-auto font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
-                      {bens.length} {bens.length === 1 ? "item" : "itens"}
-                    </span>
+                  <div className="mb-6 flex items-center gap-4">
+                    <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)]">
+                      <Icone className="h-6 w-6 text-[var(--color-gold)]" />
+                    </div>
+                    <div>
+                      <h2 className="font-serif text-2xl uppercase tracking-[0.08em] text-[var(--color-gold)]">
+                        {TIPO_META[tipo].label}
+                      </h2>
+                      <p className="font-mono text-xs uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+                        {bens.length}{" "}
+                        {bens.length === 1
+                          ? "item encontrado"
+                          : "itens encontrados"}
+                      </p>
+                    </div>
                   </div>
 
                   {bens.length === 0 ? (
-                    <p className="mt-4 pl-12 text-sm italic text-[var(--color-ivory-66)]">
+                    <p className="mt-6 text-sm italic text-[var(--color-ivory-66)]">
                       Nenhum item encontrado.
                     </p>
                   ) : (
-                    <div className="mt-4 grid gap-3 pl-12">
+                    <div className="mt-6 grid gap-4 md:grid-cols-2">
                       {bens.map((bem) => (
-                        <CardBem key={bem.id} bem={bem} />
+                        <CardBem
+                          key={bem.id}
+                          bem={bem}
+                          mostrarChipOrigem={false}
+                        />
                       ))}
                     </div>
                   )}
@@ -168,230 +290,42 @@ export default async function DossieClientePage({ params, searchParams }: Props)
           </div>
         </div>
       </section>
-    </main>
-  );
-}
 
-// ============================================================
-// COMPONENTES INTERNOS
-// ============================================================
-
-function AcessoNegado() {
-  return (
-    <main className="mx-auto max-w-[1400px] px-6 py-24 sm:px-10">
-      <div className="grid place-items-center">
-        <SpotlightCard className="max-w-[520px] p-10 text-center">
-          <span className="eyebrow !text-[var(--color-gold)]">Restrito</span>
-          <h3 className="mt-4 font-serif text-2xl text-ivory">
-            Acesso não autorizado a este dossiê
-          </h3>
-          <p className="mt-3 text-sm text-[var(--color-ivory-88)]">
-            Este devedor não consta entre os casos vinculados ao seu email de
-            contato. Se isso está errado, entre em contato com o escritório.
+      {/* ============ DOCUMENTOS API ============ */}
+      {/* esconderCustos: cliente nao ve precos das consultas (R$ 2,40 etc). */}
+      <section className="border-t border-[var(--color-ivory-12)]">
+        <div className="mx-auto max-w-[1400px] px-6 py-12 sm:px-10">
+          <SectionTitle texto="Documentos Disponíveis" />
+          <p className="mt-2 text-sm text-[var(--color-ivory-66)]">
+            Documentos que a plataforma pode puxar automaticamente. Toque pra
+            revelar e fazer download.
           </p>
-          <Link href="/cliente/casos" className="btn-neon-gold mt-6">
-            ← Voltar para casos
-          </Link>
-        </SpotlightCard>
-      </div>
-    </main>
-  );
-}
-
-function CardNumero({ rotulo, valor }: { rotulo: string; valor: string }) {
-  return (
-    <SpotlightCard className="p-6">
-      <span className="eyebrow">{rotulo}</span>
-      <p className="mt-3 font-serif text-3xl text-[var(--color-gold)]">{valor}</p>
-    </SpotlightCard>
-  );
-}
-
-function CardCasoVinculado({ caso }: { caso: CasoResumo }) {
-  const status = formatStatus(caso.status);
-  return (
-    <div className="flex flex-col gap-3 rounded-lg border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.5)] p-4 sm:flex-row sm:items-center sm:justify-between">
-      <div>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-gold)]/40 bg-[var(--color-gold)]/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-gold)]">
-            Pasta #{caso.id}
-          </span>
-          <p className="font-mono text-base text-[var(--color-ivory-66)]">
-            {caso.numero_processo || "Sem processo cadastrado"}
-          </p>
+          <div className="mt-6">
+            <DocumentosAPI devedorNome={devedor.nome} esconderCustos />
+          </div>
         </div>
-        <p className="mt-2 text-xl text-ivory">
-          Crédito:{" "}
-          <span className="text-[var(--color-gold)]">
-            {formatBRL(caso.valor_credito_brl)}
-          </span>
-        </p>
-      </div>
-      <span
-        className="self-start rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] sm:self-auto"
-        style={{ borderColor: status.color, color: status.color }}
-      >
-        {status.label}
-      </span>
-    </div>
-  );
-}
+      </section>
 
-function CardBem({ bem }: { bem: Bem }) {
-  return (
-    <div className="rounded-lg border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.4)] p-5 transition hover:border-[var(--color-gold)]/60 hover:bg-[rgba(5,7,6,0.6)]">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1">
-          <p className="font-medium text-ivory">{bem.titulo}</p>
-          <DetalhesRender tipo={bem.tipo} detalhes={bem.detalhes} />
-        </div>
-        {bem.valor_estimado_brl !== null ? (
-          <span className="whitespace-nowrap font-mono text-xl text-[var(--color-gold)]">
-            {formatBRL(bem.valor_estimado_brl)}
-          </span>
-        ) : null}
-      </div>
-      <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
-        {bem.fonte} · {formatData(bem.fonte_consultada_em)}
-      </p>
-    </div>
-  );
-}
-
-// ============================================================
-// DetalhesRender — renderiza só as chaves úteis por tipo de bem.
-// ============================================================
-
-function Linha({ rotulo, valor }: { rotulo: string; valor: string | number | undefined | null }) {
-  if (valor === undefined || valor === null || valor === "") return null;
-  return (
-    <p className="mt-1 text-xs text-[var(--color-ivory-66)]">
-      {rotulo}: <span className="text-ivory">{valor}</span>
-    </p>
-  );
-}
-
-function getStr(obj: Record<string, unknown>, key: string): string | undefined {
-  const v = obj[key];
-  return typeof v === "string" ? v : undefined;
-}
-
-function getNum(obj: Record<string, unknown>, key: string): number | undefined {
-  const v = obj[key];
-  return typeof v === "number" ? v : undefined;
-}
-
-function getArr(obj: Record<string, unknown>, key: string): unknown[] | undefined {
-  const v = obj[key];
-  return Array.isArray(v) ? v : undefined;
-}
-
-function DetalhesRender({
-  tipo,
-  detalhes,
-}: {
-  tipo: TipoBem;
-  detalhes: Record<string, unknown>;
-}) {
-  switch (tipo) {
-    case "veiculo": {
-      const placa = getStr(detalhes, "placa");
-      const marca = getStr(detalhes, "marca");
-      const modelo = getStr(detalhes, "modelo");
-      const ano = getNum(detalhes, "ano_modelo");
-      const restricoes = getArr(detalhes, "restricoes");
-      const veiculo = [marca, modelo].filter(Boolean).join(" ");
-      return (
-        <>
-          <Linha rotulo="Placa" valor={placa} />
-          <Linha rotulo="Veículo" valor={veiculo || undefined} />
-          <Linha rotulo="Ano" valor={ano} />
-          {restricoes && restricoes.length > 0 ? (
-            <Linha
-              rotulo="Restrições"
-              valor={restricoes.map((r) => String(r)).join("; ")}
-            />
-          ) : null}
-        </>
-      );
-    }
-    case "imovel": {
-      const cidade = getStr(detalhes, "cidade");
-      const uf = getStr(detalhes, "uf");
-      const areaH = getNum(detalhes, "area_hectares");
-      const areaM = getNum(detalhes, "area_m2");
-      const matricula = getStr(detalhes, "matricula");
-      const local = [cidade, uf].filter(Boolean).join(" / ");
-      const area =
-        areaH !== undefined
-          ? `${areaH} ha`
-          : areaM !== undefined
-          ? `${areaM} m²`
-          : undefined;
-      return (
-        <>
-          <Linha rotulo="Localização" valor={local || undefined} />
-          <Linha rotulo="Área" valor={area} />
-          <Linha rotulo="Matrícula" valor={matricula} />
-        </>
-      );
-    }
-    case "empresa": {
-      const cnpj = getStr(detalhes, "cnpj");
-      const razao = getStr(detalhes, "razao_social");
-      const pct = getNum(detalhes, "percent_participacao");
-      const qual = getStr(detalhes, "qual");
-      return (
-        <>
-          <Linha rotulo="CNPJ" valor={cnpj} />
-          <Linha rotulo="Razão social" valor={razao} />
-          <Linha
-            rotulo="Participação"
-            valor={pct !== undefined ? `${pct}%` : undefined}
+      {/* ============ TIMELINE ============ */}
+      {/* somenteLeitura: nao mostra botao + modal "Adicionar medida". */}
+      <section className="border-t border-[var(--color-ivory-12)]">
+        <div className="mx-auto max-w-[1400px] px-6 py-12 sm:px-10">
+          <SectionTitle
+            texto="Cronologia de Medidas"
+            eyebrow="Linha do Tempo"
           />
-          <Linha rotulo="Qualificação" valor={qual} />
-        </>
-      );
-    }
-    case "processo_credito": {
-      const cnj = getStr(detalhes, "numero_cnj");
-      const tribunal = getStr(detalhes, "tribunal");
-      const classe = getStr(detalhes, "classe");
-      return (
-        <>
-          <Linha rotulo="CNJ" valor={cnj} />
-          <Linha rotulo="Tribunal" valor={tribunal} />
-          <Linha rotulo="Classe" valor={classe} />
-        </>
-      );
-    }
-    case "endereco": {
-      const log = getStr(detalhes, "logradouro");
-      const cidade = getStr(detalhes, "cidade");
-      const uf = getStr(detalhes, "uf");
-      const tipoEnd = getStr(detalhes, "tipo");
-      const local = [cidade, uf].filter(Boolean).join(" / ");
-      return (
-        <>
-          <Linha rotulo="Logradouro" valor={log} />
-          <Linha rotulo="Cidade" valor={local || undefined} />
-          <Linha rotulo="Tipo" valor={tipoEnd} />
-        </>
-      );
-    }
-    case "vinculo": {
-      const nome = getStr(detalhes, "nome");
-      const doc = getStr(detalhes, "documento");
-      const tipoVinc = getStr(detalhes, "tipo_vinculo");
-      return (
-        <>
-          <Linha rotulo="Nome" valor={nome} />
-          <Linha rotulo="Documento" valor={doc} />
-          <Linha rotulo="Vínculo" valor={tipoVinc} />
-        </>
-      );
-    }
-    default:
-      return null;
-  }
+          <div className="mt-6 -mx-6 sm:-mx-10">
+            <TimelineMedidas
+              medidas={medidas}
+              casos={casos}
+              advogadoEmail={null}
+              somenteLeitura
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Cliente NAO tem: Acoes de Busca, Gerar Peca, Calculo, Cross-Reference. */}
+    </main>
+  );
 }

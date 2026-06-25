@@ -15,7 +15,13 @@ type Doc = {
   conteudo: string;
 };
 
-export function DocumentosAPI({ devedorNome }: { devedorNome: string }) {
+export function DocumentosAPI({
+  devedorNome,
+  esconderCustos = false,
+}: {
+  devedorNome: string;
+  esconderCustos?: boolean;
+}) {
   const [revelados, setRevelados] = useState<Set<string>>(new Set());
 
   function toggle(id: string) {
@@ -103,9 +109,11 @@ export function DocumentosAPI({ devedorNome }: { devedorNome: string }) {
                   {doc.fonte}
                 </span>
               </div>
-              <span className="whitespace-nowrap font-mono text-xs tabular-nums uppercase tracking-[0.18em] text-[var(--color-gold)]">
-                {custoLabel}
-              </span>
+              {esconderCustos ? null : (
+                <span className="whitespace-nowrap font-mono text-xs tabular-nums uppercase tracking-[0.18em] text-[var(--color-gold)]">
+                  {custoLabel}
+                </span>
+              )}
             </div>
 
             {/* Botão Ocultar (canto superior direito, só quando revelado) */}
@@ -144,7 +152,7 @@ export function DocumentosAPI({ devedorNome }: { devedorNome: string }) {
                   className="inline-flex items-center gap-2 rounded-lg bg-[var(--color-signal)]/85 px-4 py-2 font-mono text-xs uppercase tracking-[0.22em] text-[var(--color-onyx)] transition hover:bg-[var(--color-signal)]"
                 >
                   <Eye className="h-3.5 w-3.5" />
-                  Revelar ({custoLabel})
+                  {esconderCustos ? "Revelar" : `Revelar (${custoLabel})`}
                 </button>
               </div>
             ) : null}

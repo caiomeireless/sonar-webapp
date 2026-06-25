@@ -114,8 +114,8 @@ export function SinoNotificacoes({
       {aberto ? (
         <div
           className="
-            glass absolute right-0 mt-2 w-[420px] overflow-hidden rounded-xl
-            border border-[var(--color-line)] shadow-2xl
+            absolute right-0 z-50 mt-2 w-[420px] overflow-hidden rounded-xl
+            border border-[var(--color-line)] bg-[var(--color-surface-solid)] shadow-2xl
           "
           role="menu"
         >

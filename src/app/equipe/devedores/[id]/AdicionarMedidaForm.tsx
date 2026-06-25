@@ -210,31 +210,13 @@ export function AdicionarMedidaForm({
         </button>
       </div>
 
-      {/* Timeline vertical ou empty state */}
-      {medidas.length === 0 ? (
-        <div className="mt-6 rounded-lg border border-dashed border-[var(--color-ivory-22)] bg-[rgba(5,7,6,0.4)] p-10 text-center">
-          <p className="font-mono text-xs text-[var(--color-ivory-66)]">
-            Nenhuma medida registrada ainda. Use o botão acima pra adicionar.
-          </p>
-        </div>
-      ) : (
-        <div className="relative mt-8 pl-10">
-          {/* Linha vertical signal verde — corre por toda a altura, atras dos pontos */}
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute left-3 top-2 bottom-2 w-px bg-[var(--color-signal)]/30"
-          />
-          <ol className="m-0 list-none p-0">
-            {medidas.map((m) => (
-              <CardMedida
-                key={m.id}
-                medida={m}
-                numeroProcesso={casoNumeroPorId[m.caso_id] ?? null}
-              />
-            ))}
-          </ol>
-        </div>
-      )}
+      {/* Timeline vertical ou empty state — extraida como sub-componente
+          pra ser reusada na view do cliente (somenteLeitura). */}
+      <TimelineMedidasVisual
+        medidas={medidas}
+        casoNumeroPorId={casoNumeroPorId}
+        emptyHint="Nenhuma medida registrada ainda. Use o botão acima pra adicionar."
+      />
 
       {/* Modal de adicionar medida (createPortal pra escapar de containers com backdrop-filter) */}
       {modalAberto && mounted
@@ -392,6 +374,47 @@ export function AdicionarMedidaForm({
           )
         : null}
     </>
+  );
+}
+
+// ============================================================
+// TimelineMedidasVisual — extraido pra reuso no dossie do cliente.
+// Renderiza so a parte visual da timeline (linha + cards), sem form/modal.
+// ============================================================
+export function TimelineMedidasVisual({
+  medidas,
+  casoNumeroPorId,
+  emptyHint = "Nenhuma medida registrada ainda.",
+}: {
+  medidas: Medida[];
+  casoNumeroPorId: Record<number, string | null>;
+  emptyHint?: string;
+}) {
+  if (medidas.length === 0) {
+    return (
+      <div className="mt-6 rounded-lg border border-dashed border-[var(--color-ivory-22)] bg-[rgba(5,7,6,0.4)] p-10 text-center">
+        <p className="font-mono text-xs text-[var(--color-ivory-66)]">
+          {emptyHint}
+        </p>
+      </div>
+    );
+  }
+  return (
+    <div className="relative mt-8 pl-10">
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute left-3 top-2 bottom-2 w-px bg-[var(--color-signal)]/30"
+      />
+      <ol className="m-0 list-none p-0">
+        {medidas.map((m) => (
+          <CardMedida
+            key={m.id}
+            medida={m}
+            numeroProcesso={casoNumeroPorId[m.caso_id] ?? null}
+          />
+        ))}
+      </ol>
+    </div>
   );
 }
 
