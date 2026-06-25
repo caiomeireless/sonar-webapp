@@ -13,6 +13,7 @@ import type { DistribuicaoGeografica } from "@/lib/dashboard-caso";
 import { BR_STATES, BR_VIEWBOX } from "@/lib/br-geo";
 import { formatBRL } from "@/lib/format";
 import { DashboardCard } from "@/components/dashboard/DashboardCard";
+import MapaEstadoDrilldown from "./MapaEstadoDrilldown";
 
 type Props = {
   distribuicao: DistribuicaoGeografica[];
@@ -63,9 +64,12 @@ function agregarPorUf(
 export default function MapaDistribuicaoBens({
   distribuicao,
   titulo = "Distribuição geográfica dos bens",
-  descricao = "Bens identificados por UF. Passe o mouse para ver cidades.",
+  descricao = "Bens identificados por UF. Passe o mouse pra ver cidades, clique pra abrir o mapa do estado.",
 }: Props) {
   const [ativo, setAtivo] = useState<string | null>(null);
+  // UF do drill-down — quando preenchida, abre o overlay com pinos de cidades
+  // (MapaEstadoDrilldown via portal). Null = overlay fechado.
+  const [drillUf, setDrillUf] = useState<string | null>(null);
 
   const { porUf, semUf, totalGeral, valorGeral } = useMemo(
     () => agregarPorUf(distribuicao),
@@ -123,6 +127,9 @@ export default function MapaDistribuicaoBens({
                   key={s.uf}
                   d={s.d}
                   onMouseEnter={() => setAtivo(s.uf)}
+                  onClick={() => {
+                    if (tem > 0) setDrillUf(s.uf);
+                  }}
                   style={{
                     fill: on
                       ? "rgba(60, 255, 138, 0.16)"
@@ -151,6 +158,7 @@ export default function MapaDistribuicaoBens({
                   <g
                     key={s.uf}
                     onMouseEnter={() => setAtivo(s.uf)}
+                    onClick={() => setDrillUf(s.uf)}
                     style={{ cursor: "pointer" }}
                   >
                     {/* halo */}
@@ -204,7 +212,11 @@ export default function MapaDistribuicaoBens({
         {/* ===== Painel lateral ===== */}
         <div className="relative z-10 flex flex-col gap-3">
           {detalhe ? (
-            <div className="rounded-xl border border-[var(--color-signal)]/30 bg-[rgba(60,255,138,0.06)] p-4">
+            <button
+              type="button"
+              onClick={() => ativo && setDrillUf(ativo)}
+              className="group rounded-xl border border-[var(--color-signal)]/30 bg-[rgba(60,255,138,0.06)] p-4 text-left transition hover:border-[var(--color-signal)]/60 hover:bg-[rgba(60,255,138,0.1)]"
+            >
               <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
                 {ativo}
               </p>
@@ -243,11 +255,14 @@ export default function MapaDistribuicaoBens({
                   ))}
                 </div>
               )}
-            </div>
+              <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-signal)]/80 transition group-hover:text-[var(--color-signal)]">
+                Clique para abrir o mapa do estado →
+              </p>
+            </button>
           ) : (
             <div className="rounded-xl border border-[var(--color-ivory-12)] bg-[var(--color-onyx)]/40 p-4">
               <p className="text-xs text-[var(--color-ivory-66)]">
-                Passe o mouse sobre uma UF para ver detalhes.
+                Passe o mouse sobre uma UF para ver detalhes. Clique para abrir o mapa do estado.
               </p>
               <div className="mt-2 grid grid-cols-2 gap-2 border-t border-[var(--color-ivory-12)] pt-2 text-[11px]">
                 <div>
@@ -273,6 +288,7 @@ export default function MapaDistribuicaoBens({
                       key={r.uf}
                       type="button"
                       onMouseEnter={() => setAtivo(r.uf)}
+                      onClick={() => setDrillUf(r.uf)}
                       className="flex w-full items-center justify-between rounded-md px-1.5 py-1 text-xs transition hover:bg-white/5"
                     >
                       <span className="text-[var(--color-ivory-66)]">
@@ -298,6 +314,24 @@ export default function MapaDistribuicaoBens({
           )}
         </div>
       </div>
+
+      {/* Overlay (modal) de drill-down do estado — renderizado via portal
+          dentro do componente filho pra escapar de pais com backdrop-filter. */}
+      {drillUf && porUf[drillUf] && (
+        <MapaEstadoDrilldown
+          uf={drillUf}
+          ufNome={nomeDe(drillUf)}
+          cidades={porUf[drillUf].cidades.map((c) => ({
+            nome: c.nome,
+            qtd: c.qtd,
+            valor: c.valor,
+          }))}
+          qtdTotalUf={porUf[drillUf].qtdBens}
+          valorTotalUf={porUf[drillUf].valorBrl}
+          totalGeralBens={totalGeral}
+          onClose={() => setDrillUf(null)}
+        />
+      )}
     </DashboardCard>
   );
 }

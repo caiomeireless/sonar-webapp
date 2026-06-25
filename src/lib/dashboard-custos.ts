@@ -38,6 +38,16 @@ export type GastoPorEntidade = {
 
 export type GastoPorDia = { dia: string; totalBrl: number };
 
+// Período aceito como filtro. "tudo" = sem corte temporal (janela completa
+// do mock = últimos 30 dias). Os demais aplicam corte a partir do "agora"
+// ou do início do mês/ano corrente.
+export type PeriodoCustos = "tudo" | "7d" | "30d" | "90d" | "mes" | "ano";
+
+export type FiltrosCustos = {
+  credorId?: number;
+  periodo?: PeriodoCustos;
+};
+
 export type DashboardCustos = {
   totalMesBrl: number;
   limiteMesBrl: number;
@@ -259,17 +269,57 @@ function apiMaisUsadaRotulo(porAPI: GastoPorEntidade[]): string {
 }
 
 // ============================================================
+// FILTRO POR PERÍODO
+// ============================================================
+
+// Devolve a data ISO de corte (≥ corte ⇒ entra) conforme o período.
+// "tudo" devolve null (sem corte). Para "mes" / "ano" o corte é o
+// começo do mês / ano corrente — para "7d" / "30d" / "90d" é uma
+// janela móvel relativa ao "agora".
+function corteParaPeriodo(periodo: PeriodoCustos | undefined): string | null {
+  if (!periodo || periodo === "tudo") return null;
+
+  const agora = new Date();
+  const corte = new Date(agora);
+
+  switch (periodo) {
+    case "7d":
+      corte.setDate(agora.getDate() - 7);
+      return corte.toISOString();
+    case "30d":
+      corte.setDate(agora.getDate() - 30);
+      return corte.toISOString();
+    case "90d":
+      corte.setDate(agora.getDate() - 90);
+      return corte.toISOString();
+    case "mes": {
+      const inicio = new Date(agora.getFullYear(), agora.getMonth(), 1, 0, 0, 0, 0);
+      return inicio.toISOString();
+    }
+    case "ano": {
+      const inicio = new Date(agora.getFullYear(), 0, 1, 0, 0, 0, 0);
+      return inicio.toISOString();
+    }
+    default:
+      return null;
+  }
+}
+
+// ============================================================
 // ENTRY POINT
 // ============================================================
 
-export async function obterDashboardCustos(opts?: {
-  credorId?: number;
-}): Promise<DashboardCustos> {
+export async function obterDashboardCustos(
+  opts?: FiltrosCustos,
+): Promise<DashboardCustos> {
   const todas = gerarConsultasMock();
-  const consultas =
-    opts?.credorId !== undefined
-      ? todas.filter((c) => c.credorId === opts.credorId)
-      : todas;
+
+  const corte = corteParaPeriodo(opts?.periodo);
+  const consultas = todas.filter((c) => {
+    if (opts?.credorId !== undefined && c.credorId !== opts.credorId) return false;
+    if (corte && c.data < corte) return false;
+    return true;
+  });
 
   const porCliente = agruparPor(consultas, (c) => ({
     id: c.credorId,
@@ -297,4 +347,20 @@ export async function obterDashboardCustos(opts?: {
     porAPI,
     consultas: ultimas50(consultas),
   };
+}
+
+// Lista única de clientes presentes no mock — alimenta o dropdown
+// do filtro. Ordenada por nome. Quando trocarmos pra Supabase, esta
+// função vira um SELECT DISTINCT credor_id, credor_nome em `custos`.
+export async function listarClientesParaFiltroCustos(): Promise<
+  { id: number; nome: string }[]
+> {
+  const todas = gerarConsultasMock();
+  const mapa = new Map<number, string>();
+  for (const c of todas) {
+    if (!mapa.has(c.credorId)) mapa.set(c.credorId, c.credorNome);
+  }
+  return Array.from(mapa.entries())
+    .map(([id, nome]) => ({ id, nome }))
+    .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
 }

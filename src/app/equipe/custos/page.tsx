@@ -21,12 +21,39 @@ import {
   Users,
 } from "lucide-react";
 
-import { obterDashboardCustos } from "@/lib/dashboard-custos";
+import {
+  obterDashboardCustos,
+  listarClientesParaFiltroCustos,
+  type PeriodoCustos,
+} from "@/lib/dashboard-custos";
 import { perfilLogado } from "@/lib/perfis-server";
 import { ehEquipe } from "@/lib/perfis";
 import { formatBRL } from "@/lib/format";
 
 import GraficoGastosPorDia from "./_components/GraficoGastosPorDia";
+import FiltrosCustos from "./_components/FiltrosCustos";
+
+const PERIODOS_VALIDOS: ReadonlySet<PeriodoCustos> = new Set([
+  "tudo",
+  "7d",
+  "30d",
+  "90d",
+  "mes",
+  "ano",
+]);
+
+function parsePeriodo(raw: string | string[] | undefined): PeriodoCustos {
+  const v = Array.isArray(raw) ? raw[0] : raw;
+  if (v && PERIODOS_VALIDOS.has(v as PeriodoCustos)) return v as PeriodoCustos;
+  return "tudo";
+}
+
+function parseCredor(raw: string | string[] | undefined): number | undefined {
+  const v = Array.isArray(raw) ? raw[0] : raw;
+  if (!v) return undefined;
+  const n = Number(v);
+  return Number.isFinite(n) && n > 0 ? n : undefined;
+}
 
 export const dynamic = "force-dynamic";
 
@@ -52,11 +79,22 @@ function formatHora(iso: string): string {
   return `${dd}/${mm} ${hh}:${mi}`;
 }
 
-export default async function CustosPage() {
+export default async function CustosPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const perfil = await perfilLogado();
   if (!ehEquipe(perfil)) redirect("/login");
 
-  const dados = await obterDashboardCustos();
+  const sp = await searchParams;
+  const periodo = parsePeriodo(sp.periodo);
+  const credorId = parseCredor(sp.credor);
+
+  const [dados, clientes] = await Promise.all([
+    obterDashboardCustos({ periodo, credorId }),
+    listarClientesParaFiltroCustos(),
+  ]);
 
   const razaoLimite =
     dados.limiteMesBrl > 0 ? dados.totalMesBrl / dados.limiteMesBrl : 0;
@@ -78,6 +116,11 @@ export default async function CustosPage() {
           Monitor de Custos
         </p>
       </header>
+
+      {/* ============================================================
+          Filtros — período + cliente (URL-driven, client component)
+          ============================================================ */}
+      <FiltrosCustos clientes={clientes} />
 
       {/* ============================================================
           A) KPIs no topo (4 cards)

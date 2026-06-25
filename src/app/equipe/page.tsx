@@ -10,6 +10,7 @@
 // próprio chrome via DashboardCard/KPIHero.
 
 import { redirect } from "next/navigation";
+import { Eye } from "lucide-react";
 import { perfilLogado } from "@/lib/perfis-server";
 import { ehEquipe } from "@/lib/perfis";
 import {
@@ -88,7 +89,23 @@ export default async function DashboardPlataformaPage({
     <main className="py-10">
       {/* Cabeçalho centralizado dentro do container 1400 */}
       <div className="mx-auto max-w-[1400px] px-6 sm:px-10">
-        <header className="title-shield mb-6 text-center">
+        <header className="title-shield mb-6 flex flex-col items-center text-center">
+          {/* Icone Eye dourado em cima do titulo — simboliza visao geral. */}
+          <div
+            className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--color-gold)]/45 bg-[var(--color-gold)]/10"
+            style={{
+              boxShadow:
+                "0 0 20px rgba(201,162,74,0.30), inset 0 0 12px rgba(201,162,74,0.10)",
+            }}
+          >
+            <Eye
+              className="h-7 w-7 text-[var(--color-gold)]"
+              style={{
+                filter: "drop-shadow(0 0 8px rgba(201,162,74,0.7))",
+              }}
+              aria-hidden="true"
+            />
+          </div>
           <h1 className="font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
             Visão Geral do Escritório
           </h1>
