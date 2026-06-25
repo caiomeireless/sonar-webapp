@@ -205,10 +205,15 @@ function CardCasoVinculado({ caso }: { caso: CasoResumo }) {
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.5)] p-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <p className="font-mono text-base text-[var(--color-ivory-66)]">
-          {caso.numero_processo || "Sem processo cadastrado"}
-        </p>
-        <p className="mt-1 text-xl text-ivory">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-gold)]/40 bg-[var(--color-gold)]/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-gold)]">
+            Pasta #{caso.id}
+          </span>
+          <p className="font-mono text-base text-[var(--color-ivory-66)]">
+            {caso.numero_processo || "Sem processo cadastrado"}
+          </p>
+        </div>
+        <p className="mt-2 text-xl text-ivory">
           Crédito:{" "}
           <span className="text-[var(--color-gold)]">
             {formatBRL(caso.valor_credito_brl)}

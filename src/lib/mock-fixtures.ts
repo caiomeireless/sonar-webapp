@@ -569,6 +569,33 @@ export const PERFIL_CLIENTE_DEMO = {
 };
 
 // ============================================================
+// PERFIS DE EQUIPE DEMO — Paulo, Remo, Filipe sao "outros advogados"
+// que aparecem nas medidas mock pra carteira do escritorio ficar
+// distribuida (nao tudo no Caio). O seed faz UPSERT por email.
+// Magic link funciona normal — perfil so precisa existir como FK.
+// ============================================================
+export const PERFIS_EQUIPE_DEMO = [
+  {
+    email: "paulo@bpadvogados.com.br",
+    nome: "Paulo André",
+    papel: "socio" as const,
+    acessos: [] as string[],
+  },
+  {
+    email: "remo@bpadvogados.com.br",
+    nome: "Remo Battaglia",
+    papel: "socio" as const,
+    acessos: [] as string[],
+  },
+  {
+    email: "filipe@bpadvogados.com.br",
+    nome: "Filipe Garcia",
+    papel: "funcionario" as const,
+    acessos: [] as string[],
+  },
+];
+
+// ============================================================
 // PREFERENCIAS DE CLIENTE — limite mensal de gasto em pesquisas pagas
 // ============================================================
 // Camada extra do CLIENTE controlar o teto de gasto. Quando a equipe

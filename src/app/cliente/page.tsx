@@ -148,10 +148,15 @@ export default async function DashboardClientePage({ searchParams }: Props) {
                 href={`/cliente/casos/${c.caso_id}${qsBase}`}
                 className="glass-2 group block p-5 transition hover:border-[var(--color-signal-soft-2)]"
               >
-                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
-                  {c.numero_processo ?? "Sem número"}
-                </p>
-                <h3 className="mt-1 font-serif text-lg text-ivory">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-gold)]/40 bg-[var(--color-gold)]/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-gold)]">
+                    Pasta #{c.caso_id}
+                  </span>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+                    {c.numero_processo ?? "Sem número"}
+                  </p>
+                </div>
+                <h3 className="nome-devedor mt-2 font-serif text-lg text-[var(--color-devedor)]">
                   {c.devedor.nome}
                 </h3>
                 <div className="mt-3 flex items-center justify-between text-base">

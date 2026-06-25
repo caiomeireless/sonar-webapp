@@ -273,7 +273,7 @@ function HeaderConsulta({ consulta }: { consulta: ConsultaPreProcessual }) {
         )}
       </div>
 
-      <h1 className="mt-5 break-words font-serif text-[clamp(28px,4vw,52px)] font-medium uppercase leading-[1.05] tracking-[0.06em] text-[var(--color-devedor)]">
+      <h1 className="nome-devedor mt-5 break-words font-serif text-[clamp(28px,4vw,52px)] font-medium uppercase leading-[1.05] tracking-[0.06em] text-[var(--color-devedor)]">
         {devedor.nome}
       </h1>
 

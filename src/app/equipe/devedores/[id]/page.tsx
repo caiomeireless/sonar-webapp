@@ -470,7 +470,7 @@ function HeaderDossie({
           </div>
         </div>
 
-        <h1 className="mt-5 break-words font-serif text-[clamp(24px,3.5vw,44px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-devedor)]">
+        <h1 className="nome-devedor mt-5 break-words font-serif text-[clamp(24px,3.5vw,44px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-devedor)]">
           {devedor.nome}
         </h1>
 

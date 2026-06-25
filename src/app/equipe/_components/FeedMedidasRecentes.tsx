@@ -131,11 +131,14 @@ function FeedItem({ item, ehUltimo }: FeedItemProps) {
               {advogado}
             </span>{" "}
             <span className="text-[var(--color-ivory-66)]">{verbo} em</span>{" "}
-            <span className="font-serif text-[var(--color-devedor)] group-hover:underline">
+            <span className="nome-devedor font-serif text-[var(--color-devedor)] group-hover:underline">
               {item.devedorNome}
             </span>
           </p>
           <div className="flex items-center gap-2 text-[11px] text-[var(--color-ivory-66)]">
+            <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-gold)]/40 bg-[var(--color-gold)]/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-gold)]">
+              Pasta #{item.casoId}
+            </span>
             <span
               className="font-mono uppercase tracking-[0.18em]"
               style={{ color: tipoMeta.cor }}

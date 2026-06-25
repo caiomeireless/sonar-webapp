@@ -13,6 +13,7 @@ import {
   BENS_DEMO,
   MEDIDAS_DEMO,
   PERFIL_CLIENTE_DEMO,
+  PERFIS_EQUIPE_DEMO,
   PREFERENCIAS_DEMO,
 } from "./mock-fixtures";
 
@@ -51,6 +52,24 @@ export async function seedDemoData(): Promise<SeedResult> {
       { onConflict: "email" },
     );
     if (error) throw new Error(`Erro ao semear perfil cliente: ${error.message}`);
+  }
+
+  // 2.b Perfis de equipe demo (Paulo, Remo, Filipe).
+  // INSERT com ignoreDuplicates: se ja existir, deixa do jeito que esta
+  // (preserva o papel/acessos que o Caio configurou manualmente).
+  for (const p of PERFIS_EQUIPE_DEMO) {
+    const { error } = await sb.from("perfis").upsert(
+      {
+        email: p.email,
+        nome: p.nome,
+        papel: p.papel,
+        acessos: p.acessos,
+      },
+      { onConflict: "email", ignoreDuplicates: true },
+    );
+    if (error) {
+      console.warn(`[seed] perfil equipe ${p.email}: ${error.message}`);
+    }
   }
 
   // 3. Credores (forca ids 1, 2, 3 — predictable URL no /app).
@@ -120,8 +139,10 @@ export async function seedDemoData(): Promise<SeedResult> {
   }
 
   // 6.b Medidas tomadas: DELETE + INSERT idempotente.
-  // Pode falhar silenciosamente se a migration 004 ainda nao rodou — nesse
-  // caso so loga, pra nao quebrar o seed inteiro.
+  // Preserva o advogado_email do mock SE o perfil existir no banco
+  // (Paulo Andre, Remo, Filipe — pra o grafico "Atividade da Equipe"
+  // mostrar carteira distribuida). Cai pro responsavelEmail se o
+  // perfil ainda nao foi liberado (evita FK violation).
   {
     const casoIds = CASOS_DEMO.map((c) => c.id);
     const { error: delErr } = await sb
@@ -131,17 +152,30 @@ export async function seedDemoData(): Promise<SeedResult> {
     if (delErr) {
       console.warn(`[seed] medidas_tomadas indisponivel (migration 004 nao rodou?): ${delErr.message}`);
     } else {
+      // Le todos perfis pra checar FK antes de inserir.
+      const { data: perfis } = await sb.from("perfis").select("email");
+      const emailsValidos = new Set(
+        (perfis ?? []).map((p) => (p.email as string).toLowerCase()),
+      );
+
       const { error: insErr } = await sb.from("medidas_tomadas").insert(
-        MEDIDAS_DEMO.map((m) => ({
-          id: m.id,
-          caso_id: m.caso_id,
-          data: m.data,
-          tipo: m.tipo,
-          resultado: m.resultado,
-          titulo: m.titulo,
-          detalhes: m.detalhes,
-          advogado_email: responsavelEmail, // FK -> perfis.email
-        })),
+        MEDIDAS_DEMO.map((m) => {
+          const emailMock = (m.advogado_email ?? "").toLowerCase().trim();
+          const advogadoEmail =
+            emailMock && emailsValidos.has(emailMock)
+              ? emailMock
+              : responsavelEmail;
+          return {
+            id: m.id,
+            caso_id: m.caso_id,
+            data: m.data,
+            tipo: m.tipo,
+            resultado: m.resultado,
+            titulo: m.titulo,
+            detalhes: m.detalhes,
+            advogado_email: advogadoEmail,
+          };
+        }),
       );
       if (insErr) throw new Error(`Erro ao inserir medidas: ${insErr.message}`);
     }

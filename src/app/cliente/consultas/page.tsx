@@ -191,7 +191,7 @@ function CardConsulta({
 
         {/* === IDENTIFICAÇÃO DO DEVEDOR === */}
         <header>
-          <h3 className="font-serif text-[26px] leading-[1.15] text-[var(--color-devedor)]">
+          <h3 className="nome-devedor font-serif text-[26px] leading-[1.15] text-[var(--color-devedor)]">
             {consulta.devedor.nome}
           </h3>
 
