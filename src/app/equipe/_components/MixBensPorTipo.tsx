@@ -182,9 +182,11 @@ export default function MixBensPorTipo({ dados }: Props) {
                 dataKey="value"
                 position="right"
                 formatter={(v: ValueType) => num(Number(v))}
-                fill="var(--color-ivory)"
-                fontSize={13}
-                fontFamily="var(--font-jetbrains), ui-monospace, monospace"
+                style={{
+                  fill: "var(--color-ivory)",
+                  fontSize: 13,
+                  fontFamily: "var(--font-jetbrains), ui-monospace, monospace",
+                }}
               />
             </Bar>
           </BarChart>
