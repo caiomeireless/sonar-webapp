@@ -330,31 +330,32 @@ function LinhaProcesso({
   const dossieHref = `/equipe/devedores/${p.devedor.id}${linkBase}`;
 
   return (
-    <div className="glass flex items-stretch gap-5 p-5 transition hover:bg-[var(--color-surface-2)]/40">
-      {/* AVATAR — advogado responsável */}
-      <div className="flex shrink-0 flex-col items-center gap-2">
+    <Link
+      href={dossieHref}
+      className="glass group flex flex-col gap-3 p-5 transition hover:bg-[var(--color-surface-2)]/40 lg:grid lg:grid-cols-[auto_minmax(0,2.4fr)_minmax(0,1.6fr)_auto] lg:items-center lg:gap-5"
+    >
+      {/* COL 1: AVATAR + Pasta # (advogado responsável) */}
+      <div className="flex shrink-0 flex-row items-center gap-3 lg:flex-col lg:gap-1.5">
         <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[var(--color-signal)]/40 bg-[var(--color-signal-soft)] font-mono text-base font-bold text-[var(--color-signal)]">
           {iniciais(p.responsavel_email ?? undefined)}
         </div>
-        <span className="max-w-[80px] truncate text-[10px] text-[var(--color-advogado)]">
-          {emailLocal || "—"}
-        </span>
-      </div>
-
-      {/* CENTRO — info do processo */}
-      <div className="min-w-0 flex-1">
-        <div className="flex items-start justify-between gap-3">
-          <h3 className="nome-devedor truncate font-serif text-xl text-[var(--color-devedor)]">
-            {p.devedor.nome}
-          </h3>
-          <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--color-ivory-22)] bg-[var(--color-surface-2)]/60 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+        <div className="flex flex-col items-start gap-1 lg:items-center">
+          <span className="max-w-[110px] truncate font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-advogado)]">
+            {emailLocal || "—"}
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-ivory-22)] bg-[var(--color-surface-2)]/60 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
             <Hash className="h-3 w-3" />
             Pasta #{p.caso_id}
           </span>
         </div>
+      </div>
 
-        {/* Linha 1: tipo + documento + numero processo */}
-        <div className="mt-2 flex flex-wrap items-center gap-2">
+      {/* COL 2: DEVEDOR + processo + doc */}
+      <div className="min-w-0">
+        <h3 className="nome-devedor truncate font-serif text-xl leading-tight text-[var(--color-devedor)]">
+          {p.devedor.nome}
+        </h3>
+        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
           <span className="inline-flex items-center rounded-full bg-[var(--color-signal-soft)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-signal)]">
             {tipoLabel}
           </span>
@@ -366,19 +367,19 @@ function LinhaProcesso({
             {p.numero_processo ?? "Sem número"}
           </span>
         </div>
+      </div>
 
-        {/* Linha 2: credor + crédito */}
-        <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <span className="nome-cliente font-serif text-[15px] text-[var(--color-cliente)]">
+      {/* COL 3: CREDOR + crédito + status/bens/tempo */}
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-baseline gap-x-3">
+          <span className="nome-cliente truncate font-serif text-[15px] text-[var(--color-cliente)]">
             {p.credor.nome}
           </span>
-          <span className="font-mono text-[14px] tabular-nums text-[var(--color-gold)]">
+          <span className="font-mono text-[14px] tabular-nums text-[var(--color-gold)] whitespace-nowrap">
             {p.valor_credito_brl !== null ? formatBRL(p.valor_credito_brl) : "—"}
           </span>
         </div>
-
-        {/* Linha 3: status + bens + tempo */}
-        <div className="mt-2 flex flex-wrap items-center gap-2">
+        <div className="mt-1 flex flex-wrap items-center gap-2">
           <span
             className="inline-flex rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em]"
             style={{
@@ -402,17 +403,19 @@ function LinhaProcesso({
         </div>
       </div>
 
-      {/* DIREITA — ações (dossiê + 3 botões de busca) */}
-      <div className="flex shrink-0 flex-col items-end justify-between gap-3">
-        <Link href={dossieHref} className="btn-neon-gold text-[10px]">
-          Dossiê
-        </Link>
+      {/* COL 4: 3 botões de busca. Linha inteira clica pra dossiê — esses
+          botões dentro abrem modais (stopPropagation interno) e nao precisam
+          de "Dossie" duplicado. */}
+      <div
+        className="flex shrink-0 items-center justify-end"
+        onClick={(e) => e.stopPropagation()}
+      >
         <AcoesBuscaCardThemis
           devedorId={p.devedor.id}
           eu={eu ?? ""}
           jaRastreado={p.ja_rastreado}
         />
       </div>
-    </div>
+    </Link>
   );
 }
