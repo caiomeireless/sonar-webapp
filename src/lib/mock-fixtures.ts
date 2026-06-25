@@ -531,7 +531,32 @@ export const MEDIDAS_DEMO = [
   { id: 9, caso_id: 3, data: '2026-01-15', tipo: 'sniper',   resultado: 'parcial',  titulo: 'SNIPER — vinculos familiares', detalhes: 'Familiares identificados — investigar transferencias.', advogado_email: 'caio@bpadvogados.com.br' },
   // Caso 4 (Construtora Oeste x Carlos): cross-detection
   { id: 10, caso_id: 4, data: '2025-09-12', tipo: 'sisbajud', resultado: 'negativo', titulo: 'SISBAJUD Carlos (Oeste)', detalhes: 'Negativo.', advogado_email: 'caio@bpadvogados.com.br' },
+  // ============================================================
+  // ATIVIDADE RECENTE — ultimos 7 dias, distribuida entre 4 advogados
+  // pra alimentar o card "Atividade da Equipe — 7 dias" do Painel.
+  // Datas geradas a partir de "hoje" (ISO atual). Mantemos "data" e
+  // "criado_em" iguais; o agregador usa o que tiver mais recente.
+  // ============================================================
+  { id: 11, caso_id: 1, data: hojeMenos(0), criado_em: hojeMenos(0), tipo: 'sisbajud',        resultado: 'parcial',    titulo: 'SISBAJUD reforco Carlos',    detalhes: 'R$ 4.200 bloqueado em conta secundaria.',         advogado_email: 'paulo@bpadvogados.com.br' },
+  { id: 12, caso_id: 1, data: hojeMenos(1), criado_em: hojeMenos(1), tipo: 'renajud',         resultado: 'positivo',   titulo: 'RENAJUD Toyota Hilux',       detalhes: 'Bloqueio averbado.',                              advogado_email: 'paulo@bpadvogados.com.br' },
+  { id: 13, caso_id: 2, data: hojeMenos(1), criado_em: hojeMenos(1), tipo: 'arisp',           resultado: 'positivo',   titulo: 'ARISP — matricula SP',      detalhes: 'Imovel em Pinheiros localizado.',                  advogado_email: 'remo@bpadvogados.com.br' },
+  { id: 14, caso_id: 2, data: hojeMenos(2), criado_em: hojeMenos(2), tipo: 'peticao_penhora', resultado: 'aguardando', titulo: 'Penhora imovel Pinheiros',  detalhes: 'Aguardando decisao.',                              advogado_email: 'remo@bpadvogados.com.br' },
+  { id: 15, caso_id: 3, data: hojeMenos(2), criado_em: hojeMenos(2), tipo: 'infojud',         resultado: 'parcial',    titulo: 'INFOJUD Maria',             detalhes: 'IR 2024 obtida — patrimonio R$ 380k.',             advogado_email: 'filipe@bpadvogados.com.br' },
+  { id: 16, caso_id: 3, data: hojeMenos(3), criado_em: hojeMenos(3), tipo: 'sniper',          resultado: 'parcial',    titulo: 'SNIPER vinculos Maria',     detalhes: '2 familiares identificados.',                      advogado_email: 'filipe@bpadvogados.com.br' },
+  { id: 17, caso_id: 1, data: hojeMenos(3), criado_em: hojeMenos(3), tipo: 'arisp',           resultado: 'aguardando', titulo: 'ARISP — pedido Cardoso',    detalhes: 'Solicitacao protocolada.',                         advogado_email: 'caio@bpadvogados.com.br' },
+  { id: 18, caso_id: 4, data: hojeMenos(4), criado_em: hojeMenos(4), tipo: 'sisbajud',        resultado: 'negativo',   titulo: 'SISBAJUD Construtora',      detalhes: 'Sem ativos em PJ.',                                advogado_email: 'paulo@bpadvogados.com.br' },
+  { id: 19, caso_id: 2, data: hojeMenos(4), criado_em: hojeMenos(4), tipo: 'consulta_paga',   resultado: 'positivo',   titulo: 'Consulta BigDataCorp',      detalhes: 'Ficha cadastral completa obtida.',                 advogado_email: 'remo@bpadvogados.com.br' },
+  { id: 20, caso_id: 1, data: hojeMenos(5), criado_em: hojeMenos(5), tipo: 'peticao_penhora', resultado: 'positivo',   titulo: 'Penhora cotas Albuquerque', detalhes: 'Deferida pelo juizo, termo expedido.',             advogado_email: 'caio@bpadvogados.com.br' },
+  { id: 21, caso_id: 3, data: hojeMenos(5), criado_em: hojeMenos(5), tipo: 'renajud',         resultado: 'negativo',   titulo: 'RENAJUD Maria',             detalhes: 'Sem veiculos em nome dela.',                       advogado_email: 'filipe@bpadvogados.com.br' },
+  { id: 22, caso_id: 4, data: hojeMenos(6), criado_em: hojeMenos(6), tipo: 'arisp',           resultado: 'parcial',    titulo: 'ARISP Construtora',         detalhes: '1 imovel encontrado.',                             advogado_email: 'remo@bpadvogados.com.br' },
+  { id: 23, caso_id: 2, data: hojeMenos(6), criado_em: hojeMenos(6), tipo: 'sniper',          resultado: 'aguardando', titulo: 'SNIPER Horizonte',          detalhes: 'Buscando vinculos com a Albuquerque Consultoria.', advogado_email: 'paulo@bpadvogados.com.br' },
 ];
+
+// Helper pra datas relativas (ISO yyyy-mm-dd com base em hoje).
+function hojeMenos(dias: number): string {
+  const d = new Date(Date.now() - dias * 24 * 60 * 60 * 1000);
+  return d.toISOString();
+}
 
 // ============================================================
 // PERFIL DO CLIENTE DEMO
