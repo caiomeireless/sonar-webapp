@@ -16,6 +16,10 @@ import { DashboardCard } from "@/components/dashboard/DashboardCard";
 
 type Props = {
   distribuicao: DistribuicaoGeografica[];
+  // Permite reusar o mesmo mapa em outros contextos (Painel da Equipe,
+  // Painel do Cliente) mudando só o cabeçalho do card.
+  titulo?: string;
+  descricao?: string;
 };
 
 interface DadosUf {
@@ -56,7 +60,11 @@ function agregarPorUf(
   return { porUf, semUf, totalGeral, valorGeral };
 }
 
-export default function MapaDistribuicaoBens({ distribuicao }: Props) {
+export default function MapaDistribuicaoBens({
+  distribuicao,
+  titulo = "Distribuição geográfica dos bens",
+  descricao = "Bens identificados por UF. Passe o mouse para ver cidades.",
+}: Props) {
   const [ativo, setAtivo] = useState<string | null>(null);
 
   const { porUf, semUf, totalGeral, valorGeral } = useMemo(
@@ -84,8 +92,8 @@ export default function MapaDistribuicaoBens({ distribuicao }: Props) {
 
   return (
     <DashboardCard
-      titulo="Distribuição geográfica dos bens"
-      descricao="Bens identificados por UF. Passe o mouse para ver cidades."
+      titulo={titulo}
+      descricao={descricao}
       accent="green"
     >
       <div

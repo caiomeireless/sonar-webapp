@@ -33,6 +33,9 @@ import Top5ClientesPorPatrimonio from "./_components/Top5ClientesPorPatrimonio";
 import Top5DevedoresRastreio from "./_components/Top5DevedoresRastreio";
 import CarteiraPorAdvogado from "./_components/CarteiraPorAdvogado";
 import FeedMedidasRecentes from "./_components/FeedMedidasRecentes";
+// Mapa do Brasil reaproveitado do dashboard analítico do devedor.
+// O componente já vem com DashboardCard próprio (não envolver de novo).
+import MapaDistribuicaoBens from "./devedores/[id]/dashboard/_components/MapaDistribuicaoBens";
 
 const PERIODOS_VALIDOS: PeriodoChave[] = ["tudo", "7d", "30d", "90d", "mes", "ano"];
 const STATUS_VALIDOS: StatusCaso[] = ["ativo", "pausado", "encerrado", "satisfeito"];
@@ -154,6 +157,17 @@ export default async function DashboardPlataformaPage({
         </div>
         <div className="md:col-span-6">
           <Top5DevedoresRastreio dados={dados.top5DevedoresRastreio} />
+        </div>
+
+        {/* L4.5 — Mapa do Brasil (full width). Reaproveita o mesmo
+            componente do dashboard analítico do devedor; aqui agrega
+            todos os bens da plataforma em rastreio. */}
+        <div className="md:col-span-12">
+          <MapaDistribuicaoBens
+            distribuicao={dados.bensPorLocalizacao}
+            titulo="Distribuição Patrimonial pelo Brasil"
+            descricao="Onde estão os bens rastreados pela plataforma"
+          />
         </div>
 
         {/* L5 — Carteira (7) + Feed (5) */}

@@ -422,3 +422,57 @@ export async function obterDossie(devedorId: number): Promise<Dossie | null> {
     por_tipo: agruparPorTipo(bens),
   };
 }
+
+// Distribuição geográfica dos bens DOS DEVEDORES rastreados pelo cliente
+// logado. Alimenta o MapaDistribuicaoBens no Painel do Cliente.
+// Aplica as mesmas regras de visibilidade de listarCasosDoCliente — só
+// devedores em casos onde o cliente é o email_contato do credor (com o
+// mesmo fallback do cliente.demo).
+export async function listarBensPorLocalizacaoDoCliente(
+  clienteEmail: string,
+): Promise<DistribuicaoGeografica[]> {
+  const sb = createAdminClient();
+  const email = clienteEmail.toLowerCase().trim();
+
+  const { data: credores } = await sb
+    .from("credores")
+    .select("id")
+    .eq("email_contato", email);
+
+  let credorIds = (credores ?? []).map((c) => c.id as number);
+
+  if (email === DEMO_CLIENTE_EMAIL) {
+    const { data: credoresComCasos } = await sb
+      .from("casos")
+      .select("credor_id")
+      .order("credor_id", { ascending: true })
+      .limit(50);
+    const idsComCasos = Array.from(
+      new Set((credoresComCasos ?? []).map((c) => c.credor_id as number)),
+    );
+    if (idsComCasos.length > 0) credorIds = idsComCasos;
+  }
+
+  if (credorIds.length === 0) return [];
+
+  const { data: casos } = await sb
+    .from("casos")
+    .select("devedor_id")
+    .in("credor_id", credorIds);
+
+  const devedorIds = Array.from(
+    new Set((casos ?? []).map((c) => c.devedor_id as number)),
+  );
+  if (devedorIds.length === 0) return [];
+
+  const { data: bens } = await sb
+    .from("bens_encontrados")
+    .select("id, valor_estimado_brl")
+    .in("devedor_id", devedorIds)
+    .eq("ativo", true);
+
+  // Campos cidade/uf ainda não existem no schema atual — a função pura
+  // gera fallback estável por hash do id (mesmas cidades que aparecem
+  // no dossiê do devedor, pra manter coerência entre as telas).
+  return calcularDistribuicaoGeografica((bens ?? []) as { id: number; valor_estimado_brl: number | null }[]);
+}
