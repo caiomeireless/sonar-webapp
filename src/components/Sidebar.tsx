@@ -9,8 +9,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronRight, Menu, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Menu, X } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+
+// Chave persistente do estado de colapso do nav (desktop).
+const COLLAPSED_KEY = "sonar.sidebar.collapsed";
 
 import { LogoSvg } from "./LogoSvg";
 import { ThemeToggle } from "./ThemeToggle";
@@ -53,7 +56,30 @@ type SidebarProps = {
 
 export function Sidebar({ items, usuario, portal }: SidebarProps) {
   const [open, setOpen] = useState(false);
+  // Estado de colapso (desktop). Default = expandido. Hidrata do localStorage.
+  const [recolhido, setRecolhido] = useState(false);
   const pathname = usePathname();
+
+  useEffect(() => {
+    try {
+      const salvo = window.localStorage.getItem(COLLAPSED_KEY);
+      if (salvo === "1") setRecolhido(true);
+    } catch {
+      // ignora SecurityError / quota
+    }
+  }, []);
+
+  function alternarRecolhido() {
+    setRecolhido((prev) => {
+      const novo = !prev;
+      try {
+        window.localStorage.setItem(COLLAPSED_KEY, novo ? "1" : "0");
+      } catch {
+        // ignora
+      }
+      return novo;
+    });
+  }
 
   // Fecha drawer ao trocar de rota.
   useEffect(() => {
@@ -100,14 +126,35 @@ export function Sidebar({ items, usuario, portal }: SidebarProps) {
         </button>
       )}
 
-      {/* Desktop: aside fixa */}
-      <SidebarPanel
-        items={items}
-        usuario={usuario}
-        portal={portal}
-        homeHref={homeHref}
-        variant="desktop"
-      />
+      {/* Desktop: aside fixa OU bolinha pra reexpandir quando recolhida */}
+      {recolhido ? (
+        <button
+          type="button"
+          onClick={alternarRecolhido}
+          aria-label="Abrir menu lateral"
+          title="Abrir menu lateral"
+          className="fixed left-3 top-1/2 z-40 hidden h-12 w-12 -translate-y-1/2
+                     items-center justify-center rounded-full
+                     border-2 border-[var(--color-signal)]/85
+                     bg-[var(--color-onyx)]/85 text-[var(--color-signal)]
+                     shadow-[0_0_24px_rgba(60,255,138,0.55),0_0_8px_rgba(60,255,138,0.40),inset_0_0_18px_rgba(60,255,138,0.20)]
+                     backdrop-blur-md transition-all duration-200
+                     hover:scale-110 hover:border-[#3CFF8A] hover:bg-[var(--color-signal)]/22
+                     hover:shadow-[0_0_36px_rgba(60,255,138,0.85),0_0_60px_rgba(60,255,138,0.40)]
+                     md:inline-flex"
+        >
+          <ChevronRight className="h-5 w-5" aria-hidden="true" />
+        </button>
+      ) : (
+        <SidebarPanel
+          items={items}
+          usuario={usuario}
+          portal={portal}
+          homeHref={homeHref}
+          variant="desktop"
+          onRecolher={alternarRecolhido}
+        />
+      )}
 
       {/* Mobile: drawer off-canvas */}
       {open && (
@@ -142,6 +189,8 @@ type PanelProps = {
   homeHref: string;
   variant: "desktop" | "drawer";
   onClose?: () => void;
+  /** Desktop: handler pra recolher o nav lateral. */
+  onRecolher?: () => void;
 };
 
 function SidebarPanel({
@@ -151,6 +200,7 @@ function SidebarPanel({
   homeHref,
   variant,
   onClose,
+  onRecolher,
 }: PanelProps) {
   const closeBtnRef = useRef<HTMLButtonElement | null>(null);
 
@@ -220,6 +270,22 @@ function SidebarPanel({
                          hover:bg-[var(--color-line)]"
             >
               <X className="h-4 w-4" aria-hidden="true" />
+            </button>
+          )}
+          {!isDrawer && onRecolher && (
+            <button
+              type="button"
+              onClick={onRecolher}
+              aria-label="Recolher menu lateral"
+              title="Recolher menu lateral"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg
+                         border border-[var(--color-signal)]/40 bg-[var(--color-onyx)]/60
+                         text-[var(--color-signal)] backdrop-blur-md transition
+                         hover:scale-105 hover:border-[var(--color-signal)]
+                         hover:bg-[var(--color-signal)]/15
+                         hover:shadow-[0_0_16px_rgba(60,255,138,0.45)]"
+            >
+              <ChevronLeft className="h-4 w-4" aria-hidden="true" />
             </button>
           )}
         </div>
