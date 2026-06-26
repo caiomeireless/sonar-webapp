@@ -150,18 +150,18 @@ export default function ApiPesquisaAnimacao() {
 
   return (
     <div
-      className="relative overflow-hidden rounded-2xl border p-6 sm:p-8"
+      className="relative overflow-hidden rounded-2xl border p-6 sm:p-10 lg:p-14"
       style={{
         background: "var(--color-onyx)",
         borderColor: "var(--color-line)",
         boxShadow: "0 30px 80px -40px rgba(201,162,74,0.25)",
-        minHeight: 620,
+        minHeight: 700,
       }}
     >
       {/* Glow sutil de ouro ao fundo */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-1/2 h-[420px] w-[820px] -translate-x-1/2 -translate-y-1/2 opacity-60"
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[520px] w-[1100px] -translate-x-1/2 -translate-y-1/2 opacity-60"
         style={{
           background:
             "radial-gradient(ellipse at center, rgba(201,162,74,0.18), transparent 60%)",
@@ -252,7 +252,7 @@ function CenaFila({ etapa }: { etapa: Etapa }) {
   const isClicando = etapa === "click";
 
   return (
-    <div className="relative mx-auto max-w-[640px]">
+    <div className="relative mx-auto max-w-[820px]">
       {/* Card do processo */}
       <div
         className="relative overflow-hidden rounded-2xl border p-6"
@@ -280,7 +280,7 @@ function CenaFila({ etapa }: { etapa: Etapa }) {
 
         {/* Nome do devedor */}
         <h3
-          className="nome-devedor mt-3 font-serif text-[22px] font-medium uppercase leading-[1.1] tracking-[0.04em]"
+          className="nome-devedor mt-3 font-serif text-[clamp(22px,2.4vw,30px)] font-medium uppercase leading-[1.1] tracking-[0.04em]"
           style={{ color: "var(--color-devedor)" }}
         >
           Carlos Eduardo Mendes Albuquerque
@@ -609,8 +609,8 @@ function CenaBusca({
         </div>
       </div>
 
-      {/* Grid das 7 fontes */}
-      <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+      {/* Grid das 7 fontes — em telas largas, todas em 1 fileira */}
+      <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 lg:gap-4">
         {FONTES.map((fonte, indice) => (
           <CardFonte
             key={`${fonte.tag}-${fonte.legenda}`}

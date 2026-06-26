@@ -117,31 +117,31 @@ export default async function DashboardClienteCasoPage({
   return (
     <main>
       {/* ============ BARRA DE TOPO ============ */}
-      <section className="border-b border-[var(--color-ivory-12)]">
-        <div className="mx-auto flex max-w-[1400px] flex-col gap-4 px-6 py-8 sm:flex-row sm:items-end sm:justify-between sm:px-10">
-          <div className="min-w-0">
-            <div className="flex items-center gap-3">
-              <span className="eyebrow">Dashboard anal&iacute;tico</span>
-              <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-signal)]">
-                Vis&atilde;o do cliente
-              </span>
-            </div>
-            <h1 className="nome-devedor mt-3 truncate font-serif text-[clamp(22px,3vw,32px)] font-medium leading-tight tracking-tight text-[var(--color-devedor)]">
-              {devedor.nome}
-            </h1>
-            <p className="mt-1 font-mono text-xs text-[var(--color-ivory-66)]">
-              {casos.length}{" "}
-              {casos.length === 1 ? "caso vinculado" : "casos vinculados"}
-              {" · "}
-              {devedor.tipo === "PF" ? "Pessoa F&iacute;sica" : "Pessoa Jur&iacute;dica"}
-              {" · "}
-              {devedor.documento}
-            </p>
+      <section className="relative border-b border-[var(--color-ivory-12)]">
+        <Link
+          href={dossieHref}
+          className="btn-neon-gold absolute right-6 top-10 z-10 sm:right-10"
+        >
+          ← Voltar ao dossi&ecirc;
+        </Link>
+        <div className="mx-auto max-w-[1400px] px-6 py-10 text-center sm:px-10">
+          <div className="flex items-center justify-center gap-3">
+            <span className="eyebrow">Dashboard anal&iacute;tico</span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-signal)]">
+              Vis&atilde;o do cliente
+            </span>
           </div>
-
-          <Link href={dossieHref} className="btn-neon-gold shrink-0">
-            ← Voltar ao dossi&ecirc;
-          </Link>
+          <h1 className="nome-devedor mx-auto mt-4 font-serif text-[clamp(36px,5vw,56px)] font-medium leading-[1.05] tracking-tight text-[var(--color-devedor)]">
+            {devedor.nome}
+          </h1>
+          <p className="mt-3 font-mono text-xs text-[var(--color-ivory-66)]">
+            {casos.length}{" "}
+            {casos.length === 1 ? "caso vinculado" : "casos vinculados"}
+            {" · "}
+            {devedor.tipo === "PF" ? "Pessoa F&iacute;sica" : "Pessoa Jur&iacute;dica"}
+            {" · "}
+            {devedor.documento}
+          </p>
         </div>
       </section>
 

@@ -354,7 +354,7 @@ function calcularProximaAcao(args: {
   const semAtividade = ultima === 0 || (agora - ultima) / DIAS_MS > 90;
   if (semAtividade) {
     return {
-      acao: "Rodar SISBAJUD",
+      acao: "Solicitar SISBAJUD",
       motivo: "Sem atividade há 90 dias",
     };
   }

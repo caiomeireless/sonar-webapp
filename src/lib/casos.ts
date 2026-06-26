@@ -40,6 +40,10 @@ export interface DevedorResumo {
 export interface DevedorCompleto extends DevedorResumo {
   data_nascimento: string | null;
   nome_mae: string | null;
+  rg: string | null;
+  email: string | null;
+  telefone: string | null;
+  redes_sociais: string | null;
   ultima_consulta_em: string | null;
   criado_em: string;
 }
@@ -432,13 +436,49 @@ export async function obterDossie(devedorId: number): Promise<Dossie | null> {
   );
 
   return {
-    devedor: devedor as unknown as DevedorCompleto,
+    devedor: enriquecerContatoDemo(devedor as unknown as DevedorCompleto),
     casos: casosHidratados,
     bens,
     total_bens: bens.length,
     valor_estimado_total_brl: somarBens(bens),
     por_tipo: agruparPorTipo(bens),
   };
+}
+
+// Os campos rg/email/telefone/redes_sociais ainda nao tem coluna no
+// banco. Pra demo (devedores 1-3), preenchemos in-memory com dados
+// fake do mock-fixtures. Quando a coluna for criada de verdade, basta
+// remover esta funcao.
+function enriquecerContatoDemo(devedor: DevedorCompleto): DevedorCompleto {
+  type ContatoDemo = {
+    rg: string | null;
+    email: string | null;
+    telefone: string | null;
+    redes_sociais: string | null;
+  };
+  const tabela: Record<number, ContatoDemo> = {
+    1: {
+      rg: "15.487.221-9 SSP/SP",
+      email: "carlos.albuquerque@gmail.com",
+      telefone: "+55 11 98876-4520",
+      redes_sociais: "@carlos.albuquerque (IG) · linkedin.com/in/calbuquerque",
+    },
+    2: {
+      rg: null,
+      email: "contato@horizontenorte.com.br",
+      telefone: "+55 11 4002-8922",
+      redes_sociais: "linkedin.com/company/horizonte-norte",
+    },
+    3: {
+      rg: "32.118.554-2 SSP/SP",
+      email: "maria.aparecida@hotmail.com",
+      telefone: "+55 11 95412-7833",
+      redes_sociais: "@mariaap_santos (IG)",
+    },
+  };
+  const extra = tabela[devedor.id];
+  if (!extra) return { ...devedor, rg: null, email: null, telefone: null, redes_sociais: null };
+  return { ...devedor, ...extra };
 }
 
 // Distribuição geográfica dos bens DOS DEVEDORES rastreados pelo cliente

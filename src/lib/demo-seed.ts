@@ -92,6 +92,8 @@ export async function seedDemoData(): Promise<SeedResult> {
   }
 
   // 4. Devedores (forca ids 1, 2, 3) — atualiza ultima_consulta_em pra now.
+  // rg/email/telefone/redes_sociais ainda nao tem coluna no banco; sao
+  // enriquecidos in-memory em obterDossie pra os ids demo (1, 2, 3).
   for (const d of DEVEDORES_DEMO) {
     const { error } = await sb.from("devedores").upsert(
       {

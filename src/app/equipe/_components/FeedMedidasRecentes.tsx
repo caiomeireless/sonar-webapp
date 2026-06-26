@@ -20,10 +20,13 @@ type Props = {
 
 // Verbo curto por tipo — encaixa em "Advogado <verbo> em Devedor Y".
 // Quando não houver entrada, cai no label do TIPO_META com prefixo "fez".
+// Pesquisas judiciais (SISBAJUD/INFOJUD/RENAJUD) o escritório SOLICITA
+// (peticiona ao juiz, que dispara a ordem). Pesquisas privadas/contratadas
+// (ARISP/SERASAJUD/SNIPER) o escritório RODA diretamente.
 const VERBO_POR_TIPO: Partial<Record<TipoMedida, string>> = {
-  sisbajud: "rodou SISBAJUD",
-  infojud: "rodou INFOJUD",
-  renajud: "rodou RENAJUD",
+  sisbajud: "solicitou SISBAJUD",
+  infojud: "solicitou INFOJUD",
+  renajud: "solicitou RENAJUD",
   arisp: "rodou ARISP",
   serasajud: "rodou SERASAJUD",
   sniper: "rodou SNIPER",

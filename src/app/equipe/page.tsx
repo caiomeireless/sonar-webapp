@@ -39,6 +39,12 @@ import FeedMedidasRecentes from "./_components/FeedMedidasRecentes";
 // O componente já vem com DashboardCard próprio (não envolver de novo).
 import MapaDistribuicaoBens from "./devedores/[id]/dashboard/_components/MapaDistribuicaoBens";
 
+// Force-dynamic: o painel agrega dados em tempo real (feed de medidas,
+// custos do mes). Sem isso o Next.js cacheia a primeira render — basta
+// que outro advogado registre uma medida pra ficar desatualizado ate o
+// redeploy.
+export const dynamic = "force-dynamic";
+
 const PERIODOS_VALIDOS: PeriodoChave[] = ["tudo", "7d", "30d", "90d", "mes", "ano"];
 const STATUS_VALIDOS: StatusCaso[] = ["ativo", "pausado", "encerrado", "satisfeito"];
 

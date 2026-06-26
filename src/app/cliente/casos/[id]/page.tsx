@@ -151,7 +151,7 @@ export default async function DossieClientePage({ params, searchParams }: Props)
                 />
                 <CampoFicha
                   rotulo={devedor.tipo === "PF" ? "RG" : "IE"}
-                  valor={null}
+                  valor={devedor.rg}
                   mostrarChipOrigem={false}
                 />
                 {devedor.tipo === "PF" ? (
@@ -177,17 +177,17 @@ export default async function DossieClientePage({ params, searchParams }: Props)
               <SecaoFicha titulo="Contato">
                 <CampoFicha
                   rotulo="E-mail"
-                  valor={null}
+                  valor={devedor.email}
                   mostrarChipOrigem={false}
                 />
                 <CampoFicha
                   rotulo="Telefone"
-                  valor={null}
+                  valor={devedor.telefone}
                   mostrarChipOrigem={false}
                 />
                 <CampoFicha
                   rotulo="Redes Sociais"
-                  valor={null}
+                  valor={devedor.redes_sociais}
                   mostrarChipOrigem={false}
                 />
               </SecaoFicha>

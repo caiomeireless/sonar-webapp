@@ -71,30 +71,30 @@ export default async function DashboardCasoPage({ params, searchParams }: Props)
   return (
     <main>
       {/* ============ BARRA DE TOPO ============ */}
-      <section className="border-b border-[var(--color-ivory-12)]">
-        <div className="mx-auto flex max-w-[1400px] flex-col gap-4 px-6 py-8 sm:flex-row sm:items-end sm:justify-between sm:px-10">
-          <div className="min-w-0">
-            <div className="flex items-center gap-3">
-              <span className="eyebrow">Dashboard analítico</span>
-              <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-signal)]">
-                Visão da equipe
-              </span>
-            </div>
-            <h1 className="mt-3 truncate font-serif text-[clamp(22px,3vw,32px)] font-medium leading-tight tracking-tight text-ivory">
-              {devedor.nome}
-            </h1>
-            <p className="mt-1 font-mono text-xs text-[var(--color-ivory-66)]">
-              {casos.length} {casos.length === 1 ? "caso vinculado" : "casos vinculados"}
-              {" · "}
-              {devedor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"}
-              {" · "}
-              {devedor.documento}
-            </p>
+      <section className="relative border-b border-[var(--color-ivory-12)]">
+        <Link
+          href={dossieHref}
+          className="btn-neon-gold absolute right-6 top-10 z-10 sm:right-10"
+        >
+          ← Voltar ao dossiê
+        </Link>
+        <div className="mx-auto max-w-[1400px] px-6 py-10 text-center sm:px-10">
+          <div className="flex items-center justify-center gap-3">
+            <span className="eyebrow">Dashboard analítico</span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-signal)]">
+              Visão da equipe
+            </span>
           </div>
-
-          <Link href={dossieHref} className="btn-neon-gold shrink-0">
-            ← Voltar ao dossiê
-          </Link>
+          <h1 className="nome-devedor mx-auto mt-4 font-serif text-[clamp(36px,5vw,56px)] font-medium leading-[1.05] tracking-tight text-[var(--color-devedor)]">
+            {devedor.nome}
+          </h1>
+          <p className="mt-3 font-mono text-xs text-[var(--color-ivory-66)]">
+            {casos.length} {casos.length === 1 ? "caso vinculado" : "casos vinculados"}
+            {" · "}
+            {devedor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"}
+            {" · "}
+            {devedor.documento}
+          </p>
         </div>
       </section>
 

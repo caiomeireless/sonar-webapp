@@ -25,7 +25,7 @@ type AcaoMeta = {
 };
 
 const ACOES_CATALOGO: Record<string, AcaoMeta> = {
-  "Rodar SISBAJUD": {
+  "Solicitar SISBAJUD": {
     icone: "B",
     accent: "green",
     alternativas: [
@@ -48,7 +48,7 @@ const ACOES_CATALOGO: Record<string, AcaoMeta> = {
     accent: "gold",
     alternativas: [
       "Consultar JUCESP pra contrato social atualizado",
-      "Rodar INFOJUD pra DIRPF do sócio",
+      "Solicitar INFOJUD pra DIRPF do sócio",
       "Pedir desconsideração da personalidade jurídica",
     ],
   },

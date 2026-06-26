@@ -197,7 +197,8 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
                 />
                 <CampoFicha
                   rotulo={devedor.tipo === "PF" ? "RG" : "IE"}
-                  valor={null}
+                  valor={devedor.rg}
+                  origem={devedor.rg ? "MANUAL" : undefined}
                 />
                 {devedor.tipo === "PF" ? (
                   <CampoFicha
@@ -220,9 +221,21 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
               </SecaoFicha>
 
               <SecaoFicha titulo="Contato">
-                <CampoFicha rotulo="E-mail" valor={null} />
-                <CampoFicha rotulo="Telefone" valor={null} />
-                <CampoFicha rotulo="Redes Sociais" valor={null} />
+                <CampoFicha
+                  rotulo="E-mail"
+                  valor={devedor.email}
+                  origem={devedor.email ? "MANUAL" : undefined}
+                />
+                <CampoFicha
+                  rotulo="Telefone"
+                  valor={devedor.telefone}
+                  origem={devedor.telefone ? "MANUAL" : undefined}
+                />
+                <CampoFicha
+                  rotulo="Redes Sociais"
+                  valor={devedor.redes_sociais}
+                  origem={devedor.redes_sociais ? "MANUAL" : undefined}
+                />
               </SecaoFicha>
 
               <div className="md:col-span-2">

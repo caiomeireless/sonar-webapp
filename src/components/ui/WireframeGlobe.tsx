@@ -428,21 +428,7 @@ export function WireframeGlobe({
         });
       }
 
-      // Alfinetes vermelhos nas localizações espalhadas pelos continentes
-      LAND_PIN_LOCATIONS.forEach((coord) => {
-        const distance = d3.geoDistance(coord, center);
-        if (distance >= Math.PI / 2) return;
-        const projected = projection(coord);
-        if (!projected) return;
-        const fade = Math.cos(distance);
-        drawLocationPin(
-          context,
-          projected[0],
-          projected[1],
-          3 * scaleFactor,
-          0.95 * fade,
-        );
-      });
+      // (alfinetes vermelhos removidos — Caio pediu visual mais limpo)
 
       // Shooting sticks — feixes verdes voando entre cidades via great circle.
       // Renderizados POR ÚLTIMO pra ficar por cima dos alfinetes/halftone.

@@ -95,7 +95,7 @@ function HeroNotebook() {
           <div className="relative h-full w-full overflow-hidden rounded-2xl bg-[var(--color-onyx)]">
             <motion.div style={{ y: imageY }} className="relative w-full">
               <Image
-                src="/img/showcase/cliente-painel-full.png"
+                src="/img/showcase/cliente-painel-full.png?v=20260626b"
                 alt="Dashboard do Cliente"
                 width={1280}
                 height={3500}
@@ -142,33 +142,58 @@ function ScrollWindow({
   src,
   alt,
   accent = "signal",
-  imageHeight = 2400,
+  imageWidth = 2560,
+  imageHeight = 2200,
   aspect = "16/10",
-  scrollEnd = "-65%",
+  scrollEnd,
 }: {
   src: string;
   alt: string;
   accent?: Accent;
+  /** Largura real do arquivo (pra calcular o aspecto correto). */
+  imageWidth?: number;
+  /** Altura real do arquivo (pra calcular o aspecto correto). */
   imageHeight?: number;
+  /** Aspecto do container (formato "W/H"). Default 16/10 = janela larga
+   * e baixa, scroll fica menor e mais agradável. */
   aspect?: string;
-  /** Ate onde a imagem rola (em %). Default -65% (mostra topo + metade
-   * inferior). Use -95% pra scroll COMPLETO (revela imagem inteira). */
+  /** Override manual do limite de scroll (ex: "-50%"). Quando omitido,
+   * calcula automaticamente o ideal pra mostrar a imagem INTEIRA com
+   * base nos aspectos do container e da imagem. */
   scrollEnd?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
-    // Offset mais conservador: progresso 0 só começa quando o elemento
-    // já está 25% dentro do viewport (pelo topo) e termina quando ele
-    // está 25% do bottom — assim o usuário vê o topo da imagem antes
-    // de qualquer rolagem acontecer.
-    offset: ["start 25%", "end 75%"],
+    // Range maximo: progresso comeca quando o topo do elemento toca o
+    // fundo do viewport e termina quando o fundo do elemento sai pelo
+    // topo. Isso da o maximo de scroll possivel pra revelar a imagem
+    // inteira (essencial pro Monitor de Custos, que e bem alto).
+    offset: ["start end", "end start"],
   });
 
-  // Pausa inicial: nos primeiros 18% do progresso a imagem fica parada
-  // no topo, depois rola até `scrollEnd`. Isso dá tempo do usuário ver
-  // o cabeçalho/topo da tela antes de qualquer movimento.
-  const y = useTransform(scrollYProgress, [0, 0.18, 1], ["0%", "0%", scrollEnd]);
+  // Calcula o scrollEnd ideal a partir dos aspectos: a imagem rola de 0
+  // ate -(imgH - containerH)/imgH, garantindo que o RODAPE da imagem
+  // encoste no fundo da janela exatamente no fim do scroll.
+  // Ex: image 2560x2200 (aspect 1.164) em container 16/10 (aspect 1.6)
+  //  -> max = 1 - 1.164/1.6 = 27.3% -> "-27.25%"
+  const [a, b] = aspect.split("/").map(Number);
+  const containerAspect = a / b;
+  const imageAspect = imageWidth / imageHeight;
+  const autoScrollEndPct = Math.max(
+    0,
+    Math.min(95, (1 - imageAspect / containerAspect) * 100),
+  );
+  const computedScrollEnd = scrollEnd ?? `-${autoScrollEndPct.toFixed(2)}%`;
+
+  // 4 keyframes: pausa no topo (0 -> 0.10) -> rola ate o fim (0.10 -> 0.85)
+  // -> pausa no rodape (0.85 -> 1.0). A pausa final garante que o usuario
+  // VEJA o rodape antes do elemento sair do viewport.
+  const y = useTransform(
+    scrollYProgress,
+    [0, 0.1, 0.85, 1],
+    ["0%", "0%", computedScrollEnd, computedScrollEnd],
+  );
 
   return (
     <div
@@ -183,7 +208,7 @@ function ScrollWindow({
         <Image
           src={src}
           alt={alt}
-          width={1280}
+          width={imageWidth}
           height={imageHeight}
           className="block w-full"
         />
@@ -407,7 +432,7 @@ export function ShowcaseAction() {
           ]}
           media={
             <ImagemEstatica
-              src="/img/showcase/cliente-painel-graficos.png"
+              src="/img/showcase/cliente-painel-graficos.png?v=20260626b"
               alt="Painel do Cliente — gráficos de evolução e mix de bens"
               accent="signal"
             />
@@ -472,7 +497,7 @@ export function ShowcaseAction() {
                 style={{ boxShadow: ACCENT_GLOW.signal }}
               >
                 <Image
-                  src="/img/showcase/mapa-estadual.png"
+                  src="/img/showcase/mapa-estadual.png?v=20260626b"
                   alt="Drill-down em São Paulo — cidades e pinos por bem"
                   width={1280}
                   height={800}
@@ -506,51 +531,145 @@ export function ShowcaseAction() {
           </ul>
         </div>
 
-        {/* 03 — Dossie do devedor (imagem estatica wide, sem scroll) */}
-        <FeatureRow
-          reverse
-          eyebrow="03 · Patrimônio Localizado"
-          title="Dossiê Completo do Devedor."
-          description="Quando o cliente clica em um devedor, vê tudo o que foi localizado: veículos, imóveis, participações societárias, processos e endereços — organizados por categoria, com fonte e data."
-          destaques={[
-            "Bens encontrados separados por tipo, com ícones e contadores.",
-            "Timeline cronológica das medidas tomadas no processo.",
-            "Documentos disponíveis para consulta sob demanda.",
-            "Sem expor advogado responsável ou custos internos.",
-          ]}
-          media={
-            <ImagemEstatica
-              src="/img/showcase/cliente-dossie-full.png"
-              alt="Dossiê patrimonial do devedor"
-              accent="devedor"
-            />
-          }
-          accent="devedor"
-          imageWide
-        />
+        {/* 03 — Dossie do devedor (duas imagens: topo + bens, em grid) */}
+        <div>
+          <div className="mb-8 max-w-3xl">
+            <span
+              className="font-mono text-[12px] uppercase tracking-[0.32em]"
+              style={{ color: ACCENT_CSS.devedor }}
+            >
+              03 · Patrimônio Localizado
+            </span>
+            <h3 className="mt-3 font-serif text-[clamp(24px,3vw,36px)] font-medium leading-[1.2] text-ivory">
+              Dossiê Completo do Devedor.
+            </h3>
+            <p className="mt-5 text-base leading-relaxed text-[var(--color-ivory-88)]">
+              Quando o cliente clica em um devedor, vê tudo o que foi
+              localizado: veículos, imóveis, participações societárias,
+              processos e endereços — organizados por categoria, com
+              fonte e data.
+            </p>
+          </div>
 
-        {/* 04 — Dashboard analitico do devedor (imagem estatica focada
-            nos graficos, sem scroll). */}
-        <FeatureRow
-          eyebrow="04 · Análise Profunda"
-          title="Dashboard Analítico do Devedor."
-          description="Cada devedor tem seu próprio painel analítico — uma leitura visual da concentração patrimonial, do histórico de medidas e da chance de recuperação. O cliente acompanha a estratégia sem precisar abrir o processo."
-          destaques={[
-            "Concentração patrimonial por categoria em gráfico de pizza.",
-            "Linha do tempo das medidas com marcos do processo.",
-            "Indicador de chance de recuperação calculado pela equipe.",
-            "Comparativo entre devedores da mesma carteira.",
-          ]}
-          media={
+          <div className="grid items-stretch gap-6 md:grid-cols-2">
+            {/* Topo do dossie: header + estatisticas + cadastro */}
+            <div className="flex flex-col gap-3">
+              <span
+                className="font-mono text-[11px] uppercase tracking-[0.28em]"
+                style={{ color: "var(--color-ivory-66)" }}
+              >
+                Identificação e estatísticas
+              </span>
+              <div
+                className="overflow-hidden rounded-2xl border border-[var(--color-line)]"
+                style={{ boxShadow: ACCENT_GLOW.devedor }}
+              >
+                <Image
+                  src="/img/showcase/cliente-dossie-topo.png?v=20260626b"
+                  alt="Dossiê do devedor — header, estatísticas e dados cadastrais"
+                  width={1280}
+                  height={800}
+                  className="block h-auto w-full"
+                />
+              </div>
+            </div>
+
+            {/* Bens por categoria + timeline */}
+            <div className="flex flex-col gap-3">
+              <span
+                className="font-mono text-[11px] uppercase tracking-[0.28em]"
+                style={{ color: "var(--color-ivory-66)" }}
+              >
+                Bens por categoria
+              </span>
+              <div
+                className="overflow-hidden rounded-2xl border border-[var(--color-line)]"
+                style={{ boxShadow: ACCENT_GLOW.devedor }}
+              >
+                <Image
+                  src="/img/showcase/cliente-dossie-bens.png?v=20260626b"
+                  alt="Dossiê do devedor — bens encontrados por categoria"
+                  width={1280}
+                  height={800}
+                  className="block h-auto w-full"
+                />
+              </div>
+            </div>
+          </div>
+
+          <ul className="mt-8 grid gap-4 md:grid-cols-2">
+            {[
+              "Bens encontrados separados por tipo, com ícones e contadores.",
+              "Timeline cronológica das medidas tomadas no processo.",
+              "Documentos disponíveis para consulta sob demanda.",
+              "Sem expor advogado responsável ou custos internos.",
+            ].map((d) => (
+              <li
+                key={d}
+                className="flex items-start gap-3 text-[15px] leading-relaxed text-[var(--color-ivory-88)]"
+              >
+                <span
+                  aria-hidden="true"
+                  className="mt-2 inline-block h-1.5 w-1.5 shrink-0 rounded-full"
+                  style={{
+                    background: ACCENT_CSS.devedor,
+                    boxShadow: `0 0 8px ${ACCENT_CSS.devedor}`,
+                  }}
+                />
+                {d}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* 04 — Dashboard analitico do devedor — layout VERTICAL: texto no
+            topo, imagem grande full-width abaixo (max-w-[1200px] do shell). */}
+        <div className="flex flex-col items-center gap-10">
+          <div className="text-center max-w-[860px]">
+            <span
+              className="font-mono text-[12px] uppercase tracking-[0.32em]"
+              style={{ color: ACCENT_CSS.gold }}
+            >
+              04 · Análise Profunda
+            </span>
+            <h3 className="mt-3 font-serif text-[clamp(28px,3.4vw,42px)] font-medium leading-[1.18] tracking-tight text-ivory">
+              Dashboard Analítico do Devedor.
+            </h3>
+            <p className="mx-auto mt-5 max-w-[720px] text-base leading-relaxed text-[var(--color-ivory-88)]">
+              Cada devedor tem seu próprio painel analítico — uma leitura visual da concentração patrimonial, do histórico de medidas e da chance de recuperação. O cliente acompanha a estratégia sem precisar abrir o processo.
+            </p>
+            <ul className="mx-auto mt-6 grid max-w-[820px] gap-3 text-left md:grid-cols-2">
+              {[
+                "Concentração patrimonial por categoria em gráfico de pizza.",
+                "Linha do tempo das medidas com marcos do processo.",
+                "Indicador de chance de recuperação calculado pela equipe.",
+                "Comparativo entre devedores da mesma carteira.",
+              ].map((d) => (
+                <li
+                  key={d}
+                  className="flex items-start gap-3 text-[15px] leading-relaxed text-[var(--color-ivory-88)]"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="mt-2 inline-block h-1.5 w-1.5 shrink-0 rounded-full"
+                    style={{
+                      background: ACCENT_CSS.gold,
+                      boxShadow: `0 0 8px ${ACCENT_CSS.gold}`,
+                    }}
+                  />
+                  {d}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="w-full">
             <ImagemEstatica
-              src="/img/showcase/equipe-dashboard-analitico-full.png"
+              src="/img/showcase/equipe-dashboard-analitico-full.png?v=20260626b"
               alt="Dashboard analítico do devedor — gráficos de recuperabilidade, funil e patrimônio"
               accent="gold"
             />
-          }
-          accent="gold"
-          imageWide
-        />
+          </div>
+        </div>
 
         {/* 05 — Monitor de custos (ScrollWindow accent gold) */}
         <FeatureRow
@@ -566,36 +685,65 @@ export function ShowcaseAction() {
           ]}
           media={
             <ScrollWindow
-              src="/img/showcase/cliente-custos-full.png"
+              src="/img/showcase/cliente-custos-full.png?v=20260626b"
               alt="Monitor de Custos — página completa rolando"
               accent="gold"
-              imageHeight={2400}
-              aspect="4/5"
-              scrollEnd="-95%"
+              imageWidth={2560}
+              imageHeight={2200}
+              aspect="16/10"
             />
           }
           accent="gold"
         />
 
-        {/* 06 — Por tras do dia a dia (animacao) */}
+        {/* 06 — Por tras do dia a dia (animacao) — layout VERTICAL: texto
+            em cima, animacao GRANDE full-width embaixo. */}
         <div className="relative rounded-3xl border border-[var(--color-ivory-12)] bg-[var(--color-onyx-soft)]/40 p-8 md:p-12">
           <span className="absolute -top-3 left-8 inline-flex items-center gap-2 rounded-full border border-[var(--color-gold)]/40 bg-[var(--color-onyx)] px-3 py-1 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-gold)]">
             Por trás do dia a dia
           </span>
 
-          <FeatureRow
-            reverse
-            eyebrow="A Engrenagem"
-            title="O Escritório Roda Dezenas de APIs nos Bastidores."
-            description="Tudo o que o cliente vê é alimentado pelo trabalho silencioso da equipe — o Sonar dispara uma sequência automática de consultas em fontes públicas e privadas a cada novo devedor, em segundo plano. Você só vê o resultado; nós cuidamos do processo."
-            destaques={[
-              "Sequência automática de consultas a cada novo devedor.",
-              "Resultados consolidados no dossiê em minutos.",
-              "Cada bem encontrado vai direto para o painel do cliente.",
-            ]}
-            media={<ApiPesquisaAnimacao />}
-            accent="gold"
-          />
+          <div className="flex flex-col items-center gap-10">
+            <div className="text-center max-w-[860px]">
+              <span
+                className="font-mono text-[12px] uppercase tracking-[0.32em]"
+                style={{ color: ACCENT_CSS.gold }}
+              >
+                A Engrenagem
+              </span>
+              <h3 className="mt-3 font-serif text-[clamp(28px,3.4vw,42px)] font-medium leading-[1.18] tracking-tight text-ivory">
+                O Escritório Roda Dezenas de APIs nos Bastidores.
+              </h3>
+              <p className="mx-auto mt-5 max-w-[720px] text-base leading-relaxed text-[var(--color-ivory-88)]">
+                Tudo o que o cliente vê é alimentado pelo trabalho silencioso da equipe — o Sonar dispara uma sequência automática de consultas em fontes públicas e privadas a cada novo devedor, em segundo plano. Você só vê o resultado; nós cuidamos do processo.
+              </p>
+              <ul className="mx-auto mt-6 grid max-w-[820px] gap-3 text-left md:grid-cols-3">
+                {[
+                  "Sequência automática de consultas a cada novo devedor.",
+                  "Resultados consolidados no dossiê em minutos.",
+                  "Cada bem encontrado vai direto para o painel do cliente.",
+                ].map((d) => (
+                  <li
+                    key={d}
+                    className="flex items-start gap-3 text-[15px] leading-relaxed text-[var(--color-ivory-88)]"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="mt-2 inline-block h-1.5 w-1.5 shrink-0 rounded-full"
+                      style={{
+                        background: ACCENT_CSS.gold,
+                        boxShadow: `0 0 8px ${ACCENT_CSS.gold}`,
+                      }}
+                    />
+                    {d}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="w-full">
+              <ApiPesquisaAnimacao />
+            </div>
+          </div>
         </div>
       </div>
     </div>

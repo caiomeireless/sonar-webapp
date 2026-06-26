@@ -74,6 +74,10 @@ export const DEVEDOR_1 = {
   nome: "Carlos Eduardo Mendes Albuquerque",
   data_nascimento: "1972-03-15",
   nome_mae: "Helena Mendes Albuquerque",
+  rg: "15.487.221-9 SSP/SP",
+  email: "carlos.albuquerque@gmail.com",
+  telefone: "+55 11 98876-4520",
+  redes_sociais: "@carlos.albuquerque (IG) · linkedin.com/in/calbuquerque",
 };
 
 export const DEVEDOR_2 = {
@@ -83,6 +87,10 @@ export const DEVEDOR_2 = {
   nome: "Construtora Horizonte Norte LTDA",
   data_nascimento: null,
   nome_mae: null,
+  rg: null,
+  email: "contato@horizontenorte.com.br",
+  telefone: "+55 11 4002-8922",
+  redes_sociais: "linkedin.com/company/horizonte-norte",
 };
 
 export const DEVEDOR_3 = {
@@ -92,6 +100,10 @@ export const DEVEDOR_3 = {
   nome: "Maria Aparecida Santos",
   data_nascimento: "1985-11-08",
   nome_mae: "Aparecida Conceição dos Santos",
+  rg: "32.118.554-2 SSP/SP",
+  email: "maria.aparecida@hotmail.com",
+  telefone: "+55 11 95412-7833",
+  redes_sociais: "@mariaap_santos (IG)",
 };
 
 export const DEVEDORES_DEMO = [DEVEDOR_1, DEVEDOR_2, DEVEDOR_3];
