@@ -506,7 +506,7 @@ export function ShowcaseAction() {
           </ul>
         </div>
 
-        {/* 03 — Dossie do devedor (ScrollWindow) */}
+        {/* 03 — Dossie do devedor (imagem estatica wide, sem scroll) */}
         <FeatureRow
           reverse
           eyebrow="03 · Patrimônio Localizado"
@@ -519,15 +519,14 @@ export function ShowcaseAction() {
             "Sem expor advogado responsável ou custos internos.",
           ]}
           media={
-            <ScrollWindow
+            <ImagemEstatica
               src="/img/showcase/cliente-dossie-full.png"
-              alt="Dossiê do Devedor — visão do cliente, página completa"
+              alt="Dossiê patrimonial do devedor"
               accent="devedor"
-              imageHeight={2400}
-              aspect="4/5"
             />
           }
           accent="devedor"
+          imageWide
         />
 
         {/* 04 — Dashboard analitico do devedor (imagem estatica focada
