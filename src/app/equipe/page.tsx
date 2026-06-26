@@ -12,7 +12,8 @@
 import { redirect } from "next/navigation";
 import { Eye } from "lucide-react";
 import { perfilLogado } from "@/lib/perfis-server";
-import { ehEquipe } from "@/lib/perfis";
+import { ehEquipe, perfilAtual } from "@/lib/perfis";
+import { devEuFromParam } from "@/lib/dev-auth";
 import {
   obterDadosDashboardPlataforma,
   listarOpcoesFiltros,
@@ -67,10 +68,15 @@ export default async function DashboardPlataformaPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const perfil = await perfilLogado();
+  const sp = await searchParams;
+  // Dev shortcut: ?eu=<email> permite previsualizar como outro usuario em
+  // dev/preview sem fazer login. Em producao, devEuFromParam retorna
+  // undefined e a checagem real (perfilLogado) prevalece.
+  const euDev = devEuFromParam(sp.eu);
+  const perfilLog = await perfilLogado();
+  const perfil = euDev ? await perfilAtual(euDev) : perfilLog;
   if (!ehEquipe(perfil)) redirect("/login");
 
-  const sp = await searchParams;
   const filtros = parseFiltros(sp);
 
   const [dados, opcoes] = await Promise.all([
