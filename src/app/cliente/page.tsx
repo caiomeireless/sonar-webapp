@@ -24,7 +24,7 @@ import KPICasosAtivos from "@/app/equipe/_components/KPICasosAtivos";
 import KPIGastoAPIs from "@/app/equipe/_components/KPIGastoAPIs";
 import EvolucaoPatrimonioMensal from "@/app/equipe/_components/EvolucaoPatrimonioMensal";
 import MixBensPorTipo from "@/app/equipe/_components/MixBensPorTipo";
-import AtividadeEquipe7Dias from "@/app/equipe/_components/AtividadeEquipe7Dias";
+import AtividadePorProcesso7Dias from "@/app/equipe/_components/AtividadePorProcesso7Dias";
 import CustosPorAPIDonut from "@/app/equipe/_components/CustosPorAPIDonut";
 import Top5DevedoresRastreio from "@/app/equipe/_components/Top5DevedoresRastreio";
 import FeedMedidasRecentes from "@/app/equipe/_components/FeedMedidasRecentes";
@@ -153,7 +153,7 @@ export default async function DashboardClientePage({ searchParams }: Props) {
           <CustosPorAPIDonut dados={dados.custosPorAPI} />
         </div>
         <div className="md:col-span-12">
-          <AtividadeEquipe7Dias dados={dados.atividadeEquipe7Dias} />
+          <AtividadePorProcesso7Dias dados={dados.atividadePorProcesso7Dias} />
         </div>
 
         {/* L4 — Top 5 devedores (full) */}

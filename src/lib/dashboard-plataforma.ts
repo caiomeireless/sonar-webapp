@@ -55,6 +55,15 @@ export interface AtividadeEquipeItem {
   breakdown: Partial<Record<TipoMedida, number>>;
 }
 
+// Atividade agregada POR PROCESSO (caso_id) — usada no painel do cliente,
+// onde o eixo X mostra "Pasta #X" em vez de advogado interno.
+export interface AtividadeProcessoItem {
+  casoId: number;
+  devedorNome: string;
+  medidasTomadas: number;
+  breakdown: Partial<Record<TipoMedida, number>>;
+}
+
 export interface TopClienteItem {
   credorId: number;
   credorNome: string;
@@ -98,6 +107,7 @@ export interface DashboardPlataforma {
   evolucaoMensal: EvolucaoMensalItem[];
   mixBensPorTipo: MixBensItem[];
   atividadeEquipe7Dias: AtividadeEquipeItem[];
+  atividadePorProcesso7Dias: AtividadeProcessoItem[];
   top5ClientesPorPatrimonio: TopClienteItem[];
   top5DevedoresRastreio: TopDevedorItem[];
   carteiraPorAdvogado: CarteiraAdvogadoItem[];
@@ -487,6 +497,50 @@ function agregarAtividadeEquipe(
   return out;
 }
 
+// Atividade por processo (caso_id) nos ultimos 7 dias. Usado no painel
+// do cliente: cada barra eh um caso, segmentos por tipo de medida.
+function agregarAtividadePorProcesso(
+  medidas: MedidaRow[],
+  casos: CasoRow[],
+  devedores: DevedorRow[],
+): AtividadeProcessoItem[] {
+  const corte = diasAtrasISO(7);
+  const recentes = medidas.filter((m) => (m.criado_em || m.data) >= corte);
+
+  const devedorDoCaso = new Map<number, number>();
+  for (const c of casos) devedorDoCaso.set(c.id, c.devedor_id);
+  const nomePorDevedor = new Map<number, string>();
+  for (const d of devedores) nomePorDevedor.set(d.id, d.nome);
+
+  const acc = new Map<
+    number,
+    { total: number; breakdown: Partial<Record<TipoMedida, number>> }
+  >();
+  for (const m of recentes) {
+    const cur = acc.get(m.caso_id) ?? { total: 0, breakdown: {} };
+    cur.total += 1;
+    cur.breakdown[m.tipo] = (cur.breakdown[m.tipo] ?? 0) + 1;
+    acc.set(m.caso_id, cur);
+  }
+
+  const out: AtividadeProcessoItem[] = [];
+  for (const [casoId, v] of acc.entries()) {
+    const devedorId = devedorDoCaso.get(casoId);
+    const devedorNome =
+      devedorId !== undefined
+        ? (nomePorDevedor.get(devedorId) ?? `Devedor #${devedorId}`)
+        : "—";
+    out.push({
+      casoId,
+      devedorNome,
+      medidasTomadas: v.total,
+      breakdown: v.breakdown,
+    });
+  }
+  out.sort((a, b) => b.medidasTomadas - a.medidasTomadas);
+  return out;
+}
+
 function agregarTopClientes(args: {
   credores: CredorRow[];
   casos: CasoRow[];
@@ -839,6 +893,11 @@ export async function obterDadosDashboardPlataforma(
     filtrado.medidas,
     mapaPerfis,
   );
+  const atividadePorProcesso7Dias = agregarAtividadePorProcesso(
+    filtrado.medidas,
+    filtrado.casos,
+    filtrado.devedores,
+  );
   const top5ClientesPorPatrimonio = agregarTopClientes({
     credores: filtrado.credores,
     casos: filtrado.casos,
@@ -872,6 +931,7 @@ export async function obterDadosDashboardPlataforma(
     evolucaoMensal,
     mixBensPorTipo,
     atividadeEquipe7Dias,
+    atividadePorProcesso7Dias,
     top5ClientesPorPatrimonio,
     top5DevedoresRastreio,
     carteiraPorAdvogado,
