@@ -176,19 +176,15 @@ async function tirarCustosFull(context) {
   await aplicarCssOcultar(page);
   await page.waitForTimeout(1500);
 
-  const buf = await page.screenshot({ fullPage: true, type: "png" });
-  const img = sharp(buf);
-  const meta = await img.metadata();
-  const altura = Math.min(meta.height || ALTURA_MAX_CUSTOS, ALTURA_MAX_CUSTOS);
-  const largura = meta.width || 1280;
-
+  // Tira FULL PAGE inteira — sem recortar. O ScrollWindow do bloco 5
+  // depende da imagem ter altura COMPLETA pra mostrar pagina inteira
+  // rolando dentro da janela.
   const destino = path.join(OUTPUT_DIR, "cliente-custos-full.png");
-  await img
-    .extract({ left: 0, top: 0, width: largura, height: altura })
-    .toFile(destino);
+  await page.screenshot({ path: destino, fullPage: true, type: "png" });
 
+  const meta = await sharp(destino).metadata();
   console.log(
-    `[final] custos-full salvo: original ${meta.width}x${meta.height} -> recortado ${largura}x${altura}`,
+    `[final] custos-full salvo: ${meta.width}x${meta.height}  (FULL — sem corte)`,
   );
 
   await page.close().catch(() => {});

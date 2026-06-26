@@ -95,7 +95,7 @@ function HeroNotebook() {
           <div className="relative h-full w-full overflow-hidden rounded-2xl bg-[var(--color-onyx)]">
             <motion.div style={{ y: imageY }} className="relative w-full">
               <Image
-                src="/img/showcase/cliente-painel-full.png?v=20260626b"
+                src="/img/showcase/cliente-painel-full.png?v=20260626c"
                 alt="Dashboard do Cliente"
                 width={1280}
                 height={3500}
@@ -432,7 +432,7 @@ export function ShowcaseAction() {
           ]}
           media={
             <ImagemEstatica
-              src="/img/showcase/cliente-painel-graficos.png?v=20260626b"
+              src="/img/showcase/cliente-painel-graficos.png?v=20260626c"
               alt="Painel do Cliente — gráficos de evolução e mix de bens"
               accent="signal"
             />
@@ -497,7 +497,7 @@ export function ShowcaseAction() {
                 style={{ boxShadow: ACCENT_GLOW.signal }}
               >
                 <Image
-                  src="/img/showcase/mapa-estadual.png?v=20260626b"
+                  src="/img/showcase/mapa-estadual.png?v=20260626c"
                   alt="Drill-down em São Paulo — cidades e pinos por bem"
                   width={1280}
                   height={800}
@@ -565,7 +565,7 @@ export function ShowcaseAction() {
                 style={{ boxShadow: ACCENT_GLOW.devedor }}
               >
                 <Image
-                  src="/img/showcase/cliente-dossie-topo.png?v=20260626b"
+                  src="/img/showcase/cliente-dossie-topo.png?v=20260626c"
                   alt="Dossiê do devedor — header, estatísticas e dados cadastrais"
                   width={1280}
                   height={800}
@@ -587,7 +587,7 @@ export function ShowcaseAction() {
                 style={{ boxShadow: ACCENT_GLOW.devedor }}
               >
                 <Image
-                  src="/img/showcase/cliente-dossie-bens.png?v=20260626b"
+                  src="/img/showcase/cliente-dossie-bens.png?v=20260626c"
                   alt="Dossiê do devedor — bens encontrados por categoria"
                   width={1280}
                   height={800}
@@ -664,7 +664,7 @@ export function ShowcaseAction() {
           </div>
           <div className="w-full">
             <ImagemEstatica
-              src="/img/showcase/equipe-dashboard-analitico-full.png?v=20260626b"
+              src="/img/showcase/equipe-dashboard-analitico-full.png?v=20260626c"
               alt="Dashboard analítico do devedor — gráficos de recuperabilidade, funil e patrimônio"
               accent="gold"
             />
@@ -685,11 +685,11 @@ export function ShowcaseAction() {
           ]}
           media={
             <ScrollWindow
-              src="/img/showcase/cliente-custos-full.png?v=20260626b"
+              src="/img/showcase/cliente-custos-full.png?v=20260626c"
               alt="Monitor de Custos — página completa rolando"
               accent="gold"
               imageWidth={2560}
-              imageHeight={2200}
+              imageHeight={7760}
               aspect="16/10"
             />
           }
