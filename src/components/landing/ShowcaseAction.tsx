@@ -154,11 +154,17 @@ function ScrollWindow({
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start end", "end start"],
+    // Offset mais conservador: progresso 0 só começa quando o elemento
+    // já está 25% dentro do viewport (pelo topo) e termina quando ele
+    // está 25% do bottom — assim o usuário vê o topo da imagem antes
+    // de qualquer rolagem acontecer.
+    offset: ["start 25%", "end 75%"],
   });
 
-  // Rola a imagem de 0% a -70% conforme a janela cruza o viewport.
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "-70%"]);
+  // Pausa inicial: nos primeiros 18% do progresso a imagem fica parada
+  // no topo (0%), depois rola até -65%. Isso dá tempo do usuário ver
+  // o cabeçalho/topo da tela antes de qualquer movimento.
+  const y = useTransform(scrollYProgress, [0, 0.18, 1], ["0%", "0%", "-65%"]);
 
   return (
     <div
@@ -209,11 +215,14 @@ function VerticalMonitor({
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start end", "end start"],
+    // Mesmo offset conservador do ScrollWindow: dá tempo de ver o topo
+    // do monitor vertical antes da rolagem começar.
+    offset: ["start 25%", "end 75%"],
   });
 
-  // Scroll bem mais suave que o ScrollWindow do bloco 3.
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "-55%"]);
+  // Pausa inicial um pouco maior (20%) e amplitude menor (-50%) porque
+  // o monitor vertical é mais alto e o movimento precisa ser mais suave.
+  const y = useTransform(scrollYProgress, [0, 0.2, 1], ["0%", "0%", "-50%"]);
   // Pequeno fade-in no comeco, sem grandes transformacoes.
   const opacity = useTransform(scrollYProgress, [0, 0.1, 1], [0.6, 1, 1]);
 

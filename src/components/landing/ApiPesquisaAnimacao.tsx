@@ -1,150 +1,171 @@
 "use client";
 
-// Animação inline que simula a sequência de pesquisas de patrimônio
-// disparadas no fundo do Sonar. Cada API entra em "loading" por 1.4s,
-// faz uma transição de 0.4s pra "done", e a próxima começa logo em
-// seguida. Quando todas terminam, espera 2.5s e reinicia o ciclo.
+// Animação inline que reproduz a tela "Fila do sistema interno" do Sonar
+// (a mesma tela que o advogado vê quando dispara uma busca de patrimônio
+// pelo painel interno do escritório). Cards das 7 fontes pagas/grátis
+// acendem em sequência: AGUARDANDO → BUSCANDO... → CONCLUÍDO.
 //
-// Visual estilo console/terminal: bordas finas, fundo onyx, barra de
-// progresso preenchendo da esquerda pra direita, contador acumulando
-// no rodapé.
+// Substitui o console minimalista antigo. Mesma estética da AnimacaoBusca
+// real, mas em loop infinito pra ser usada como showcase na landing.
 
 import { useEffect, useMemo, useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import {
-  AlertTriangle,
-  Briefcase,
-  Building2,
-  Check,
-  Database,
-  FileText,
-  Inbox,
-  MapPin,
-  Search,
-  type LucideIcon,
-} from "lucide-react";
 
 // --------------------------------------------------------------
-// Tipagem
+// Tipagem e dados das fontes
 // --------------------------------------------------------------
 
-type Estado = "idle" | "loading" | "done";
+type Estado = "aguardando" | "buscando" | "concluido";
 
-type TipoApi =
-  | "fila-interna"
-  | "assertiva"
-  | "bigdatacorp"
-  | "arisp"
-  | "cenprot"
-  | "edossie"
-  | "junta";
-
-type ApiDef = {
-  tipo: TipoApi;
-  rotulo: string;
-  icone: LucideIcon;
-  /** Quando true, marca uma etapa interna do escritorio (nao uma API
-   * paga). Usado pra separar visualmente a primeira linha das demais. */
-  interno?: boolean;
+type FonteApi = {
+  /** Tag curta exibida no canto superior esquerdo do card. */
+  tag: string;
+  /** Descrição curta, abaixo da tag — o que essa fonte traz. */
+  legenda: string;
+  /** Preço em centavos pra montar o label e definir cor (grátis = signal). */
+  precoCentavos: number;
+  /** Quantos "achados" essa fonte gera (mostrado quando concluída). */
+  achados: number;
 };
 
-// Lista fixa de etapas exibidas na animação. A ordem aqui também é a
-// ordem em que elas são acionadas no ciclo. A primeira linha eh o
-// "sistema interno do escritorio" (fila de execucoes recebida via
-// integracao com o nosso sistema de gestao). Depois passa pras APIs
-// pagas que rodam patrimonio.
-const APIS: ReadonlyArray<ApiDef> = [
+// As 7 fontes do combo "lead" do Sonar, na mesma ordem em que aparecem
+// no painel interno. Total: R$ 0,80.
+const FONTES: ReadonlyArray<FonteApi> = [
   {
-    tipo: "fila-interna",
-    rotulo: "Sistema interno · recebendo execução",
-    icone: Inbox,
-    interno: true,
+    tag: "Assertiva",
+    legenda: "Endereços / Telefones",
+    precoCentavos: 30,
+    achados: 3,
   },
-  { tipo: "assertiva", rotulo: "Assertiva", icone: Building2 },
-  { tipo: "bigdatacorp", rotulo: "BigDataCorp", icone: Database },
-  { tipo: "arisp", rotulo: "ARISP — matrículas SP", icone: MapPin },
-  { tipo: "cenprot", rotulo: "Cenprot — protestos", icone: AlertTriangle },
-  { tipo: "edossie", rotulo: "eDossiê — carga tributária", icone: FileText },
-  { tipo: "junta", rotulo: "Junta Comercial", icone: Briefcase },
+  {
+    tag: "BigDataCorp",
+    legenda: "Veículos",
+    precoCentavos: 40,
+    achados: 2,
+  },
+  {
+    tag: "BigDataCorp",
+    legenda: "Vínculos societários",
+    precoCentavos: 5,
+    achados: 1,
+  },
+  {
+    tag: "BigDataCorp",
+    legenda: "Aeronaves / Embarcações",
+    precoCentavos: 5,
+    achados: 0,
+  },
+  {
+    tag: "DataJud",
+    legenda: "Processos CNJ",
+    precoCentavos: 0,
+    achados: 4,
+  },
+  {
+    tag: "minhareceita",
+    legenda: "CNPJ + Quadro societário",
+    precoCentavos: 0,
+    achados: 1,
+  },
+  {
+    tag: "SICAR",
+    legenda: "Imóvel rural",
+    precoCentavos: 0,
+    achados: 0,
+  },
 ];
 
 // --------------------------------------------------------------
 // Constantes de tempo (ms)
 // --------------------------------------------------------------
 
-const DURACAO_LOADING_MS = 1400; // tempo na fase "loading"
-const DURACAO_SUCCESS_MS = 400; // animação curta marcando "done"
-const PAUSA_REINICIO_MS = 2500; // pausa antes de reiniciar o ciclo
+const DURACAO_BUSCANDO_MS = 1600; // tempo que cada card fica "buscando"
+const STAGGER_MS = 1600;          // intervalo entre o início de cards consecutivos
+const PAUSA_REINICIO_MS = 3000;   // espera depois de tudo concluído
 
 // --------------------------------------------------------------
-// Componente
+// Helpers
+// --------------------------------------------------------------
+
+function formatBRL(centavos: number): string {
+  return (centavos / 100).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+}
+
+function precoLabel(centavos: number): string {
+  return centavos === 0 ? "Grátis" : formatBRL(centavos);
+}
+
+// --------------------------------------------------------------
+// Componente principal
 // --------------------------------------------------------------
 
 export default function ApiPesquisaAnimacao() {
-  // Estado de cada API por índice.
+  // Estado de cada fonte.
   const [estados, setEstados] = useState<Estado[]>(() =>
-    APIS.map(() => "idle"),
+    FONTES.map(() => "aguardando"),
   );
-  // Contador acumulado de "bens encontrados".
-  const [bens, setBens] = useState(0);
-  // Chave do ciclo atual — incrementa a cada reinício pra resetar
-  // animações internas (barras, contador, etc).
+  // Ciclo atual — incrementa a cada reinício pra resetar timers.
   const [ciclo, setCiclo] = useState(0);
 
-  // Quantidade aleatória de bens por API, sorteada uma vez por ciclo
-  // pra manter consistência entre reinícios sem virar puramente
-  // determinístico. A primeira etapa eh interna (recebimento do caso)
-  // e nao gera bens — incremento fixo em 0.
-  const incrementos = useMemo(() => {
-    return APIS.map((a) =>
-      a.interno ? 0 : Math.floor(Math.random() * 3) + 1,
-    ); // 1..3 pras APIs, 0 pra etapa interna
-    // ciclo entra como dep abaixo
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ciclo]);
+  // Total monetário do combo (somatório dos preços).
+  const custoTotalCentavos = useMemo(
+    () => FONTES.reduce((acc, f) => acc + f.precoCentavos, 0),
+    [],
+  );
 
-  // Loop principal: encadeia setTimeouts pra cada API na sequência.
+  // Quantas fontes já concluíram.
+  const concluidas = estados.filter((e) => e === "concluido").length;
+  const total = FONTES.length;
+  // Progresso linear (0–100) baseado em concluídas + meia barra pra
+  // quem tá buscando, pra ficar suave.
+  const buscando = estados.filter((e) => e === "buscando").length;
+  const progresso = Math.min(
+    100,
+    ((concluidas + buscando * 0.5) / total) * 100,
+  );
+
+  // Loop principal: agenda as transições de cada card.
   useEffect(() => {
     const timers: ReturnType<typeof setTimeout>[] = [];
 
-    APIS.forEach((_, indice) => {
-      const inicioLoading =
-        indice * (DURACAO_LOADING_MS + DURACAO_SUCCESS_MS);
-      const inicioDone = inicioLoading + DURACAO_LOADING_MS;
+    FONTES.forEach((_, indice) => {
+      const inicioBuscando = indice * STAGGER_MS;
+      const inicioConcluido = inicioBuscando + DURACAO_BUSCANDO_MS;
 
-      // Marca essa API como loading.
+      // aguardando → buscando
       timers.push(
         setTimeout(() => {
           setEstados((anterior) => {
             const proximo = [...anterior];
-            proximo[indice] = "loading";
+            proximo[indice] = "buscando";
             return proximo;
           });
-        }, inicioLoading),
+        }, inicioBuscando),
       );
 
-      // Marca como done e soma o incremento ao contador.
+      // buscando → concluido
       timers.push(
         setTimeout(() => {
           setEstados((anterior) => {
             const proximo = [...anterior];
-            proximo[indice] = "done";
+            proximo[indice] = "concluido";
             return proximo;
           });
-          setBens((anterior) => anterior + incrementos[indice]);
-        }, inicioDone),
+        }, inicioConcluido),
       );
     });
 
-    // Reinício do ciclo.
+    // Reinício após pausa.
     const totalCiclo =
-      APIS.length * (DURACAO_LOADING_MS + DURACAO_SUCCESS_MS) +
+      FONTES.length * STAGGER_MS +
+      (DURACAO_BUSCANDO_MS - STAGGER_MS) +
       PAUSA_REINICIO_MS;
 
     timers.push(
       setTimeout(() => {
-        setEstados(APIS.map(() => "idle"));
-        setBens(0);
+        setEstados(FONTES.map(() => "aguardando"));
         setCiclo((c) => c + 1);
       }, totalCiclo),
     );
@@ -152,294 +173,238 @@ export default function ApiPesquisaAnimacao() {
     return () => {
       timers.forEach((t) => clearTimeout(t));
     };
-  }, [ciclo, incrementos]);
-
-  // Quantas APIs já terminaram (pra eyebrow do header).
-  const concluidas = estados.filter((e) => e === "done").length;
-  const total = APIS.length;
-  const tudoPronto = concluidas === total;
+  }, [ciclo]);
 
   return (
     <div
-      className="relative overflow-hidden rounded-2xl border p-6 shadow-[0_30px_80px_-40px_rgba(255,193,7,0.25)]"
+      className="relative overflow-hidden rounded-2xl border p-6 sm:p-8"
       style={{
         background: "var(--color-onyx)",
         borderColor: "var(--color-line)",
+        boxShadow: "0 30px 80px -40px rgba(201,162,74,0.25)",
       }}
     >
-      {/* halo sutil de signal no canto superior, pra dar sensação de "ativo" */}
+      {/* Glow sutil de ouro ao fundo, igual à tela real. */}
       <div
-        aria-hidden
-        className="pointer-events-none absolute -top-24 -right-24 h-56 w-56 rounded-full opacity-30 blur-3xl"
-        style={{ background: "var(--color-signal)" }}
+        aria-hidden="true"
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[420px] w-[820px] -translate-x-1/2 -translate-y-1/2 opacity-60"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, rgba(201,162,74,0.18), transparent 60%)",
+        }}
       />
 
-      {/* Header do console */}
-      <div className="relative flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <span
-            className="grid h-9 w-9 place-items-center rounded-lg"
-            style={{
-              background: "var(--color-surface-2, rgba(255,255,255,0.04))",
-              border: "1px solid var(--color-line)",
-            }}
-          >
-            <motion.span
-              animate={
-                tudoPronto
-                  ? { scale: 1, opacity: 1 }
-                  : { scale: [1, 1.15, 1], opacity: [0.7, 1, 0.7] }
-              }
-              transition={{
-                duration: 1.4,
-                repeat: tudoPronto ? 0 : Infinity,
-                ease: "easeInOut",
-              }}
-              className="inline-flex"
-              style={{ color: "var(--color-signal)" }}
-            >
-              <Search size={16} strokeWidth={2.2} />
-            </motion.span>
-          </span>
-          <div className="flex flex-col">
-            <span
-              className="eyebrow"
-              style={{ color: "var(--color-signal)" }}
-            >
-              Pesquisa em andamento
-            </span>
-            <span
-              className="text-sm font-medium"
-              style={{ color: "var(--color-ivory, #f5efe6)" }}
-            >
-              Processando execução…
-            </span>
-          </div>
-        </div>
-
-        {/* contador de etapas concluídas (1 fila interna + 6 APIs) */}
-        <div
-          className="font-mono text-[12px] uppercase tracking-[0.22em]"
-          style={{ color: "var(--color-ivory-66, rgba(245,239,230,0.66))" }}
-        >
-          {concluidas}/{total} etapas
-        </div>
-      </div>
-
-      {/* Linhas das etapas: 1 fila interna + 6 APIs.
-          Apos a primeira linha (interna), inserimos um pequeno separador
-          com label "Aciona pesquisas externas" pra contar a historia
-          visualmente — o caso chega pela fila e dispara o leque de APIs.
-          Usamos <div> simples em vez de <ul> pra poder intercalar o
-          separador sem violar a regra "ul so aceita li como filho direto"
-          ou "role=list precisa de role=listitem nos filhos". */}
-      <div className="relative mt-6 flex flex-col gap-3">
-        {APIS.flatMap((api, indice) => {
-          const linha = (
-            <LinhaApi
-              key={api.tipo}
-              api={api}
-              estado={estados[indice]}
-              ciclo={ciclo}
-            />
-          );
-          if (!api.interno) return [linha];
-          // Apos a linha interna, insere o divisor de fluxo.
-          const divisor = (
-            <div
-              key={`${api.tipo}-divisor`}
-              className="flex items-center gap-2 py-0.5 pl-11"
-              role="presentation"
-            >
-              <span
-                aria-hidden="true"
-                className="h-px flex-1"
-                style={{ background: "var(--color-line)" }}
-              />
-              <span
-                className="font-mono text-[10px] uppercase tracking-[0.22em]"
-                style={{
-                  color: "var(--color-ivory-66, rgba(245,239,230,0.66))",
-                }}
-              >
-                Aciona pesquisas externas
-              </span>
-              <span
-                aria-hidden="true"
-                className="h-px flex-1"
-                style={{ background: "var(--color-line)" }}
-              />
-            </div>
-          );
-          return [linha, divisor];
-        })}
-      </div>
-
-      {/* Rodapé: contador de bens encontrados */}
-      <div
-        className="relative mt-6 flex items-center justify-between gap-4 rounded-xl border px-4 py-3"
-        style={{
-          borderColor: "var(--color-line)",
-          background: "rgba(255,255,255,0.02)",
-        }}
-      >
+      {/* ----------------------------------------------------- */}
+      {/* TOPO — eyebrow + subtítulo (sem mencionar Themis)      */}
+      {/* ----------------------------------------------------- */}
+      <div className="relative flex flex-col items-center text-center">
         <span
           className="eyebrow"
-          style={{ color: "var(--color-ivory-66, rgba(245,239,230,0.66))" }}
+          style={{ color: "var(--color-ivory-66)" }}
         >
-          Bens encontrados
+          Fila do sistema interno
         </span>
+        <p
+          className="mt-1 font-mono text-[10px] uppercase tracking-[0.32em]"
+          style={{ color: "var(--color-ivory-66)" }}
+        >
+          Execuções aguardando rastreamento patrimonial
+        </p>
+      </div>
+
+      {/* ----------------------------------------------------- */}
+      {/* CARD CENTRAL — devedor + barra de progresso             */}
+      {/* ----------------------------------------------------- */}
+      <div className="relative mt-8 flex flex-col items-center text-center">
         <span
-          className="font-mono text-2xl font-semibold tabular-nums"
-          style={{ color: "var(--color-gold, #ffc107)" }}
+          className="eyebrow"
+          style={{ color: "var(--color-signal)" }}
         >
-          <AnimatePresence mode="popLayout">
-            <motion.span
-              key={bens}
-              initial={{ y: -8, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 8, opacity: 0 }}
-              transition={{ duration: 0.25, ease: "easeOut" }}
-              className="inline-block"
-            >
-              {bens.toString().padStart(2, "0")}
-            </motion.span>
-          </AnimatePresence>
+          Buscando bens
         </span>
+
+        <h3
+          className="nome-devedor mt-3 font-serif text-[clamp(20px,2.4vw,32px)] font-medium uppercase leading-[1.05] tracking-[0.06em]"
+          style={{ color: "var(--color-devedor)" }}
+        >
+          Carlos Eduardo Mendes Albuquerque
+        </h3>
+
+        <p
+          className="mt-3 font-mono text-xs"
+          style={{ color: "var(--color-ivory-66)" }}
+        >
+          Pessoa Física · CPF 111.222.333-44
+        </p>
+
+        <p
+          className="mt-2 font-mono text-[10px] uppercase tracking-[0.32em]"
+          style={{ color: "var(--color-gold)" }}
+        >
+          Combo lead · 7 consultas · {formatBRL(custoTotalCentavos)}
+        </p>
+
+        {/* Barra horizontal de progresso (signal → gold) */}
+        <div className="mt-6 w-full max-w-[560px]">
+          <div
+            className="relative h-1 overflow-hidden rounded-full"
+            style={{ background: "var(--color-ivory-12)" }}
+          >
+            <div
+              className="absolute inset-y-0 left-0 rounded-full"
+              style={{
+                width: `${progresso}%`,
+                background:
+                  "linear-gradient(90deg, var(--color-signal), var(--color-gold))",
+                transition: "width 0.35s ease-out",
+                boxShadow: "0 0 12px rgba(201,162,74,0.4)",
+              }}
+            />
+          </div>
+          <p
+            className="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.32em]"
+            style={{ color: "var(--color-ivory-66)" }}
+          >
+            {Math.round(progresso)}% · {concluidas} de {total} fontes
+          </p>
+        </div>
+      </div>
+
+      {/* ----------------------------------------------------- */}
+      {/* GRID DAS 7 FONTES                                      */}
+      {/* ----------------------------------------------------- */}
+      <div className="relative mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        {FONTES.map((fonte, indice) => (
+          <CardFonte
+            key={`${fonte.tag}-${fonte.legenda}`}
+            fonte={fonte}
+            estado={estados[indice]}
+          />
+        ))}
       </div>
     </div>
   );
 }
 
 // --------------------------------------------------------------
-// Linha de uma API
+// Card individual de fonte
 // --------------------------------------------------------------
 
-type LinhaApiProps = {
-  api: ApiDef;
+type CardFonteProps = {
+  fonte: FonteApi;
   estado: Estado;
-  ciclo: number;
 };
 
-function LinhaApi({ api, estado, ciclo }: LinhaApiProps) {
-  const Icone = api.icone;
+function CardFonte({ fonte, estado }: CardFonteProps) {
+  const isAguardando = estado === "aguardando";
+  const isBuscando = estado === "buscando";
+  const isConcluido = estado === "concluido";
 
-  // Cor principal do texto/ícone conforme estado.
-  const cor =
-    estado === "idle"
-      ? "var(--color-ivory-40, rgba(245,239,230,0.4))"
-      : "var(--color-signal)";
+  // Cor do preço: grátis vira signal (verde), pago vira gold (ouro).
+  const corPreco =
+    fonte.precoCentavos === 0
+      ? "var(--color-signal)"
+      : "var(--color-gold)";
 
-  // Cor do rótulo: idle fica acinzentado, ativo/concluído fica claro.
-  const corRotulo =
-    estado === "idle"
-      ? "var(--color-ivory-66, rgba(245,239,230,0.66))"
-      : "var(--color-ivory, #f5efe6)";
+  // Container — três variantes visuais conforme estado.
+  const classeContainer = isAguardando
+    ? "border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.5)] opacity-50"
+    : isBuscando
+      ? "border-[var(--color-gold)] bg-[rgba(201,162,74,0.08)] shadow-[0_0_32px_rgba(201,162,74,0.35)] ring-1 ring-[var(--color-gold)]/30"
+      : "border-[var(--color-signal)]/45 bg-[rgba(60,255,138,0.04)]";
 
   return (
     <div
-      className="grid items-center gap-3"
-      style={{ gridTemplateColumns: "auto 1fr auto auto" }}
+      className={`relative overflow-hidden rounded-xl border p-3 transition-all duration-500 ${classeContainer}`}
     >
-      {/* ícone da API */}
-      <span
-        className="grid h-8 w-8 place-items-center rounded-lg transition-colors"
-        style={{
-          background:
-            estado === "idle"
-              ? "rgba(255,255,255,0.02)"
-              : "rgba(255,193,7,0.08)",
-          border: "1px solid var(--color-line)",
-          color: cor,
-        }}
-      >
-        <Icone size={15} strokeWidth={2} />
-      </span>
-
-      {/* rótulo da API */}
-      <span
-        className="text-sm transition-colors"
-        style={{ color: corRotulo }}
-      >
-        {api.rotulo}
-      </span>
-
-      {/* barra de progresso */}
-      <div
-        className="relative h-[3px] w-32 overflow-hidden rounded-full"
-        style={{ background: "rgba(255,255,255,0.06)" }}
-      >
-        <motion.div
-          // Chave inclui o ciclo pra resetar a barra a cada reinício.
-          key={`${api.tipo}-${ciclo}-${estado}`}
-          className="absolute inset-y-0 left-0 rounded-full"
-          style={{ background: "var(--color-signal)" }}
-          initial={{ width: estado === "done" ? "100%" : "0%" }}
-          animate={{
-            width:
-              estado === "loading"
-                ? "100%"
-                : estado === "done"
-                  ? "100%"
-                  : "0%",
-          }}
-          transition={{
-            duration:
-              estado === "loading"
-                ? DURACAO_LOADING_MS / 1000
-                : DURACAO_SUCCESS_MS / 1000,
-            ease: "easeInOut",
+      {/* Pulso radial dourado por trás quando "buscando" */}
+      {isBuscando ? (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 animate-pulse"
+          style={{
+            background:
+              "radial-gradient(circle at center, rgba(201,162,74,0.18), transparent 70%)",
           }}
         />
+      ) : null}
+
+      {/* Header: tag da fonte (esq.) + preço (dir.) */}
+      <div className="relative flex items-start justify-between gap-2">
+        <span
+          className="font-mono text-[11px] uppercase tracking-[0.18em]"
+          style={{ color: "var(--color-ivory)" }}
+        >
+          {fonte.tag}
+        </span>
+        <span
+          className="whitespace-nowrap font-mono text-[10px] uppercase tracking-[0.18em]"
+          style={{ color: corPreco }}
+        >
+          {precoLabel(fonte.precoCentavos)}
+        </span>
       </div>
 
-      {/* dot de status */}
-      <Status estado={estado} />
-    </div>
-  );
-}
-
-// --------------------------------------------------------------
-// Indicador de status (dot cinza / dot signal pulsante / check verde)
-// --------------------------------------------------------------
-
-function Status({ estado }: { estado: Estado }) {
-  if (estado === "idle") {
-    return (
-      <span
-        aria-label="Aguardando"
-        className="block h-2 w-2 rounded-full"
-        style={{ background: "rgba(245,239,230,0.18)" }}
-      />
-    );
-  }
-
-  if (estado === "loading") {
-    return (
-      <span
-        aria-label="Pesquisando"
-        className="relative block h-2 w-2 rounded-full"
-        style={{ background: "var(--color-signal)" }}
+      {/* Legenda — o que essa fonte traz */}
+      <p
+        className="relative mt-2 font-mono text-[10px] leading-tight"
+        style={{ color: "var(--color-ivory-66)" }}
       >
-        <span
-          className="absolute inset-0 animate-ping rounded-full"
-          style={{ background: "var(--color-signal)", opacity: 0.55 }}
-        />
-      </span>
-    );
-  }
+        {fonte.legenda}
+      </p>
 
-  // done
-  return (
-    <motion.span
-      aria-label="Concluído"
-      initial={{ scale: 0.6, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
-      className="grid h-4 w-4 place-items-center rounded-full"
-      style={{ background: "var(--color-signal)", color: "var(--color-onyx)" }}
-    >
-      <Check size={11} strokeWidth={3} />
-    </motion.span>
+      {/* Rodapé do card: dot + status */}
+      <div className="relative mt-4 flex items-center gap-2">
+        {isAguardando ? (
+          <>
+            <span
+              className="inline-block h-2 w-2 rounded-full"
+              style={{ background: "var(--color-ivory-22)" }}
+            />
+            <span
+              className="font-mono text-[10px] uppercase tracking-[0.18em]"
+              style={{ color: "var(--color-ivory-66)" }}
+            >
+              Aguardando
+            </span>
+          </>
+        ) : isBuscando ? (
+          <>
+            <span
+              className="relative inline-block h-2 w-2 rounded-full"
+              style={{ background: "var(--color-gold)" }}
+            >
+              <span
+                className="absolute inset-0 animate-ping rounded-full"
+                style={{ background: "var(--color-gold)", opacity: 0.6 }}
+              />
+            </span>
+            <span
+              className="font-mono text-[10px] uppercase tracking-[0.18em]"
+              style={{ color: "var(--color-gold)" }}
+            >
+              Buscando...
+            </span>
+          </>
+        ) : (
+          <>
+            <span
+              className="font-mono text-base font-semibold leading-none"
+              style={{ color: "var(--color-signal)" }}
+            >
+              ✓
+            </span>
+            <span
+              className="font-mono text-[10px] uppercase tracking-[0.18em]"
+              style={{ color: isConcluido ? "var(--color-ivory)" : "var(--color-ivory-66)" }}
+            >
+              {fonte.achados === 0
+                ? "Sem resultados"
+                : `${fonte.achados} ${fonte.achados === 1 ? "achado" : "achados"}`}
+            </span>
+          </>
+        )}
+      </div>
+    </div>
   );
 }
