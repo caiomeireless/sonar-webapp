@@ -286,6 +286,7 @@ function FeatureRow({
   destaques,
   media,
   accent = "signal",
+  imageWide = false,
 }: {
   reverse?: boolean;
   eyebrow: string;
@@ -294,12 +295,17 @@ function FeatureRow({
   destaques?: string[];
   media: React.ReactNode;
   accent?: Accent;
+  /** Quando true, a imagem ocupa proporcao maior (1.6fr vs texto 1fr). */
+  imageWide?: boolean;
 }) {
   const cor = ACCENT_CSS[accent];
+  const gridCols = imageWide
+    ? "md:grid-cols-[1fr_1.6fr]"
+    : "md:grid-cols-2";
 
   return (
     <div
-      className={`grid items-center gap-10 md:gap-16 md:grid-cols-2 ${
+      className={`grid items-center gap-10 md:gap-16 ${gridCols} ${
         reverse ? "md:[direction:rtl]" : ""
       }`}
     >
@@ -383,7 +389,7 @@ export function ShowcaseAction() {
       {/* Feature rows — TODAS focadas no CLIENTE.
           O ultimo bloco discreto explica que existe uma versao espelhada
           pra equipe; nao eh venda B2B. */}
-      <div className="mx-auto max-w-[1200px] space-y-32 px-6 py-24 sm:px-10 md:py-32">
+      <div className="mx-auto max-w-[1200px] space-y-32 px-6 pb-24 pt-4 sm:px-10 md:pb-32 md:pt-8">
         {/* 01 — Visão geral (graficos do painel) */}
         <FeatureRow
           eyebrow="01 · Visão Geral"
@@ -403,6 +409,7 @@ export function ShowcaseAction() {
             />
           }
           accent="signal"
+          imageWide
         />
 
         {/* 02 — Mapa do Brasil com drill-down (UNIDO) */}
@@ -454,7 +461,7 @@ export function ShowcaseAction() {
                 className="font-mono text-[11px] uppercase tracking-[0.28em]"
                 style={{ color: "var(--color-ivory-66)" }}
               >
-                Drill-down em São Paulo
+                Drill-down em Goiás
               </span>
               <div
                 className="overflow-hidden rounded-2xl border border-[var(--color-line)]"
@@ -462,7 +469,7 @@ export function ShowcaseAction() {
               >
                 <Image
                   src="/img/showcase/mapa-estadual.png"
-                  alt="Drill-down em São Paulo — cidades e pinos por bem"
+                  alt="Drill-down em Goiás — cidades e pinos por bem"
                   width={1280}
                   height={800}
                   className="block h-auto w-full"
