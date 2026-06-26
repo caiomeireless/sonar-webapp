@@ -583,7 +583,7 @@ export function ShowcaseAction() {
             reverse
             eyebrow="A Engrenagem"
             title="O Escritório Roda Dezenas de APIs nos Bastidores."
-            description="Tudo o que o cliente vê é alimentado pelo trabalho silencioso da equipe — o Sonar consulta Assertiva, BigDataCorp, ARISP, Cenprot, eDossiê, Junta Comercial e outras fontes em segundo plano. Você só vê o resultado; nós cuidamos do processo."
+            description="Tudo o que o cliente vê é alimentado pelo trabalho silencioso da equipe — o Sonar dispara uma sequência automática de consultas em fontes públicas e privadas a cada novo devedor, em segundo plano. Você só vê o resultado; nós cuidamos do processo."
             destaques={[
               "Sequência automática de consultas a cada novo devedor.",
               "Resultados consolidados no dossiê em minutos.",

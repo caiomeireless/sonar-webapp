@@ -33,14 +33,17 @@ type FonteApi = {
   achados: number;
 };
 
+// Tags anonimizadas (API 1, API 2...) — cliente nao precisa saber
+// quais fornecedores especificos sao consultados. So importa O QUE
+// cada fonte traz (Enderecos, Veiculos, Imoveis, etc).
 const FONTES: ReadonlyArray<FonteApi> = [
-  { tag: "Assertiva", legenda: "Endereços / Telefones", precoCentavos: 30, achados: 3 },
-  { tag: "BigDataCorp", legenda: "Veículos", precoCentavos: 40, achados: 2 },
-  { tag: "BigDataCorp", legenda: "Vínculos societários", precoCentavos: 5, achados: 1 },
-  { tag: "BigDataCorp", legenda: "Aeronaves / Embarcações", precoCentavos: 5, achados: 0 },
-  { tag: "DataJud", legenda: "Processos CNJ", precoCentavos: 0, achados: 4 },
-  { tag: "minhareceita", legenda: "CNPJ + Quadro societário", precoCentavos: 0, achados: 1 },
-  { tag: "SICAR", legenda: "Imóvel rural", precoCentavos: 0, achados: 0 },
+  { tag: "API 1", legenda: "Endereços / Telefones", precoCentavos: 30, achados: 3 },
+  { tag: "API 2", legenda: "Veículos", precoCentavos: 40, achados: 2 },
+  { tag: "API 3", legenda: "Vínculos societários", precoCentavos: 5, achados: 1 },
+  { tag: "API 4", legenda: "Aeronaves / Embarcações", precoCentavos: 5, achados: 0 },
+  { tag: "API 5", legenda: "Processos judiciais", precoCentavos: 0, achados: 4 },
+  { tag: "API 6", legenda: "CNPJ + Quadro societário", precoCentavos: 0, achados: 1 },
+  { tag: "API 7", legenda: "Imóvel rural", precoCentavos: 0, achados: 0 },
 ];
 
 // ==============================================================
