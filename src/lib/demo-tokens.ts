@@ -1,43 +1,61 @@
 // Tokens de acesso a demo na landing.
 //
-// Fluxo:
-//   1. Visitante clica "Versao Demo" na landing -> abre modal
-//   2. Escolhe "Demo Equipe" ou "Demo Cliente" -> preenche nome+email
-//   3. Backend gera token UUID, persiste in-memory, dispara email pro
-//      caio@bpadvogados.com.br avisando + link pra Caio APROVAR
-//   4. Caio recebe email, clica em "Aprovar" -> token vira aprovado
-//   5. Visitante (que recebeu o link com o token) acessa /demo/{token}
-//      -> middleware seta cookie 'sonar.demo' + redireciona pra portal
+// Fluxo (atualizado 2026-06-26 — codigo de 6 digitos sem aprovacao):
+//   1. Visitante preenche form -> backend gera codigo de 6 digitos
+//      numericos e envia EMAIL pro caio@bpadvogados.com.br com o
+//      codigo destacado
+//   2. Caio repassa o codigo direto pro visitante (WhatsApp/voz)
+//   3. Visitante cola o codigo no card de "Entrar com codigo" que
+//      aparece na tela apos enviar o pedido
+//   4. Validacao em /api/demo/{codigo} seta cookie sonar.demo e
+//      redireciona pro portal correspondente
 //
-// Storage em memoria por enquanto. Migrar pra tabela `demo_tokens` no
-// Supabase quando passar de demo. O reset do processo (deploy) limpa
-// todos os tokens — comportamento aceitavel ja que sao de uso unico.
+// O codigo nao precisa de aprovacao explicita — assim que e enviado
+// pro Caio, ja vale por 24h. O ato de o Caio "aprovar" e simplesmente
+// repassar o codigo ou nao.
 //
-// Tempo de vida: 24h depois de aprovado. Tokens pendentes (nao
-// aprovados) expiram em 7 dias por garbage collection no listarPendentes.
+// Storage em memoria. Reset do processo (deploy) limpa tudo —
+// aceitavel porque tokens sao de uso curto. Migrar pra tabela
+// Supabase quando passar do estado de demo.
 
-import { randomUUID } from "node:crypto";
+import { randomInt } from "node:crypto";
 
 export type DemoTipo = "equipe" | "cliente";
 
-export type DemoTokenStatus = "pendente" | "aprovado" | "negado" | "consumido";
-
 export type DemoToken = {
-  token: string;
+  codigo: string; // 6 digitos numericos, ex "428193"
   tipo: DemoTipo;
   nomeVisitante: string;
   emailVisitante: string;
   motivo: string | null;
-  status: DemoTokenStatus;
   criadoEm: string;
-  aprovadoEm: string | null;
   consumidoEm: string | null;
 };
 
-const TTL_PENDENTE_MS = 7 * 24 * 60 * 60 * 1000; // 7 dias
-const TTL_APROVADO_MS = 24 * 60 * 60 * 1000; // 24h
+const TTL_MS = 24 * 60 * 60 * 1000; // 24h
 
 const _tokens: DemoToken[] = [];
+
+// Gera codigo 6 digitos garantindo unicidade entre tokens ainda
+// validos (nao expirados). 1M combinacoes — colisao improvavel com
+// poucos tokens simultaneos, mas o loop garante seguranca.
+function gerarCodigoUnico(): string {
+  const agora = Date.now();
+  const ativos = new Set(
+    _tokens
+      .filter(
+        (t) =>
+          agora - new Date(t.criadoEm).getTime() < TTL_MS,
+      )
+      .map((t) => t.codigo),
+  );
+  for (let tentativa = 0; tentativa < 50; tentativa++) {
+    const c = String(randomInt(100000, 1000000)); // 100000..999999
+    if (!ativos.has(c)) return c;
+  }
+  // Improvavel chegar aqui — em todo caso, devolve algo.
+  return String(randomInt(100000, 1000000));
+}
 
 export async function criarToken(args: {
   tipo: DemoTipo;
@@ -46,68 +64,48 @@ export async function criarToken(args: {
   motivo: string | null;
 }): Promise<DemoToken> {
   const novo: DemoToken = {
-    token: randomUUID(),
+    codigo: gerarCodigoUnico(),
     tipo: args.tipo,
     nomeVisitante: args.nomeVisitante,
     emailVisitante: args.emailVisitante,
     motivo: args.motivo,
-    status: "pendente",
     criadoEm: new Date().toISOString(),
-    aprovadoEm: null,
     consumidoEm: null,
   };
   _tokens.unshift(novo);
+  // Garbage collection inline — remove tokens expirados
+  garbageCollect();
   return novo;
 }
 
-export async function buscarToken(token: string): Promise<DemoToken | null> {
-  if (!token) return null;
-  return _tokens.find((t) => t.token === token) ?? null;
+export async function buscarToken(codigo: string): Promise<DemoToken | null> {
+  if (!codigo) return null;
+  return _tokens.find((t) => t.codigo === codigo) ?? null;
 }
 
-export async function aprovarToken(token: string): Promise<DemoToken | null> {
-  const t = _tokens.find((x) => x.token === token);
+// Tenta consumir um codigo. Retorna o token se valido (dentro do TTL);
+// retorna null se nao existe ou expirou.
+export async function consumirToken(codigo: string): Promise<DemoToken | null> {
+  const t = _tokens.find((x) => x.codigo === codigo);
   if (!t) return null;
-  if (t.status !== "pendente") return t; // idempotente
-  t.status = "aprovado";
-  t.aprovadoEm = new Date().toISOString();
-  return t;
-}
-
-export async function negarToken(token: string): Promise<DemoToken | null> {
-  const t = _tokens.find((x) => x.token === token);
-  if (!t) return null;
-  if (t.status !== "pendente") return t;
-  t.status = "negado";
-  return t;
-}
-
-export async function consumirToken(token: string): Promise<DemoToken | null> {
-  const t = _tokens.find((x) => x.token === token);
-  if (!t) return null;
-  if (t.status !== "aprovado") return null;
-  // Verifica TTL apos aprovado
-  const aprovado = t.aprovadoEm ? new Date(t.aprovadoEm).getTime() : 0;
-  if (Date.now() - aprovado > TTL_APROVADO_MS) {
-    t.status = "consumido"; // marca como expirado/consumido
-    return null;
+  const criado = new Date(t.criadoEm).getTime();
+  if (Date.now() - criado > TTL_MS) {
+    return null; // expirado
   }
-  t.consumidoEm = new Date().toISOString();
-  // NAO marca como consumido pra permitir o cookie ser reutilizado pelo
-  // proprio visitante durante as 24h. O TTL_APROVADO_MS bloqueia uso futuro.
+  // Marca como consumido (informativo — nao invalida pra que o cookie
+  // possa ser reutilizado pelo proprio visitante durante as 24h).
+  if (!t.consumidoEm) {
+    t.consumidoEm = new Date().toISOString();
+  }
   return t;
 }
 
-export async function listarPendentes(): Promise<DemoToken[]> {
-  // Garbage collection inline — remove pendentes muito antigos
+function garbageCollect(): void {
   const agora = Date.now();
   for (let i = _tokens.length - 1; i >= 0; i--) {
     const t = _tokens[i];
-    if (t.status !== "pendente") continue;
-    const criado = new Date(t.criadoEm).getTime();
-    if (agora - criado > TTL_PENDENTE_MS) {
+    if (agora - new Date(t.criadoEm).getTime() > TTL_MS) {
       _tokens.splice(i, 1);
     }
   }
-  return _tokens.filter((t) => t.status === "pendente");
 }

@@ -39,7 +39,7 @@ export async function GET(request: Request) {
       emailVisitante: email,
       motivo: "Diagnostico via /api/demo/teste-pedido",
     });
-    out.passo1_token = { ok: true, token: token.token };
+    out.passo1_token = { ok: true, codigo: token.codigo };
   } catch (err) {
     out.passo1_token = {
       ok: false,
@@ -70,29 +70,20 @@ export async function GET(request: Request) {
       return Response.json(out, { status: 200 });
     }
     const resend = new Resend(apiKey);
-    const baseUrl =
-      process.env.NEXT_PUBLIC_BASE_URL ??
-      (process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : "https://sonar-bpa.vercel.app");
-    const urlAprovar = `${baseUrl}/api/demo/aprovar?token=${encodeURIComponent(token.token)}`;
-    const urlAcesso = `${baseUrl}/api/demo/${encodeURIComponent(token.token)}`;
     const tipoLabel = tipo === "equipe" ? "EQUIPE" : "CLIENTE";
 
     const result = await resend.emails.send({
       from: SENDER,
       to: EMAIL_ADMIN,
-      subject: `[Sonar] Pedido de Demo ${tipoLabel} - ${nome} (DIAGNOSTICO)`,
+      subject: `[Sonar] Demo ${tipoLabel} - ${nome} - Codigo ${token.codigo} (DIAGNOSTICO)`,
       html: `<div style="font-family:system-ui,sans-serif;padding:24px">
 <h1>Pedido de Demo (diagnostico)</h1>
 <p>Nome: ${escapeHtml(nome)}</p>
 <p>E-mail: ${escapeHtml(email)}</p>
 <p>Tipo: ${tipoLabel}</p>
-<p><a href="${urlAprovar}">Aprovar</a></p>
-<p>Token: ${token.token}</p>
-<p>Link de acesso: ${urlAcesso}</p>
+<p>Codigo de acesso: <strong style="font-size:24px;font-family:monospace">${token.codigo}</strong></p>
 </div>`,
-      text: `Diagnostico. ${nome} <${email}> pediu Demo ${tipoLabel}.\nAprovar: ${urlAprovar}\nAcesso: ${urlAcesso}`,
+      text: `Diagnostico. ${nome} <${email}> pediu Demo ${tipoLabel}.\nCodigo de acesso: ${token.codigo}`,
     });
 
     if (result.error) {
@@ -108,8 +99,7 @@ export async function GET(request: Request) {
         email_id: result.data?.id ?? null,
         usou_from: SENDER,
         usou_to: EMAIL_ADMIN,
-        urlAprovar,
-        urlAcesso,
+        codigo: token.codigo,
       };
     }
   } catch (err) {

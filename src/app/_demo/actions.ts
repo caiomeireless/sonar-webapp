@@ -1,10 +1,9 @@
 // Server Action — recebe o pedido de demo da landing e:
-//   1. Cria token (in-memory)
-//   2. Envia email pro caio@bpadvogados.com.br com links de Aprovar/Negar
-//   3. Devolve um objeto { ok, mensagem } pro cliente decidir o que mostrar
-//
-// Falha silenciosa no Resend: se a env nao tiver RESEND_API_KEY, o token
-// e' criado mesmo assim — Caio consulta na /equipe/configuracoes (TODO).
+//   1. Cria token de 6 digitos (in-memory, TTL 24h)
+//   2. Envia email pro caio@bpadvogados.com.br destacando o codigo
+//      pra ele copiar e repassar pro visitante (WhatsApp/voz)
+//   3. Devolve { ok, mensagem } pro modal mostrar o card com input
+//      pro visitante colar o codigo e entrar
 "use server";
 
 import { criarToken, type DemoTipo } from "@/lib/demo-tokens";
@@ -40,7 +39,8 @@ export async function pedirDemo(formData: FormData): Promise<{
     motivo,
   });
 
-  // E-mail pro Caio com botoes Aprovar / Negar.
+  // E-mail pro Caio mostrando o CODIGO em destaque (sem botoes — Caio so
+  // copia o codigo e repassa pro visitante pelo proprio canal de contato).
   try {
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) {
@@ -52,40 +52,40 @@ export async function pedirDemo(formData: FormData): Promise<{
 
     const baseUrl =
       process.env.NEXT_PUBLIC_BASE_URL ??
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://sonar.vercel.app");
-
-    const urlAprovar = `${baseUrl}/api/demo/aprovar?token=${encodeURIComponent(token.token)}`;
-    const urlNegar = `${baseUrl}/api/demo/negar?token=${encodeURIComponent(token.token)}`;
-    const urlAcesso = `${baseUrl}/api/demo/${encodeURIComponent(token.token)}`;
+      (process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : "https://sonar-bpa.vercel.app");
     const tipoLabel = tipo === "equipe" ? "EQUIPE" : "CLIENTE";
-
     const logoUrl = `${baseUrl}/brand/logo-horizontal.png`;
+
     const html = htmlEmailPedido({
       logoUrl,
       tipoLabel,
       nome: escapeHtml(nome),
       email: escapeHtml(email),
       motivo: motivo ? escapeHtml(motivo) : null,
-      token: token.token,
-      urlAprovar,
-      urlNegar,
-      urlAcesso,
+      codigo: token.codigo,
     });
 
     const result = await resend.emails.send({
       from: SENDER,
       to: EMAIL_ADMIN,
-      subject: `[Sonar] Pedido de Demo ${tipoLabel} - ${nome}`,
+      subject: `[Sonar] Demo ${tipoLabel} - ${nome} - Codigo ${token.codigo}`,
       html,
       text: [
-        `Nova solicitacao: Demo ${tipoLabel}`,
-        `Nome: ${nome}`,
+        `Novo pedido de Demo ${tipoLabel}`,
+        ``,
+        `Codigo de acesso: ${token.codigo}`,
+        ``,
+        `Visitante: ${nome}`,
         `E-mail: ${email}`,
         motivo ? `Motivo: ${motivo}` : null,
         ``,
-        `Aprovar: ${urlAprovar}`,
-        `Negar: ${urlNegar}`,
-        `Link de acesso pro visitante (apos aprovar): ${urlAcesso}`,
+        `Repasse o codigo de 6 digitos acima pro visitante via WhatsApp.`,
+        `Ele vai colar no card "Entrar com codigo" que ja esta aberto`,
+        `na landing pra ele.`,
+        ``,
+        `O codigo expira em 24h.`,
       ]
         .filter(Boolean)
         .join("\n"),
@@ -109,7 +109,7 @@ export async function pedirDemo(formData: FormData): Promise<{
   return {
     ok: true,
     mensagem:
-      "Pedido enviado. Em breve o Advogado Caio Vicentino entrara em contato para liberar o acesso.",
+      "Pedido recebido. O Advogado Caio Vicentino vai te enviar um codigo de 6 digitos pelo WhatsApp.",
   };
 }
 
@@ -122,19 +122,16 @@ function escapeHtml(s: string): string {
     .replace(/'/g, "&#039;");
 }
 
-// HTML do email — layout table-based (estilo "newsletter") para garantir
-// renderizacao consistente em Outlook/Titan/Gmail. Estetica do Sonar:
-// fundo onyx, header verde signal, accent dourado, fonte serif Georgia.
+// HTML do email — layout table-based pra Outlook/Titan/Gmail.
+// Centraliza o CODIGO em destaque (fonte grande, monospace, fundo
+// onyx, accent dourado) pra ser facil de bater olho e copiar.
 function htmlEmailPedido(a: {
   logoUrl: string;
   tipoLabel: string;
   nome: string;
   email: string;
   motivo: string | null;
-  token: string;
-  urlAprovar: string;
-  urlNegar: string;
-  urlAcesso: string;
+  codigo: string;
 }): string {
   return `<!doctype html>
 <html lang="pt-BR"><body style="margin:0;padding:0;background:#0a0c0b;font-family:Georgia,'Times New Roman',serif;color:#f0ead6;">
@@ -142,22 +139,33 @@ function htmlEmailPedido(a: {
     <tr><td align="center">
       <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="background:#121514;border:1px solid #1f2422;border-radius:12px;overflow:hidden;">
 
-        <!-- HEADER com faixa verde + logo -->
+        <!-- HEADER -->
         <tr><td align="center" style="background:linear-gradient(135deg,#0d1612 0%,#101816 100%);padding:32px 24px 22px;border-bottom:1px solid #1f2422;">
           <img src="${a.logoUrl}" alt="Sonar - Battaglia &amp; Pedrosa Advogados" width="180" style="display:block;max-width:180px;width:60%;height:auto;border:0;outline:none;text-decoration:none;" />
           <p style="margin:18px 0 0;font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:#3cff8a;font-family:'Courier New',monospace;">Pedido de Demonstração</p>
         </td></tr>
 
         <!-- TITULO -->
-        <tr><td align="center" style="padding:30px 36px 8px;">
-          <h1 style="font-size:24px;margin:0;color:#f8f3df;letter-spacing:.3px;font-weight:500;line-height:1.2;">Nova solicitação<br/><span style="color:#c9a24a;">Demo ${a.tipoLabel}</span></h1>
+        <tr><td align="center" style="padding:30px 36px 6px;">
+          <h1 style="font-size:24px;margin:0;color:#f8f3df;letter-spacing:.3px;font-weight:500;line-height:1.2;">Novo pedido<br/><span style="color:#c9a24a;">Demo ${a.tipoLabel}</span></h1>
+        </td></tr>
+
+        <!-- CODIGO EM DESTAQUE -->
+        <tr><td align="center" style="padding:28px 40px 18px;">
+          <p style="font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:#9a937e;margin:0 0 10px;font-family:'Courier New',monospace;">Codigo de acesso</p>
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+            <tr><td style="background:#0a0c0b;border:1px solid rgba(60,255,138,0.4);border-radius:12px;padding:22px 40px;box-shadow:0 0 24px rgba(60,255,138,0.15);">
+              <p style="margin:0;font-family:'Courier New',monospace;font-size:42px;font-weight:700;letter-spacing:.32em;color:#3cff8a;line-height:1;text-shadow:0 0 8px rgba(60,255,138,0.4);">${a.codigo}</p>
+            </td></tr>
+          </table>
+          <p style="margin:14px 0 0;font-size:12px;color:#7e786a;line-height:1.5;max-width:380px;">Copie e envie pelo WhatsApp do visitante.<br/>Ele vai colar no card que ja esta aberto na tela dele.</p>
         </td></tr>
 
         <!-- DADOS DO VISITANTE -->
-        <tr><td style="padding:24px 40px 4px;">
+        <tr><td style="padding:18px 40px 4px;">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:rgba(255,255,255,0.02);border:1px solid #1f2422;border-radius:8px;">
             <tr><td style="padding:18px 22px;">
-              <p style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#9a937e;margin:0 0 4px;font-family:'Courier New',monospace;">Nome</p>
+              <p style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#9a937e;margin:0 0 4px;font-family:'Courier New',monospace;">Visitante</p>
               <p style="font-size:16px;color:#f8f3df;margin:0 0 14px;">${a.nome}</p>
 
               <p style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#9a937e;margin:0 0 4px;font-family:'Courier New',monospace;">E-mail</p>
@@ -173,37 +181,12 @@ function htmlEmailPedido(a: {
           </table>
         </td></tr>
 
-        <!-- BOTOES APROVAR / NEGAR -->
-        <tr><td align="center" style="padding:30px 40px 8px;">
-          <table role="presentation" cellpadding="0" cellspacing="0">
-            <tr>
-              <td style="padding:0 6px;">
-                <a href="${a.urlAprovar}" style="display:inline-block;background:#3cff8a;color:#0a0c0b;font-weight:700;font-size:14px;padding:14px 28px;border-radius:8px;text-decoration:none;letter-spacing:.04em;font-family:Georgia,serif;box-shadow:0 4px 18px rgba(60,255,138,0.25);">✓ Aprovar pedido</a>
-              </td>
-              <td style="padding:0 6px;">
-                <a href="${a.urlNegar}" style="display:inline-block;background:transparent;color:#9a937e;border:1px solid #2a302d;font-weight:500;font-size:14px;padding:13px 22px;border-radius:8px;text-decoration:none;letter-spacing:.04em;font-family:Georgia,serif;">Negar</a>
-              </td>
-            </tr>
-          </table>
-          <p style="margin:14px 0 0;font-size:12px;color:#7e786a;line-height:1.5;">Ao aprovar, copie o link de acesso abaixo<br/>e envie pelo WhatsApp do visitante.</p>
-        </td></tr>
-
-        <!-- LINK DE ACESSO -->
-        <tr><td style="padding:26px 40px 6px;">
-          <p style="font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#9a937e;margin:0 0 8px;font-family:'Courier New',monospace;">Link de Acesso (24h)</p>
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-            <tr><td style="padding:14px 18px;background:#0a0c0b;border:1px dashed #2a302d;border-radius:6px;">
-              <a href="${a.urlAcesso}" style="display:block;word-break:break-all;font-family:'Courier New',monospace;font-size:12px;color:#3cff8a;text-decoration:none;line-height:1.5;">${a.urlAcesso}</a>
-            </td></tr>
-          </table>
-        </td></tr>
-
-        <!-- DIVIDER + TOKEN -->
-        <tr><td style="padding:20px 40px 10px;">
+        <!-- DIVIDER + FOOTER -->
+        <tr><td style="padding:24px 40px 10px;">
           <div style="height:2px;width:48px;background:#c9a24a;border-radius:1px;margin:0 auto;"></div>
         </td></tr>
         <tr><td align="center" style="padding:4px 40px 28px;">
-          <p style="font-size:10px;color:#5a564b;margin:0;font-family:'Courier New',monospace;letter-spacing:.06em;">TOKEN ${a.token}</p>
+          <p style="font-size:11px;color:#7e786a;margin:0;font-family:Georgia,serif;">O codigo expira em 24 horas</p>
         </td></tr>
 
       </table>
