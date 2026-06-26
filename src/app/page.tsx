@@ -20,24 +20,18 @@ import { SpotlightCard } from "@/components/ui/SpotlightCard";
 export const dynamic = "force-static";
 
 // =====================================================================
-// SHOWCASE — slides do scroll-driven da landing.
-// Imagens em /public/img/showcase/ — placeholders .svg ate Caio adicionar
-// os prints reais. Pra trocar por .png/.jpg, basta substituir o arquivo
-// na pasta e atualizar a extensao em `imagem` aqui. Slugs disponiveis:
-//   /public/img/showcase/equipe-painel.svg       (1280x800)
-//   /public/img/showcase/equipe-dossie.svg
-//   /public/img/showcase/equipe-gerador.svg
-//   /public/img/showcase/cliente-painel.svg
-//   /public/img/showcase/cliente-dossie.svg
-//   /public/img/showcase/cliente-custos.svg
-// Manter aspect ratio 16:10 (1280x800 ou 1920x1200) pra que o aspect-[16/10]
-// do container preserve a tela inteira sem corte.
+// SHOWCASE — slides usados pelas 3 variantes visuais da landing
+// (CardStackFan + InteractiveSelector + ShowcaseScroll).
+// Prints high-res em /public/img/showcase/ (gerados via Playwright pelo
+// workflow `tirar-prints-showcase`). Pra regenerar, rodar
+// `node scripts/tirar-prints.mjs` com o dev server ativo. Aspect 16:10
+// (1280x800) preservado pra que o aspect-[16/10] dos containers nao corte.
 // =====================================================================
 
 const SHOWCASE_EQUIPE: ShowcaseSlide[] = [
   {
     id: "equipe-painel",
-    imagem: "/img/showcase/equipe-painel.svg",
+    imagem: "/img/showcase/equipe-painel.png",
     titulo: "Painel da Equipe",
     descricao: "Visão geral em tempo real da carteira do escritório.",
     destaques: [
@@ -50,7 +44,7 @@ const SHOWCASE_EQUIPE: ShowcaseSlide[] = [
   },
   {
     id: "equipe-dossie",
-    imagem: "/img/showcase/equipe-dossie.svg",
+    imagem: "/img/showcase/equipe-dossie.png",
     titulo: "Dossiê do Devedor",
     descricao: "Tudo o que foi localizado e tomado contra cada devedor.",
     destaques: [
@@ -63,7 +57,7 @@ const SHOWCASE_EQUIPE: ShowcaseSlide[] = [
   },
   {
     id: "equipe-gerador",
-    imagem: "/img/showcase/equipe-gerador.svg",
+    imagem: "/img/showcase/equipe-gerador.png",
     titulo: "Gerador de Peça",
     descricao: "Da localização do bem ao protocolo, em minutos.",
     destaques: [
@@ -79,7 +73,7 @@ const SHOWCASE_EQUIPE: ShowcaseSlide[] = [
 const SHOWCASE_CLIENTE: ShowcaseSlide[] = [
   {
     id: "cliente-painel",
-    imagem: "/img/showcase/cliente-painel.svg",
+    imagem: "/img/showcase/cliente-painel.png",
     titulo: "Painel do Cliente",
     descricao: "Acompanhamento direto da carteira em rastreamento.",
     destaques: [
@@ -92,7 +86,7 @@ const SHOWCASE_CLIENTE: ShowcaseSlide[] = [
   },
   {
     id: "cliente-dossie",
-    imagem: "/img/showcase/cliente-dossie.svg",
+    imagem: "/img/showcase/cliente-dossie.png",
     titulo: "Dossiê Patrimonial",
     descricao: "O que foi localizado contra cada devedor do cliente.",
     destaques: [
@@ -105,7 +99,7 @@ const SHOWCASE_CLIENTE: ShowcaseSlide[] = [
   },
   {
     id: "cliente-custos",
-    imagem: "/img/showcase/cliente-custos.svg",
+    imagem: "/img/showcase/cliente-custos.png",
     titulo: "Monitor de Custos",
     descricao: "Onde cada real do orçamento de pesquisa está indo.",
     destaques: [
@@ -124,7 +118,7 @@ const SELECTOR_EQUIPE: InteractiveSelectorItem[] = [
     id: "sel-equipe-painel",
     title: "Painel da Equipe",
     description: "KPIs, evolução mensal e mapa do Brasil em tempo real.",
-    image: "/img/showcase/equipe-painel.svg",
+    image: "/img/showcase/equipe-painel.png",
     icon: <BarChart3 size={22} />,
     accent: "signal",
   },
@@ -132,7 +126,7 @@ const SELECTOR_EQUIPE: InteractiveSelectorItem[] = [
     id: "sel-equipe-dossie",
     title: "Dossiê do Devedor",
     description: "Bens, vínculos, timeline de medidas e cross-detection.",
-    image: "/img/showcase/equipe-dossie.svg",
+    image: "/img/showcase/equipe-dossie.png",
     icon: <FileSearch size={22} />,
     accent: "devedor",
   },
@@ -140,7 +134,7 @@ const SELECTOR_EQUIPE: InteractiveSelectorItem[] = [
     id: "sel-equipe-gerador",
     title: "Gerador de Peça",
     description: "Da localização do bem ao .docx em minutos.",
-    image: "/img/showcase/equipe-gerador.svg",
+    image: "/img/showcase/equipe-gerador.png",
     icon: <Pencil size={22} />,
     accent: "gold",
   },
@@ -151,7 +145,7 @@ const SELECTOR_CLIENTE: InteractiveSelectorItem[] = [
     id: "sel-cliente-painel",
     title: "Painel do Cliente",
     description: "O cliente acompanha sua carteira em rastreamento.",
-    image: "/img/showcase/cliente-painel.svg",
+    image: "/img/showcase/cliente-painel.png",
     icon: <Eye size={22} />,
     accent: "signal",
   },
@@ -159,7 +153,7 @@ const SELECTOR_CLIENTE: InteractiveSelectorItem[] = [
     id: "sel-cliente-dossie",
     title: "Dossiê Patrimonial",
     description: "Bens encontrados + timeline + documentos disponíveis.",
-    image: "/img/showcase/cliente-dossie.svg",
+    image: "/img/showcase/cliente-dossie.png",
     icon: <Layers size={22} />,
     accent: "devedor",
   },
@@ -167,7 +161,7 @@ const SELECTOR_CLIENTE: InteractiveSelectorItem[] = [
     id: "sel-cliente-custos",
     title: "Monitor de Custos",
     description: "Onde cada real do orçamento de pesquisa está indo.",
-    image: "/img/showcase/cliente-custos.svg",
+    image: "/img/showcase/cliente-custos.png",
     icon: <Wallet size={22} />,
     accent: "gold",
   },
@@ -179,42 +173,42 @@ const FAN_TODAS: CardStackFanItem[] = [
     id: "fan-1",
     title: "Painel da Equipe",
     description: "Visão gerencial da carteira do escritório, em tempo real.",
-    imageSrc: "/img/showcase/equipe-painel.svg",
+    imageSrc: "/img/showcase/equipe-painel.png",
     tag: "Equipe",
   },
   {
     id: "fan-2",
     title: "Dossiê do Devedor",
     description: "Bens, vínculos e medidas tomadas em um só lugar.",
-    imageSrc: "/img/showcase/equipe-dossie.svg",
+    imageSrc: "/img/showcase/equipe-dossie.png",
     tag: "Equipe",
   },
   {
     id: "fan-3",
     title: "Gerador de Peça",
     description: "Templates BP — penhora, bloqueio e mais — em minutos.",
-    imageSrc: "/img/showcase/equipe-gerador.svg",
+    imageSrc: "/img/showcase/equipe-gerador.png",
     tag: "Equipe",
   },
   {
     id: "fan-4",
     title: "Painel do Cliente",
     description: "Acompanhamento direto da carteira em rastreamento.",
-    imageSrc: "/img/showcase/cliente-painel.svg",
+    imageSrc: "/img/showcase/cliente-painel.png",
     tag: "Cliente",
   },
   {
     id: "fan-5",
     title: "Dossiê Patrimonial",
     description: "O que foi localizado contra cada devedor do cliente.",
-    imageSrc: "/img/showcase/cliente-dossie.svg",
+    imageSrc: "/img/showcase/cliente-dossie.png",
     tag: "Cliente",
   },
   {
     id: "fan-6",
     title: "Monitor de Custos",
     description: "Quanto está sendo investido na carteira do cliente.",
-    imageSrc: "/img/showcase/cliente-custos.svg",
+    imageSrc: "/img/showcase/cliente-custos.png",
     tag: "Cliente",
   },
 ];
