@@ -1,24 +1,25 @@
-// Tokens de acesso a demo na landing.
+// Tokens de acesso a demo na landing — codigo de 6 digitos.
 //
-// Fluxo (atualizado 2026-06-26 — codigo de 6 digitos sem aprovacao):
-//   1. Visitante preenche form -> backend gera codigo de 6 digitos
-//      numericos e envia EMAIL pro caio@bpadvogados.com.br com o
-//      codigo destacado
+// Persistencia: tabela `demo_tokens` no Supabase (migration 008).
+// Antes era in-memory, mas na Vercel cada serverless function pode
+// estar numa instancia diferente -> o codigo gerado pelo POST nao
+// existia mais quando o GET tentava resgatar (cold start).
+//
+// Fluxo:
+//   1. Visitante preenche form -> backend gera codigo 6 digitos
+//      numericos e envia EMAIL pro caio@bpadvogados.com.br
 //   2. Caio repassa o codigo direto pro visitante (WhatsApp/voz)
 //   3. Visitante cola o codigo no card de "Entrar com codigo" que
 //      aparece na tela apos enviar o pedido
-//   4. Validacao em /api/demo/{codigo} seta cookie sonar.demo e
-//      redireciona pro portal correspondente
+//   4. /api/demo/{codigo} valida, seta cookie sonar.demo e
+//      redireciona pro portal
 //
-// O codigo nao precisa de aprovacao explicita — assim que e enviado
-// pro Caio, ja vale por 24h. O ato de o Caio "aprovar" e simplesmente
-// repassar o codigo ou nao.
-//
-// Storage em memoria. Reset do processo (deploy) limpa tudo —
-// aceitavel porque tokens sao de uso curto. Migrar pra tabela
-// Supabase quando passar do estado de demo.
+// TTL: 24h a partir do criadoEm. Codigo nao precisa de aprovacao
+// (Caio decide se repassa ou nao).
 
 import { randomInt } from "node:crypto";
+
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export type DemoTipo = "equipe" | "cliente";
 
@@ -34,27 +35,30 @@ export type DemoToken = {
 
 const TTL_MS = 24 * 60 * 60 * 1000; // 24h
 
-const _tokens: DemoToken[] = [];
+type DbRow = {
+  codigo: string;
+  tipo: DemoTipo;
+  nome_visitante: string;
+  email_visitante: string;
+  motivo: string | null;
+  criado_em: string;
+  consumido_em: string | null;
+};
 
-// Gera codigo 6 digitos garantindo unicidade entre tokens ainda
-// validos (nao expirados). 1M combinacoes — colisao improvavel com
-// poucos tokens simultaneos, mas o loop garante seguranca.
-function gerarCodigoUnico(): string {
-  const agora = Date.now();
-  const ativos = new Set(
-    _tokens
-      .filter(
-        (t) =>
-          agora - new Date(t.criadoEm).getTime() < TTL_MS,
-      )
-      .map((t) => t.codigo),
-  );
-  for (let tentativa = 0; tentativa < 50; tentativa++) {
-    const c = String(randomInt(100000, 1000000)); // 100000..999999
-    if (!ativos.has(c)) return c;
-  }
-  // Improvavel chegar aqui — em todo caso, devolve algo.
-  return String(randomInt(100000, 1000000));
+function rowToToken(r: DbRow): DemoToken {
+  return {
+    codigo: r.codigo,
+    tipo: r.tipo,
+    nomeVisitante: r.nome_visitante,
+    emailVisitante: r.email_visitante,
+    motivo: r.motivo,
+    criadoEm: r.criado_em,
+    consumidoEm: r.consumido_em,
+  };
+}
+
+function gerar6Digitos(): string {
+  return String(randomInt(100000, 1000000)); // 100000..999999
 }
 
 export async function criarToken(args: {
@@ -63,49 +67,87 @@ export async function criarToken(args: {
   emailVisitante: string;
   motivo: string | null;
 }): Promise<DemoToken> {
-  const novo: DemoToken = {
-    codigo: gerarCodigoUnico(),
-    tipo: args.tipo,
-    nomeVisitante: args.nomeVisitante,
-    emailVisitante: args.emailVisitante,
-    motivo: args.motivo,
-    criadoEm: new Date().toISOString(),
-    consumidoEm: null,
-  };
-  _tokens.unshift(novo);
-  // Garbage collection inline — remove tokens expirados
-  garbageCollect();
-  return novo;
+  const sb = createAdminClient();
+
+  // Gera codigo + insere. Em caso de colisao na PK (codigo ja
+  // existe e nao expirou), tenta de novo. Ate 10 tentativas — com
+  // 1M combinacoes a colisao e' improvavel.
+  for (let tentativa = 0; tentativa < 10; tentativa++) {
+    const codigo = gerar6Digitos();
+    const { data, error } = await sb
+      .from("demo_tokens")
+      .insert({
+        codigo,
+        tipo: args.tipo,
+        nome_visitante: args.nomeVisitante,
+        email_visitante: args.emailVisitante,
+        motivo: args.motivo,
+      })
+      .select()
+      .single<DbRow>();
+
+    if (!error && data) {
+      // Limpa expirados em background (best-effort, ignora erro)
+      garbageCollect(sb).catch(() => {});
+      return rowToToken(data);
+    }
+
+    // Codigo duplicado -> tenta de novo. Outros erros -> propaga.
+    const e = error as { code?: string; message?: string } | null;
+    if (e && e.code !== "23505") {
+      throw new Error(
+        `[demo-tokens] criarToken falhou: ${e.message ?? "desconhecido"}`,
+      );
+    }
+  }
+  throw new Error(
+    "[demo-tokens] criarToken: 10 colisoes consecutivas (improvavel) — abortando",
+  );
 }
 
 export async function buscarToken(codigo: string): Promise<DemoToken | null> {
   if (!codigo) return null;
-  return _tokens.find((t) => t.codigo === codigo) ?? null;
+  const sb = createAdminClient();
+  const { data, error } = await sb
+    .from("demo_tokens")
+    .select("*")
+    .eq("codigo", codigo)
+    .maybeSingle<DbRow>();
+  if (error || !data) return null;
+  return rowToToken(data);
 }
 
-// Tenta consumir um codigo. Retorna o token se valido (dentro do TTL);
-// retorna null se nao existe ou expirou.
+// Tenta consumir um codigo. Retorna o token se valido (dentro do
+// TTL); retorna null se nao existe ou expirou. Marca consumido_em
+// no primeiro uso (informativo — nao invalida pra que o cookie
+// possa ser reutilizado pelo proprio visitante durante 24h).
 export async function consumirToken(codigo: string): Promise<DemoToken | null> {
-  const t = _tokens.find((x) => x.codigo === codigo);
-  if (!t) return null;
-  const criado = new Date(t.criadoEm).getTime();
-  if (Date.now() - criado > TTL_MS) {
-    return null; // expirado
+  if (!codigo) return null;
+  const sb = createAdminClient();
+  const { data, error } = await sb
+    .from("demo_tokens")
+    .select("*")
+    .eq("codigo", codigo)
+    .maybeSingle<DbRow>();
+  if (error || !data) return null;
+
+  const criado = new Date(data.criado_em).getTime();
+  if (Date.now() - criado > TTL_MS) return null; // expirado
+
+  if (!data.consumido_em) {
+    await sb
+      .from("demo_tokens")
+      .update({ consumido_em: new Date().toISOString() })
+      .eq("codigo", codigo);
   }
-  // Marca como consumido (informativo — nao invalida pra que o cookie
-  // possa ser reutilizado pelo proprio visitante durante as 24h).
-  if (!t.consumidoEm) {
-    t.consumidoEm = new Date().toISOString();
-  }
-  return t;
+  return rowToToken(data);
 }
 
-function garbageCollect(): void {
-  const agora = Date.now();
-  for (let i = _tokens.length - 1; i >= 0; i--) {
-    const t = _tokens[i];
-    if (agora - new Date(t.criadoEm).getTime() > TTL_MS) {
-      _tokens.splice(i, 1);
-    }
-  }
+// Garbage collection — apaga tokens com mais de 24h. Best-effort,
+// invocado em background na criacao de novos tokens.
+async function garbageCollect(
+  sb: ReturnType<typeof createAdminClient>,
+): Promise<void> {
+  const cutoff = new Date(Date.now() - TTL_MS).toISOString();
+  await sb.from("demo_tokens").delete().lt("criado_em", cutoff);
 }
