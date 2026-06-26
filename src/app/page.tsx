@@ -10,6 +10,7 @@ import { CursorGlow } from "@/components/ui/CursorGlow";
 import { ImageAutoSlider } from "@/components/ui/ImageAutoSlider";
 import { LampLight } from "@/components/ui/LampLight";
 import { ShowcaseAction } from "@/components/landing/ShowcaseAction";
+import { GridBeam } from "@/components/landing/GridBeam";
 import { SonarParticleText } from "@/components/ui/SonarParticleText";
 import { SonarWaveParticles } from "@/components/ui/SonarWaveParticles";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
@@ -649,9 +650,14 @@ export default function LandingPage() {
 
       <Divider reversed />
 
-      {/* ============ SHOWCASE: NOTEBOOK EM ACAO (ShowcaseAction) ============ */}
+      {/* ============ SHOWCASE: NOTEBOOK EM ACAO (ShowcaseAction) ============
+          Envolto em GridBeam: background quadriculado degrade verde igual a
+          faixa 1 (header) + feixes signal->gold animados percorrendo as
+          linhas do grid. */}
       <section className="relative overflow-hidden">
-        <ShowcaseAction />
+        <GridBeam>
+          <ShowcaseAction />
+        </GridBeam>
       </section>
 
       <Divider reversed />
