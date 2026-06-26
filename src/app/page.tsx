@@ -485,14 +485,14 @@ export default function LandingPage() {
                 >
                   Acessar plataforma →
                 </Link>
-                <Link
-                  href="#sobre"
-                  className="rounded-lg bg-white/5 px-8 py-4 text-base font-medium text-ivory shadow-[0_4px_24px_rgba(0,0,0,0.25)] ring-1 ring-[var(--color-ivory-22)] backdrop-blur-md transition hover:bg-white/10 hover:ring-[var(--color-ivory-66)]"
-                >
-                  Como funciona
-                </Link>
+                <DemoButton variant="hero" />
               </div>
-              <DemoButton variant="hero" />
+              <Link
+                href="#sobre"
+                className="rounded-lg bg-white/5 px-8 py-4 text-base font-medium text-ivory shadow-[0_4px_24px_rgba(0,0,0,0.25)] ring-1 ring-[var(--color-ivory-22)] backdrop-blur-md transition hover:bg-white/10 hover:ring-[var(--color-ivory-66)]"
+              >
+                Como funciona
+              </Link>
             </div>
           </div>
         </div>
