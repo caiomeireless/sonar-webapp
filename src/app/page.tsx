@@ -9,11 +9,111 @@ import { SonarScene } from "@/components/SonarScene";
 import { CursorGlow } from "@/components/ui/CursorGlow";
 import { ImageAutoSlider } from "@/components/ui/ImageAutoSlider";
 import { LampLight } from "@/components/ui/LampLight";
+import { ShowcaseScroll, type ShowcaseSlide } from "@/components/landing/ShowcaseScroll";
 import { SonarParticleText } from "@/components/ui/SonarParticleText";
 import { SonarWaveParticles } from "@/components/ui/SonarWaveParticles";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 
 export const dynamic = "force-static";
+
+// =====================================================================
+// SHOWCASE — slides do scroll-driven da landing.
+// Imagens em /public/img/showcase/ — placeholders .svg ate Caio adicionar
+// os prints reais. Pra trocar por .png/.jpg, basta substituir o arquivo
+// na pasta e atualizar a extensao em `imagem` aqui. Slugs disponiveis:
+//   /public/img/showcase/equipe-painel.svg       (1280x800)
+//   /public/img/showcase/equipe-dossie.svg
+//   /public/img/showcase/equipe-gerador.svg
+//   /public/img/showcase/cliente-painel.svg
+//   /public/img/showcase/cliente-dossie.svg
+//   /public/img/showcase/cliente-custos.svg
+// Manter aspect ratio 16:10 (1280x800 ou 1920x1200) pra que o aspect-[16/10]
+// do container preserve a tela inteira sem corte.
+// =====================================================================
+
+const SHOWCASE_EQUIPE: ShowcaseSlide[] = [
+  {
+    id: "equipe-painel",
+    imagem: "/img/showcase/equipe-painel.svg",
+    titulo: "Painel da Equipe",
+    descricao: "Visão geral em tempo real da carteira do escritório.",
+    destaques: [
+      "KPIs do mês: patrimônio localizado, penhoras efetivadas, casos ativos, gasto com APIs.",
+      "Evolução mensal do patrimônio identificado em série de 12 meses.",
+      "Mapa do Brasil com drill-down por estado e cidade dos bens em rastreio.",
+      "Ranking dos devedores e clientes com maior valor estimado.",
+    ],
+    cor: "signal",
+  },
+  {
+    id: "equipe-dossie",
+    imagem: "/img/showcase/equipe-dossie.svg",
+    titulo: "Dossiê do Devedor",
+    descricao: "Tudo o que foi localizado e tomado contra cada devedor.",
+    destaques: [
+      "Identificação completa + endereço + vínculos cruzados com APIs.",
+      "Bens encontrados por categoria: veículos, imóveis, empresas, processos.",
+      "Timeline de medidas tomadas pelo escritório (SISBAJUD, ARISP, ofícios, audiências).",
+      "Cross-detection: alerta quando o mesmo devedor aparece em mais de um cliente.",
+    ],
+    cor: "devedor",
+  },
+  {
+    id: "equipe-gerador",
+    imagem: "/img/showcase/equipe-gerador.svg",
+    titulo: "Gerador de Peça",
+    descricao: "Da localização do bem ao protocolo, em minutos.",
+    destaques: [
+      "Sete templates: penhora de imóvel, veículo, cotas, rosto dos autos, faturamento, bloqueio judicial e consolidada.",
+      "Preview ao vivo com timbre BP — cite matrícula, placa, CNPJ direto do dossiê.",
+      "Exportação .docx pronta para protocolo + opção Imprimir/PDF.",
+      "Fundamentação CPC + jurisprudência STJ embutidas em cada peça.",
+    ],
+    cor: "gold",
+  },
+];
+
+const SHOWCASE_CLIENTE: ShowcaseSlide[] = [
+  {
+    id: "cliente-painel",
+    imagem: "/img/showcase/cliente-painel.svg",
+    titulo: "Painel do Cliente",
+    descricao: "Acompanhamento direto da carteira em rastreamento.",
+    destaques: [
+      "Total de patrimônio identificado nos processos onde é credor.",
+      "Mapa do Brasil com os bens rastreados pelo escritório.",
+      "Medidas tomadas em cada processo nos últimos 7 dias.",
+      "Top devedores em rastreio e feed cronológico de ações.",
+    ],
+    cor: "signal",
+  },
+  {
+    id: "cliente-dossie",
+    imagem: "/img/showcase/cliente-dossie.svg",
+    titulo: "Dossiê Patrimonial",
+    descricao: "O que foi localizado contra cada devedor do cliente.",
+    destaques: [
+      "Bens encontrados por categoria, com fonte e data da consulta.",
+      "Timeline das medidas tomadas pelo escritório em cada processo.",
+      "Documentos disponíveis para consulta sob demanda.",
+      "Sem expor advogado responsável ou custos internos da operação.",
+    ],
+    cor: "devedor",
+  },
+  {
+    id: "cliente-custos",
+    imagem: "/img/showcase/cliente-custos.svg",
+    titulo: "Monitor de Custos",
+    descricao: "Onde cada real do orçamento de pesquisa está indo.",
+    destaques: [
+      "Total do mês versus limite contratado, com barra de progresso.",
+      "Investimento por devedor: total + breakdown por fonte de dados.",
+      "Filtro de período: 7 dias, 30 dias, 90 dias, mês ou ano.",
+      "Preferências de limite global, por modo e por API.",
+    ],
+    cor: "gold",
+  },
+];
 
 export default function LandingPage() {
   return (
@@ -644,6 +744,25 @@ export default function LandingPage() {
             />
           </div>
         </div>
+      </section>
+
+      <Divider reversed />
+
+      {/* ============ SHOWCASE: o que voce ve dentro da plataforma ============ */}
+      <section className="relative overflow-hidden py-24 md:py-32">
+        <ShowcaseScroll
+          eyebrow="Como funciona"
+          titulo="O que o Sonar mostra na tela."
+          subtitulo="Duas visões — uma para o escritório, outra para o cliente — desenhadas para que cada decisão seja tomada sobre dados verificáveis."
+          slides={SHOWCASE_EQUIPE}
+        />
+        <div className="mt-24" />
+        <ShowcaseScroll
+          eyebrow="Visão do Cliente"
+          titulo="O que o seu cliente acompanha."
+          subtitulo="Transparência sobre o trabalho que está sendo feito — sem expor a engrenagem interna do escritório."
+          slides={SHOWCASE_CLIENTE}
+        />
       </section>
 
       <Divider reversed />
