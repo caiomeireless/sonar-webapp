@@ -42,14 +42,17 @@ export async function pedirDemo(formData: FormData): Promise<{
 
   // E-mail pro Caio com botoes Aprovar / Negar.
   try {
-    const { Resend } = await import("resend");
     const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey) throw new Error("sem RESEND_API_KEY");
+    if (!apiKey) {
+      console.error("[demo-token] RESEND_API_KEY ausente em process.env");
+      throw new Error("sem RESEND_API_KEY");
+    }
+    const { Resend } = await import("resend");
     const resend = new Resend(apiKey);
 
     const baseUrl =
       process.env.NEXT_PUBLIC_BASE_URL ??
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://sonar.vercel.app");
 
     const urlAprovar = `${baseUrl}/api/demo/aprovar?token=${encodeURIComponent(token.token)}`;
     const urlNegar = `${baseUrl}/api/demo/negar?token=${encodeURIComponent(token.token)}`;
@@ -79,7 +82,7 @@ export async function pedirDemo(formData: FormData): Promise<{
   <p style="margin:24px 0 0;font-size:11px;color:#aaa">Tokens expiram em 24h apos a aprovacao.</p>
 </div>`.trim();
 
-    await resend.emails.send({
+    const result = await resend.emails.send({
       from: SENDER,
       to: EMAIL_ADMIN,
       subject: `[Sonar] Pedido de Demo ${tipoLabel} - ${nome}`,
@@ -97,8 +100,13 @@ export async function pedirDemo(formData: FormData): Promise<{
         .filter(Boolean)
         .join("\n"),
     });
-  } catch {
-    // Resend indisponivel — token persiste, mas Caio precisa olhar no log
+    if (result.error) {
+      console.error("[demo-token] Resend retornou erro:", result.error);
+    } else {
+      console.log("[demo-token] email enviado, id:", result.data?.id);
+    }
+  } catch (err) {
+    console.error("[demo-token] excecao ao enviar email:", err);
   }
 
   return {
