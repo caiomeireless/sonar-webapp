@@ -101,12 +101,19 @@ export async function pedirDemo(formData: FormData): Promise<{
         .join("\n"),
     });
     if (result.error) {
-      console.error("[demo-token] Resend retornou erro:", result.error);
-    } else {
-      console.log("[demo-token] email enviado, id:", result.data?.id);
+      console.error("[demo-token] Resend retornou erro:", JSON.stringify(result.error));
+      return {
+        ok: false,
+        mensagem: `Falha ao enviar e-mail de aviso (${(result.error as { name?: string }).name ?? "erro Resend"}). Por favor, fale direto com Caio: WhatsApp (15) 98115-5238.`,
+      };
     }
+    console.log("[demo-token] email enviado, id:", result.data?.id);
   } catch (err) {
     console.error("[demo-token] excecao ao enviar email:", err);
+    return {
+      ok: false,
+      mensagem: `Falha ao enviar e-mail (${err instanceof Error ? err.message : "erro desconhecido"}). Por favor, fale direto com Caio: WhatsApp (15) 98115-5238.`,
+    };
   }
 
   return {
