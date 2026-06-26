@@ -286,7 +286,7 @@ function SidebarPanel({
           onClick={onRecolher}
           aria-label="Recolher menu lateral"
           title="Recolher menu lateral"
-          className="absolute right-0 top-1/2 z-30 inline-flex h-9 w-9 -translate-y-1/2 translate-x-1/2
+          className="absolute right-0 top-1/2 z-30 inline-flex h-9 w-9 -translate-y-1/2 translate-x-full
                      items-center justify-center rounded-full
                      border border-[var(--color-signal)]/40 bg-[var(--color-onyx)]/85
                      text-[var(--color-signal)] backdrop-blur-md transition
