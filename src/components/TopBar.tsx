@@ -170,10 +170,12 @@ export function TopBar({
         aria-hidden="true"
       />
 
-      <div className="relative flex min-h-[122px] items-center px-6 sm:px-10">
+      <div className="relative flex min-h-[122px] items-center pl-6 pr-3 sm:pl-10 sm:pr-4">
         {/* Centro absoluto: título + subtítulo, centralizados horizontal
-            e vertical, independentes do conteúdo lateral. */}
-        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
+            e vertical, independentes do conteúdo lateral. Reservamos
+            ~460px de padding-right pra que o centramento ignore o espaco
+            ocupado pelo grupo direito (robo + botoes) e nao sobreponha. */}
+        <div className="pointer-events-none absolute inset-y-0 left-6 right-[460px] flex flex-col items-center justify-center text-center sm:left-10">
           <h1 className="font-serif text-2xl font-medium uppercase tracking-[0.06em] text-[var(--color-fg)] sm:text-[28px]">
             {titulo}
           </h1>
@@ -184,7 +186,9 @@ export function TopBar({
           ) : null}
         </div>
 
-        {/* Direita: tudo agrupado — robô + Sincronizar + Sino + Avatar */}
+        {/* Direita: tudo agrupado — robô + Sincronizar + Sino + Avatar.
+            Aproximado da borda direita (pr-3/4) pra empurrar o robo pra
+            longe do titulo centralizado. */}
         <div className="ml-auto flex items-center gap-3">
           <AssistantBot solido />
           <BotaoSincronizar />
