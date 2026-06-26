@@ -84,7 +84,7 @@ function HeroNotebook() {
             boxShadow:
               "0 0 0 1px rgba(60,255,138,0.12), 0 9px 20px rgba(0,0,0,0.45), 0 37px 37px rgba(0,0,0,0.40), 0 84px 50px rgba(0,0,0,0.30), 0 149px 60px rgba(0,0,0,0.10)",
           }}
-          className="-mt-12 mx-auto h-[30rem] w-full max-w-5xl rounded-[30px] border-4 border-[var(--color-ivory-22)] bg-[var(--color-onyx-soft)] p-2 shadow-2xl md:h-[40rem] md:p-6"
+          className="mt-16 mx-auto h-[30rem] w-full max-w-5xl rounded-[30px] border-4 border-[var(--color-ivory-22)] bg-[var(--color-onyx-soft)] p-2 shadow-2xl md:mt-20 md:h-[40rem] md:p-6"
         >
           {/* Notch sutil no topo */}
           <span
