@@ -526,7 +526,8 @@ export function ShowcaseAction() {
           accent="devedor"
         />
 
-        {/* 04 — Dashboard analitico do devedor (VerticalMonitor) */}
+        {/* 04 — Dashboard analitico do devedor (imagem estatica focada
+            nos graficos, sem scroll). */}
         <FeatureRow
           eyebrow="04 · Análise Profunda"
           title="Dashboard Analítico do Devedor."
@@ -538,14 +539,14 @@ export function ShowcaseAction() {
             "Comparativo entre devedores da mesma carteira.",
           ]}
           media={
-            <VerticalMonitor
+            <ImagemEstatica
               src="/img/showcase/equipe-dashboard-analitico-full.png"
-              alt="Dashboard analítico do devedor — formato monitor vertical"
+              alt="Dashboard analítico do devedor — gráficos de recuperabilidade, funil e patrimônio"
               accent="gold"
-              imageHeight={2400}
             />
           }
           accent="gold"
+          imageWide
         />
 
         {/* 05 — Monitor de custos (ScrollWindow accent gold) */}

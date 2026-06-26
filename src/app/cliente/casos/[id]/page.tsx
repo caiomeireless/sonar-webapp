@@ -16,7 +16,7 @@ import {
 } from "@/lib/casos";
 import { perfilLogado } from "@/lib/perfis-server";
 import { previewEuFromParam } from "@/lib/dev-auth";
-import { formatData } from "@/lib/format";
+import { formatBRL, formatData } from "@/lib/format";
 import { listarMedidasPorDevedor } from "@/lib/medidas";
 import { DocumentosAPI } from "@/app/equipe/devedores/[id]/DocumentosAPI";
 import { TimelineMedidas } from "@/app/equipe/devedores/[id]/TimelineMedidas";
@@ -34,7 +34,11 @@ import {
   ICONES_TIPO_BEM,
   ORDEM,
 } from "@/app/_shared/dossie/icones-tipo-bem";
-import { primeiroEndereco } from "@/app/_shared/dossie/helpers-ficha";
+import {
+  primeiroEndereco,
+  areasDoDevedor,
+  somaCredito,
+} from "@/app/_shared/dossie/helpers-ficha";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -95,6 +99,10 @@ export default async function DossieClientePage({ params, searchParams }: Props)
     ? "var(--color-signal)"
     : "var(--color-ivory-66)";
 
+  // Query string ?eu= pra preservar modo visualizacao nos links internos.
+  const euParam = previewEuFromParam(sp.eu, perfil);
+  const qsEu = euParam ? `?eu=${encodeURIComponent(euParam)}` : "";
+
   return (
     <main>
       {/* ============ HEADER ============ */}
@@ -111,12 +119,14 @@ export default async function DossieClientePage({ params, searchParams }: Props)
           </div>
 
           {/* ============ HEADER DOSSIÊ ============ */}
-          {/* dashboardHref=null esconde o atalho Dashboard Analitico (cliente nao tem). */}
+          {/* dashboardHref habilitado: cliente AGORA tem dashboard analitico
+              proprio em /cliente/casos/[id]/dashboard (reusa componentes da
+              equipe; esconde CustosPorAPI). */}
           <HeaderDossie
             devedor={devedor}
             statusLabel={statusLabel}
             statusColor={statusColor}
-            dashboardHref={null}
+            dashboardHref={`/cliente/casos/${devedor.id}/dashboard${qsEu}`}
           />
 
           {/* ============ ESTATÍSTICAS ============ */}
@@ -207,8 +217,18 @@ export default async function DossieClientePage({ params, searchParams }: Props)
 
               <SecaoFicha titulo="Perfil Jurídico">
                 <CampoFicha
+                  rotulo="Áreas Envolvidas"
+                  valor={areasDoDevedor(casos)}
+                  mostrarChipOrigem={false}
+                />
+                <CampoFicha
                   rotulo="Status Geral"
                   valor={statusLabel}
+                  mostrarChipOrigem={false}
+                />
+                <CampoFicha
+                  rotulo="Valor Total em Crédito"
+                  valor={formatBRL(somaCredito(casos))}
                   mostrarChipOrigem={false}
                 />
               </SecaoFicha>
