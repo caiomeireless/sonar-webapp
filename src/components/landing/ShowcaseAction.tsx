@@ -1,348 +1,315 @@
 "use client";
 
-// ShowcaseAction — secao "em acao" da landing.
-//
-// Ideia: um NOTEBOOK estilizado em CSS no centro da tela; dentro da tela
-// do notebook, a imagem do dashboard do cliente (uma captura inteira da
-// pagina, alta) rola verticalmente CONFORME o visitante rola a pagina.
-// O efeito eh "voce esta vendo o cliente scrollando o painel dele".
-//
-// Tecnica (motion/react): pin + scrub.
-// - Container raiz de altura 300vh marca o "espaco de scroll".
-// - Filho sticky 100vh contem o notebook.
-// - scrollYProgress vai de 0 a 1 conforme a viewport atravessa o container.
-// - A imagem dentro do notebook tem y: useTransform([0,1], [0, -(imgH - telaH)])
-//   medindo ALTURA REAL via ResizeObserver no client.
-//
-// A direita, em desktop, 4 cards laterais com prints menores aparecem com
-// fade conforme o scroll progride (cada um em uma faixa de 0..1):
-//   - Monitor de Custos
-//   - Dossie do Devedor
-//   - Mapa Continental
-//   - Mapa Estadual
-//
-// Em mobile, sem sticky: notebook full width seguido dos cards empilhados.
+// Showcase em duas partes:
+// 1) Hero notebook com efeito "container scroll" (rotateX 20->0 + scale,
+//    inspirado em Aceternity ContainerScroll). Dentro da tela do notebook,
+//    a imagem do dashboard do cliente rola translateY conforme o scroll
+//    avanca, depois que o notebook ja esta plano.
+// 2) FeatureRows zigzag: alternando imagem-esquerda/texto-direita e
+//    vice-versa. Foco TOTAL na versao CLIENTE (esse Showcase eh pra
+//    cliente entender o Sonar, nao pra venda B2B do escritorio).
+//    Existe um unico bloco discreto no final mostrando que existe uma
+//    visao espelhada pra equipe — so pra contextualizar.
 
-import { useEffect, useRef, useState } from "react";
-import { motion, useScroll, useTransform, useMotionValue } from "motion/react";
+import { useRef, useState, useEffect } from "react";
+import { motion, useScroll, useTransform } from "motion/react";
+import Image from "next/image";
 
-type CardLateral = {
-  id: string;
-  titulo: string;
-  legenda: string;
-  imagem: string;
-  cor: "signal" | "gold" | "devedor";
-  // Faixa de scrollYProgress em que o card fica visivel (fade in/out).
-  faixa: [number, number];
-};
+// ==================================================================
+// HERO NOTEBOOK
+// ==================================================================
 
-const COR_TOKEN: Record<CardLateral["cor"], string> = {
+function HeroNotebook() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: containerRef });
+
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  // Fase 1 (0 -> 0.4): notebook se levanta (rotateX 20deg -> 0deg) +
+  //   scale (1.05 -> 1) + cabecalho sobe (translateY 0 -> -100).
+  // Fase 2 (0.4 -> 1): imagem rola dentro do notebook (translateY 0 -> -72%).
+  const rotate = useTransform(scrollYProgress, [0, 0.4, 1], [20, 0, 0]);
+  const scale = useTransform(
+    scrollYProgress,
+    [0, 0.4, 1],
+    isMobile ? [0.7, 0.9, 0.9] : [1.05, 1, 1],
+  );
+  const headerTranslate = useTransform(
+    scrollYProgress,
+    [0, 0.4, 1],
+    [0, -100, -100],
+  );
+  const imageY = useTransform(
+    scrollYProgress,
+    [0, 0.4, 1],
+    ["0%", "0%", "-72%"],
+  );
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative flex h-[60rem] items-center justify-center p-2 md:h-[80rem] md:p-20"
+    >
+      <div
+        className="relative w-full py-10 md:py-32"
+        style={{ perspective: "1000px" }}
+      >
+        {/* Cabecalho */}
+        <motion.div
+          style={{ translateY: headerTranslate }}
+          className="mx-auto max-w-5xl px-6 text-center"
+        >
+          <span className="eyebrow mb-6 inline-block">Em ação</span>
+          <h2 className="font-serif text-[clamp(28px,4vw,46px)] font-medium leading-[1.15] tracking-tight text-ivory">
+            Veja o Sonar funcionando.
+          </h2>
+          <p className="mx-auto mt-5 max-w-[640px] text-base leading-relaxed text-[var(--color-ivory-88)]">
+            Rolando esta página, o dashboard do cliente se anima como
+            se ele estivesse acessando a plataforma agora.
+          </p>
+        </motion.div>
+
+        {/* Notebook */}
+        <motion.div
+          style={{
+            rotateX: rotate,
+            scale,
+            boxShadow:
+              "0 0 0 1px rgba(60,255,138,0.12), 0 9px 20px rgba(0,0,0,0.45), 0 37px 37px rgba(0,0,0,0.40), 0 84px 50px rgba(0,0,0,0.30), 0 149px 60px rgba(0,0,0,0.10)",
+          }}
+          className="-mt-12 mx-auto h-[30rem] w-full max-w-5xl rounded-[30px] border-4 border-[var(--color-ivory-22)] bg-[var(--color-onyx-soft)] p-2 shadow-2xl md:h-[40rem] md:p-6"
+        >
+          {/* Notch sutil no topo */}
+          <span
+            aria-hidden="true"
+            className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 inline-block h-1.5 w-20 rounded-full bg-[var(--color-line)]"
+          />
+
+          <div className="relative h-full w-full overflow-hidden rounded-2xl bg-[var(--color-onyx)]">
+            <motion.div style={{ y: imageY }} className="relative w-full">
+              <Image
+                src="/img/showcase/cliente-painel-full.png"
+                alt="Dashboard do Cliente"
+                width={1280}
+                height={3500}
+                priority
+                className="block w-full"
+              />
+            </motion.div>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
+
+// ==================================================================
+// FEATURE ROW (zigzag esquerda/direita)
+// ==================================================================
+
+type Accent = "signal" | "gold" | "devedor";
+
+const ACCENT_CSS: Record<Accent, string> = {
   signal: "var(--color-signal)",
   gold: "var(--color-gold)",
   devedor: "var(--color-devedor)",
 };
 
-const CARDS: CardLateral[] = [
-  {
-    id: "custos",
-    titulo: "Monitor de Custos",
-    legenda: "O cliente acompanha quanto cada caso ja custou.",
-    imagem: "/img/showcase/cliente-custos.png",
-    cor: "signal",
-    faixa: [0, 0.28],
-  },
-  {
-    id: "dossie",
-    titulo: "Dossie do Devedor",
-    legenda: "A equipe abre o dossie completo da parte contraria.",
-    imagem: "/img/showcase/equipe-dossie.png",
-    cor: "devedor",
-    faixa: [0.22, 0.52],
-  },
-  {
-    id: "mapa-pais",
-    titulo: "Mapa Continental",
-    legenda: "Onde estao os processos no pais inteiro.",
-    imagem: "/img/showcase/mapa-continental.png",
-    cor: "gold",
-    faixa: [0.46, 0.76],
-  },
-  {
-    id: "mapa-estado",
-    titulo: "Mapa Estadual",
-    legenda: "Drill-down num estado, cidade a cidade.",
-    imagem: "/img/showcase/mapa-estadual.png",
-    cor: "gold",
-    faixa: [0.7, 1],
-  },
-];
+const ACCENT_GLOW: Record<Accent, string> = {
+  signal:
+    "0 0 0 1px rgba(60,255,138,0.30), 0 24px 60px -20px rgba(60,255,138,0.18)",
+  gold: "0 0 0 1px rgba(201,162,74,0.30), 0 24px 60px -20px rgba(201,162,74,0.18)",
+  devedor:
+    "0 0 0 1px rgba(220,38,38,0.30), 0 24px 60px -20px rgba(220,38,38,0.18)",
+};
 
-export function ShowcaseAction() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const telaRef = useRef<HTMLDivElement>(null);
-  const imgRef = useRef<HTMLImageElement>(null);
-
-  // scroll do container alto (300vh): 0 quando entra, 1 quando sai
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  });
-
-  // Alturas reais medidas no client (a imagem nao tem altura fixa — width 100%, height auto)
-  const [alturaTela, setAlturaTela] = useState(0);
-  const [alturaImg, setAlturaImg] = useState(0);
-
-  useEffect(() => {
-    if (!telaRef.current || !imgRef.current) return;
-
-    const tela = telaRef.current;
-    const img = imgRef.current;
-
-    const medir = () => {
-      setAlturaTela(tela.clientHeight);
-      // naturalHeight * (largura renderizada / naturalWidth) = altura renderizada
-      const w = img.clientWidth;
-      const nw = img.naturalWidth;
-      const nh = img.naturalHeight;
-      if (nw > 0) {
-        setAlturaImg((nh * w) / nw);
-      } else {
-        setAlturaImg(img.clientHeight);
-      }
-    };
-
-    // Mede assim que monta
-    medir();
-
-    // Se a imagem ainda esta carregando, mede depois do onload
-    if (!img.complete) {
-      img.addEventListener("load", medir);
-    }
-
-    const obs = new ResizeObserver(medir);
-    obs.observe(tela);
-    obs.observe(img);
-
-    window.addEventListener("resize", medir);
-    return () => {
-      obs.disconnect();
-      window.removeEventListener("resize", medir);
-      img.removeEventListener("load", medir);
-    };
-  }, []);
-
-  // Quanto a imagem precisa subir: (alturaImg - alturaTela). Se imagem menor
-  // que a tela, nao desloca (deslocamento = 0).
-  const deslocamento = Math.max(0, alturaImg - alturaTela);
-  const y = useTransform(scrollYProgress, [0, 1], [0, -deslocamento]);
-
-  return (
-    <section
-      ref={containerRef}
-      className="relative"
-      style={{ height: "300vh" }}
-      aria-label="Sonar em acao"
-    >
-      <div className="sticky top-0 flex h-screen items-center">
-        <div className="mx-auto w-full max-w-[1400px] px-6 sm:px-10">
-          {/* Cabecalho */}
-          <div className="mb-10 text-center md:mb-12">
-            <span className="eyebrow">Em acao</span>
-            <h2 className="mt-5 font-serif text-[clamp(28px,4vw,46px)] font-medium leading-[1.15] tracking-tight text-ivory">
-              Veja o Sonar funcionando.
-            </h2>
-            <p className="mx-auto mt-4 max-w-[640px] text-base leading-relaxed text-[var(--color-ivory-88)]">
-              Rolando essa pagina, voce ve o painel do cliente passando dentro
-              do notebook — como se estivesse olhando por cima do ombro dele.
-            </p>
-          </div>
-
-          {/* Layout: notebook + cards */}
-          <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-[1.6fr_1fr]">
-            {/* Notebook */}
-            <NotebookFrame
-              telaRef={telaRef}
-              imgRef={imgRef}
-              y={y}
-            />
-
-            {/* Cards laterais — desktop only, com fade por faixa */}
-            <div className="hidden flex-col gap-4 md:flex">
-              {CARDS.map((card) => (
-                <CardComFade
-                  key={card.id}
-                  card={card}
-                  scrollYProgress={scrollYProgress}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile: cards empilhados ABAIXO do sticky (fora do flex sticky).
-          Como a section tem 300vh, o final dela coincide com saida do sticky;
-          colocamos os cards num bloco absoluto no fim. */}
-      <div className="absolute inset-x-0 bottom-0 px-6 pb-10 md:hidden">
-        <div className="mx-auto flex max-w-[640px] flex-col gap-4">
-          {CARDS.map((card) => (
-            <CardEstatico key={card.id} card={card} />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ---------- Notebook ----------
-
-function NotebookFrame({
-  telaRef,
-  imgRef,
-  y,
+function FeatureRow({
+  reverse = false,
+  eyebrow,
+  title,
+  description,
+  destaques,
+  image,
+  imageAlt,
+  accent = "signal",
 }: {
-  telaRef: React.RefObject<HTMLDivElement | null>;
-  imgRef: React.RefObject<HTMLImageElement | null>;
-  y: ReturnType<typeof useMotionValue<number>> | ReturnType<typeof useTransform<number, number>>;
+  reverse?: boolean;
+  eyebrow: string;
+  title: string;
+  description: string;
+  destaques?: string[];
+  image: string;
+  imageAlt: string;
+  accent?: Accent;
 }) {
+  const cor = ACCENT_CSS[accent];
+
   return (
-    <div className="mx-auto w-full max-w-[900px]">
-      {/* Corpo do notebook */}
-      <div
-        className="relative rounded-3xl border-2 border-[var(--color-ivory-12)] bg-[var(--color-onyx-soft)] p-3 shadow-[0_40px_100px_-30px_rgba(0,0,0,0.85),0_0_0_1px_rgba(212,175,55,0.08)] sm:p-4"
-      >
-        {/* Notch (camera) */}
-        <div className="mx-auto mb-2 flex items-center justify-center gap-1.5">
-          <span className="block h-1.5 w-1.5 rounded-full bg-[var(--color-ivory-22)]" />
-          <span className="block h-1 w-10 rounded-full bg-[var(--color-onyx)]" />
-          <span className="block h-1.5 w-1.5 rounded-full bg-[var(--color-ivory-22)]" />
-        </div>
-
-        {/* Tela */}
-        <div
-          ref={telaRef}
-          className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-[var(--color-ivory-12)] bg-[var(--color-onyx)]"
+    <div
+      className={`grid items-center gap-10 md:gap-16 md:grid-cols-2 ${
+        reverse ? "md:[direction:rtl]" : ""
+      }`}
+    >
+      {/* Texto */}
+      <div className="[direction:ltr]">
+        <span
+          className="font-mono text-[11px] uppercase tracking-[0.32em]"
+          style={{ color: cor }}
         >
-          {/* A imagem do painel inteiro do cliente; sobe com o scroll */}
-          <motion.img
-            ref={imgRef}
-            src="/img/showcase/cliente-painel-full.png"
-            alt="Painel do cliente do Sonar — visao completa rolando dentro do notebook."
-            style={{ y, width: "100%", height: "auto" }}
-            className="block select-none"
-            draggable={false}
-          />
+          {eyebrow}
+        </span>
+        <h3 className="mt-3 font-serif text-[clamp(24px,3vw,36px)] font-medium leading-[1.2] text-ivory">
+          {title}
+        </h3>
+        <p className="mt-5 text-base leading-relaxed text-[var(--color-ivory-88)]">
+          {description}
+        </p>
+        {destaques && destaques.length > 0 ? (
+          <ul className="mt-6 flex flex-col gap-3">
+            {destaques.map((d) => (
+              <li
+                key={d}
+                className="flex items-start gap-3 text-[15px] leading-relaxed text-[var(--color-ivory-88)]"
+              >
+                <span
+                  aria-hidden="true"
+                  className="mt-2 inline-block h-1.5 w-1.5 shrink-0 rounded-full"
+                  style={{
+                    background: cor,
+                    boxShadow: `0 0 8px ${cor}`,
+                  }}
+                />
+                {d}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </div>
 
-          {/* Reflexo sutil */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.04] via-transparent to-black/20"
+      {/* Imagem */}
+      <div className="[direction:ltr]">
+        <div
+          className="overflow-hidden rounded-2xl border border-[var(--color-line)]"
+          style={{ boxShadow: ACCENT_GLOW[accent] }}
+        >
+          <Image
+            src={image}
+            alt={imageAlt}
+            width={1280}
+            height={800}
+            className="block h-auto w-full"
           />
         </div>
       </div>
-
-      {/* Stand (base trapezoidal) */}
-      <div
-        aria-hidden="true"
-        className="relative mx-auto h-3 w-[88%] bg-[var(--color-onyx-soft)] border-x-2 border-b-2 border-[var(--color-ivory-12)]"
-        style={{ clipPath: "polygon(4% 0, 96% 0, 100% 100%, 0 100%)" }}
-      />
-      <div
-        aria-hidden="true"
-        className="mx-auto h-1 w-[40%] rounded-b-full bg-[var(--color-onyx)]"
-      />
     </div>
   );
 }
 
-// ---------- Cards laterais ----------
+// ==================================================================
+// SHOWCASE PRINCIPAL
+// ==================================================================
 
-function CardComFade({
-  card,
-  scrollYProgress,
-}: {
-  card: CardLateral;
-  scrollYProgress: ReturnType<typeof useScroll>["scrollYProgress"];
-}) {
-  // Faixa [a, b] -> opacity 0..1..0 com leve fade in/out (0.08 nas pontas)
-  const [a, b] = card.faixa;
-  const margem = Math.min(0.08, (b - a) / 4);
-  const opacity = useTransform(
-    scrollYProgress,
-    [a, a + margem, b - margem, b],
-    [0.25, 1, 1, 0.25],
-  );
-  const scale = useTransform(
-    scrollYProgress,
-    [a, a + margem, b - margem, b],
-    [0.96, 1, 1, 0.96],
-  );
-
+export function ShowcaseAction() {
   return (
-    <motion.div
-      style={{ opacity, scale }}
-      className="relative overflow-hidden rounded-xl border bg-[var(--color-onyx-soft)] shadow-[0_18px_40px_-18px_rgba(0,0,0,0.7)]"
-    >
-      {/* Glow sutil colorido na borda */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 rounded-xl"
-        style={{
-          borderColor: `color-mix(in srgb, ${COR_TOKEN[card.cor]} 35%, transparent)`,
-          boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${COR_TOKEN[card.cor]} 28%, transparent), 0 0 24px -6px color-mix(in srgb, ${COR_TOKEN[card.cor]} 40%, transparent)`,
-        }}
-      />
+    <div className="relative">
+      <HeroNotebook />
 
-      <div className="aspect-[4/3] w-full overflow-hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={card.imagem}
-          alt={card.titulo}
-          className="h-full w-full object-cover object-top"
+      {/* Feature rows — TODAS focadas no CLIENTE.
+          O ultimo bloco discreto explica que existe uma versao espelhada
+          pra equipe; nao eh venda B2B. */}
+      <div className="mx-auto max-w-[1200px] space-y-32 px-6 py-24 sm:px-10 md:py-32">
+        <FeatureRow
+          eyebrow="01 · Visão Geral"
+          title="A sua carteira em um só olhar."
+          description="No painel principal, o cliente vê o resumo do que o escritório está rastreando para ele — sem precisar pedir relatório, sem precisar marcar reunião."
+          destaques={[
+            "Total de patrimônio identificado nos processos onde é credor.",
+            "Penhoras efetivadas no mês e evolução em série de 12 meses.",
+            "Casos ativos, pausados e encerrados separados.",
+            "Limite mensal de pesquisa contratado e quanto já foi usado.",
+          ]}
+          image="/img/showcase/cliente-painel.png"
+          imageAlt="Painel do Cliente — visão geral"
+          accent="signal"
         />
-      </div>
 
-      <div className="px-4 py-3">
-        <span
-          className="font-mono text-[12px] uppercase tracking-[0.22em]"
-          style={{ color: COR_TOKEN[card.cor] }}
-        >
-          {card.titulo}
-        </span>
-        <p className="mt-1 text-[13px] leading-snug text-[var(--color-ivory-88)]">
-          {card.legenda}
-        </p>
-      </div>
-    </motion.div>
-  );
-}
-
-function CardEstatico({ card }: { card: CardLateral }) {
-  return (
-    <div
-      className="relative overflow-hidden rounded-xl border border-[var(--color-ivory-12)] bg-[var(--color-onyx-soft)]"
-      style={{
-        boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${COR_TOKEN[card.cor]} 22%, transparent)`,
-      }}
-    >
-      <div className="aspect-[4/3] w-full overflow-hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={card.imagem}
-          alt={card.titulo}
-          className="h-full w-full object-cover object-top"
+        <FeatureRow
+          reverse
+          eyebrow="02 · Onde estão os bens"
+          title="Mapa do Brasil com drill-down por estado."
+          description="A distribuição patrimonial em escala continental, com clique em qualquer UF para abrir o mapa estadual e ver as cidades onde estão os bens rastreados."
+          destaques={[
+            "Bolhas dimensionadas pelo valor estimado em cada estado.",
+            "Drill-down para o estado: cidades + pinos individuais por bem.",
+            "Top 5 UFs com maior concentração patrimonial.",
+          ]}
+          image="/img/showcase/mapa-continental.png"
+          imageAlt="Mapa do Brasil — visão continental"
+          accent="signal"
         />
-      </div>
-      <div className="px-4 py-3">
-        <span
-          className="font-mono text-[12px] uppercase tracking-[0.22em]"
-          style={{ color: COR_TOKEN[card.cor] }}
-        >
-          {card.titulo}
-        </span>
-        <p className="mt-1 text-[13px] leading-snug text-[var(--color-ivory-88)]">
-          {card.legenda}
-        </p>
+
+        <FeatureRow
+          eyebrow="03 · Detalhe geográfico"
+          title="Cada bem no lugar exato."
+          description="O drill-down estadual abre as cidades onde o escritório localizou patrimônio. O cliente acompanha geograficamente o trabalho que está sendo feito."
+          image="/img/showcase/mapa-estadual.png"
+          imageAlt="Mapa estadual com drill-down em SP"
+          accent="signal"
+        />
+
+        <FeatureRow
+          reverse
+          eyebrow="04 · Patrimônio localizado"
+          title="Dossiê completo do devedor."
+          description="Quando o cliente clica em um devedor, vê tudo o que foi localizado: veículos, imóveis, participações societárias, processos e endereços — organizados por categoria, com fonte e data."
+          destaques={[
+            "Bens encontrados separados por tipo, com ícones e contadores.",
+            "Timeline cronológica das medidas tomadas no processo.",
+            "Documentos disponíveis para consulta sob demanda.",
+            "Sem expor advogado responsável ou custos internos.",
+          ]}
+          image="/img/showcase/cliente-dossie.png"
+          imageAlt="Dossiê Patrimonial do Devedor"
+          accent="devedor"
+        />
+
+        <FeatureRow
+          eyebrow="05 · Transparência financeira"
+          title="Onde cada real do orçamento foi investido."
+          description="O cliente acompanha em tempo real quanto está sendo gasto em consultas pagas — por devedor, por fonte de dados e por período."
+          destaques={[
+            "Total do mês versus limite contratado, com barra de progresso.",
+            "Investimento por devedor com breakdown por API consultada.",
+            "Filtro de período: 7 dias, 30 dias, 90 dias, mês ou ano.",
+            "Preferências de limite global, por modo e por API específica.",
+          ]}
+          image="/img/showcase/cliente-custos.png"
+          imageAlt="Monitor de Custos"
+          accent="gold"
+        />
+
+        {/* Bloco final: equipe — discreto, contexto e nao venda */}
+        <div className="relative rounded-3xl border border-[var(--color-ivory-12)] bg-[var(--color-onyx-soft)]/40 p-8 md:p-12">
+          <span className="absolute -top-3 left-8 inline-flex items-center gap-2 rounded-full border border-[var(--color-gold)]/40 bg-[var(--color-onyx)] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--color-gold)]">
+            Por trás do dia a dia
+          </span>
+
+          <FeatureRow
+            reverse
+            eyebrow="A engrenagem"
+            title="O escritório enxerga ainda mais."
+            description="Tudo o que o cliente vê é alimentado pela visão da equipe — onde o escritório consulta APIs, registra medidas, monta dossiês e gera as peças. Você só vê o resultado; nós cuidamos do processo."
+            image="/img/showcase/equipe-dossie.png"
+            imageAlt="Dossiê do Devedor visto pela equipe"
+            accent="gold"
+          />
+        </div>
       </div>
     </div>
   );
