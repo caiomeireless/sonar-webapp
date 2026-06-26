@@ -144,12 +144,16 @@ function ScrollWindow({
   accent = "signal",
   imageHeight = 2400,
   aspect = "16/10",
+  scrollEnd = "-65%",
 }: {
   src: string;
   alt: string;
   accent?: Accent;
   imageHeight?: number;
   aspect?: string;
+  /** Ate onde a imagem rola (em %). Default -65% (mostra topo + metade
+   * inferior). Use -95% pra scroll COMPLETO (revela imagem inteira). */
+  scrollEnd?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
@@ -162,9 +166,9 @@ function ScrollWindow({
   });
 
   // Pausa inicial: nos primeiros 18% do progresso a imagem fica parada
-  // no topo (0%), depois rola até -65%. Isso dá tempo do usuário ver
+  // no topo, depois rola até `scrollEnd`. Isso dá tempo do usuário ver
   // o cabeçalho/topo da tela antes de qualquer movimento.
-  const y = useTransform(scrollYProgress, [0, 0.18, 1], ["0%", "0%", "-65%"]);
+  const y = useTransform(scrollYProgress, [0, 0.18, 1], ["0%", "0%", scrollEnd]);
 
   return (
     <div
@@ -461,7 +465,7 @@ export function ShowcaseAction() {
                 className="font-mono text-[11px] uppercase tracking-[0.28em]"
                 style={{ color: "var(--color-ivory-66)" }}
               >
-                Drill-down em Goiás
+                Drill-down em São Paulo
               </span>
               <div
                 className="overflow-hidden rounded-2xl border border-[var(--color-line)]"
@@ -469,7 +473,7 @@ export function ShowcaseAction() {
               >
                 <Image
                   src="/img/showcase/mapa-estadual.png"
-                  alt="Drill-down em Goiás — cidades e pinos por bem"
+                  alt="Drill-down em São Paulo — cidades e pinos por bem"
                   width={1280}
                   height={800}
                   className="block h-auto w-full"
@@ -568,6 +572,7 @@ export function ShowcaseAction() {
               accent="gold"
               imageHeight={2400}
               aspect="4/5"
+              scrollEnd="-95%"
             />
           }
           accent="gold"
