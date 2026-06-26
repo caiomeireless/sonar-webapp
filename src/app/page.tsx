@@ -10,6 +10,9 @@ import { CursorGlow } from "@/components/ui/CursorGlow";
 import { ImageAutoSlider } from "@/components/ui/ImageAutoSlider";
 import { LampLight } from "@/components/ui/LampLight";
 import { ShowcaseScroll, type ShowcaseSlide } from "@/components/landing/ShowcaseScroll";
+import { InteractiveSelector, type InteractiveSelectorItem } from "@/components/ui/interactive-selector";
+import { CardStackFan, type CardStackFanItem } from "@/components/ui/card-stack-fan";
+import { BarChart3, FileSearch, Pencil, Eye, Layers, Wallet } from "lucide-react";
 import { SonarParticleText } from "@/components/ui/SonarParticleText";
 import { SonarWaveParticles } from "@/components/ui/SonarWaveParticles";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
@@ -112,6 +115,107 @@ const SHOWCASE_CLIENTE: ShowcaseSlide[] = [
       "Preferências de limite global, por modo e por API.",
     ],
     cor: "gold",
+  },
+];
+
+// Items do InteractiveSelector — acordeao horizontal de 6 telas
+const SELECTOR_EQUIPE: InteractiveSelectorItem[] = [
+  {
+    id: "sel-equipe-painel",
+    title: "Painel da Equipe",
+    description: "KPIs, evolução mensal e mapa do Brasil em tempo real.",
+    image: "/img/showcase/equipe-painel.svg",
+    icon: <BarChart3 size={22} />,
+    accent: "signal",
+  },
+  {
+    id: "sel-equipe-dossie",
+    title: "Dossiê do Devedor",
+    description: "Bens, vínculos, timeline de medidas e cross-detection.",
+    image: "/img/showcase/equipe-dossie.svg",
+    icon: <FileSearch size={22} />,
+    accent: "devedor",
+  },
+  {
+    id: "sel-equipe-gerador",
+    title: "Gerador de Peça",
+    description: "Da localização do bem ao .docx em minutos.",
+    image: "/img/showcase/equipe-gerador.svg",
+    icon: <Pencil size={22} />,
+    accent: "gold",
+  },
+];
+
+const SELECTOR_CLIENTE: InteractiveSelectorItem[] = [
+  {
+    id: "sel-cliente-painel",
+    title: "Painel do Cliente",
+    description: "O cliente acompanha sua carteira em rastreamento.",
+    image: "/img/showcase/cliente-painel.svg",
+    icon: <Eye size={22} />,
+    accent: "signal",
+  },
+  {
+    id: "sel-cliente-dossie",
+    title: "Dossiê Patrimonial",
+    description: "Bens encontrados + timeline + documentos disponíveis.",
+    image: "/img/showcase/cliente-dossie.svg",
+    icon: <Layers size={22} />,
+    accent: "devedor",
+  },
+  {
+    id: "sel-cliente-custos",
+    title: "Monitor de Custos",
+    description: "Onde cada real do orçamento de pesquisa está indo.",
+    image: "/img/showcase/cliente-custos.svg",
+    icon: <Wallet size={22} />,
+    accent: "gold",
+  },
+];
+
+// Items do CardStackFan — leque 3D destacado das 6 telas misturadas
+const FAN_TODAS: CardStackFanItem[] = [
+  {
+    id: "fan-1",
+    title: "Painel da Equipe",
+    description: "Visão gerencial da carteira do escritório, em tempo real.",
+    imageSrc: "/img/showcase/equipe-painel.svg",
+    tag: "Equipe",
+  },
+  {
+    id: "fan-2",
+    title: "Dossiê do Devedor",
+    description: "Bens, vínculos e medidas tomadas em um só lugar.",
+    imageSrc: "/img/showcase/equipe-dossie.svg",
+    tag: "Equipe",
+  },
+  {
+    id: "fan-3",
+    title: "Gerador de Peça",
+    description: "Templates BP — penhora, bloqueio e mais — em minutos.",
+    imageSrc: "/img/showcase/equipe-gerador.svg",
+    tag: "Equipe",
+  },
+  {
+    id: "fan-4",
+    title: "Painel do Cliente",
+    description: "Acompanhamento direto da carteira em rastreamento.",
+    imageSrc: "/img/showcase/cliente-painel.svg",
+    tag: "Cliente",
+  },
+  {
+    id: "fan-5",
+    title: "Dossiê Patrimonial",
+    description: "O que foi localizado contra cada devedor do cliente.",
+    imageSrc: "/img/showcase/cliente-dossie.svg",
+    tag: "Cliente",
+  },
+  {
+    id: "fan-6",
+    title: "Monitor de Custos",
+    description: "Quanto está sendo investido na carteira do cliente.",
+    imageSrc: "/img/showcase/cliente-custos.svg",
+    tag: "Cliente",
   },
 ];
 
@@ -748,17 +852,79 @@ export default function LandingPage() {
 
       <Divider reversed />
 
-      {/* ============ SHOWCASE: o que voce ve dentro da plataforma ============ */}
+      {/* ============ SHOWCASE 1: LEQUE 3D (CardStackFan) ============ */}
+      <section className="relative overflow-hidden py-24 md:py-28">
+        <div className="mx-auto max-w-[1200px] px-6 sm:px-10">
+          <div className="text-center">
+            <span className="eyebrow mb-6 inline-block">Visão geral</span>
+            <h2 className="font-serif text-[clamp(28px,4vw,46px)] font-medium leading-[1.15] tracking-tight text-ivory">
+              Por dentro do Sonar.
+            </h2>
+            <p className="mx-auto mt-5 max-w-[640px] text-base leading-relaxed text-[var(--color-ivory-88)]">
+              Arraste, clique nas bolinhas ou use as setas — explore as
+              principais telas que o escritório e o cliente acessam todos os dias.
+            </p>
+          </div>
+          <div className="mt-16">
+            <CardStackFan
+              items={FAN_TODAS}
+              cardWidth={520}
+              cardHeight={320}
+              overlap={0.48}
+              spreadDeg={48}
+              perspectivePx={1100}
+              depthPx={140}
+              tiltXDeg={12}
+              activeLiftPx={22}
+              activeScale={1.03}
+              inactiveScale={0.94}
+              maxVisible={7}
+              loop
+              autoAdvance
+              intervalMs={4200}
+              pauseOnHover
+              showDots
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ============ SHOWCASE 2: ACORDEAO HORIZONTAL (InteractiveSelector) ============ */}
+      <section className="relative overflow-hidden py-24 md:py-28">
+        <InteractiveSelector
+          items={SELECTOR_EQUIPE}
+          height={420}
+          heading={{
+            eyebrow: "Para o escritório",
+            title: "Tudo o que a equipe acessa.",
+            subtitle:
+              "Clique em cada faixa para ver o destaque — do painel gerencial à geração de peças.",
+          }}
+        />
+        <div className="mt-20" />
+        <InteractiveSelector
+          items={SELECTOR_CLIENTE}
+          height={420}
+          heading={{
+            eyebrow: "Para o cliente",
+            title: "O que o cliente vê do trabalho.",
+            subtitle:
+              "Transparência sobre o que foi localizado, sem expor a engrenagem interna do escritório.",
+          }}
+        />
+      </section>
+
+      {/* ============ SHOWCASE 3: SCROLL DETALHADO (ShowcaseScroll) ============ */}
       <section className="relative overflow-hidden py-24 md:py-32">
         <ShowcaseScroll
-          eyebrow="Como funciona"
+          eyebrow="Em profundidade · Equipe"
           titulo="O que o Sonar mostra na tela."
           subtitulo="Duas visões — uma para o escritório, outra para o cliente — desenhadas para que cada decisão seja tomada sobre dados verificáveis."
           slides={SHOWCASE_EQUIPE}
         />
         <div className="mt-24" />
         <ShowcaseScroll
-          eyebrow="Visão do Cliente"
+          eyebrow="Em profundidade · Cliente"
           titulo="O que o seu cliente acompanha."
           subtitulo="Transparência sobre o trabalho que está sendo feito — sem expor a engrenagem interna do escritório."
           slides={SHOWCASE_CLIENTE}
