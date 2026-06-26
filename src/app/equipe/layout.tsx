@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 
 import { AetherBackground } from "@/components/AetherBackground";
+import { BannerModoDemo } from "@/components/BannerModoDemo";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
 import { NAV_EQUIPE } from "@/lib/nav-equipe";
@@ -49,7 +50,9 @@ export default async function EquipeLayout({ children }: { children: ReactNode }
   ]);
 
   return (
-    <div className="flex min-h-svh bg-onyx text-ivory">
+    <div className="flex min-h-svh flex-col bg-onyx text-ivory">
+      <BannerModoDemo />
+      <div className="flex min-h-svh">
       <Sidebar
         items={NAV_EQUIPE}
         usuario={{ email, papel, nome }}
@@ -81,6 +84,7 @@ export default async function EquipeLayout({ children }: { children: ReactNode }
           />
           <main className="flex-1">{children}</main>
         </div>
+      </div>
       </div>
     </div>
   );

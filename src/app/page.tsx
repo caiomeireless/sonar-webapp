@@ -2,6 +2,7 @@
 // e empurrar pro /login. Sem dashboard ainda (próximo dia).
 import Link from "next/link";
 import { AssistantBot } from "@/components/AssistantBot";
+import { DemoButton } from "@/app/_demo/DemoButton";
 import { HeaderParticles } from "@/components/HeaderParticles";
 import { Logo } from "@/components/Logo";
 import { LogoSvg, LogoSymbolStatic, STAIRCASE_PATTERN } from "@/components/LogoSvg";
@@ -66,6 +67,7 @@ export default function LandingPage() {
               >
                 ENTRAR
               </Link>
+              <DemoButton variant="mini" />
             </nav>
           </div>
           <p className="mt-4 whitespace-nowrap text-[8px] font-mono uppercase tracking-[0.22em] text-[var(--color-gold)]">
@@ -475,19 +477,22 @@ export default function LandingPage() {
                 Battaglia <span className="italic text-white">&amp;</span> Pedrosa Advogados.
               </span>
             </p>
-            <div className="mt-10 flex flex-wrap items-center gap-4">
-              <Link
-                href="/login"
-                className="rounded-lg bg-[var(--color-signal)]/85 px-8 py-4 text-base font-semibold text-onyx shadow-[0_4px_24px_rgba(60,255,138,0.28)] ring-1 ring-[var(--color-signal)]/60 backdrop-blur-md transition hover:bg-[var(--color-tip-glow)]/90"
-              >
-                Acessar plataforma →
-              </Link>
-              <Link
-                href="#sobre"
-                className="rounded-lg bg-white/5 px-8 py-4 text-base font-medium text-ivory shadow-[0_4px_24px_rgba(0,0,0,0.25)] ring-1 ring-[var(--color-ivory-22)] backdrop-blur-md transition hover:bg-white/10 hover:ring-[var(--color-ivory-66)]"
-              >
-                Como funciona
-              </Link>
+            <div className="mt-10 flex flex-col items-start gap-4">
+              <div className="flex flex-wrap items-center gap-4">
+                <Link
+                  href="/login"
+                  className="rounded-lg bg-[var(--color-signal)]/85 px-8 py-4 text-base font-semibold text-onyx shadow-[0_4px_24px_rgba(60,255,138,0.28)] ring-1 ring-[var(--color-signal)]/60 backdrop-blur-md transition hover:bg-[var(--color-tip-glow)]/90"
+                >
+                  Acessar plataforma →
+                </Link>
+                <Link
+                  href="#sobre"
+                  className="rounded-lg bg-white/5 px-8 py-4 text-base font-medium text-ivory shadow-[0_4px_24px_rgba(0,0,0,0.25)] ring-1 ring-[var(--color-ivory-22)] backdrop-blur-md transition hover:bg-white/10 hover:ring-[var(--color-ivory-66)]"
+                >
+                  Como funciona
+                </Link>
+              </div>
+              <DemoButton variant="hero" />
             </div>
           </div>
         </div>
@@ -669,12 +674,15 @@ export default function LandingPage() {
           <p className="mt-6 text-[var(--color-ivory-88)]">
             Equipe ou cliente, informe seu e-mail e receba um código de acesso.
           </p>
-          <Link
-            href="/login"
-            className="mt-10 inline-block rounded-lg bg-[var(--color-signal)]/85 px-8 py-4 text-sm font-semibold text-onyx shadow-[0_4px_24px_rgba(60,255,138,0.28)] ring-1 ring-[var(--color-signal)]/60 backdrop-blur-md transition hover:bg-[var(--color-tip-glow)]/90"
-          >
-            Acessar plataforma →
-          </Link>
+          <div className="mt-10 flex flex-col items-center gap-3">
+            <Link
+              href="/login"
+              className="inline-block rounded-lg bg-[var(--color-signal)]/85 px-8 py-4 text-sm font-semibold text-onyx shadow-[0_4px_24px_rgba(60,255,138,0.28)] ring-1 ring-[var(--color-signal)]/60 backdrop-blur-md transition hover:bg-[var(--color-tip-glow)]/90"
+            >
+              Acessar plataforma →
+            </Link>
+            <DemoButton variant="cta" />
+          </div>
         </div>
       </section>
 

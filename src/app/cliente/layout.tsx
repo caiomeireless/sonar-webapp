@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { Eye } from "lucide-react";
 
 import { AetherBackground } from "@/components/AetherBackground";
+import { BannerModoDemo } from "@/components/BannerModoDemo";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
 import { NAV_CLIENTE } from "@/lib/nav-cliente";
@@ -91,7 +92,9 @@ export default async function ClienteLayout({
   ]);
 
   return (
-    <div className="flex min-h-svh bg-onyx text-ivory">
+    <div className="flex min-h-svh flex-col bg-onyx text-ivory">
+      <BannerModoDemo />
+      <div className="flex min-h-svh">
       <Sidebar
         items={itemsComEu}
         usuario={{ email, papel, nome }}
@@ -139,6 +142,7 @@ export default async function ClienteLayout({
         />
         <main className="flex-1">{children}</main>
         </div>
+      </div>
       </div>
     </div>
   );
