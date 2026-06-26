@@ -10,13 +10,13 @@
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Eye, ArrowRight } from "lucide-react";
+import { Eye, ArrowRight, Activity, Coins, Layers, Clock } from "lucide-react";
 
 import { obterDadosDashboardCliente } from "@/lib/dashboard-cliente";
 import { listarCasosDoCliente } from "@/lib/casos";
 import { perfilLogado } from "@/lib/perfis-server";
 import { previewEuFromParam } from "@/lib/dev-auth";
-import { formatBRL } from "@/lib/format";
+import { formatBRL, formatStatus, formatTempoRelativo } from "@/lib/format";
 
 import KPIPatrimonioTotal from "@/app/equipe/_components/KPIPatrimonioTotal";
 import KPIPenhorasEfetivadasMes from "@/app/equipe/_components/KPIPenhorasEfetivadasMes";
@@ -195,34 +195,95 @@ export default async function DashboardClientePage({ searchParams }: Props) {
             Nenhum processo em rastreamento.
           </div>
         ) : (
-          <div className="grid gap-3 md:grid-cols-2">
-            {casos.slice(0, 6).map((c) => (
+          <div className="grid gap-4 md:grid-cols-2">
+            {casos.slice(0, 6).map((c) => {
+              const status = formatStatus(c.status);
+              const valor = c.valor_estimado_total_brl ?? 0;
+              const semBens = c.total_bens === 0;
+              return (
               <Link
                 key={c.caso_id}
                 href={`/cliente/casos/${c.caso_id}${qsBase}`}
-                className="glass-2 group block p-5 transition hover:border-[var(--color-signal-soft-2)]"
+                className="glass-2 group relative block overflow-hidden p-6 transition hover:border-[var(--color-signal-soft-2)] hover:shadow-[0_0_24px_-8px_rgba(60,255,138,0.45)]"
               >
+                {/* Faixa lateral dourada — sinaliza acesso ao dossie */}
+                <span
+                  aria-hidden="true"
+                  className="absolute left-0 top-0 h-full w-[3px] bg-gradient-to-b from-[var(--color-gold)]/60 via-[var(--color-gold)]/20 to-transparent"
+                />
+
+                {/* === Header: Pasta + Status + Processo === */}
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-gold)]/40 bg-[var(--color-gold)]/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-gold)]">
                     Pasta #{c.caso_id}
                   </span>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
-                    {c.numero_processo ?? "Sem n&uacute;mero"}
+                  <span
+                    className="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em]"
+                    style={{
+                      color: status.color,
+                      borderColor: `color-mix(in srgb, ${status.color} 45%, transparent)`,
+                      backgroundColor: `color-mix(in srgb, ${status.color} 12%, transparent)`,
+                    }}
+                  >
+                    <Activity className="h-2.5 w-2.5" aria-hidden="true" />
+                    {status.label}
+                  </span>
+                  <p className="ml-auto break-all font-mono text-[11px] text-[var(--color-ivory-66)]">
+                    {c.numero_processo ?? "Sem número"}
                   </p>
                 </div>
-                <h3 className="nome-devedor mt-2 font-serif text-lg text-[var(--color-devedor)]">
+
+                {/* === Nome devedor === */}
+                <h3 className="nome-devedor mt-4 font-serif text-xl leading-tight text-[var(--color-devedor)]">
                   {c.devedor.nome}
                 </h3>
-                <div className="mt-3 flex items-center justify-between text-base">
-                  <span className="text-[var(--color-ivory-88)]">
-                    {c.total_bens} {c.total_bens === 1 ? "bem" : "bens"}
-                  </span>
-                  <span className="font-mono tabular-nums text-[var(--color-gold)]">
-                    {formatBRL(c.valor_estimado_total_brl ?? 0)}
-                  </span>
+
+                <div className="my-4 h-px bg-[var(--color-ivory-12)]" />
+
+                {/* === Metricas em grid === */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="flex flex-col gap-1">
+                    <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+                      <Layers className="h-3 w-3" aria-hidden="true" />
+                      Bens
+                    </span>
+                    <span className="font-serif text-2xl leading-none tabular-nums text-[var(--color-gold)]">
+                      {c.total_bens}
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+                      <Coins className="h-3 w-3" aria-hidden="true" />
+                      Estimado
+                    </span>
+                    <span
+                      className={
+                        "font-mono text-[15px] leading-none tabular-nums " +
+                        (semBens ? "text-[var(--color-ivory-40)] italic" : "text-[var(--color-gold)]")
+                      }
+                    >
+                      {semBens ? "aguardando" : formatBRL(valor)}
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+                      <Clock className="h-3 w-3" aria-hidden="true" />
+                      Atualizado
+                    </span>
+                    <span className="font-mono text-[13px] leading-none text-[var(--color-ivory-88)]">
+                      {formatTempoRelativo(c.ultima_consulta_em)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* === Footer hint === */}
+                <div className="mt-4 inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-signal)] opacity-0 transition-opacity group-hover:opacity-100">
+                  Abrir dossê
+                  <ArrowRight className="h-3 w-3" />
                 </div>
               </Link>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>
