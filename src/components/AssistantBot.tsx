@@ -11,7 +11,9 @@ const SUPPORT_EMAIL = "contato@bpadvogados.com.br";
 const SUPPORT_WHATSAPP = "5511995049829";
 
 type Props = {
-  /** Modo "topbar": fundo onyx sólido atrás do robô + sem mixBlendMode (cor total). */
+  /** Modo "topbar": SEM fundo onyx atras do robo — deixa o quadriculado
+   * verde da topbar aparecer + remove o mixBlendMode pra que o robo
+   * fique visivel sem precisar de fundo preto. */
   solido?: boolean;
 };
 
@@ -43,19 +45,13 @@ export function AssistantBot({ solido = false }: Props = {}) {
         aria-label="Tire suas dúvidas com a equipe"
         className="group relative h-[130px] w-[110px] cursor-pointer overflow-hidden rounded-xl"
       >
-        {/* Fundo onyx opaco — usado quando `solido` (modo topbar) pra que o
-            mixBlendMode lighten clareie sobre PRETO (igual à landing), mesmo
-            quando o layout pai tem fundo translúcido ou particulas. */}
-        {solido ? (
-          <span
-            aria-hidden="true"
-            className="absolute inset-0 bg-onyx"
-          />
-        ) : null}
         {/* Renderiza o canvas Spline INTEIRO em alta resolução (400x520),
             depois encolhe via CSS transform pra caber em 110x130 visualmente.
             O scene aparece em miniatura COMPLETA (robô + cubo, sem corte).
-            Filter: roxo -> verde escuro + tom dourado (sepia). */}
+            Filter: roxo -> verde escuro + tom dourado (sepia).
+            Quando `solido` (topbar) NAO aplicamos mixBlendMode lighten —
+            assim o robo continua visivel mesmo sem fundo preto, deixando
+            o quadriculado da topbar aparecer atras. */}
         <div
           className="absolute left-0 top-0"
           style={{
@@ -63,7 +59,7 @@ export function AssistantBot({ solido = false }: Props = {}) {
             height: "520px",
             transform: "scale(0.275)",
             transformOrigin: "top left",
-            mixBlendMode: "lighten",
+            mixBlendMode: solido ? "normal" : "lighten",
             filter:
               "hue-rotate(-115deg) sepia(0.3) brightness(0.65) saturate(1.5)",
           }}
@@ -71,7 +67,10 @@ export function AssistantBot({ solido = false }: Props = {}) {
           <SplineScene scene={SCENE_URL} className="h-full w-full" />
         </div>
         {/* Cobertura do watermark — barra full-width estendida ABAIXO do botão
-            (canvas escalado vaza ~15px além do botão) */}
+            (canvas escalado vaza ~15px além do botão). Mantida em bg-onyx
+            tambem no modo solido pra esconder o "PYZD..." que o Spline
+            estampa no canto inferior — pequena faixa (h-8) fica acima da
+            borda da topbar e nao atrapalha o layout. */}
         <span className="pointer-events-none absolute -bottom-5 left-0 right-0 z-10 h-8 bg-onyx" />
         {/* Escada B&P estampada na parede da caixa (lado esquerdo, espelhando o badge "?") */}
         <svg

@@ -348,7 +348,13 @@ function SidebarPanel({
 function NavLinkItem({ item }: { item: SidebarItem }) {
   const pathname = usePathname();
 
-  const prefixes = item.matchPrefixes ?? [item.href];
+  // Normaliza removendo querystring — em modo visualizacao o layout do
+  // cliente injeta ?eu= em todos os hrefs do NAV, mas o pathname nao
+  // carrega query, entao a comparacao direta falhava e nenhum item
+  // ficava marcado como ativo.
+  const prefixes = (item.matchPrefixes ?? [item.href]).map(
+    (p) => p.split("?")[0]!,
+  );
   const ativo = prefixes.some((p) => {
     if (p === "/equipe" || p === "/cliente") return pathname === p;
     return pathname === p || pathname.startsWith(p + "/");
