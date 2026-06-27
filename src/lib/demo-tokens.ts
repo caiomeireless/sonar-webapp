@@ -143,6 +143,24 @@ export async function consumirToken(codigo: string): Promise<DemoToken | null> {
   return rowToToken(data);
 }
 
+// Lista os tokens mais recentes (consumidos, pendentes ou expirados).
+// Usado pelo painel /equipe/demos pra Caio/Paulo verem os pedidos da
+// landing. Ordem: criado_em DESC. Resiliente: erro -> [].
+export async function listarTodos(limite: number = 100): Promise<DemoToken[]> {
+  try {
+    const sb = createAdminClient();
+    const { data, error } = await sb
+      .from("demo_tokens")
+      .select("*")
+      .order("criado_em", { ascending: false })
+      .limit(limite);
+    if (error || !data) return [];
+    return (data as DbRow[]).map(rowToToken);
+  } catch {
+    return [];
+  }
+}
+
 // Garbage collection — apaga tokens com mais de 24h. Best-effort,
 // invocado em background na criacao de novos tokens.
 async function garbageCollect(
