@@ -1,8 +1,19 @@
 "use client";
 
-import { useState } from "react";
+// Form de login OTP — 2 etapas: pedir email -> verificar codigo.
+//
+// As chamadas ao Supabase passam por SERVER ACTIONS (./actions.ts) em vez de
+// rodar no browser. Vantagem: a sessao do Supabase ja escreve cookies no
+// servidor logo apos verifyOtp — no proximo router.refresh() o middleware ja
+// enxerga o usuario logado e o /app redireciona pro portal certo (cliente
+// ou equipe) sem flash de tela.
+//
+// UX: input do codigo tem inputMode="numeric" + autoComplete="one-time-code",
+// que disparam autopreenchimento de SMS/email em iOS/Android.
+
+import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { enviarOtp, verificarOtp } from "./actions";
 
 export function LoginForm({
   accent = "signal",
@@ -20,11 +31,10 @@ export function LoginForm({
   const searchParams = useSearchParams();
   const erroQuery = searchParams.get("erro");
 
-  const [supabase] = useState(() => createClient());
   const [etapa, setEtapa] = useState<"email" | "codigo">("email");
   const [email, setEmail] = useState("");
   const [codigo, setCodigo] = useState("");
-  const [carregando, setCarregando] = useState(false);
+  const [pendente, iniciar] = useTransition();
   const [erro, setErro] = useState(
     erroQuery === "dominio"
       ? "E-mail não autorizado. Use seu institucional do escritório ou um e-mail cadastrado pelo escritório."
@@ -32,6 +42,7 @@ export function LoginForm({
         ? "Link inválido ou expirado. Solicite um novo código."
         : "",
   );
+  const [aviso, setAviso] = useState("");
 
   // Cores por accent — equipe usa SIGNAL VERDE, cliente usa GOLD dourado.
   // Mesma UX, cor diferente pra dar clareza visual de qual entrada e' qual.
@@ -52,53 +63,42 @@ export function LoginForm({
           bgHover: "hover:bg-[var(--color-tip-glow)]",
         };
 
-  async function enviarCodigo(e: React.FormEvent) {
+  function enviarCodigo(e: React.FormEvent) {
     e.preventDefault();
     setErro("");
-    setCarregando(true);
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim().toLowerCase(),
-      options: {
-        // shouldCreateUser=false: usuario PRECISA existir em auth.users
-        // antes (criado pelo admin no Supabase Dashboard ou via API).
-        // Sem isso, novos emails recebem o template "Confirm signup"
-        // com link e nao o codigo OTP, o que confunde o usuario.
-        shouldCreateUser: false,
-        emailRedirectTo: `${window.location.origin}/auth/confirm`,
-      },
-    });
-    setCarregando(false);
-    if (error) {
-      // Mensagem amigavel pra "user not found"
-      const msg = error.message.toLowerCase();
-      if (msg.includes("not found") || msg.includes("signups not allowed")) {
-        setErro(
-          "E-mail nao autorizado. Peca ao administrador (Caio) pra liberar seu acesso.",
-        );
-      } else {
-        setErro(error.message);
+    setAviso("");
+    iniciar(async () => {
+      const resultado = await enviarOtp(email);
+      if (!resultado.ok) {
+        setErro(resultado.mensagem ?? "Não foi possível enviar o código.");
+        return;
       }
-    } else {
       setEtapa("codigo");
-    }
+      setAviso(`Enviamos um código para ${email.trim().toLowerCase()}.`);
+    });
   }
 
-  async function verificarCodigo(e: React.FormEvent) {
+  function verificarCodigo(e: React.FormEvent) {
     e.preventDefault();
     setErro("");
-    setCarregando(true);
-    const { error } = await supabase.auth.verifyOtp({
-      email: email.trim().toLowerCase(),
-      token: codigo.replace(/\s/g, ""),
-      type: "email",
-    });
-    setCarregando(false);
-    if (error) {
-      setErro("Código inválido ou expirado. Confira e tente novamente.");
-    } else {
+    setAviso("");
+    iniciar(async () => {
+      const resultado = await verificarOtp(email, codigo);
+      if (!resultado.ok) {
+        setErro(resultado.mensagem ?? "Código inválido.");
+        return;
+      }
+      // /app redireciona pro portal certo conforme o papel (cliente/equipe).
       router.push("/app");
       router.refresh();
-    }
+    });
+  }
+
+  function voltarParaEmail() {
+    setEtapa("email");
+    setCodigo("");
+    setErro("");
+    setAviso("");
   }
 
   const inputBase = `w-full rounded-lg border border-[var(--color-ivory-22)] bg-[var(--color-carbon)] px-4 ${compacto ? "py-2" : "py-3"} text-sm text-ivory outline-none transition placeholder:text-[var(--color-ivory-66)] ${accentColors.border} focus:ring-2 ${accentColors.ring}`;
@@ -128,9 +128,10 @@ export function LoginForm({
             placeholder="seu.email@exemplo.com"
             className={inputBase}
             autoComplete="email"
+            disabled={pendente}
           />
-          <button type="submit" disabled={carregando} className={btnBase}>
-            {carregando ? "Enviando..." : "Receber código por e-mail"}
+          <button type="submit" disabled={pendente} className={btnBase}>
+            {pendente ? "Enviando..." : "Receber código por e-mail"}
           </button>
           {erro && <p className="text-sm text-red-400">{erro}</p>}
         </form>
@@ -149,21 +150,22 @@ export function LoginForm({
             placeholder="000 000"
             maxLength={7}
             className={`${inputBase} text-center text-xl tracking-[0.4em]`}
+            disabled={pendente}
           />
-          <button type="submit" disabled={carregando} className={btnBase}>
-            {carregando ? "Verificando..." : "Entrar"}
+          <button type="submit" disabled={pendente} className={btnBase}>
+            {pendente ? "Verificando..." : "Entrar"}
           </button>
+          {aviso && !erro && (
+            <p className="text-xs text-[var(--color-ivory-66)]">{aviso}</p>
+          )}
           {erro && <p className="text-sm text-red-400">{erro}</p>}
           <button
             type="button"
-            onClick={() => {
-              setEtapa("email");
-              setCodigo("");
-              setErro("");
-            }}
-            className="text-xs text-[var(--color-ivory-66)] transition hover:text-ivory"
+            onClick={voltarParaEmail}
+            disabled={pendente}
+            className="text-xs text-[var(--color-ivory-66)] transition hover:text-ivory disabled:opacity-50"
           >
-            Usar outro e-mail
+            Tentar outro e-mail
           </button>
         </form>
       )}
