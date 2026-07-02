@@ -13,8 +13,8 @@ type Props = {
 export default function Top5ClientesPorPatrimonio({ itens }: Props) {
   return (
     <DashboardCard
-      titulo="Top 5 clientes por patrimônio"
-      descricao="Credores com maior patrimônio localizado em rastreio"
+      titulo="Top 5 Clientes por Patrimônio Localizado"
+      descricao="Credores com maior patrimônio Localizado em rastreio"
       accent="gold"
     >
       {itens.length === 0 ? (
@@ -25,18 +25,25 @@ export default function Top5ClientesPorPatrimonio({ itens }: Props) {
         <table className="w-full border-collapse text-left">
           <thead>
             <tr className="border-b border-[var(--color-ivory-12)] text-[var(--color-ivory-66)]">
+              <Th align="center" className="w-[40px]">#</Th>
               <Th className="text-[var(--color-cliente)]">Cliente</Th>
-              <Th align="right" className="w-[140px]">Valor</Th>
+              <Th align="right" className="w-[160px]">Patrimônio Localizado</Th>
               <Th align="right" className="w-[80px]">Casos</Th>
             </tr>
           </thead>
           <tbody>
-            {itens.map((item) => {
+            {itens.map((item, idx) => {
+              const posicao = idx + 1;
               return (
                 <tr
                   key={item.credorId}
                   className="group border-b border-[var(--color-ivory-12)] last:border-b-0 transition hover:bg-[var(--color-ivory-12)]/20"
                 >
+                  <Td align="center">
+                    <span className="font-mono text-[13px] tabular-nums uppercase tracking-[0.12em] text-[var(--color-gold)]">
+                      {posicao}
+                    </span>
+                  </Td>
                   <Td>
                     <Link
                       href={`/equipe/devedores/credor/${item.credorId}`}
@@ -72,14 +79,16 @@ function Th({
   className,
 }: {
   children: React.ReactNode;
-  align?: "right";
+  align?: "right" | "center";
   className?: string;
 }) {
+  const alignClass =
+    align === "right" ? "text-right " : align === "center" ? "text-center " : "text-left ";
   return (
     <th
       className={
-        "px-2 py-2 font-mono text-[10px] uppercase tracking-[0.22em] font-normal " +
-        (align === "right" ? "text-right " : "text-left ") +
+        "px-2 py-2 font-mono text-[12px] uppercase tracking-[0.22em] font-normal " +
+        alignClass +
         (className ?? "")
       }
     >
@@ -93,13 +102,13 @@ function Td({
   align,
 }: {
   children: React.ReactNode;
-  align?: "right";
+  align?: "right" | "center";
 }) {
+  const alignClass =
+    align === "right" ? "text-right" : align === "center" ? "text-center" : "";
   return (
     <td
-      className={
-        "px-2 py-3 align-top " + (align === "right" ? "text-right" : "")
-      }
+      className={"px-2 py-3 align-top " + alignClass}
     >
       {children}
     </td>

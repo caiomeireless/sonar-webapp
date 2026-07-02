@@ -572,19 +572,23 @@ const MOCKS_CLIENTE: MockInput[] = [
 // --------------------------------------------------------------------------
 // Hidratacao dos arrays in-memory
 // --------------------------------------------------------------------------
+// MOCKS desabilitados 2026-06-30 (Caio): notificacoes nao sao mais geradas
+// a partir dos arrays MOCKS_EQUIPE / MOCKS_CLIENTE. Eles ficam no codigo como
+// referencia de schema/categoria. Quando a tabela real `public.notificacoes`
+// for criada e populada por eventos (novo processo Themis, bens encontrados,
+// audiencia, etc), trocar a hidratacao por leitura do Supabase.
+//
+// Pra reativar temporariamente em dev: troque `[]` pelo .map original.
+const _notificacoesEquipe: Notificacao[] = [];
+const _notificacoesCliente: Notificacao[] = [];
 
-const _notificacoesEquipe: Notificacao[] = MOCKS_EQUIPE.map((m) => ({
-  ...m,
-  portal: "equipe",
-  criadoEm: relativaParaIso(m.relativaEm, AGORA),
-}));
-
-const _notificacoesCliente: Notificacao[] = MOCKS_CLIENTE.map((m) => ({
-  ...m,
-  portal: "cliente",
-  criadoEm: relativaParaIso(m.relativaEm, AGORA),
-  destinatarioEmail: EMAIL_CLIENTE_DEMO,
-}));
+// Compat: referencia MOCKS_* pra evitar warning de unused (mantem as definicoes
+// disponiveis pra quem quiser reusar como schema/template).
+void MOCKS_EQUIPE;
+void MOCKS_CLIENTE;
+void EMAIL_CLIENTE_DEMO;
+void AGORA;
+void relativaParaIso;
 
 // --------------------------------------------------------------------------
 // API publica

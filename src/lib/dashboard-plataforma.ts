@@ -102,6 +102,14 @@ export interface FeedMedidaItem {
   criadoEm: string;
 }
 
+export interface KpisAndamentosGlobal {
+  total: number;
+  ultimos_30d: number;
+  por_esaj: number;
+  por_eproc: number;
+  por_datajud: number;
+}
+
 export interface DashboardPlataforma {
   kpisGerais: KPIsGerais;
   evolucaoMensal: EvolucaoMensalItem[];
@@ -116,6 +124,10 @@ export interface DashboardPlataforma {
   // Distribuição geográfica dos bens em rastreio — alimenta o
   // MapaDistribuicaoBens reutilizado no Painel da Equipe.
   bensPorLocalizacao: DistribuicaoGeografica[];
+  // Andamentos processuais capturados (GH Actions e-SAJ/eproc Ter+Sex,
+  // e DataJud quando ligado). Visivel no Painel da equipe pra mostrar
+  // valor da automacao de sync.
+  kpisAndamentos: KpisAndamentosGlobal;
 }
 
 // ============================================================
@@ -258,6 +270,11 @@ interface CustoRow {
 // devolve [] em vez de quebrar a página inteira)
 // ============================================================
 
+// eh_demo: protege os 3 mocks do showroom (migration 009 em devedores/casos).
+// Credores AINDA NAO tem essa coluna (TODO migration 017), entao trazemos
+// todos e a filtragem efetiva acontece via casos (que ja vem so com
+// eh_demo=false): credores sem casos reais simplesmente nao agregam valor
+// nos KPIs/Top5.
 async function lerCredores(): Promise<CredorRow[]> {
   try {
     const sb = createAdminClient();
@@ -280,6 +297,7 @@ async function lerDevedores(): Promise<DevedorRow[]> {
       const res = await sb
         .from("devedores")
         .select("id, nome")
+        .eq("eh_demo", false)
         .range(from, to);
       return { data: res.data as DevedorRow[] | null, error: res.error };
     });
@@ -295,6 +313,7 @@ async function lerCasos(): Promise<CasoRow[]> {
       const res = await sb
         .from("casos")
         .select("id, credor_id, devedor_id, status, responsavel_email")
+        .eq("eh_demo", false)
         .range(from, to);
       return { data: res.data as CasoRow[] | null, error: res.error };
     });
@@ -333,6 +352,33 @@ async function lerMedidas(): Promise<MedidaRow[]> {
     });
   } catch {
     return [];
+  }
+}
+
+// KPIs globais de andamentos processuais (timeline capturada pelo GH Actions
+// e-SAJ/eproc Ter+Sex). 4 counts head:true sao baratos no PostgREST e dao
+// numeros de impacto pro Painel ("142k andamentos capturados, +X nos ultimos
+// 30d, distribuicao por fonte"). Se a tabela ainda nao existir, devolve zeros.
+async function kpisAndamentosGlobal(): Promise<KpisAndamentosGlobal> {
+  try {
+    const sb = createAdminClient();
+    const corte30 = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
+    const [total, last30, esaj, eproc, datajud] = await Promise.all([
+      sb.from("andamentos").select("*", { count: "exact", head: true }),
+      sb.from("andamentos").select("*", { count: "exact", head: true }).gte("capturado_em", corte30),
+      sb.from("andamentos").select("*", { count: "exact", head: true }).eq("fonte", "esaj-tjsp"),
+      sb.from("andamentos").select("*", { count: "exact", head: true }).eq("fonte", "eproc-tjsp"),
+      sb.from("andamentos").select("*", { count: "exact", head: true }).eq("fonte", "datajud"),
+    ]);
+    return {
+      total: total.count ?? 0,
+      ultimos_30d: last30.count ?? 0,
+      por_esaj: esaj.count ?? 0,
+      por_eproc: eproc.count ?? 0,
+      por_datajud: datajud.count ?? 0,
+    };
+  } catch {
+    return { total: 0, ultimos_30d: 0, por_esaj: 0, por_eproc: 0, por_datajud: 0 };
   }
 }
 
@@ -683,19 +729,6 @@ function agregarCarteiraPorAdvogado(args: {
   return out;
 }
 
-// Mock ficticio pro card "Custos por API" do Painel — ate' a tabela
-// real de custos comecar a ser populada pelo dia-a-dia das consultas
-// pagas, esses valores ilustram o comportamento esperado.
-const MOCK_CUSTOS_POR_API: CustoApiItem[] = [
-  { tipo: "assertiva", custoBrl: 1287.4, descricaoRotulo: "Assertiva (Pessoas/Score)" },
-  { tipo: "bigdatacorp", custoBrl: 942.8, descricaoRotulo: "BigDataCorp" },
-  { tipo: "arisp", custoBrl: 615.0, descricaoRotulo: "ARISP (Matrículas SP)" },
-  { tipo: "cenprot", custoBrl: 308.5, descricaoRotulo: "Cenprot (Protestos)" },
-  { tipo: "edossie", custoBrl: 214.0, descricaoRotulo: "eDossiê (Carga Tributária)" },
-  { tipo: "junta_comercial", custoBrl: 178.3, descricaoRotulo: "Junta Comercial" },
-  { tipo: "datajud", custoBrl: 0, descricaoRotulo: "DataJud CNJ (gratuita)" },
-];
-
 function agregarCustosPorApi(custos: CustoRow[]): CustoApiItem[] {
   const acc = new Map<string, number>();
   for (const c of custos) {
@@ -710,9 +743,6 @@ function agregarCustosPorApi(custos: CustoRow[]): CustoApiItem[] {
       descricaoRotulo: ROTULO_TIPO[tipo] ?? tipo,
     });
   }
-  // Fallback: ainda nao ha custos reais registrados — mostra mock
-  // ficticio pra dar materia ao card no Painel (demo).
-  if (out.length === 0) return MOCK_CUSTOS_POR_API;
   out.sort((a, b) => b.custoBrl - a.custoBrl);
   return out;
 }
@@ -862,7 +892,7 @@ export async function listarOpcoesFiltros(): Promise<OpcoesFiltros> {
 export async function obterDadosDashboardPlataforma(
   filtros?: FiltrosPlataforma,
 ): Promise<DashboardPlataforma> {
-  const [credores, devedores, casos, bens, medidas, custos, mapaPerfis] =
+  const [credores, devedores, casos, bensRaw, medidasRaw, custosRaw, mapaPerfis, kpisAndamentos] =
     await Promise.all([
       lerCredores(),
       lerDevedores(),
@@ -871,7 +901,19 @@ export async function obterDadosDashboardPlataforma(
       lerMedidas(),
       lerCustos(),
       perfisPorEmail(),
+      kpisAndamentosGlobal(),
     ]);
+
+  // Pos-filtro eh_demo: bens/medidas/custos nao tem coluna eh_demo, mas
+  // herdam o status via FK (devedor_id, caso_id). Como credores/devedores/casos
+  // ja vem filtrados pra eh_demo=false, basta intersectar pelos ids reais.
+  const devedoresReais = new Set(devedores.map((d) => d.id));
+  const casosReais = new Set(casos.map((c) => c.id));
+  const bens = bensRaw.filter((b) => b.devedor_id != null && devedoresReais.has(b.devedor_id));
+  const medidas = medidasRaw.filter((m) => m.caso_id != null && casosReais.has(m.caso_id));
+  const custos = custosRaw.filter(
+    (cu) => cu.devedor_id == null || devedoresReais.has(cu.devedor_id),
+  );
 
   const filtrado = aplicarFiltros(
     { credores, devedores, casos, bens, medidas, custos },
@@ -938,5 +980,6 @@ export async function obterDadosDashboardPlataforma(
     custosPorAPI,
     feedMedidasRecentes,
     bensPorLocalizacao,
+    kpisAndamentos,
   };
 }

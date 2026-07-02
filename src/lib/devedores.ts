@@ -135,6 +135,37 @@ export async function listarDevedoresRastreados(): Promise<DevedorListagemAdmin[
 // Ordenação: maior valor estimado primeiro (cliente "mais quente" no topo).
 export async function listarCredoresComResumo(): Promise<CredorListagem[]> {
   const sb = createAdminClient();
+
+  // Caminho rapido: view SQL (migration 017) agrega casos + devedores + bens
+  // em 1 SELECT. Antes eram 1 + 3N queries (~151 pra 50 credores, 5-15s).
+  // A view ja filtra eh_demo=false e exclui credor sem caso real.
+  const { data: viaView, error } = await sb
+    .from("credores_com_agregados")
+    .select("*")
+    .order("valor_estimado_total_brl", { ascending: false });
+
+  if (!error && viaView) {
+    return viaView.map((c) => ({
+      id: c.id as number,
+      tipo: c.tipo as "PF" | "PJ",
+      documento: c.documento as string,
+      nome: c.nome as string,
+      email_contato: (c.email_contato as string | null) ?? null,
+      telefone: (c.telefone as string | null) ?? null,
+      observacoes: (c.observacoes as string | null) ?? null,
+      total_casos: Number(c.total_casos) || 0,
+      total_devedores: Number(c.total_devedores) || 0,
+      total_bens: Number(c.total_bens) || 0,
+      valor_estimado_total_brl: Number(c.valor_estimado_total_brl) || 0,
+      ultima_consulta_em: (c.ultima_consulta_em as string | null) ?? null,
+    }));
+  }
+
+  // Fallback N+1 (migration 017 ainda nao aplicada): mesmo resultado, lento.
+  console.warn(
+    "[devedores] view credores_com_agregados indisponivel (rode migration 017):",
+    error?.message,
+  );
   const { data: credores } = await sb
     .from("credores")
     .select("id, tipo, documento, nome, email_contato, telefone, observacoes");
@@ -142,14 +173,19 @@ export async function listarCredoresComResumo(): Promise<CredorListagem[]> {
 
   const result: CredorListagem[] = [];
   for (const c of credores) {
-    // Casos deste credor (id + devedor_id) — origem dos agregados.
+    // Casos REAIS deste credor (eh_demo=false). Casos demo nao contam.
     const { data: casos } = await sb
       .from("casos")
       .select("id, devedor_id")
-      .eq("credor_id", c.id as number);
+      .eq("credor_id", c.id as number)
+      .eq("eh_demo", false);
 
     const casosList = casos ?? [];
     const total_casos = casosList.length;
+
+    // Credor sem nenhum caso real e' showroom — nao entra na carteira.
+    if (total_casos === 0) continue;
+
     const devedorIds = Array.from(
       new Set(casosList.map((r) => r.devedor_id as number)),
     );

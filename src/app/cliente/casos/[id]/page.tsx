@@ -18,7 +18,6 @@ import { perfilLogado } from "@/lib/perfis-server";
 import { previewEuFromParam } from "@/lib/dev-auth";
 import { formatBRL, formatData } from "@/lib/format";
 import { listarMedidasPorDevedor } from "@/lib/medidas";
-import { DocumentosAPI } from "@/app/equipe/devedores/[id]/DocumentosAPI";
 import { TimelineMedidas } from "@/app/equipe/devedores/[id]/TimelineMedidas";
 
 // ---- Componentes compartilhados ----
@@ -312,20 +311,6 @@ export default async function DossieClientePage({ params, searchParams }: Props)
       </section>
 
       {/* ============ DOCUMENTOS API ============ */}
-      {/* esconderCustos: cliente nao ve precos das consultas (R$ 2,40 etc). */}
-      <section className="border-t border-[var(--color-ivory-12)]">
-        <div className="mx-auto max-w-[1400px] px-6 py-12 sm:px-10">
-          <SectionTitle texto="Documentos Disponíveis" />
-          <p className="mt-2 text-sm text-[var(--color-ivory-66)]">
-            Documentos que a plataforma pode puxar automaticamente. Toque pra
-            revelar e fazer download.
-          </p>
-          <div className="mt-6">
-            <DocumentosAPI devedorNome={devedor.nome} esconderCustos />
-          </div>
-        </div>
-      </section>
-
       {/* ============ TIMELINE ============ */}
       {/* somenteLeitura: nao mostra botao + modal "Adicionar medida". */}
       <section className="border-t border-[var(--color-ivory-12)]">
