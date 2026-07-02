@@ -22,13 +22,15 @@ import { perfilLogado } from "@/lib/perfis-server";
 import { ehCliente } from "@/lib/perfis";
 import { devEuFromParam } from "@/lib/dev-auth";
 import { formatBRL, formatData } from "@/lib/format";
-import { AcoesBuscaMockadas } from "./AcoesBuscaMockadas";
 import { BotaoGerarPeca } from "./BotaoGerarPeca";
-import { AtualizadorCalculo } from "./AtualizadorCalculo";
-import { DocumentosAPI } from "./DocumentosAPI";
 import { TimelineMedidas } from "./TimelineMedidas";
 import { listarMedidasPorDevedor } from "@/lib/medidas";
 import { templatesSugeridos } from "@/lib/pecas-templates";
+import {
+  listarAndamentosPorDevedor,
+  estatisticasAndamentosPorDevedor,
+} from "@/lib/andamentos";
+import { AndamentosProcessuais } from "@/app/_shared/dossie/AndamentosProcessuais";
 
 // ---- Componentes compartilhados (cliente + advogado) ----
 import { HeaderDossie } from "@/app/_shared/dossie/HeaderDossie";
@@ -93,6 +95,13 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
   // Medidas tomadas (timeline). Se a tabela ainda nao existir, devolve [].
   const medidas = await listarMedidasPorDevedor(devedorId);
 
+  // Andamentos processuais (capturados pelo GH Actions e-SAJ/eproc Ter+Sex).
+  // Fonte: public.andamentos. Agrupa por numero_processo dos casos vinculados.
+  const [andamentos, estatisticasAndamentos] = await Promise.all([
+    listarAndamentosPorDevedor(devedorId, 200),
+    estatisticasAndamentosPorDevedor(devedorId),
+  ]);
+
   // Status do devedor — devedor nao tem flag propria; usa o status do
   // primeiro caso vinculado ("ativo" se houver caso ativo, senao "pausado").
   // Quando casos.status virar enum por devedor, trocar pra dado real.
@@ -141,15 +150,8 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
             casosVinculados={casos.length}
           />
 
-          {/* ============ AÇÕES DE BUSCA ============ */}
-          <div className="mt-10">
-            <BlocoAcao titulo="Ações de Busca">
-              <AcoesBuscaMockadas devedorNome={devedor.nome} />
-            </BlocoAcao>
-          </div>
-
           {/* ============ GERAR PEÇA ============ */}
-          <div className="mt-6">
+          <div className="mt-10">
             <BlocoAcao titulo="Gerar Peça">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
                 <Link
@@ -174,13 +176,6 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
                   />
                 </div>
               </div>
-            </BlocoAcao>
-          </div>
-
-          {/* ============ CÁLCULO JUDICIAL ============ */}
-          <div className="mt-6">
-            <BlocoAcao titulo="Cálculo Judicial">
-              <AtualizadorCalculo devedorId={devedor.id} euQuery={linkBase} />
             </BlocoAcao>
           </div>
 
@@ -303,6 +298,25 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
         </section>
       ) : null}
 
+      {/* ============ ANDAMENTOS PROCESSUAIS ============ */}
+      <section className="border-t border-[var(--color-ivory-12)]">
+        <div className="mx-auto max-w-[1400px] px-6 py-12 sm:px-10">
+          <SectionTitle
+            texto="Andamentos Processuais"
+            eyebrow="Movimentações Capturadas — TJSP (e-SAJ + eproc)"
+          />
+          <p className="mt-2 text-sm text-[var(--color-ivory-66)]">
+            Capturados automaticamente nos sistemas do TJSP às terças e sextas.
+          </p>
+          <div className="mt-6">
+            <AndamentosProcessuais
+              andamentos={andamentos}
+              estatisticas={estatisticasAndamentos}
+            />
+          </div>
+        </div>
+      </section>
+
       {/* ============ CATEGORIAS ============ */}
       <section className="border-t border-[var(--color-ivory-12)]">
         <div className="mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
@@ -343,19 +357,6 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
                 </div>
               );
             })}
-          </div>
-        </div>
-      </section>
-
-      {/* ============ DOCUMENTOS API ============ */}
-      <section className="border-t border-[var(--color-ivory-12)]">
-        <div className="mx-auto max-w-[1400px] px-6 py-12 sm:px-10">
-          <SectionTitle texto="Documentos Disponíveis (API)" />
-          <p className="mt-2 text-sm text-[var(--color-ivory-66)]">
-            Documentos que a plataforma pode puxar automaticamente. Toque pra revelar e fazer download.
-          </p>
-          <div className="mt-6">
-            <DocumentosAPI devedorNome={devedor.nome} />
           </div>
         </div>
       </section>

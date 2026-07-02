@@ -27,6 +27,7 @@ import KPIPatrimonioTotal from "./_components/KPIPatrimonioTotal";
 import KPIPenhorasEfetivadasMes from "./_components/KPIPenhorasEfetivadasMes";
 import KPICasosAtivos from "./_components/KPICasosAtivos";
 import KPIGastoAPIs from "./_components/KPIGastoAPIs";
+import KPIAndamentosCapturados from "./_components/KPIAndamentosCapturados";
 import EvolucaoPatrimonioMensal from "./_components/EvolucaoPatrimonioMensal";
 import MixBensPorTipo from "./_components/MixBensPorTipo";
 import AtividadeEquipe7Dias from "./_components/AtividadeEquipe7Dias";
@@ -160,6 +161,11 @@ export default async function DashboardPlataformaPage({
             gastoMes={dados.kpisGerais.gastoApisMes}
             limite={dados.kpisGerais.gastoApisLimite}
           />
+        </div>
+
+        {/* L1.5 — Andamentos capturados nos tribunais (full width) */}
+        <div className="md:col-span-12">
+          <KPIAndamentosCapturados dados={dados.kpisAndamentos} />
         </div>
 
         {/* L2 — Evolução mensal (full width) */}
