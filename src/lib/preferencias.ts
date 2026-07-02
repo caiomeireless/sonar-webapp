@@ -151,13 +151,10 @@ export async function salvarPreferencias(
   }
 }
 
-// Soma o gasto do mes corrente em consultas pagas para um credor.
-// O agregado e feito sobre a tabela `custos` filtrando pelos emails da
-// equipe (registros do escritorio). Como ainda nao temos vinculacao
-// custo->credor formal, isto e um MOCK que retorna ~R$ 47,20 — espelha
-// a barra de saldo do mes nos cards de busca paga.
+// Gasto real do mes corrente por credor. Enquanto `custos` nao tem coluna
+// `credor_id` (chega no Sprint 3 junto com a integracao Assertiva), retorna
+// 0 — mais honesto do que devolver R$ 47,20 hardcoded pra todo mundo, que
+// era vazamento de dado ficticio no portal do cliente.
 export async function gastoDoMesAtual(_credorId: number): Promise<number> {
-  // Workaround mock pra demo. Quando a migration 002 evoluir pra associar
-  // custos a credor, este helper agrega de verdade.
-  return 47.20;
+  return 0;
 }

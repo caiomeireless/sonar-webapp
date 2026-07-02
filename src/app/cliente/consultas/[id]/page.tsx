@@ -28,6 +28,7 @@ import {
 } from "@/lib/consultas-pre";
 import { perfilLogado } from "@/lib/perfis-server";
 import { previewEuFromParam } from "@/lib/dev-auth";
+import { DEMO_CLIENTE_EMAIL } from "@/lib/mock-fixtures";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { formatBRL, formatData } from "@/lib/format";
 
@@ -68,18 +69,17 @@ export default async function ConsultaClienteDetalhePage({
     return <AcessoNegado />;
   }
 
-  // Visibilidade: se mapeamos o cliente pra um credorId e a consulta
-  // pertence a outro credor, bloqueia. Fallback de demo: se não há mapeamento,
-  // libera (o mock não tem cliente real ainda).
-  const credorIdEsperado = emailParaCredorId(eu);
-  if (
-    credorIdEsperado !== null &&
-    consulta.credorId !== credorIdEsperado
-  ) {
-    // Em produção isso seria 403. Pra demo, mantemos a leitura (sem mapeamento
-    // perfeito, evita "perder" a consulta selecionada).
-    // Quando a tabela real existir, descomentar:
-    // return <AcessoNegado />;
+  // Visibilidade: cliente demo (showroom) ve qualquer consulta mock —
+  // preserva a narrativa. Cliente REAL so ve consulta do proprio credorId
+  // mapeado; se nao ha mapeamento OU nao bate, 403.
+  // Admin/socio em modo visualizacao ja e' redirigido pro DEMO_CLIENTE_EMAIL
+  // no layout, entao esta clausula os libera junto com a demo.
+  const ehDemo = eu.toLowerCase() === DEMO_CLIENTE_EMAIL;
+  if (!ehDemo) {
+    const credorIdEsperado = emailParaCredorId(eu);
+    if (credorIdEsperado === null || consulta.credorId !== credorIdEsperado) {
+      return <AcessoNegado />;
+    }
   }
 
   const qsBase = sp.eu

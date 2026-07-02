@@ -79,6 +79,14 @@ export default async function NotificacaoClienteDetalhe({
   const notificacao = await buscarNotificacaoPorId(id);
   if (!notificacao || notificacao.portal !== "cliente") notFound();
 
+  // Isolamento por email: uma notificacao com destinatarioEmail so pode ser
+  // aberta pelo dono ou pelo demo (showroom). Sem este bloco, qualquer cliente
+  // podia enumerar IDs e ler notificacoes de outro cliente.
+  const destinatario = notificacao.destinatarioEmail?.toLowerCase() ?? null;
+  const meuEmail = emailEfetivo?.toLowerCase() ?? null;
+  const ehDemo = meuEmail === DEMO_CLIENTE_EMAIL.toLowerCase();
+  if (destinatario && meuEmail !== destinatario && !ehDemo) notFound();
+
   // Marca como lida ao abrir.
   if (!notificacao.lida) {
     await marcarComoLida(notificacao.id);

@@ -21,6 +21,7 @@ import {
 } from "@/lib/consultas-pre";
 import { perfilLogado } from "@/lib/perfis-server";
 import { previewEuFromParam } from "@/lib/dev-auth";
+import { DEMO_CLIENTE_EMAIL } from "@/lib/mock-fixtures";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { formatBRL, formatTempoRelativo } from "@/lib/format";
 
@@ -46,16 +47,17 @@ export default async function ConsultasClientePage({ searchParams }: Props) {
   const eu = previewEuFromParam(params.eu, perfil) ?? perfil?.email ?? null;
   if (!eu) redirect("/login");
 
+  // Cliente demo (showroom): ve todas as consultas mock — preserva a
+  // narrativa da apresentacao. Cliente REAL: filtra pelo credorId mapeado;
+  // sem mapeamento -> lista vazia (proibido cair pro mock geral, que era
+  // um leak de isolamento entre clientes).
+  const ehDemo = eu.toLowerCase() === DEMO_CLIENTE_EMAIL;
   const credorId = emailParaCredorId(eu);
-  let consultas: ConsultaPreProcessual[] = credorId
-    ? await listarConsultasDoCliente(credorId)
-    : [];
-
-  // Fallback de demo: se o email não mapeia ou não tem consultas atribuídas,
-  // mostra todas as do mock pra preservar a narrativa da apresentação.
-  if (consultas.length === 0) {
-    consultas = await listarConsultasPre();
-  }
+  const consultas: ConsultaPreProcessual[] = ehDemo
+    ? await listarConsultasPre()
+    : credorId
+      ? await listarConsultasDoCliente(credorId)
+      : [];
 
   const qsBase = params.eu
     ? `?eu=${encodeURIComponent(Array.isArray(params.eu) ? params.eu[0]! : params.eu)}`
