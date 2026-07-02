@@ -12,6 +12,7 @@ import { ImageAutoSlider } from "@/components/ui/ImageAutoSlider";
 import { LampLight } from "@/components/ui/LampLight";
 import { ShowcaseAction } from "@/components/landing/ShowcaseAction";
 import { GridBeam } from "@/components/landing/GridBeam";
+import { ScrollReveals } from "@/components/landing/ScrollReveals";
 import { SonarParticleText } from "@/components/ui/SonarParticleText";
 import { SonarWaveParticles } from "@/components/ui/SonarWaveParticles";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
@@ -22,6 +23,7 @@ export default function LandingPage() {
   return (
     <main className="min-h-svh bg-onyx text-ivory">
       <CursorGlow />
+      <ScrollReveals />
       {/* Header */}
       <header className="relative h-[170px] overflow-hidden">
         {/* Quadriculado: contorno forte no canto superior-esquerdo, some no inferior-direito */}
@@ -505,7 +507,7 @@ export default function LandingPage() {
         <HeaderParticles />
         <div className="pointer-events-none relative z-10 mx-auto max-w-[1400px] px-6 py-24 sm:px-10">
           {/* Painel de vidro envolvendo o título + intro */}
-          <div className="max-w-[840px] rounded-2xl border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.7)] p-8 backdrop-blur-md sm:p-10">
+          <div className="reveal max-w-[840px] rounded-2xl border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.7)] p-8 backdrop-blur-md sm:p-10">
             <div className="flex items-center gap-3">
               {/* Radar miniatura girando animado */}
               <svg
@@ -572,7 +574,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="stagger reveal mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <Card titulo="Veículos" descricao="Encontre carros, motos, caminhões, barcos e outros." fonte="MAIS RÁPIDO QUE PEDIR RENAJUD (JUDICIAL)" />
             <Card titulo="Imóveis Urbanos e Rurais" descricao="Em poucos segundos, encontre fazendas via SICAR, enquanto acha imóveis urbanos via ARISP." fonte="SICAR · ARISP" />
             <Card titulo="Participações societárias" descricao="Empresas em que o devedor é sócio: quotas penhoráveis." fonte="QSA · Receita · JUCESP" />
@@ -599,7 +601,7 @@ export default function LandingPage() {
           </div>
 
           {/* Título + história de origem */}
-          <div className="mx-auto mt-14 max-w-[780px] text-center">
+          <div className="reveal mx-auto mt-14 max-w-[780px] text-center">
             <h2 className="font-serif text-[clamp(28px,4vw,46px)] font-medium leading-[1.15] tracking-tight text-ivory">
               Por que o Sonar{" "}
               <em className="text-[var(--color-gold)]">existe</em>.
@@ -624,7 +626,7 @@ export default function LandingPage() {
           </div>
 
           {/* Slider horizontal infinito com fotos do escritório */}
-          <div className="mt-20">
+          <div className="reveal mt-20">
             <ImageAutoSlider
               images={[
                 {
@@ -660,14 +662,17 @@ export default function LandingPage() {
           faixa 1 (header) + feixes signal->gold animados percorrendo as
           linhas do grid. */}
       <section className="relative overflow-hidden">
-        <GridBeam>
-          <ShowcaseAction />
-        </GridBeam>
+        <div className="reveal">
+          <GridBeam>
+            <ShowcaseAction />
+          </GridBeam>
+        </div>
       </section>
 
       <Divider reversed />
 
-      {/* CTA */}
+      {/* CTA — sem reveal: ficava perto demais do fim da página e o
+          observer (folga -80px) nem sempre disparava, sumindo a faixa. */}
       <section>
         <div className="mx-auto max-w-[1400px] px-6 py-24 text-center sm:px-10">
           <h2 className="sonar-wordmark text-[clamp(40px,8vw,96px)]">Entre no Sonar.</h2>
