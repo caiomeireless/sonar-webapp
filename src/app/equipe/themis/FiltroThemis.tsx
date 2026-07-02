@@ -29,6 +29,9 @@ export function FiltroThemis() {
       const trimmed = novo.trim();
       if (trimmed) params.set("q", trimmed);
       else params.delete("q");
+      // Reseta paginacao ao mudar a busca — senao o usuario fica na pagina
+      // 5 com hits novos que caberiam em 1 pagina.
+      params.delete("p");
       const qs = params.toString();
       router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     }, 250);

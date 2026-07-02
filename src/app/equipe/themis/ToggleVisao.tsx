@@ -13,8 +13,12 @@ export function ToggleVisao({ atual }: { atual: VisaoThemis }) {
   function aplicar(v: VisaoThemis) {
     if (v === atual) return;
     const params = new URLSearchParams(sp.toString());
-    if (v === "cards") params.delete("v");
+    // Padrao = lista (perf); cards agora precisa de ?v=cards no URL.
+    if (v === "lista") params.delete("v");
     else params.set("v", v);
+    // Trocar de visao volta pra pagina 1 — caso o usuario esteja numa
+    // pagina alta, faz menos sentido no outro modo.
+    params.delete("p");
     const qs = params.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   }
@@ -34,7 +38,7 @@ export function ToggleVisao({ atual }: { atual: VisaoThemis }) {
       <button
         type="button"
         onClick={() => aplicar("cards")}
-        aria-pressed={atual === "cards" ? "true" : "false"}
+        aria-pressed={atual === "cards"}
         className={`${base} ${atual === "cards" ? ativoCls : inativoCls}`}
       >
         <LayoutGrid className="h-3.5 w-3.5" aria-hidden="true" />
@@ -43,7 +47,7 @@ export function ToggleVisao({ atual }: { atual: VisaoThemis }) {
       <button
         type="button"
         onClick={() => aplicar("lista")}
-        aria-pressed={atual === "lista" ? "true" : "false"}
+        aria-pressed={atual === "lista"}
         className={`${base} ${atual === "lista" ? ativoCls : inativoCls}`}
       >
         <List className="h-3.5 w-3.5" aria-hidden="true" />

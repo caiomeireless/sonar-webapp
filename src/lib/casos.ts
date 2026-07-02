@@ -276,34 +276,102 @@ export async function obterDossieParaCliente(
 // LEITURA — sem checagem (uso interno + admin)
 // ============================================================
 
-// Lista TODOS os processos "vindos do Themis" (na demo: tabela casos).
-// Usado pela tela /equipe/themis pra mostrar a fila de execuções
-// que o escritório precisa rastrear.
-export async function listarProcessosThemis(): Promise<ProcessoThemis[]> {
+// Lista os processos reais vindos do Themis pra tela /equipe/themis.
+// Antes: SELECT * de casos + N counts de bens em serie (1840 round-trips
+// no banco -> aba nao abria por timeout). Agora: 1 SELECT paginado dos
+// casos (com count exact pra saber total) + 1 SELECT paginado de bens
+// agregando por devedor em JS. eh_demo=false filtra casos-showroom.
+//
+// Paginacao: 50 por pagina, count exact devolve total pra UI montar
+// 1..N. Busca vai pro banco (numero_processo + id) e tambem pagina.
+export const THEMIS_POR_PAGINA = 50;
+
+export interface ListagemThemis {
+  processos: ProcessoThemis[];
+  total: number;
+  pagina: number;
+  porPagina: number;
+}
+
+export async function listarProcessosThemis(
+  q?: string,
+  pagina: number = 1,
+): Promise<ListagemThemis> {
   const sb = createAdminClient();
 
-  const { data: casos } = await sb
+  const paginaSegura = Math.max(1, Math.floor(pagina) || 1);
+  const inicio = (paginaSegura - 1) * THEMIS_POR_PAGINA;
+  const fim = inicio + THEMIS_POR_PAGINA - 1;
+
+  const termo = (q ?? "").trim();
+  let query = sb
     .from("casos")
-    .select(`
+    .select(
+      `
       id, numero_processo, valor_credito_brl, status, observacoes, responsavel_email, criado_em,
       credor:credores!inner(id, nome, documento, tipo),
       devedor:devedores!inner(id, tipo, documento, nome)
-    `)
+    `,
+      { count: "exact" },
+    )
+    .eq("eh_demo", false)
     .order("criado_em", { ascending: false });
 
-  if (!casos) return [];
+  if (termo) {
+    // Numero de processo eh o campo mais buscado. Escapa % e , (delimitador
+    // do PostgREST .or) pra nao quebrar o parser em termos com pontuacao.
+    const escaped = termo.replace(/[%,]/g, " ");
+    // Se o termo for numerico, tambem tenta match pelo id da pasta.
+    const numerico = /^\d+$/.test(escaped);
+    query = numerico
+      ? query.or(`numero_processo.ilike.%${escaped}%,id.eq.${escaped}`)
+      : query.ilike("numero_processo", `%${escaped}%`);
+  }
+
+  const { data: casos, count } = await query.range(inicio, fim);
+
+  const total = count ?? 0;
+  const base: ListagemThemis = {
+    processos: [],
+    total,
+    pagina: paginaSegura,
+    porPagina: THEMIS_POR_PAGINA,
+  };
+  if (!casos || casos.length === 0) return base;
+
+  const devedorIds = Array.from(
+    new Set(
+      casos
+        .map((c) => (c.devedor as unknown as { id: number } | null)?.id)
+        .filter((x): x is number => typeof x === "number"),
+    ),
+  );
+
+  // Paginacao explicita (PostgREST corta em 1000 sem aviso — [[supabase-paginacao-1000]]).
+  const bensPorDevedor = new Map<number, number>();
+  const PAGE = 1000;
+  let offset = 0;
+  while (devedorIds.length > 0) {
+    const { data: bens } = await sb
+      .from("bens_encontrados")
+      .select("devedor_id")
+      .in("devedor_id", devedorIds)
+      .eq("ativo", true)
+      .range(offset, offset + PAGE - 1);
+    if (!bens || bens.length === 0) break;
+    for (const b of bens) {
+      const id = b.devedor_id as number;
+      bensPorDevedor.set(id, (bensPorDevedor.get(id) ?? 0) + 1);
+    }
+    if (bens.length < PAGE) break;
+    offset += PAGE;
+  }
 
   const result: ProcessoThemis[] = [];
   for (const c of casos) {
     const devedor = c.devedor as unknown as ProcessoThemis["devedor"];
     if (!devedor) continue;
-
-    const { count } = await sb
-      .from("bens_encontrados")
-      .select("*", { count: "exact", head: true })
-      .eq("devedor_id", devedor.id)
-      .eq("ativo", true);
-
+    const totalBens = bensPorDevedor.get(devedor.id) ?? 0;
     result.push({
       caso_id: c.id as number,
       numero_processo: (c.numero_processo as string | null) ?? null,
@@ -314,12 +382,12 @@ export async function listarProcessosThemis(): Promise<ProcessoThemis[]> {
       recebido_em: (c.criado_em as string) ?? new Date().toISOString(),
       credor: c.credor as unknown as ProcessoThemis["credor"],
       devedor,
-      total_bens: count ?? 0,
-      ja_rastreado: (count ?? 0) > 0,
+      total_bens: totalBens,
+      ja_rastreado: totalBens > 0,
     });
   }
 
-  return result;
+  return { ...base, processos: result };
 }
 
 // Conta bens por fonte pra um devedor — alimenta a animação das 7

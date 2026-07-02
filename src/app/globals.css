@@ -399,6 +399,30 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
+/* Glass-flat — mesmo visual do .glass SEM backdrop-filter. Pra listas com
+   dezenas de itens (Fila Themis etc): blur(28px) por item multiplica custo
+   de GPU e trava o scroll. Fundo um pouco mais opaco compensa a falta do
+   desfoque sobre o AetherBackground. */
+.glass-flat {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 35%),
+    rgba(14, 17, 16, 0.92);
+  border: 1px solid var(--color-line);
+  box-shadow:
+    0 10px 30px -16px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+}
+[data-theme="light"] .glass-flat {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.65), transparent 40%),
+    rgba(246, 243, 234, 0.96);
+  box-shadow:
+    0 10px 30px -16px rgba(10, 12, 11, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
 /* Title shield — card de vidro sutil pra wrap em cabeçalhos de página.
    Garante leitura do título sobre o AetherBackground (partículas verdes
    no fundo). Padding generoso + glass leve. Aplicar como wrapper do

@@ -220,7 +220,11 @@ function SidebarPanel({
   // sidebar continua até o rodapé da página.
   const shellClass = isDrawer
     ? "glass-side absolute left-0 top-0 z-10 flex h-dvh w-[288px] shrink-0 flex-col px-4 py-6 animate-[slideIn_180ms_ease-out]"
-    : "glass-side relative hidden w-[288px] shrink-0 self-stretch md:block";
+    // z-30: sobe o stacking context da aside acima do z-10 da main content.
+    // Sem isso o botao de recolher (translate-x-full — vaza fora da aside)
+    // ficava por baixo da main e nao recebia click. Nao afeta layout — a
+    // aside continua no fluxo do flex, so muda ordem de pintura.
+    : "glass-side relative z-30 hidden w-[288px] shrink-0 self-stretch md:block";
 
   const Wrapper = isDrawer
     ? ({ children }: { children: React.ReactNode }) => <>{children}</>

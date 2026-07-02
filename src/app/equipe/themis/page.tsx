@@ -16,6 +16,7 @@ import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { formatBRL, formatStatus, formatTempoRelativo } from "@/lib/format";
 import { AcoesBuscaCardThemis } from "./AcoesBuscaCardThemis";
 import { FiltroThemis } from "./FiltroThemis";
+import { PaginacaoThemis } from "./PaginacaoThemis";
 import { ToggleVisao, type VisaoThemis } from "./ToggleVisao";
 
 type Props = {
@@ -23,6 +24,7 @@ type Props = {
     eu?: string | string[];
     q?: string | string[];
     v?: string | string[];
+    p?: string | string[];
   }>;
 };
 
@@ -56,16 +58,30 @@ export default async function ThemisPage({ searchParams }: Props) {
   const eu = euDev ?? perfil?.email ?? null;
   if (!eu) redirect("/login");
 
-  const todos = await listarProcessosThemis();
   const q = (Array.isArray(params.q) ? params.q[0] : params.q) ?? "";
-  const processos = q ? todos.filter((p) => matchBusca(p, q)) : todos;
+  const pRaw = Array.isArray(params.p) ? params.p[0] : params.p;
+  const paginaAtual = Math.max(1, Number.parseInt(pRaw ?? "1", 10) || 1);
+
+  // Busca vai pro banco (numero_processo + id) + paginacao no banco (range).
+  // Depois JS refina por nome de devedor/credor DENTRO da pagina atual — se
+  // faltar match, o usuario navega as paginas ate achar.
+  const listagem = await listarProcessosThemis(q, paginaAtual);
+  const preFiltrados = listagem.processos;
+  const processos = q
+    ? preFiltrados.filter((p) => matchBusca(p, q))
+    : preFiltrados;
   const linkBase = euDev ? `?eu=${encodeURIComponent(euDev)}` : "";
   const vRaw = Array.isArray(params.v) ? params.v[0] : params.v;
-  const visao: VisaoThemis = vRaw === "lista" ? "lista" : "cards";
+  // Padrao = lista (linhas rapidas). Cards eh opt-in via ?v=cards — 50
+  // SpotlightCards com backdrop-filter empilhado ainda deixam scroll pesado
+  // em GPU media, entao carrega so quando o usuario escolher.
+  const visao: VisaoThemis = vRaw === "cards" ? "cards" : "lista";
 
-  const totalProcessos = processos.length;
+  const totalPaginas = Math.max(1, Math.ceil(listagem.total / listagem.porPagina));
+  // Somas na pagina atual (nao no total geral — Painel /equipe agrega tudo).
+  const totalNaPagina = processos.length;
   const totalRastreados = processos.filter((p) => p.ja_rastreado).length;
-  const totalPendentes = totalProcessos - totalRastreados;
+  const totalPendentes = totalNaPagina - totalRastreados;
 
   return (
     <main className="relative mx-auto max-w-[1100px] px-6 py-16 sm:px-10">
@@ -81,17 +97,17 @@ export default async function ThemisPage({ searchParams }: Props) {
           Themis · Fila do Escritório
         </p>
         <p className="mx-auto mt-3 max-w-[680px] font-mono text-[13px] text-[var(--color-signal)]">
-          {totalProcessos === 0
+          {totalNaPagina === 0
             ? q
               ? `Nenhum processo encontrado para "${q}".`
               : "Nenhum processo recebido do Themis ainda."
-            : `${totalProcessos} ${
-                totalProcessos === 1 ? "processo recebido" : "processos recebidos"
-              } do sistema interno · ${totalPendentes} ${
+            : `${listagem.total.toLocaleString("pt-BR")} ${
+                listagem.total === 1 ? "processo" : "processos"
+              } no total · página ${paginaAtual} de ${totalPaginas} · ${totalPendentes} ${
                 totalPendentes === 1 ? "pendente" : "pendentes"
-              } de busca · ${totalRastreados} já rastreado${
+              } · ${totalRastreados} já rastreado${
                 totalRastreados === 1 ? "" : "s"
-              }`}
+              } nesta página`}
         </p>
 
         {/* Filtro + toggle de visualização */}
@@ -133,6 +149,11 @@ export default async function ThemisPage({ searchParams }: Props) {
           ))}
         </div>
       )}
+
+      {/* Paginacao: 50 por pagina. Preserva q/v/eu no URL — a busca ja
+          filtra por numero_processo no banco, entao paginar em cima da
+          busca navega os hits corretamente. */}
+      <PaginacaoThemis pagina={paginaAtual} totalPaginas={totalPaginas} />
     </main>
   );
 }
@@ -315,6 +336,16 @@ function iniciais(email?: string): string {
   return local.slice(0, 2).toUpperCase() || "?";
 }
 
+// "caio.vicentino@bpadvogados.com.br" -> "Caio Vicentino". Fallback pra
+// email inteiro se nao der pra derivar um nome legivel.
+function nomeAdvogado(email: string | null | undefined): string {
+  if (!email) return "Sem responsavel";
+  const local = email.split("@")[0] ?? email;
+  const partes = local.split(/[._-]/).filter(Boolean);
+  if (partes.length === 0) return email;
+  return partes.map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(" ");
+}
+
 function LinhaProcesso({
   processo: p,
   eu,
@@ -326,93 +357,99 @@ function LinhaProcesso({
 }) {
   const status = formatStatus(p.status);
   const tipoLabel = p.devedor.tipo === "PF" ? "PF" : "PJ";
-  const emailLocal = (p.responsavel_email ?? "").split("@")[0] ?? "";
+  const docLabel = p.devedor.tipo === "PF" ? "CPF" : "CNPJ";
+  const advogado = nomeAdvogado(p.responsavel_email);
   const dossieHref = `/equipe/devedores/${p.devedor.id}${linkBase}`;
 
   return (
-    <div className="glass group flex flex-col gap-4 p-5 transition hover:bg-[var(--color-surface-2)]/40">
-      {/* CABECALHO — 3 colunas: avatar | info do processo | (espaco) */}
-      <div className="flex items-start gap-4">
-        {/* AVATAR + advogado + Pasta */}
-        <div className="flex shrink-0 flex-col items-center gap-1.5">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[var(--color-signal)]/40 bg-[var(--color-signal-soft)] font-mono text-base font-bold text-[var(--color-signal)]">
-            {iniciais(p.responsavel_email ?? undefined)}
-          </div>
-          <span className="max-w-[100px] truncate font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-advogado)]">
-            {emailLocal || "—"}
+    <div className="glass-flat group flex flex-col gap-3 p-5 transition hover:bg-[var(--color-surface-2)]/40">
+      {/* ROW 1 — Header: chips (Pasta + Status + Tipo) + Recebido ha' X */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-gold)]/40 bg-[var(--color-gold)]/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-gold)]">
+            <Hash className="h-3 w-3" aria-hidden="true" />
+            Pasta {p.caso_id}
           </span>
-          <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-ivory-22)] bg-[var(--color-surface-2)]/60 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
-            <Hash className="h-2.5 w-2.5" />#{p.caso_id}
+          <span
+            className="inline-flex rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.20em]"
+            style={{
+              borderColor: `${status.color}66`,
+              backgroundColor: `${status.color}14`,
+              color: status.color,
+            }}
+          >
+            {status.label}
+          </span>
+          <span className="inline-flex items-center rounded-full border border-[var(--color-signal-soft-2)] bg-[var(--color-signal-soft)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.20em] text-[var(--color-signal)]">
+            {tipoLabel}
           </span>
         </div>
+        <span className="inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+          <Clock className="h-3 w-3" aria-hidden="true" />
+          Recebido {formatTempoRelativo(p.recebido_em)}
+        </span>
+      </div>
 
-        {/* INFO DO PROCESSO — empilhado em linhas claras */}
-        <div className="min-w-0 flex-1 space-y-2">
-          {/* Linha 1: nome devedor (clicavel) */}
-          <Link href={dossieHref} className="block min-w-0">
-            <h3 className="nome-devedor truncate font-serif text-xl leading-tight text-[var(--color-devedor)] transition group-hover:underline">
-              {p.devedor.nome}
-            </h3>
-          </Link>
+      {/* ROW 2 — Devedor (clicavel) + Doc + Processo em linha */}
+      <div>
+        <Link href={dossieHref} className="block min-w-0">
+          <h3 className="nome-devedor truncate font-serif text-[22px] leading-tight text-[var(--color-devedor)] transition group-hover:underline">
+            {p.devedor.nome}
+          </h3>
+        </Link>
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[12px] text-[var(--color-ivory-88)]">
+          <span>
+            <span className="text-[var(--color-ivory-66)]">{docLabel}:</span>{" "}
+            {p.devedor.documento}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <FileText className="h-3 w-3 text-[var(--color-signal)]/70" aria-hidden="true" />
+            <span className="text-[var(--color-ivory-66)]">Processo:</span>
+            <span className="break-all text-[var(--color-gold)]">
+              {p.numero_processo ?? "Sem numero"}
+            </span>
+          </span>
+        </div>
+      </div>
 
-          {/* Linha 2: tipo + doc + numero processo */}
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span className="inline-flex items-center rounded-full bg-[var(--color-signal-soft)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-signal)]">
-              {tipoLabel}
-            </span>
-            <span className="font-mono text-[12px] text-[var(--color-ivory-88)]">
-              {p.devedor.documento}
-            </span>
-            <span className="inline-flex items-center gap-1 font-mono text-[12px] text-[var(--color-gold)]">
-              <FileText className="h-3 w-3 text-[var(--color-signal)]/70" />
-              {p.numero_processo ?? "Sem número"}
-            </span>
-          </div>
-
-          {/* Linha 3: credor + credito */}
-          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
-              Credor:
-            </span>
-            <span className="nome-cliente truncate font-serif text-[15px] text-[var(--color-cliente)]">
-              {p.credor.nome}
-            </span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
-              Crédito:
-            </span>
-            <span className="font-mono text-[14px] tabular-nums text-[var(--color-gold)] whitespace-nowrap">
+      {/* ROW 3 — Grid 3-col: Credor | Advogado | Credito + Bens */}
+      <div className="grid grid-cols-1 gap-4 border-t border-[var(--color-ivory-12)] pt-3 sm:grid-cols-3">
+        <div className="min-w-0">
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+            Credor
+          </p>
+          <p className="nome-cliente mt-1 truncate font-serif text-[15px] text-[var(--color-cliente)]">
+            {p.credor.nome}
+          </p>
+        </div>
+        <div className="min-w-0">
+          <p className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+            <Scale className="h-3 w-3" aria-hidden="true" />
+            Advogado responsavel
+          </p>
+          <p className="mt-1 truncate font-serif text-[15px] text-[var(--color-advogado)]">
+            {advogado}
+          </p>
+        </div>
+        <div className="min-w-0">
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+            Credito e bens
+          </p>
+          <div className="mt-1 flex items-baseline gap-3 font-mono">
+            <span className="text-[15px] tabular-nums text-[var(--color-gold)]">
               {p.valor_credito_brl !== null ? formatBRL(p.valor_credito_brl) : "—"}
             </span>
-          </div>
-
-          {/* Linha 4: status + bens + tempo */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span
-              className="inline-flex rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em]"
-              style={{
-                borderColor: `${status.color}66`,
-                backgroundColor: `${status.color}14`,
-                color: status.color,
-              }}
-            >
-              {status.label}
-            </span>
-            <span className="inline-flex items-center gap-1 font-mono text-[11px] text-[var(--color-ivory-88)]">
-              <Scale className="h-3 w-3 text-[var(--color-signal)]/70" />
+            <span className="text-[11px] text-[var(--color-ivory-88)]">
               {p.ja_rastreado
                 ? `${p.total_bens} ${p.total_bens === 1 ? "bem" : "bens"}`
-                : "Aguardando busca"}
-            </span>
-            <span className="inline-flex items-center gap-1 font-mono text-[11px] text-[var(--color-ivory-66)]">
-              <Clock className="h-3 w-3" />
-              {formatTempoRelativo(p.recebido_em)}
+                : "Aguardando"}
             </span>
           </div>
         </div>
       </div>
 
-      {/* RODAPE — 3 botoes de busca (AcoesBuscaCardThemis ja' inclui "Ver
-          Dossiê Atual →" no proprio rodape, sem duplicar). */}
+      {/* ROW 4 — Rodape com botoes de busca (AcoesBuscaCardThemis inclui
+          "Ver Dossie Atual" no proprio rodape, entao sem duplicar). */}
       <div className="border-t border-[var(--color-ivory-12)] pt-3">
         <AcoesBuscaCardThemis
           devedorId={p.devedor.id}
