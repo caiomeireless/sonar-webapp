@@ -47,26 +47,13 @@ export const metadata: Metadata = {
   icons: { icon: "/favicon.svg" },
 };
 
-// Script anti-flash: roda ANTES da hidratação React e reconcilia o
-// `data-theme` aplicado pelo SSR (via cookie) com o estado mais fresco
-// guardado em localStorage. Cobre o caso de o usuário trocar tema em
-// outra aba — sem isso teríamos FOUC ao recarregar a aba antiga.
-//
-// Estratégia: lê localStorage; se válido e diferente do atributo já
-// presente, sobrescreve imediatamente. Qualquer erro cai em silêncio
-// (mantém o que o SSR mandou).
-const antiFlashScript = `(function(){
-  try {
-    var ls = localStorage.getItem('sonar-theme');
-    if (ls === 'light' || ls === 'dark') {
-      var atual = document.documentElement.getAttribute('data-theme');
-      if (atual !== ls) {
-        document.documentElement.setAttribute('data-theme', ls);
-      }
-    }
-  } catch (e) {}
-})();`;
-
+// Tema sem script anti-flash: o data-theme vem 100% do cookie via SSR
+// (lerTemaCookie) e o ThemeToggle grava cookie + localStorage a cada troca,
+// entao o SSR sempre renderiza o tema mais recente — sem FOUC. O script
+// inline que reconciliava localStorage foi removido: React 19 loga erro
+// pra <script> cru em componente (mesmo via next/script beforeInteractive)
+// e o caso que ele cobria (cookie e localStorage divergirem) nao acontece
+// no fluxo normal.
 export default async function RootLayout({
   children,
 }: {
@@ -81,12 +68,6 @@ export default async function RootLayout({
       suppressHydrationWarning
       className={`${manrope.variable} ${cormorant.variable} ${jetbrains.variable} ${openSans.variable}`}
     >
-      <head>
-        <script
-          id="theme-init"
-          dangerouslySetInnerHTML={{ __html: antiFlashScript }}
-        />
-      </head>
       <body className="fade-theme">{children}</body>
     </html>
   );

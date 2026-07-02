@@ -59,10 +59,14 @@ export default async function EquipeLayout({ children }: { children: ReactNode }
         portal="equipe"
       />
       <div className="relative flex min-w-0 flex-1 flex-col">
-        {/* AetherFlow — partículas signal+gold com conectores, bem discreto. */}
+        {/* AetherFlow — partículas signal+gold com conectores, bem discreto.
+            FIXED (viewport), nao absolute (pagina inteira): numa pagina longa
+            o canvas esticava a altura toda -> milhares de particulas com
+            conexao O(n^2) por frame -> scroll travado. Fixo no viewport o
+            visual e' identico e o custo vira constante. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+          className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
         >
           <AetherBackground intensidade={0.55} />
           {/* Vinheta radial escura ao centro: protege a leitura dos

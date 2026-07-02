@@ -66,7 +66,9 @@ export function AetherBackground({
     }
 
     function gerarParticulas() {
-      const total = Math.max(20, Math.floor((w * h) / densidade));
+      // Cap 240: conectar() e' O(n^2) — em 240 particulas sao ~29k pares por
+      // frame (ok); sem cap, um container grande gerava milhares e travava.
+      const total = Math.min(240, Math.max(20, Math.floor((w * h) / densidade)));
       particulas = [];
       for (let i = 0; i < total; i++) {
         const r = Math.random() * 1.5 + 0.8;

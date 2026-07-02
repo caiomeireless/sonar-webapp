@@ -7,7 +7,7 @@
 // Uso: envolver um bloco grande (secao showcase) com <GridBeam>.
 
 import { motion } from "motion/react";
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 
 function cn(...classes: Array<string | undefined | null | false>): string {
   return classes.filter(Boolean).join(" ");
@@ -77,7 +77,11 @@ function Beam({
   delay?: number;
   reverse?: boolean;
 }) {
-  const id = `grad-${Math.random().toString(36).slice(2)}`;
+  // useId() eh estavel entre SSR e hydrate; Math.random() diferia e
+  // quebrava hidratacao (o stroke url apontava pra gradient inexistente
+  // no cliente). React sanitiza os ':' pra ficar SVG-legal.
+  const rawId = useId();
+  const id = `grad-${rawId.replace(/:/g, "")}`;
   return (
     <svg
       width="156"

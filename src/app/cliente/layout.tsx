@@ -101,10 +101,12 @@ export default async function ClienteLayout({
         portal="cliente"
       />
       <div className="relative flex min-w-0 flex-1 flex-col">
-        {/* AetherFlow — partículas signal+gold com conectores, bem discreto. */}
+        {/* AetherFlow — FIXED (viewport) em vez de absolute (pagina inteira):
+            paginas longas esticavam o canvas -> particulas demais -> scroll
+            travado. Mesmo visual, custo constante. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+          className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
         >
           <AetherBackground intensidade={0.55} />
           <div

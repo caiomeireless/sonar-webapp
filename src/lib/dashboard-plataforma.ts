@@ -8,6 +8,8 @@
 // REGRA: Toda métrica devolvida já vem pronta pra UI consumir. A view
 // não deve fazer agregação no client.
 
+import { unstable_cache } from "next/cache";
+
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ROTULO_TIPO, type RegistroCusto } from "@/lib/custos";
 import { perfisPorEmail, nomeOuEmail } from "@/lib/perfis";
@@ -17,6 +19,11 @@ import {
   calcularDistribuicaoGeografica,
   type DistribuicaoGeografica,
 } from "@/lib/distribuicao-bens";
+
+// Cache tag: server actions de mutacao (nova medida, novo custo, sync Themis)
+// podem chamar revalidateTag(DASHBOARD_TAG) pra invalidar sem esperar os 60s.
+export const DASHBOARD_TAG = "dashboard-plataforma";
+const DASHBOARD_TTL_SEGUNDOS = 60;
 
 // ============================================================
 // TIPOS de saída
@@ -889,7 +896,10 @@ export async function listarOpcoesFiltros(): Promise<OpcoesFiltros> {
 // ENTRY POINT
 // ============================================================
 
-export async function obterDadosDashboardPlataforma(
+// Implementacao real — cara. Sozinho fez o painel bater 8.8s em prod porque
+// puxa 6 tabelas cruas + agrega 12 metricas em JS. Ler em cache pelo wrapper
+// abaixo transforma o ganho gigante: 1 hit cold, N hits proximos gratuitos.
+async function obterDadosDashboardPlataformaRaw(
   filtros?: FiltrosPlataforma,
 ): Promise<DashboardPlataforma> {
   const [credores, devedores, casos, bensRaw, medidasRaw, custosRaw, mapaPerfis, kpisAndamentos] =
@@ -982,4 +992,20 @@ export async function obterDadosDashboardPlataforma(
     bensPorLocalizacao,
     kpisAndamentos,
   };
+}
+
+// Wrapper com unstable_cache: 60s de TTL, chave = filtros aplicados. Cada
+// combinacao de filtros ganha entrada separada, entao o dashboard sem filtro
+// (visita mais comum) fica quente entre navegacoes. Auth continua no layout
+// (nao cacheado), entao nao vaza acesso.
+export async function obterDadosDashboardPlataforma(
+  filtros?: FiltrosPlataforma,
+): Promise<DashboardPlataforma> {
+  const chave = JSON.stringify(filtros ?? {});
+  const carregar = unstable_cache(
+    () => obterDadosDashboardPlataformaRaw(filtros),
+    ["dashboard-plataforma", chave],
+    { revalidate: DASHBOARD_TTL_SEGUNDOS, tags: [DASHBOARD_TAG] },
+  );
+  return carregar();
 }
