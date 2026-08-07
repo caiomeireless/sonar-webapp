@@ -33,9 +33,8 @@ export const NAV_EQUIPE: SidebarItem[] = [
   // garante que so admin/socio entram. SidebarItem nao tem campo de papel
   // hoje; controle de acesso fica na propria pagina.
   { href: "/equipe/demos", label: "Pedidos de Demo", icon: <Mail className={ICON_CLASS} /> },
-  // Abre o portal do cliente em modo visualização (banner dourado + volta).
-  // Sem ?eu= cai no cliente demo; pra ver um cliente REAL, usar o botão
-  // "Ver Portal" na lista de Clientes do Portal (Configurações).
-  { href: "/cliente", label: "Ver Como Cliente", icon: <Eye className={ICON_CLASS} /> },
+  // Janela de seleção: escolhe QUAL cliente simular (cada um vê um portal
+  // diferente) antes de entrar no /cliente em modo visualização.
+  { href: "/equipe/ver-como", label: "Ver Como Cliente", icon: <Eye className={ICON_CLASS} /> },
   { href: "/equipe/configuracoes", label: "Configurações", icon: <Settings className={ICON_CLASS} /> },
 ];
