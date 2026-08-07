@@ -70,34 +70,42 @@ export function CampoFicha({
   );
 }
 
+// Paleta de origem (padrao Caio 2026-07-02):
+//   THEMIS             -> verde signal
+//   ASSERTIVA LOCALIZE -> roxo neon (campos da ficha preenchidos pelo Localize)
+//   ASSERTIVA VEICULOS -> laranja neon (bens de frota, ver CardBem)
+//   MANUAL             -> dourado
 export function ChipOrigem({ origem }: { origem: OrigemFicha }) {
   const map: Record<
     OrigemFicha,
-    { color: string; bg: string; border: string }
+    { label: string; color: string; bg: string; border: string }
   > = {
     "VIA THEMIS": {
-      color: "rgb(244,197,66)",
-      bg: "rgba(244,197,66,0.15)",
-      border: "rgba(244,197,66,0.45)",
-    },
-    "VIA ASSERTIVA": {
+      label: "VIA THEMIS",
       color: "var(--color-signal)",
       bg: "rgba(60,255,138,0.10)",
       border: "rgba(60,255,138,0.45)",
     },
+    "VIA ASSERTIVA": {
+      label: "ASSERTIVA LOCALIZE",
+      color: "#C084FC",
+      bg: "rgba(192,132,252,0.12)",
+      border: "rgba(192,132,252,0.50)",
+    },
     MANUAL: {
+      label: "MANUAL",
       color: "var(--color-gold)",
       bg: "rgba(201,162,74,0.10)",
       border: "rgba(201,162,74,0.45)",
     },
   };
-  const { color, bg, border } = map[origem];
+  const { label, color, bg, border } = map[origem];
   return (
     <span
       className="inline-flex items-center rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em]"
       style={{ borderColor: border, color, backgroundColor: bg }}
     >
-      {origem}
+      {label}
     </span>
   );
 }

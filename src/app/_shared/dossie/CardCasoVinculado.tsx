@@ -1,4 +1,4 @@
-// Card de caso vinculado: numero + Pasta # + Credor + Credito + status.
+// Card de caso vinculado: numero + Pasta Themis + Credor + Debito Judicial + status.
 // Prop `mostrarAdvogado` (default true) controla a linha do email do advogado
 // responsavel — cliente passa false (nao mostra email interno).
 import { Hash } from "lucide-react";
@@ -21,14 +21,14 @@ export function CardCasoVinculado({
         </p>
         <span className="mt-2 inline-flex items-center gap-1 rounded-full border border-[var(--color-ivory-22)] bg-[var(--color-surface-2)]/60 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
           <Hash className="h-3 w-3" />
-          Pasta {caso.id}
+          {caso.pasta_themis ? `Pasta ${caso.pasta_themis}` : `Caso #${caso.id}`}
         </span>
         <p className="mt-1 text-xl text-ivory">
           Credor:{" "}
           <span className="text-[var(--color-gold)]">{caso.credor.nome}</span>
         </p>
         <p className="mt-1 text-xl text-ivory">
-          Crédito:{" "}
+          Débito Judicial:{" "}
           <span className="text-[var(--color-gold)]">
             {formatBRL(caso.valor_credito_brl)}
           </span>

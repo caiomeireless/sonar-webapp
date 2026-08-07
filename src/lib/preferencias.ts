@@ -151,10 +151,24 @@ export async function salvarPreferencias(
   }
 }
 
-// Gasto real do mes corrente por credor. Enquanto `custos` nao tem coluna
-// `credor_id` (chega no Sprint 3 junto com a integracao Assertiva), retorna
-// 0 — mais honesto do que devolver R$ 47,20 hardcoded pra todo mundo, que
-// era vazamento de dado ficticio no portal do cliente.
-export async function gastoDoMesAtual(_credorId: number): Promise<number> {
-  return 0;
+// Gasto real do mes corrente por credor — soma `custos.credor_id`
+// (migration 020; consultas Assertiva ja gravam com o vinculo). Antes da
+// migration rodar (coluna ausente), devolve 0 em vez de quebrar.
+export async function gastoDoMesAtual(credorId: number): Promise<number> {
+  try {
+    const sb = createAdminClient();
+    const inicioMes = new Date();
+    inicioMes.setDate(1);
+    inicioMes.setHours(0, 0, 0, 0);
+    const { data, error } = await sb
+      .from("custos")
+      .select("custo")
+      .eq("credor_id", credorId)
+      .gte("criado_em", inicioMes.toISOString())
+      .limit(5000);
+    if (error || !data) return 0;
+    return data.reduce((s, r) => s + (Number(r.custo) || 0), 0);
+  } catch {
+    return 0;
+  }
 }

@@ -8,10 +8,12 @@ import { perfilLogado } from "@/lib/perfis-server";
 import { ehAdmin, ehSocio } from "@/lib/perfis";
 import { DONO_EMAIL } from "@/lib/config";
 import { listarBugs, rotuloStatusBug } from "@/lib/bugs";
+import { listarCredoresAdmin } from "@/lib/credores-admin";
 import { formatTempoRelativo } from "@/lib/format";
 
 import SelectStatusBug from "./_components/SelectStatusBug";
 import BotaoReseedDemo from "./_components/BotaoReseedDemo";
+import ClientesPortal from "./_components/ClientesPortal";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +31,10 @@ export default async function ConfiguracoesPage() {
   // Bloco "Bugs Reportados" é EXCLUSIVO do Caio (DONO_EMAIL). Nem outros
   // admins/sócios veem essa seção — fila pessoal de triagem.
   const ehDono = (perfil?.email ?? "").toLowerCase() === DONO_EMAIL.toLowerCase();
-  const bugs = ehDono ? await listarBugs() : [];
+  const [bugs, credores] = await Promise.all([
+    ehDono ? listarBugs() : Promise.resolve([]),
+    listarCredoresAdmin(),
+  ]);
 
   return (
     <main className="mx-auto max-w-[1400px] px-6 py-10 sm:px-10">
@@ -61,6 +66,9 @@ export default async function ConfiguracoesPage() {
           </article>
         ))}
       </section>
+
+      {/* ============ CLIENTES DO PORTAL · Sprint 2 ============ */}
+      <ClientesPortal credores={credores} />
 
       {/* ============ DEMO TOOLS · DONO_EMAIL ============ */}
       {ehDono ? (

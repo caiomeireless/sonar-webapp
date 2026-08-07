@@ -40,26 +40,33 @@ export function HeaderDossie({
             )}
           </div>
 
-          <div className="inline-flex items-center gap-4">
+          {/* Eyebrow discreto — o PROTAGONISTA do header é o nome do
+              devedor, não o letreiro (antes o mono chegava a 32px e
+              disputava com o nome). */}
+          <div className="inline-flex items-center gap-3">
             <span
               aria-hidden="true"
-              className="inline-block h-px w-12 bg-[var(--color-signal)] opacity-70 sm:w-16"
+              className="inline-block h-px w-10 bg-[var(--color-signal)] opacity-60 sm:w-14"
             />
-            <span className="font-mono font-medium uppercase tracking-[0.32em] text-[var(--color-signal)] text-[clamp(20px,2.6vw,32px)]">
+            <span className="font-mono font-medium uppercase tracking-[0.34em] text-[14px] text-[var(--color-signal)]">
               Dossiê Patrimonial
             </span>
             <span
               aria-hidden="true"
-              className="inline-block h-px w-12 bg-[var(--color-signal)] opacity-70 sm:w-16"
+              className="inline-block h-px w-10 bg-[var(--color-signal)] opacity-60 sm:w-14"
             />
           </div>
         </div>
 
-        <h1 className="nome-devedor mt-5 break-words font-serif text-[clamp(24px,3.5vw,44px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-devedor)]">
+        <h1 className="nome-devedor mt-4 break-words font-serif text-[clamp(28px,4.2vw,52px)] font-medium uppercase leading-[1.05] tracking-[0.06em] text-[var(--color-devedor)]">
           {devedor.nome}
         </h1>
 
         <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+          <BadgeFicha
+            label={`${devedor.tipo === "PF" ? "CPF" : "CNPJ"} ${devedor.documento}`}
+            color="var(--color-ivory-88)"
+          />
           <BadgeFicha
             label={devedor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"}
             color="var(--color-gold)"

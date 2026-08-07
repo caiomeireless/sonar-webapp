@@ -245,10 +245,11 @@ interface BemRow {
   tipo: TipoBem;
   valor_estimado_brl: number | null;
   fonte_consultada_em: string | null;
-  // cidade/uf podem não existir no schema atual; quando ausentes a
-  // distribuição geográfica usa fallback determinístico via hash do id.
+  // cidade/uf podem não existir no schema atual; a distribuição geográfica
+  // cai pra detalhes (localizacao real da Assertiva) e só então pro hash.
   cidade?: string | null;
   uf?: string | null;
+  detalhes?: Record<string, unknown> | null;
 }
 
 interface MedidaRow {
@@ -335,7 +336,9 @@ async function lerBens(): Promise<BemRow[]> {
     return await selecionarTudo<BemRow>(async (from, to) => {
       const res = await sb
         .from("bens_encontrados")
-        .select("id, devedor_id, tipo, valor_estimado_brl, fonte_consultada_em")
+        .select(
+          "id, devedor_id, tipo, valor_estimado_brl, fonte_consultada_em, detalhes",
+        )
         .eq("ativo", true)
         .range(from, to);
       return { data: res.data as BemRow[] | null, error: res.error };

@@ -22,6 +22,7 @@ import { TimelineMedidas } from "@/app/equipe/devedores/[id]/TimelineMedidas";
 
 // ---- Componentes compartilhados ----
 import { HeaderDossie } from "@/app/_shared/dossie/HeaderDossie";
+import { NavDossie } from "@/app/_shared/dossie/NavDossie";
 import { EstatisticasGrid } from "@/app/_shared/dossie/EstatisticasGrid";
 import { SectionTitle } from "@/app/_shared/dossie/SectionTitle";
 import { SecaoFicha, CampoFicha } from "@/app/_shared/dossie/SecaoFicha";
@@ -135,10 +136,22 @@ export default async function DossieClientePage({ params, searchParams }: Props)
             casosVinculados={casos.length}
           />
 
+          {/* ============ NAV INTERNA (scrollspy) ============ */}
+          <div className="mt-8">
+            <NavDossie
+              secoes={[
+                { id: "ficha", rotulo: "Ficha" },
+                { id: "casos", rotulo: "Casos" },
+                { id: "bens", rotulo: "Bens" },
+                { id: "timeline", rotulo: "Linha do Tempo" },
+              ]}
+            />
+          </div>
+
           {/* ============ DADOS CADASTRAIS ============ */}
           {/* Cliente nao ve: Responsavel no Escritorio, Areas Envolvidas,
               Valor Total em Credito. ChipOrigem omitido em todos os campos. */}
-          <div className="mt-12">
+          <div id="ficha" className="mt-12 scroll-mt-16">
             <SectionTitle texto="Dados Cadastrais" />
 
             <div className="mt-6 grid gap-5 md:grid-cols-2">
@@ -189,17 +202,12 @@ export default async function DossieClientePage({ params, searchParams }: Props)
                   valor={devedor.redes_sociais}
                   mostrarChipOrigem={false}
                 />
+                <CampoFicha
+                  rotulo="Endereço"
+                  valor={primeiroEndereco(dossie.bens)}
+                  mostrarChipOrigem={false}
+                />
               </SecaoFicha>
-
-              <div className="md:col-span-2">
-                <SecaoFicha titulo="Endereço">
-                  <CampoFicha
-                    rotulo="Endereço Completo"
-                    valor={primeiroEndereco(dossie.bens)}
-                    mostrarChipOrigem={false}
-                  />
-                </SecaoFicha>
-              </div>
 
               <SecaoFicha titulo="Relacionamento">
                 <CampoFicha
@@ -226,7 +234,7 @@ export default async function DossieClientePage({ params, searchParams }: Props)
                   mostrarChipOrigem={false}
                 />
                 <CampoFicha
-                  rotulo="Valor Total em Crédito"
+                  rotulo="Débito Judicial Total"
                   valor={formatBRL(somaCredito(casos))}
                   mostrarChipOrigem={false}
                 />
@@ -238,7 +246,7 @@ export default async function DossieClientePage({ params, searchParams }: Props)
 
       {/* ============ CASOS ============ */}
       {casos.length > 0 ? (
-        <section className="border-t border-[var(--color-ivory-12)]">
+        <section id="casos" className="scroll-mt-16 border-t border-[var(--color-ivory-12)]">
           <div className="mx-auto max-w-[1400px] px-6 py-12 sm:px-10">
             <SectionTitle
               texto="Casos Vinculados"
@@ -258,41 +266,49 @@ export default async function DossieClientePage({ params, searchParams }: Props)
       ) : null}
 
       {/* ============ CATEGORIAS DE BENS ============ */}
-      <section className="border-t border-[var(--color-ivory-12)]">
+      {/* So renderiza categorias COM itens; as vazias viram chips no rodape
+          (mesma logica do dossie da equipe). */}
+      <section id="bens" className="scroll-mt-16 border-t border-[var(--color-ivory-12)]">
         <div className="mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
           <SectionTitle
             texto="Bens Encontrados por Categoria"
             eyebrow="Bens Encontrados"
           />
 
-          <div className="mt-12 space-y-16">
-            {ORDEM.map((tipo) => {
-              const bens = por_tipo[tipo];
-              const Icone = ICONES_TIPO_BEM[tipo];
-              return (
-                <div key={tipo}>
-                  <div className="mb-6 flex items-center gap-4">
-                    <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)]">
-                      <Icone className="h-6 w-6 text-[var(--color-gold)]" />
+          {total_bens === 0 ? (
+            <div className="mt-10 rounded-2xl border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.45)] p-10 text-center">
+              <p className="font-serif text-2xl text-ivory">
+                Nenhum bem localizado até o momento
+              </p>
+              <p className="mx-auto mt-3 max-w-[520px] text-sm text-[var(--color-ivory-88)]">
+                O escritório segue rastreando. Assim que um bem for
+                identificado, ele aparece aqui e você recebe uma notificação.
+              </p>
+            </div>
+          ) : (
+            <div className="mt-12 space-y-16">
+              {ORDEM.filter((tipo) => por_tipo[tipo].length > 0).map((tipo) => {
+                const bens = por_tipo[tipo];
+                const Icone = ICONES_TIPO_BEM[tipo];
+                return (
+                  <div key={tipo}>
+                    <div className="mb-6 flex items-center gap-4">
+                      <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)]">
+                        <Icone className="h-6 w-6 text-[var(--color-gold)]" />
+                      </div>
+                      <div>
+                        <h2 className="font-serif text-2xl uppercase tracking-[0.08em] text-[var(--color-gold)]">
+                          {TIPO_META[tipo].label}
+                        </h2>
+                        <p className="font-mono text-xs uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+                          {bens.length}{" "}
+                          {bens.length === 1
+                            ? "item encontrado"
+                            : "itens encontrados"}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="font-serif text-2xl uppercase tracking-[0.08em] text-[var(--color-gold)]">
-                        {TIPO_META[tipo].label}
-                      </h2>
-                      <p className="font-mono text-xs uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
-                        {bens.length}{" "}
-                        {bens.length === 1
-                          ? "item encontrado"
-                          : "itens encontrados"}
-                      </p>
-                    </div>
-                  </div>
 
-                  {bens.length === 0 ? (
-                    <p className="mt-6 text-sm italic text-[var(--color-ivory-66)]">
-                      Nenhum item encontrado.
-                    </p>
-                  ) : (
                     <div className="mt-6 grid gap-4 md:grid-cols-2">
                       {bens.map((bem) => (
                         <CardBem
@@ -302,18 +318,36 @@ export default async function DossieClientePage({ params, searchParams }: Props)
                         />
                       ))}
                     </div>
+                  </div>
+                );
+              })}
+
+              {ORDEM.some((tipo) => por_tipo[tipo].length === 0) ? (
+                <div className="flex flex-wrap items-center gap-2 border-t border-[var(--color-ivory-12)] pt-6">
+                  <span className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+                    Sem registros:
+                  </span>
+                  {ORDEM.filter((tipo) => por_tipo[tipo].length === 0).map(
+                    (tipo) => (
+                      <span
+                        key={tipo}
+                        className="inline-flex items-center rounded-full border border-[var(--color-ivory-12)] px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--color-ivory-40)]"
+                      >
+                        {TIPO_META[tipo].label}
+                      </span>
+                    ),
                   )}
                 </div>
-              );
-            })}
-          </div>
+              ) : null}
+            </div>
+          )}
         </div>
       </section>
 
       {/* ============ DOCUMENTOS API ============ */}
       {/* ============ TIMELINE ============ */}
       {/* somenteLeitura: nao mostra botao + modal "Adicionar medida". */}
-      <section className="border-t border-[var(--color-ivory-12)]">
+      <section id="timeline" className="scroll-mt-16 border-t border-[var(--color-ivory-12)]">
         <div className="mx-auto max-w-[1400px] px-6 py-12 sm:px-10">
           <SectionTitle
             texto="Cronologia de Medidas"

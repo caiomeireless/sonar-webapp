@@ -10,9 +10,15 @@
 import { useMemo, useState } from "react";
 
 import type { DistribuicaoGeografica } from "@/lib/dashboard-caso";
+import type { DistribuicaoPorTipo } from "@/lib/distribuicao-bens";
 import { BR_STATES, BR_VIEWBOX } from "@/lib/br-geo";
 import { formatBRL } from "@/lib/format";
 import { DashboardCard } from "@/components/dashboard/DashboardCard";
+import {
+  ICONES_TIPO_BEM,
+  rotuloContagemTipoBem,
+} from "@/app/_shared/dossie/icones-tipo-bem";
+import type { TipoBem } from "@/lib/mock-fixtures";
 import MapaEstadoDrilldown from "./MapaEstadoDrilldown";
 
 type Props = {
@@ -26,7 +32,57 @@ type Props = {
 interface DadosUf {
   qtdBens: number;
   valorBrl: number;
-  cidades: { nome: string; qtd: number; valor: number }[];
+  cidades: { nome: string; qtd: number; valor: number; porTipo: DistribuicaoPorTipo[] }[];
+  porTipo: DistribuicaoPorTipo[];
+}
+
+// Soma quebras por tipo de varios buckets numa so (usada pra agregar
+// cidades -> UF e UFs -> total geral). Maior valor primeiro.
+function somarPorTipo(listas: DistribuicaoPorTipo[][]): DistribuicaoPorTipo[] {
+  const acc = new Map<string, { qtd: number; valor: number }>();
+  for (const lista of listas) {
+    for (const t of lista ?? []) {
+      const cur = acc.get(t.tipo) ?? { qtd: 0, valor: 0 };
+      cur.qtd += t.qtd;
+      cur.valor += t.valorBrl;
+      acc.set(t.tipo, cur);
+    }
+  }
+  const out: DistribuicaoPorTipo[] = [];
+  for (const [tipo, v] of acc) out.push({ tipo, qtd: v.qtd, valorBrl: v.valor });
+  out.sort((a, b) => b.valorBrl - a.valorBrl || b.qtd - a.qtd);
+  return out;
+}
+
+// Linha "ícone + 1 Veículo …… R$ 51.656" — o tipo do bem sempre junto do
+// valor, em todos os contextos do mapa (pedido do Caio 2026-07-03).
+function QuebraPorTipo({ itens }: { itens: DistribuicaoPorTipo[] }) {
+  if (itens.length === 0) return null;
+  return (
+    <div className="space-y-1">
+      {itens.map((t) => {
+        const Icon = ICONES_TIPO_BEM[t.tipo as TipoBem];
+        return (
+          <div
+            key={t.tipo}
+            className="flex items-center justify-between gap-2 text-xs"
+          >
+            <span className="inline-flex min-w-0 items-center gap-1.5 text-[var(--color-ivory-88)]">
+              {Icon ? (
+                <Icon className="h-3 w-3 shrink-0 text-[var(--color-signal)]/80" />
+              ) : null}
+              <span className="truncate">{rotuloContagemTipoBem(t.tipo, t.qtd)}</span>
+            </span>
+            {t.valorBrl > 0 ? (
+              <span className="shrink-0 tabular-nums text-[var(--color-gold)]">
+                {formatBRL(t.valorBrl)}
+              </span>
+            ) : null}
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 function agregarPorUf(
@@ -45,18 +101,20 @@ function agregarPorUf(
       semUf += d.qtdBens;
       continue;
     }
-    if (!porUf[uf]) porUf[uf] = { qtdBens: 0, valorBrl: 0, cidades: [] };
+    if (!porUf[uf]) porUf[uf] = { qtdBens: 0, valorBrl: 0, cidades: [], porTipo: [] };
     porUf[uf].qtdBens += d.qtdBens;
     porUf[uf].valorBrl += d.valorTotalBrl;
     porUf[uf].cidades.push({
       nome: d.cidade || "—",
       qtd: d.qtdBens,
       valor: d.valorTotalBrl,
+      porTipo: d.porTipo ?? [],
     });
   }
-  // Ordena cidades por qtd dentro de cada UF
+  // Ordena cidades por qtd dentro de cada UF + consolida a quebra por tipo
   for (const uf of Object.keys(porUf)) {
     porUf[uf].cidades.sort((a, b) => b.qtd - a.qtd);
+    porUf[uf].porTipo = somarPorTipo(porUf[uf].cidades.map((c) => c.porTipo));
   }
   return { porUf, semUf, totalGeral, valorGeral };
 }
@@ -87,6 +145,12 @@ export default function MapaDistribuicaoBens({
       Object.entries(porUf)
         .map(([uf, d]) => ({ uf, qtd: d.qtdBens, valor: d.valorBrl }))
         .sort((a, b) => b.qtd - a.qtd),
+    [porUf],
+  );
+
+  // Quebra por tipo do Brasil inteiro — aparece no painel default (sem hover).
+  const porTipoGeral = useMemo(
+    () => somarPorTipo(Object.values(porUf).map((d) => d.porTipo)),
     [porUf],
   );
 
@@ -235,6 +299,11 @@ export default function MapaDistribuicaoBens({
               <p className="mt-1.5 text-base tabular-nums text-[var(--color-gold)]">
                 {formatBRL(detalhe.valorBrl)}
               </p>
+              {detalhe.porTipo.length > 0 && (
+                <div className="mt-2 border-t border-[var(--color-signal)]/15 pt-2">
+                  <QuebraPorTipo itens={detalhe.porTipo} />
+                </div>
+              )}
               {detalhe.cidades.length > 0 && (
                 <div className="mt-3 border-t border-[var(--color-signal)]/15 pt-2">
                   <p className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
@@ -278,6 +347,14 @@ export default function MapaDistribuicaoBens({
                   </p>
                 </div>
               </div>
+              {porTipoGeral.length > 0 && (
+                <div className="mt-3 border-t border-[var(--color-ivory-12)] pt-2">
+                  <p className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+                    O que foi encontrado
+                  </p>
+                  <QuebraPorTipo itens={porTipoGeral} />
+                </div>
+              )}
               {ranking.length > 0 && (
                 <div className="mt-3 border-t border-[var(--color-ivory-12)] pt-2">
                   <p className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
@@ -325,9 +402,11 @@ export default function MapaDistribuicaoBens({
             nome: c.nome,
             qtd: c.qtd,
             valor: c.valor,
+            porTipo: c.porTipo,
           }))}
           qtdTotalUf={porUf[drillUf].qtdBens}
           valorTotalUf={porUf[drillUf].valorBrl}
+          porTipoUf={porUf[drillUf].porTipo}
           totalGeralBens={totalGeral}
           onClose={() => setDrillUf(null)}
         />

@@ -171,13 +171,13 @@ function CardCaso({
           </p>
           {caso.valor_credito_brl ? (
             <p className="mt-3 font-mono text-[13px] text-ivory">
-              <span className="text-[var(--color-ivory-66)]">Crédito:</span>{" "}
+              <span className="text-[var(--color-ivory-66)]">Débito Judicial:</span>{" "}
               <span className="tabular-nums">{formatBRL(caso.valor_credito_brl)}</span>
             </p>
           ) : null}
-          {/* === PASTA (caso_id Themis) === */}
+          {/* === PASTA (real do Themis — mig 022; fallback caso interno) === */}
           <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
-            Pasta #{caso.caso_id}
+            {caso.pasta_themis ? `Pasta ${caso.pasta_themis}` : `Caso #${caso.caso_id}`}
           </p>
         </div>
 

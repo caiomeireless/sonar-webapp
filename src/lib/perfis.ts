@@ -26,15 +26,22 @@ export interface Perfil {
   fotoUrl: string | null;
   papel: Papel;
   acessos: string[];
+  /** FK pro credor (so perfis papel=cliente; null pra equipe). */
+  credorId: number | null;
 }
 
+// Default seguro por dominio: email do escritorio cai como funcionario;
+// email EXTERNO cai como cliente (read-only). Antes o default era sempre
+// funcionario — um cliente externo sem registro em perfis passava por
+// ehCliente()=false e entrava no portal da equipe.
 const vazio = (email: string): Perfil => ({
   email,
   nome: "",
   fotoPath: null,
   fotoUrl: null,
-  papel: "funcionario",
+  papel: email.endsWith("@" + ALLOWED_DOMAIN) ? "funcionario" : "cliente",
   acessos: [],
+  credorId: null,
 });
 
 // Deriva um nome legivel do email: "paulo.andre@..." -> "Paulo Andre".
@@ -49,25 +56,54 @@ function nomeDoEmail(email: string): string {
     .join(" ");
 }
 
-// Auto-cria perfil para emails do dominio do escritorio que ainda nao
-// existem na tabela. Defaults seguros (papel funcionario, sem acessos).
-// Admin/socio promovem depois pelas configuracoes. Para emails externos
-// (clientes), NAO auto-cria — eles tem que ser cadastrados pelo admin
-// (regra ja imposta no middleware via isEmailAutorizado).
-async function autoCriarPerfilEquipe(
+// Auto-cria perfil no primeiro acesso:
+// - Email do dominio do escritorio -> funcionario (admin/socio promovem
+//   depois pelas configuracoes).
+// - Email EXTERNO que corresponde a um credor cadastrado (email_contato)
+//   -> cliente, ja vinculado ao credor via credor_id. E' o "primeiro
+//   login" do fluxo de convite do Sprint 2.
+// - Email externo sem credor: nao cria nada (o middleware ja barra esses
+//   logins via isEmailAutorizado; aqui e' defesa em profundidade).
+async function autoCriarPerfil(
   sb: ReturnType<typeof createAdminClient>,
   email: string,
 ): Promise<void> {
-  if (!email.endsWith("@" + ALLOWED_DOMAIN)) return;
-  await sb.from("perfis").upsert(
-    {
-      email,
-      nome: nomeDoEmail(email),
-      papel: "funcionario",
-      acessos: [],
-    },
+  if (email.endsWith("@" + ALLOWED_DOMAIN)) {
+    await sb.from("perfis").upsert(
+      {
+        email,
+        nome: nomeDoEmail(email),
+        papel: "funcionario",
+        acessos: [],
+      },
+      { onConflict: "email", ignoreDuplicates: true },
+    );
+    return;
+  }
+
+  const { data: credor } = await sb
+    .from("credores")
+    .select("id, nome")
+    .eq("email_contato", email)
+    .maybeSingle();
+  if (!credor?.id) return;
+
+  const base = {
+    email,
+    nome: (credor.nome as string) || nomeDoEmail(email),
+    papel: "cliente",
+    acessos: [],
+  };
+  const { error } = await sb.from("perfis").upsert(
+    { ...base, credor_id: credor.id as number },
     { onConflict: "email", ignoreDuplicates: true },
   );
+  // Coluna credor_id so existe apos migration 019 — retry sem ela.
+  if (error) {
+    await sb
+      .from("perfis")
+      .upsert(base, { onConflict: "email", ignoreDuplicates: true });
+  }
 }
 
 // Resiliente: se a tabela/colunas ainda não existem (migração não rodada) ou
@@ -79,22 +115,44 @@ export async function perfilAtual(email: string | null | undefined): Promise<Per
   const e = email.toLowerCase();
   try {
     const sb = createAdminClient();
+    // credor_id chegou na migration 019 — enquanto ela nao roda, o select
+    // com a coluna falha; refaz sem ela pra nao derrubar TODO login.
+    const COLS = "email, nome, foto_path, papel, acessos, credor_id";
+    const COLS_LEGADO = "email, nome, foto_path, papel, acessos";
     let { data, error } = await sb
       .from("perfis")
-      .select("email, nome, foto_path, papel, acessos")
+      .select(COLS)
       .eq("email", e)
       .maybeSingle();
+    if (error) {
+      const legado = await sb
+        .from("perfis")
+        .select(COLS_LEGADO)
+        .eq("email", e)
+        .maybeSingle();
+      data = legado.data as typeof data;
+      error = legado.error;
+    }
 
-    // Nao encontrou: tenta auto-criar (so funciona pra email do dominio).
+    // Nao encontrou: auto-cria (equipe do dominio OU cliente com credor).
     if (!error && !data) {
-      await autoCriarPerfilEquipe(sb, e);
+      await autoCriarPerfil(sb, e);
       const releitura = await sb
         .from("perfis")
-        .select("email, nome, foto_path, papel, acessos")
+        .select(COLS)
         .eq("email", e)
         .maybeSingle();
       data = releitura.data;
       error = releitura.error;
+      if (error) {
+        const legado = await sb
+          .from("perfis")
+          .select(COLS_LEGADO)
+          .eq("email", e)
+          .maybeSingle();
+        data = legado.data as typeof data;
+        error = legado.error;
+      }
     }
 
     if (error || !data) return vazio(e);
@@ -107,13 +165,20 @@ export async function perfilAtual(email: string | null | undefined): Promise<Per
         .createSignedUrl(fotoPath, 3600);
       fotoUrl = assinada?.signedUrl ?? null;
     }
+    // Papel default espelha vazio(): dominio -> funcionario, externo ->
+    // cliente. Nunca deixar externo cair como funcionario por registro
+    // corrompido/sem papel.
+    const papelDefault: Papel = e.endsWith("@" + ALLOWED_DOMAIN)
+      ? "funcionario"
+      : "cliente";
     return {
       email: e,
       nome: (data.nome as string) ?? "",
       fotoPath,
       fotoUrl,
-      papel: ((data.papel as Papel) ?? "funcionario"),
+      papel: ((data.papel as Papel) ?? papelDefault),
       acessos: ((data.acessos as string[]) ?? []),
+      credorId: (data.credor_id as number | null) ?? null,
     };
   } catch {
     return vazio(e);

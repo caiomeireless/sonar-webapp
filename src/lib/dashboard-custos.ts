@@ -1,15 +1,15 @@
-// Monitor de Custos — mock + agregadores puros para a tela gerencial
-// de gasto com APIs pagas.
+// Monitor de Custos — agregadores da tela gerencial de gasto com APIs
+// pagas (server-only). Fonte REAL: tabela `custos` (cada consulta paga
+// grava uma linha via registrarCusto, com devedor_id desde a migration
+// 006 e credor_id desde a 020).
 //
-// Mock-only por enquanto: gera ~80-100 consultas fictícias distribuídas
-// nos últimos 30 dias e devolve agregados prontos para a UI consumir.
-// Quando a tabela `custos` do Supabase comecar a ser populada de verdade
-// pelo dia-a-dia das consultas pagas, troca-se a fonte aqui sem mexer
-// na tela.
-//
-// Determinismo: o mock usa um PRNG semeado para que cada render produza
-// os mesmos números (importante pra demo — totais não dançam a cada
-// reload).
+// Era mock deterministico (PRNG) ate 2026-07-02 — trocado por leitura
+// real quando a Assertiva entrou (Sprint 3). Os agregadores continuam
+// puros: a UI nao mudou.
+
+import { createAdminClient } from "@/lib/supabase/admin";
+import { ROTULO_TIPO } from "@/lib/custos";
+import { perfisPorEmail, nomeOuEmail } from "@/lib/perfis";
 
 // ============================================================
 // TIPOS
@@ -50,9 +50,6 @@ export type GastoPorDevedor = {
 
 export type GastoPorDia = { dia: string; totalBrl: number };
 
-// Período aceito como filtro. "tudo" = sem corte temporal (janela completa
-// do mock = últimos 30 dias). Os demais aplicam corte a partir do "agora"
-// ou do início do mês/ano corrente.
 export type PeriodoCustos = "tudo" | "7d" | "30d" | "90d" | "mes" | "ano";
 
 export type FiltrosCustos = {
@@ -83,78 +80,104 @@ export type DashboardCustos = {
 // por escritório, mover pra `preferencias`.
 const LIMITE_MES_BRL = 5000;
 
-const ADVOGADOS = [
-  { email: "caio@bpadvogados.com.br", nome: "Caio Vicentino" },
-  { email: "paulo@bpadvogados.com.br", nome: "Paulo André" },
-  { email: "remo@bpadvogados.com.br", nome: "Remo Battaglia" },
-  { email: "igor@bpadvogados.com.br", nome: "Igor" },
-  { email: "hugo@bpadvogados.com.br", nome: "Hugo" },
-  { email: "fabiane@bpadvogados.com.br", nome: "Fabiane" },
-  { email: "katia@bpadvogados.com.br", nome: "Katia" },
-] as const;
-
-const CLIENTES = [
-  { id: 1, nome: "Comercial Vértice" },
-  { id: 2, nome: "Construtora Oeste" },
-  { id: 3, nome: "Pedro Almeida ME" },
-] as const;
-
-const APIS = [
-  { tipo: "assertiva", rotulo: "Assertiva", custoBase: 2.5, variacao: 4.0 },
-  { tipo: "bigdatacorp", rotulo: "BigDataCorp", custoBase: 4.0, variacao: 6.0 },
-  { tipo: "arisp", rotulo: "ARISP", custoBase: 6.5, variacao: 8.5 },
-  { tipo: "cenprot", rotulo: "Cenprot", custoBase: 1.5, variacao: 3.0 },
-  { tipo: "edossie", rotulo: "eDossiê", custoBase: 3.5, variacao: 5.0 },
-  { tipo: "junta_comercial", rotulo: "Junta Comercial", custoBase: 2.0, variacao: 4.5 },
-  { tipo: "datajud", rotulo: "DataJud (gratuito)", custoBase: 0, variacao: 0 },
-] as const;
-
-const DEVEDORES = [
-  "Auto Posto Bandeirantes Ltda",
-  "Metalúrgica São Caetano S.A.",
-  "Transportadora Veloz EIRELI",
-  "Padaria Estrela d'Alva ME",
-  "Confecções Aurora Ltda",
-  "Construtora Horizonte S.A.",
-  "Comércio de Peças Atlanta",
-  "Restaurante Sabor & Arte",
-  "Jorge Henrique Pacheco",
-  "Mariana Silveira Costa",
-  "Eduardo Nascimento Lopes",
-  "Helena Bittencourt Ribeiro",
-  "Indústria Têxtil Pôr-do-Sol",
-  "Distribuidora Três Rios",
-  "Mecânica Central Express",
-  "Sapataria Pé Quente Ltda",
-] as const;
-
-const CONTEXTOS: ReadonlyArray<ConsultaCusto["contexto"]> = [
-  "themis",
-  "pre-processual",
-  "dossie",
-];
+// Registros mais antigos que isso ficam fora da leitura (o monitor olha
+// tendência recente; histórico completo vive no banco).
+const MAX_LINHAS = 5000;
 
 // ============================================================
-// PRNG semeado (Mulberry32) — determinístico p/ a demo
+// LEITURA REAL — custos + nomes de credor/devedor/advogado
 // ============================================================
 
-function mulberry32(seed: number): () => number {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let t = a;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
+interface CustoRow {
+  id: number;
+  email: string;
+  tipo: string;
+  descricao: string;
+  custo: number;
+  criado_em: string;
+  devedor_id: number | null;
+  credor_id: number | null;
 }
 
-function escolher<T>(rng: () => number, arr: ReadonlyArray<T>): T {
-  return arr[Math.floor(rng() * arr.length)]!;
+async function lerConsultasReais(): Promise<ConsultaCusto[]> {
+  const sb = createAdminClient();
+
+  // 1. Custos crus (mais recentes primeiro). credor_id pode nao existir
+  //    antes da migration 020 — fallback sem a coluna.
+  let rows: CustoRow[] = [];
+  const { data, error } = await sb
+    .from("custos")
+    .select("id, email, tipo, descricao, custo, criado_em, devedor_id, credor_id")
+    .order("criado_em", { ascending: false })
+    .limit(MAX_LINHAS);
+  if (!error && data) {
+    rows = data as unknown as CustoRow[];
+  } else {
+    const legado = await sb
+      .from("custos")
+      .select("id, email, tipo, descricao, custo, criado_em, devedor_id")
+      .order("criado_em", { ascending: false })
+      .limit(MAX_LINHAS);
+    rows = ((legado.data ?? []) as unknown as Omit<CustoRow, "credor_id">[]).map(
+      (r) => ({ ...r, credor_id: null }),
+    );
+  }
+  if (rows.length === 0) return [];
+
+  // 2. Nomes em lote: credores, devedores, perfis.
+  const credorIds = Array.from(
+    new Set(rows.map((r) => r.credor_id).filter((x): x is number => !!x)),
+  );
+  const devedorIds = Array.from(
+    new Set(rows.map((r) => r.devedor_id).filter((x): x is number => !!x)),
+  );
+
+  const nomesCredor = new Map<number, string>();
+  if (credorIds.length > 0) {
+    const { data: creds } = await sb
+      .from("credores")
+      .select("id, nome")
+      .in("id", credorIds);
+    for (const c of creds ?? []) {
+      nomesCredor.set(c.id as number, c.nome as string);
+    }
+  }
+
+  const nomesDevedor = new Map<number, string>();
+  if (devedorIds.length > 0) {
+    const { data: devs } = await sb
+      .from("devedores")
+      .select("id, nome")
+      .in("id", devedorIds);
+    for (const d of devs ?? []) {
+      nomesDevedor.set(d.id as number, d.nome as string);
+    }
+  }
+
+  const mapaPerfis = await perfisPorEmail();
+
+  // 3. Monta o shape que os agregadores esperam.
+  return rows.map((r) => ({
+    id: r.id,
+    data: r.criado_em,
+    advogadoEmail: r.email,
+    advogadoNome: nomeOuEmail(r.email, mapaPerfis),
+    credorId: r.credor_id ?? 0,
+    credorNome: r.credor_id
+      ? (nomesCredor.get(r.credor_id) ?? `Credor ${r.credor_id}`)
+      : "—",
+    devedorNome: r.devedor_id
+      ? (nomesDevedor.get(r.devedor_id) ?? `Devedor ${r.devedor_id}`)
+      : "—",
+    apiTipo: r.tipo,
+    apiRotulo: ROTULO_TIPO[r.tipo] ?? r.tipo,
+    custoBrl: Number(r.custo) || 0,
+    contexto: "dossie" as const,
+  }));
 }
 
 // ============================================================
-// GERAÇÃO DO MOCK
+// AGREGADORES PUROS (inalterados desde a versão mock)
 // ============================================================
 
 function diaISO(d: Date): string {
@@ -163,54 +186,6 @@ function diaISO(d: Date): string {
   const dd = String(d.getDate()).padStart(2, "0");
   return `${yyyy}-${mm}-${dd}`;
 }
-
-function gerarConsultasMock(): ConsultaCusto[] {
-  const rng = mulberry32(20260625); // semente fixa: data da implementação
-  // entre 80 e 100 consultas
-  const total = 80 + Math.floor(rng() * 21);
-
-  const agora = Date.now();
-  const out: ConsultaCusto[] = [];
-
-  for (let i = 0; i < total; i++) {
-    // distribuído ao longo dos últimos 30 dias (com hora aleatória)
-    const offsetMs = Math.floor(rng() * 30 * 24 * 60 * 60 * 1000);
-    const data = new Date(agora - offsetMs);
-
-    const adv = escolher(rng, ADVOGADOS);
-    const cli = escolher(rng, CLIENTES);
-    const api = escolher(rng, APIS);
-    const devedor = escolher(rng, DEVEDORES);
-    const contexto = escolher(rng, CONTEXTOS);
-
-    // Custo: base + variação aleatória, com bias mínimo de R$ 0,30 para
-    // APIs pagas (datajud fica zerado).
-    const custoBrl =
-      api.custoBase === 0
-        ? 0
-        : Math.round((api.custoBase + rng() * api.variacao) * 100) / 100;
-
-    out.push({
-      id: i + 1,
-      data: data.toISOString(),
-      advogadoEmail: adv.email,
-      advogadoNome: adv.nome,
-      credorId: cli.id,
-      credorNome: cli.nome,
-      devedorNome: devedor,
-      apiTipo: api.tipo,
-      apiRotulo: api.rotulo,
-      custoBrl,
-      contexto,
-    });
-  }
-
-  return out;
-}
-
-// ============================================================
-// AGREGADORES PUROS
-// ============================================================
 
 function totalMes(consultas: ConsultaCusto[]): number {
   const inicio = new Date();
@@ -266,10 +241,6 @@ function agruparPor<T extends { id: string | number; nome: string }>(
   return out;
 }
 
-// Agrega por devedor com breakdown por API e timestamp da última consulta.
-// Usado no painel do cliente — quem mais "custou" no portfólio, em que
-// API e quando foi a última vez. Devedores ordenados por totalBrl desc;
-// o breakdown interno também vem ordenado por totalBrl desc.
 function agruparPorDevedor(consultas: ConsultaCusto[]): GastoPorDevedor[] {
   const acc = new Map<
     string,
@@ -282,6 +253,8 @@ function agruparPorDevedor(consultas: ConsultaCusto[]): GastoPorDevedor[] {
     }
   >();
   for (const c of consultas) {
+    // Custos sem devedor vinculado nao entram no ranking por devedor.
+    if (c.devedorNome === "—") continue;
     const id = c.devedorNome;
     const cur =
       acc.get(id) ?? {
@@ -351,10 +324,6 @@ function apiMaisUsadaRotulo(porAPI: GastoPorEntidade[]): string {
 // FILTRO POR PERÍODO
 // ============================================================
 
-// Devolve a data ISO de corte (≥ corte ⇒ entra) conforme o período.
-// "tudo" devolve null (sem corte). Para "mes" / "ano" o corte é o
-// começo do mês / ano corrente — para "7d" / "30d" / "90d" é uma
-// janela móvel relativa ao "agora".
 function corteParaPeriodo(periodo: PeriodoCustos | undefined): string | null {
   if (!periodo || periodo === "tudo") return null;
 
@@ -391,7 +360,7 @@ function corteParaPeriodo(periodo: PeriodoCustos | undefined): string | null {
 export async function obterDashboardCustos(
   opts?: FiltrosCustos,
 ): Promise<DashboardCustos> {
-  const todas = gerarConsultasMock();
+  const todas = await lerConsultasReais();
 
   const corte = corteParaPeriodo(opts?.periodo);
   const consultas = todas.filter((c) => {
@@ -419,7 +388,7 @@ export async function obterDashboardCustos(
     limiteMesBrl: LIMITE_MES_BRL,
     totalConsultas: consultas.length,
     totalAdvogados: porAdvogado.length,
-    totalClientes: porCliente.length,
+    totalClientes: porCliente.filter((c) => c.id !== 0).length,
     apiMaisUsada: apiMaisUsadaRotulo(porAPI),
     gastosPorDia: agruparPorDia(consultas),
     porCliente,
@@ -430,18 +399,30 @@ export async function obterDashboardCustos(
   };
 }
 
-// Lista única de clientes presentes no mock — alimenta o dropdown
-// do filtro. Ordenada por nome. Quando trocarmos pra Supabase, esta
-// função vira um SELECT DISTINCT credor_id, credor_nome em `custos`.
+// Clientes (credores) presentes na tabela de custos — alimenta o dropdown
+// do filtro do monitor. Ordenado por nome.
 export async function listarClientesParaFiltroCustos(): Promise<
   { id: number; nome: string }[]
 > {
-  const todas = gerarConsultasMock();
-  const mapa = new Map<number, string>();
-  for (const c of todas) {
-    if (!mapa.has(c.credorId)) mapa.set(c.credorId, c.credorNome);
+  const sb = createAdminClient();
+  try {
+    const { data: custos } = await sb
+      .from("custos")
+      .select("credor_id")
+      .not("credor_id", "is", null)
+      .limit(MAX_LINHAS);
+    const ids = Array.from(
+      new Set((custos ?? []).map((c) => c.credor_id as number)),
+    );
+    if (ids.length === 0) return [];
+    const { data: creds } = await sb
+      .from("credores")
+      .select("id, nome")
+      .in("id", ids);
+    return (creds ?? [])
+      .map((c) => ({ id: c.id as number, nome: c.nome as string }))
+      .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+  } catch {
+    return [];
   }
-  return Array.from(mapa.entries())
-    .map(([id, nome]) => ({ id, nome }))
-    .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
 }

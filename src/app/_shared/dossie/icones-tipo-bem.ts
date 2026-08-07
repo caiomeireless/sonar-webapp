@@ -41,3 +41,21 @@ export const ORDEM: TipoBem[] = [
   "endereco",
   "vinculo",
 ];
+
+// Rotulos curtos de contagem pros mapas ("1 Veículo", "2 Imóveis") — os
+// labels de TIPO_META sao titulos de secao, longos demais pra caber ao
+// lado do valor numa linha de localizacao.
+const TIPO_CONTAGEM: Record<TipoBem, { singular: string; plural: string }> = {
+  veiculo: { singular: "Veículo", plural: "Veículos" },
+  imovel: { singular: "Imóvel", plural: "Imóveis" },
+  empresa: { singular: "Participação Societária", plural: "Participações Societárias" },
+  processo_credito: { singular: "Crédito Judicial", plural: "Créditos Judiciais" },
+  endereco: { singular: "Endereço", plural: "Endereços" },
+  vinculo: { singular: "Vínculo", plural: "Vínculos" },
+};
+
+export function rotuloContagemTipoBem(tipo: string, qtd: number): string {
+  const meta = TIPO_CONTAGEM[tipo as TipoBem];
+  if (!meta) return `${qtd} ${qtd === 1 ? "outro bem" : "outros bens"}`;
+  return `${qtd} ${qtd === 1 ? meta.singular : meta.plural}`;
+}

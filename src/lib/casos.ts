@@ -44,6 +44,8 @@ export interface DevedorCompleto extends DevedorResumo {
   email: string | null;
   telefone: string | null;
   redes_sociais: string | null;
+  /** Mapa campo -> fonte ('assertiva' | 'themis' | 'manual'). Migration 021. */
+  origem_campos: Record<string, string>;
   ultima_consulta_em: string | null;
   criado_em: string;
 }
@@ -63,6 +65,9 @@ export interface Bem {
 export interface CasoResumo {
   id: number;
   numero_processo: string | null;
+  /** Pasta REAL do Themis (ex.: "1214A - 142") — mig 022. Opcional pra
+      não quebrar mocks/demo que antecedem a coluna. */
+  pasta_themis?: string | null;
   valor_credito_brl: number | null;
   status: "ativo" | "pausado" | "encerrado" | "satisfeito";
   observacoes: string | null;
@@ -76,6 +81,8 @@ export interface CasoResumo {
 export interface CasoListagem {
   caso_id: number;
   numero_processo: string | null;
+  /** Pasta REAL do Themis — mig 022 (fallback: caso interno). */
+  pasta_themis?: string | null;
   valor_credito_brl: number | null;
   status: string;
   devedor: DevedorResumo;
@@ -102,6 +109,8 @@ export interface Dossie {
 export interface ProcessoThemis {
   caso_id: number;
   numero_processo: string | null;
+  /** Pasta REAL do Themis (ex.: "1214A - 142") — mig 022. */
+  pasta_themis: string | null;
   valor_credito_brl: number | null;
   status: "ativo" | "pausado" | "encerrado" | "satisfeito";
   observacoes: string | null;
@@ -178,7 +187,7 @@ export async function listarCasosDoCliente(clienteEmail: string): Promise<CasoLi
   const { data: casos } = await sb
     .from("casos")
     .select(`
-      id, numero_processo, valor_credito_brl, status,
+      id, numero_processo, pasta_themis, valor_credito_brl, status,
       devedor:devedores!inner(id, tipo, documento, nome)
     `)
     .in("credor_id", credorIds);
@@ -207,6 +216,7 @@ export async function listarCasosDoCliente(clienteEmail: string): Promise<CasoLi
     result.push({
       caso_id: c.id as number,
       numero_processo: (c.numero_processo as string | null) ?? null,
+      pasta_themis: (c.pasta_themis as string | null) ?? null,
       valor_credito_brl: (c.valor_credito_brl as number | null) ?? null,
       status: (c.status as string) ?? "ativo",
       devedor,
@@ -304,31 +314,70 @@ export async function listarProcessosThemis(
   const fim = inicio + THEMIS_POR_PAGINA - 1;
 
   const termo = (q ?? "").trim();
-  let query = sb
-    .from("casos")
-    .select(
-      `
-      id, numero_processo, valor_credito_brl, status, observacoes, responsavel_email, criado_em,
-      credor:credores!inner(id, nome, documento, tipo),
-      devedor:devedores!inner(id, tipo, documento, nome)
-    `,
-      { count: "exact" },
-    )
-    .eq("eh_demo", false)
-    .order("criado_em", { ascending: false });
+  // Clausulas de busca: numero de processo OU pasta do Themis. Escapa
+  // % e , (delimitadores do PostgREST .or).
+  const filtroOr = (comPasta: boolean): string | null => {
+    if (!termo) return null;
+    const escaped = termo.replace(/[%,]/g, " ").trim();
+    const clausulas = [`numero_processo.ilike.%${escaped}%`];
+    if (comPasta) clausulas.push(`pasta_themis.ilike.%${escaped}%`);
+    // Termo 100% numerico tambem tenta o id interno do caso.
+    if (/^\d+$/.test(escaped)) clausulas.push(`id.eq.${escaped}`);
+    return clausulas.join(",");
+  };
 
-  if (termo) {
-    // Numero de processo eh o campo mais buscado. Escapa % e , (delimitador
-    // do PostgREST .or) pra nao quebrar o parser em termos com pontuacao.
-    const escaped = termo.replace(/[%,]/g, " ");
-    // Se o termo for numerico, tambem tenta match pelo id da pasta.
-    const numerico = /^\d+$/.test(escaped);
-    query = numerico
-      ? query.or(`numero_processo.ilike.%${escaped}%,id.eq.${escaped}`)
-      : query.ilike("numero_processo", `%${escaped}%`);
+  type ResultadoCasos = {
+    data: unknown[] | null;
+    count: number | null;
+    error: unknown;
+  };
+
+  // Caminhos separados (sem union de literais — o parser de tipos do
+  // supabase-js quebra com ternario no select). comPasta=false eh o
+  // fallback pra antes da migration 022.
+  const buscarComPasta = async (): Promise<ResultadoCasos> => {
+    let query = sb
+      .from("casos")
+      .select(
+        `
+        id, numero_processo, pasta_themis, valor_credito_brl, status, observacoes, responsavel_email, criado_em,
+        credor:credores!inner(id, nome, documento, tipo),
+        devedor:devedores!inner(id, tipo, documento, nome)
+      `,
+        { count: "exact" },
+      )
+      .eq("eh_demo", false)
+      .order("criado_em", { ascending: false });
+    const or = filtroOr(true);
+    if (or) query = query.or(or);
+    return query.range(inicio, fim) as unknown as Promise<ResultadoCasos>;
+  };
+
+  const buscarSemPasta = async (): Promise<ResultadoCasos> => {
+    let query = sb
+      .from("casos")
+      .select(
+        `
+        id, numero_processo, valor_credito_brl, status, observacoes, responsavel_email, criado_em,
+        credor:credores!inner(id, nome, documento, tipo),
+        devedor:devedores!inner(id, tipo, documento, nome)
+      `,
+        { count: "exact" },
+      )
+      .eq("eh_demo", false)
+      .order("criado_em", { ascending: false });
+    const or = filtroOr(false);
+    if (or) query = query.or(or);
+    return query.range(inicio, fim) as unknown as Promise<ResultadoCasos>;
+  };
+
+  let { data: casosRaw, count, error } = await buscarComPasta();
+  if (error) {
+    const retry = await buscarSemPasta();
+    casosRaw = retry.data;
+    count = retry.count;
   }
-
-  const { data: casos, count } = await query.range(inicio, fim);
+  const casos = (casosRaw ?? []) as Record<string, unknown>[];
 
   const total = count ?? 0;
   const base: ListagemThemis = {
@@ -375,6 +424,8 @@ export async function listarProcessosThemis(
     result.push({
       caso_id: c.id as number,
       numero_processo: (c.numero_processo as string | null) ?? null,
+      pasta_themis:
+        ((c as Record<string, unknown>).pasta_themis as string | null) ?? null,
       valor_credito_brl: (c.valor_credito_brl as number | null) ?? null,
       status: (c.status as ProcessoThemis["status"]) ?? "ativo",
       observacoes: (c.observacoes as string | null) ?? null,
@@ -484,7 +535,7 @@ export async function obterDossie(devedorId: number): Promise<Dossie | null> {
   const { data: casos } = await sb
     .from("casos")
     .select(`
-      id, numero_processo, valor_credito_brl, status, observacoes, responsavel_email,
+      id, numero_processo, pasta_themis, valor_credito_brl, status, observacoes, responsavel_email,
       credor:credores!inner(id, nome, documento, tipo)
     `)
     .eq("devedor_id", devedorId);
@@ -503,19 +554,21 @@ export async function obterDossie(devedorId: number): Promise<Dossie | null> {
     (c) => ({ ...c, juizo: juizoMockPorId(c.id) }),
   );
 
-  // Campos rg/email/telefone/redes_sociais ainda nao tem coluna no schema
-  // de devedores — UI ja trata null/undefined como "—" (sem origem-chip).
-  // Quando esses campos forem adicionados, alimentar via Themis/Assertiva.
-  const devedorSemContatoFake = {
+  // Campos rg/email/telefone/redes_sociais vem da migration 020 e sao
+  // preenchidos pelo Localize (Assertiva). Antes dela rodar, o select *
+  // simplesmente nao traz as chaves — normaliza pra null (UI mostra "—").
+  const d = devedor as unknown as Partial<DevedorCompleto> & DevedorResumo;
+  const devedorCompleto: DevedorCompleto = {
     ...(devedor as unknown as DevedorCompleto),
-    rg: null,
-    email: null,
-    telefone: null,
-    redes_sociais: null,
+    rg: d.rg ?? null,
+    email: d.email ?? null,
+    telefone: d.telefone ?? null,
+    redes_sociais: d.redes_sociais ?? null,
+    origem_campos: d.origem_campos ?? {},
   };
 
   return {
-    devedor: devedorSemContatoFake,
+    devedor: devedorCompleto,
     casos: casosHidratados,
     bens,
     total_bens: bens.length,
@@ -568,12 +621,14 @@ export async function listarBensPorLocalizacaoDoCliente(
 
   const { data: bens } = await sb
     .from("bens_encontrados")
-    .select("id, valor_estimado_brl")
+    .select("id, tipo, valor_estimado_brl, detalhes")
     .in("devedor_id", devedorIds)
     .eq("ativo", true);
 
-  // Campos cidade/uf ainda não existem no schema atual — a função pura
-  // gera fallback estável por hash do id (mesmas cidades que aparecem
-  // no dossiê do devedor, pra manter coerência entre as telas).
-  return calcularDistribuicaoGeografica((bens ?? []) as { id: number; valor_estimado_brl: number | null }[]);
+  // Localizacao real vem de detalhes (Assertiva grava "SOROCABA/SP");
+  // sem ela a função pura gera fallback estável por hash do id (mesmas
+  // cidades do dossiê, pra manter coerência entre as telas).
+  return calcularDistribuicaoGeografica(
+    (bens ?? []) as { id: number; tipo: string; valor_estimado_brl: number | null }[],
+  );
 }

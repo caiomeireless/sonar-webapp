@@ -13,7 +13,13 @@ export function CardBem({
   mostrarChipOrigem?: boolean;
 }) {
   const titulo = identificacaoPrincipal(bem);
-  const origem = origemDoBem(bem.fonte);
+  const origem = origemDoBem(bem.fonte, bem.tipo);
+  // Valor de veiculo vindo da tabela FIPE: declara a fonte + referencia
+  // junto do numero (ex.: "Tabela FIPE · jul/2026 · ano 2019").
+  const fipeRef = getStr(bem.detalhes, "fipe_referencia");
+  const anoVeiculo =
+    getNum(bem.detalhes, "ano_modelo") ?? getStr(bem.detalhes, "ano");
+  const ehValorFipe = bem.tipo === "veiculo" && !!getStr(bem.detalhes, "fipe_codigo");
   return (
     <div className="glass p-6">
       <div className="flex items-start justify-between gap-4">
@@ -43,9 +49,17 @@ export function CardBem({
           </div>
         </div>
         {bem.valor_estimado_brl !== null ? (
-          <span className="whitespace-nowrap font-mono text-lg text-[var(--color-gold)]">
-            {formatBRL(bem.valor_estimado_brl)}
-          </span>
+          <div className="shrink-0 text-right">
+            <span className="whitespace-nowrap font-mono text-lg text-[var(--color-gold)]">
+              {formatBRL(bem.valor_estimado_brl)}
+            </span>
+            {ehValorFipe ? (
+              <p className="mt-0.5 whitespace-nowrap font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--color-ivory-66)]">
+                Tabela FIPE{fipeRef ? ` · ${fipeRef}` : ""}
+                {anoVeiculo ? ` · ano ${anoVeiculo}` : ""}
+              </p>
+            ) : null}
+          </div>
         ) : null}
       </div>
 
@@ -132,21 +146,32 @@ type ChipBemOrigem = {
   border: string;
 };
 
-export function origemDoBem(fonte: string): ChipBemOrigem {
+// Paleta de origem (padrao Caio 2026-07-02): Themis verde signal;
+// Assertiva VEICULOS (frota) laranja neon; Assertiva LOCALIZE
+// (enderecos/empresas do enriquecimento) roxo neon.
+export function origemDoBem(fonte: string, tipoBem?: string): ChipBemOrigem {
   switch (fonte) {
     case "Themis":
       return {
         label: "VIA THEMIS",
-        color: "rgb(244,197,66)",
-        bg: "rgba(244,197,66,0.15)",
-        border: "rgba(244,197,66,0.45)",
-      };
-    case "Assertiva":
-      return {
-        label: "VIA ASSERTIVA",
         color: "var(--color-signal)",
         bg: "rgba(60,255,138,0.10)",
         border: "rgba(60,255,138,0.45)",
+      };
+    case "Assertiva":
+      if (tipoBem === "veiculo") {
+        return {
+          label: "ASSERTIVA VEÍCULOS",
+          color: "#FF9C41",
+          bg: "rgba(255,156,65,0.12)",
+          border: "rgba(255,156,65,0.50)",
+        };
+      }
+      return {
+        label: "ASSERTIVA LOCALIZE",
+        color: "#C084FC",
+        bg: "rgba(192,132,252,0.12)",
+        border: "rgba(192,132,252,0.50)",
       };
     case "DataJud":
       return {
@@ -184,20 +209,39 @@ function DetalhesRender({
       const placa = getStr(detalhes, "placa");
       const marca = getStr(detalhes, "marca");
       const modelo = getStr(detalhes, "modelo");
-      const ano = getNum(detalhes, "ano_modelo");
+      // Ano/restricao: aceita os DOIS formatos gravados no historico —
+      // ano_modelo (number, seeds antigos) e ano (string, Assertiva);
+      // restricoes (array) e restricao (string).
+      const ano = getNum(detalhes, "ano_modelo") ?? getStr(detalhes, "ano");
       const restricoes = getArr(detalhes, "restricoes");
+      const restricaoStr = getStr(detalhes, "restricao");
+      const cor = getStr(detalhes, "cor");
+      const chassi = getStr(detalhes, "chassi");
+      const renavam = getStr(detalhes, "renavam");
+      const localizacao = getStr(detalhes, "localizacao");
+      const fipeCodigo = getStr(detalhes, "fipe_codigo");
+      const fipeReferencia = getStr(detalhes, "fipe_referencia");
       const veiculo = [marca, modelo].filter(Boolean).join(" ");
+      const restricaoTexto =
+        restricoes && restricoes.length > 0
+          ? restricoes.map((r) => String(r)).join("; ")
+          : restricaoStr || undefined;
       return (
         <>
           <Linha rotulo="Placa" valor={placa} />
           <Linha rotulo="Veículo" valor={veiculo || undefined} />
           <Linha rotulo="Ano" valor={ano} />
-          {restricoes && restricoes.length > 0 ? (
+          <Linha rotulo="Cor" valor={cor} />
+          <Linha rotulo="Renavam" valor={renavam} />
+          <Linha rotulo="Chassi" valor={chassi} />
+          <Linha rotulo="Registro" valor={localizacao} />
+          {fipeCodigo ? (
             <Linha
-              rotulo="Restrições"
-              valor={restricoes.map((r) => String(r)).join("; ")}
+              rotulo="Tabela FIPE"
+              valor={`${fipeCodigo}${fipeReferencia ? ` · ref. ${fipeReferencia}` : ""}`}
             />
           ) : null}
+          <Linha rotulo="Restrições" valor={restricaoTexto} />
         </>
       );
     }

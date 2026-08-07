@@ -18,6 +18,7 @@ import {
   type RegistroCusto,
 } from "@/lib/custos";
 import type { Medida, ResultadoMedida, TipoMedida } from "@/lib/medidas";
+import { listarAndamentosPorDevedor } from "@/lib/andamentos";
 import {
   calcularDistribuicaoGeografica as calcularDistribuicaoGeograficaPura,
   type BemParaLocalizacao,
@@ -690,7 +691,17 @@ function calcularVinculosPatrimoniais(bens: Bem[]): VinculoPatrimonial[] {
   return out;
 }
 
-// (f) Cronologia processual — 6 marcos canônicos.
+// (f) Cronologia processual — trilha por TIPO de execução.
+//
+// Redesenho 2026-07-02 (correção jurídica do Caio): cumprimento de
+// sentença NÃO tem "sentença futura" — o título já existe; as fases são
+// intimação pra pagar (CPC 523), penhora, impugnação (CPC 525) e
+// eventual agravo. O desenho clássico (distribuição -> citação ->
+// sentença -> trânsito) só vale pra fase de conhecimento; execução de
+// título extrajudicial tem citação do art. 829 + embargos.
+//
+// Marcos são detectados nos ANDAMENTOS reais capturados dos tribunais
+// (keyword matching na descrição) + medidas tomadas + status do caso.
 type MarcosProcessuais = {
   citacao?: string | null;
   sentenca?: string | null;
@@ -698,35 +709,139 @@ type MarcosProcessuais = {
   inicio_cumprimento?: string | null;
 };
 
+type AndamentoResumo = { data: string | null; descricao: string };
+
+// Primeiro andamento cuja descrição casa com o padrão (mais antigo).
+function detectaMarco(
+  andamentos: AndamentoResumo[],
+  padrao: RegExp,
+): string | null {
+  let menor: string | null = null;
+  for (const a of andamentos) {
+    if (!padrao.test(a.descricao)) continue;
+    const d = a.data ?? null;
+    if (d && (menor === null || d < menor)) menor = d;
+    else if (!d && menor === null) menor = "";
+  }
+  return menor === "" ? null : menor;
+}
+
 function calcularCronologiaCaso(
   dataDistribuicao: string | null,
   marcos: MarcosProcessuais,
   medidas: Medida[],
+  tipoExecucao: string,
+  statusCaso: string,
+  andamentos: AndamentoResumo[],
 ): CronologiaItem[] {
-  // 1ª medida tomada = min(data) das medidas.
-  let primeiraMedida: string | null = null;
-  for (const m of medidas) {
-    if (!m.data) continue;
-    const t = new Date(m.data).getTime();
-    if (Number.isNaN(t)) continue;
-    if (primeiraMedida === null || m.data < primeiraMedida) {
-      primeiraMedida = m.data;
-    }
-  }
+  // Sinais dos andamentos (case-insensitive, sem acento nas keywords
+  // críticas — os tribunais variam a grafia).
+  const norm = (s: string) =>
+    s.toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "");
+  const ands = andamentos.map((a) => ({
+    data: a.data,
+    descricao: norm(a.descricao),
+  }));
 
-  const itens: { evento: string; data: string | null }[] = [
-    { evento: "Distribuição", data: dataDistribuicao },
-    { evento: "Citação", data: marcos.citacao ?? null },
-    { evento: "Sentença", data: marcos.sentenca ?? null },
-    { evento: "Trânsito julgado", data: marcos.transito_julgado ?? null },
-    { evento: "Início do cumprimento", data: marcos.inicio_cumprimento ?? null },
-    { evento: "1ª medida tomada", data: primeiraMedida },
-  ];
+  const dtCitacao =
+    marcos.citacao ?? detectaMarco(ands, /citacao|citado|mandado de citacao/);
+  const dtPenhora = (() => {
+    const viaAndamento = detectaMarco(
+      ands,
+      /penhora|bloqueio|bacenjud|sisbajud|arresto|indisponibilidade/,
+    );
+    if (viaAndamento) return viaAndamento;
+    // Fallback: medida tomada do tipo penhora/bloqueio.
+    let menor: string | null = null;
+    for (const m of medidas) {
+      const t = norm(String(m.tipo ?? ""));
+      if (!/penhora|bloqueio/.test(t) || !m.data) continue;
+      if (menor === null || m.data < menor) menor = m.data;
+    }
+    return menor;
+  })();
+  const dtImpugnacao = detectaMarco(ands, /impugnacao/);
+  const dtEmbargos = detectaMarco(ands, /embargos/);
+  const dtRecursal = detectaMarco(ands, /agravo|apelacao|recurso/);
+  const dtExpropriacao = detectaMarco(
+    ands,
+    /leilao|hasta publica|alienacao|adjudicacao|expropriacao/,
+  );
+  const satisfeito = statusCaso === "satisfeito" || statusCaso === "encerrado";
+
+  let itens: { evento: string; data: string | null; completo?: boolean }[];
+
+  if (tipoExecucao === "cumprimento") {
+    // Cumprimento de sentença: o título JÁ existe (completo por definição).
+    itens = [
+      {
+        evento: "Título formado (sentença)",
+        data: marcos.sentenca ?? null,
+        completo: true,
+      },
+      {
+        evento: "Início do cumprimento",
+        data: marcos.inicio_cumprimento ?? dataDistribuicao,
+        completo: true,
+      },
+      { evento: "Intimação p/ pagar (art. 523)", data: dtCitacao },
+      { evento: "Penhora / bloqueio", data: dtPenhora },
+      {
+        evento: "Impugnação (art. 525)",
+        data: dtImpugnacao,
+        completo: dtImpugnacao !== null,
+      },
+      {
+        evento: "Fase recursal (agravo)",
+        data: dtRecursal,
+        completo: dtRecursal !== null,
+      },
+      {
+        evento: "Satisfação do crédito",
+        data: null,
+        completo: satisfeito,
+      },
+    ];
+  } else if (tipoExecucao === "execucao") {
+    // Execução de título extrajudicial (CPC 824+).
+    itens = [
+      { evento: "Distribuição", data: dataDistribuicao },
+      { evento: "Citação (art. 829)", data: dtCitacao },
+      {
+        evento: "Embargos à execução",
+        data: dtEmbargos,
+        completo: dtEmbargos !== null,
+      },
+      { evento: "Penhora / bloqueio", data: dtPenhora },
+      {
+        evento: "Fase recursal",
+        data: dtRecursal,
+        completo: dtRecursal !== null,
+      },
+      {
+        evento: "Expropriação (leilão/adjudicação)",
+        data: dtExpropriacao,
+      },
+      { evento: "Satisfação do crédito", data: null, completo: satisfeito },
+    ];
+  } else {
+    // Fase de conhecimento / outros: desenho clássico.
+    itens = [
+      { evento: "Distribuição", data: dataDistribuicao },
+      { evento: "Citação", data: dtCitacao },
+      { evento: "Sentença", data: marcos.sentenca ?? null },
+      { evento: "Trânsito em julgado", data: marcos.transito_julgado ?? null },
+      {
+        evento: "Início do cumprimento",
+        data: marcos.inicio_cumprimento ?? null,
+      },
+    ];
+  }
 
   return itens.map((it, i) => ({
     evento: it.evento,
     data: it.data,
-    completo: !!it.data,
+    completo: it.completo ?? !!it.data,
     ordem: i + 1,
   }));
 }
@@ -857,46 +972,15 @@ function calcularCustoOportunidade(
   };
 }
 
-// (i) Próximos atos processuais — MOCK até Themis entregar prazos reais.
-// Gera 2-3 atos fictícios estáveis por devedorId. Quando Themis API entregar
-// prazos fatais, substituir este helper por uma leitura da API mantendo a
-// interface ProximoAtoProcessual.
+// (i) Próximos atos processuais.
+// Era MOCK (prazos fictícios) — REMOVIDO 2026-07-02: prazo processual
+// inventado num painel jurídico é risco real (alguém confia e perde
+// prazo de verdade). Devolve vazio ("Nenhum prazo fatal mapeado") até a
+// fonte real chegar (DataJud/Themis — Sprint 4), mantendo a interface.
 function calcularProximosAtosProcessuais(
-  devedorId: number,
+  _devedorId: number,
 ): ProximoAtoProcessual[] {
-  // MOCK: pool de atos fictícios. Hash do devedorId rotaciona quais entram
-  // pra cada caso ter um set diferente mas estável entre reloads.
-  const pool: { ato: string; offsetDias: number }[] = [
-    { ato: "Manifestação sobre penhora", offsetDias: 15 },
-    { ato: "Audiência de conciliação", offsetDias: 45 },
-    { ato: "Embargos à execução", offsetDias: 10 },
-    { ato: "Impugnação ao cumprimento de sentença", offsetDias: 30 },
-    { ato: "Resposta a cálculo do contador", offsetDias: 20 },
-    { ato: "Recurso de agravo", offsetDias: 8 },
-  ];
-
-  const h = Math.abs(devedorId * 2654435761) >>> 0;
-  const qtd = 2 + (h % 2); // 2 ou 3 atos
-  const escolhidos: { ato: string; offsetDias: number }[] = [];
-  for (let i = 0; i < qtd; i++) {
-    escolhidos.push(pool[(h + i) % pool.length]);
-  }
-
-  const hoje = new Date();
-  return escolhidos.map((e) => {
-    const fatal = new Date(hoje.getTime() + e.offsetDias * DIAS_MS);
-    const diasRestantes = e.offsetDias;
-    let urgencia: ProximoAtoProcessual["urgencia"];
-    if (diasRestantes <= 10) urgencia = "alta";
-    else if (diasRestantes <= 30) urgencia = "media";
-    else urgencia = "baixa";
-    return {
-      ato: e.ato,
-      prazoFatal: fatal.toISOString().slice(0, 10),
-      diasRestantes,
-      urgencia,
-    };
-  });
+  return [];
 }
 
 // (j) Sazonalidade — atividade processual nos últimos 12 meses.
@@ -964,23 +1048,37 @@ export async function obterDadosDashboardCasoV2(
   const dossie = await obterDossie(devedorId);
   if (!dossie) return null;
 
-  const [medidas, casosExtra] = await Promise.all([
+  const [medidas, casosExtra, andamentosRaw] = await Promise.all([
     buscarMedidasPorDevedor(devedorId),
     sb
       .from("casos")
-      .select("id, data_distribuicao, marcos_processuais")
+      .select("id, data_distribuicao, marcos_processuais, tipo_execucao, status")
       .eq("devedor_id", devedorId),
+    listarAndamentosPorDevedor(devedorId, 500),
   ]);
+  const andamentosResumo: AndamentoResumo[] = andamentosRaw.map((a) => ({
+    data: a.data_andamento,
+    descricao: a.descricao,
+  }));
 
   // Pra prescrição e cronologia, considera o caso mais antigo distribuído
   // (data_distribuicao mínima). Se nenhum caso tiver, devolve null.
+  // Tipo/status pra trilha da cronologia: prioriza o caso de cumprimento/
+  // execução (é a fase que o Sonar acompanha) sobre "outro".
   let dataDistribuicao: string | null = null;
   let marcos: MarcosProcessuais = {};
+  let tipoExecucao = "outro";
+  let statusCaso = "ativo";
   for (const c of casosExtra.data ?? []) {
     const dd = (c.data_distribuicao as string | null) ?? null;
     if (dd && (dataDistribuicao === null || dd < dataDistribuicao)) {
       dataDistribuicao = dd;
       marcos = (c.marcos_processuais as MarcosProcessuais | null) ?? {};
+    }
+    const te = (c.tipo_execucao as string | null) ?? "outro";
+    if (te === "cumprimento" || (te === "execucao" && tipoExecucao === "outro")) {
+      tipoExecucao = te;
+      statusCaso = (c.status as string | null) ?? "ativo";
     }
   }
 
@@ -993,6 +1091,9 @@ export async function obterDadosDashboardCasoV2(
     dataDistribuicao,
     marcos,
     medidas,
+    tipoExecucao,
+    statusCaso,
+    andamentosResumo,
   );
   const comparativoEscritorio = await calcularComparativoEscritorio(
     devedorId,

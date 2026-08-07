@@ -18,7 +18,13 @@ import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 import { BR_STATES } from "@/lib/br-geo";
+import type { DistribuicaoPorTipo } from "@/lib/distribuicao-bens";
 import { formatBRL } from "@/lib/format";
+import {
+  ICONES_TIPO_BEM,
+  rotuloContagemTipoBem,
+} from "@/app/_shared/dossie/icones-tipo-bem";
+import type { TipoBem } from "@/lib/mock-fixtures";
 
 // ---------- Coordenadas medias (lat, lon) por UF -------------------------
 // Centroides aproximados das UFs em graus decimais. Usados em conjunto com
@@ -186,6 +192,9 @@ export interface CidadeDrilldown {
   nome: string;
   qtd: number;
   valor: number;
+  /** O QUE foi encontrado na cidade (tipo + valor) — sempre exibido junto
+   *  do valor da localizacao. */
+  porTipo?: DistribuicaoPorTipo[];
 }
 
 interface Props {
@@ -194,8 +203,28 @@ interface Props {
   cidades: CidadeDrilldown[];
   qtdTotalUf: number;
   valorTotalUf: number;
+  /** Quebra por tipo consolidada da UF — chips no cabecalho. */
+  porTipoUf?: DistribuicaoPorTipo[];
   totalGeralBens: number;
   onClose: () => void;
+}
+
+// Chip "ícone + 1 Veículo · R$ 51.656" usado no cabecalho do estado.
+function ChipTipo({ item }: { item: DistribuicaoPorTipo }) {
+  const Icon = ICONES_TIPO_BEM[item.tipo as TipoBem];
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-signal)]/25 bg-[rgba(60,255,138,0.07)] px-2.5 py-1 text-[11px] text-[var(--color-ivory-88)]">
+      {Icon ? (
+        <Icon className="h-3 w-3 shrink-0 text-[var(--color-signal)]" />
+      ) : null}
+      {rotuloContagemTipoBem(item.tipo, item.qtd)}
+      {item.valorBrl > 0 ? (
+        <span className="tabular-nums text-[var(--color-gold)]">
+          {formatBRL(item.valorBrl)}
+        </span>
+      ) : null}
+    </span>
+  );
 }
 
 export default function MapaEstadoDrilldown({
@@ -204,6 +233,7 @@ export default function MapaEstadoDrilldown({
   cidades,
   qtdTotalUf,
   valorTotalUf,
+  porTipoUf,
   totalGeralBens,
   onClose,
 }: Props) {
@@ -344,6 +374,13 @@ export default function MapaEstadoDrilldown({
                 {formatBRL(valorTotalUf)}
               </span>
             </p>
+            {porTipoUf && porTipoUf.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {porTipoUf.map((t) => (
+                  <ChipTipo key={t.tipo} item={t} />
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="relative">
@@ -490,6 +527,33 @@ export default function MapaEstadoDrilldown({
                       </p>
                     </div>
                   </div>
+                  {c.porTipo && c.porTipo.length > 0 && (
+                    <ul className="mt-1.5 space-y-0.5 border-t border-[var(--color-ivory-12)] pt-1.5">
+                      {c.porTipo.map((t) => {
+                        const Icon = ICONES_TIPO_BEM[t.tipo as TipoBem];
+                        return (
+                          <li
+                            key={`${c.nome}-${t.tipo}`}
+                            className="flex items-center justify-between gap-2 text-[11px]"
+                          >
+                            <span className="inline-flex min-w-0 items-center gap-1.5 text-[var(--color-ivory-88)]">
+                              {Icon ? (
+                                <Icon className="h-3 w-3 shrink-0 text-[var(--color-signal)]/80" />
+                              ) : null}
+                              <span className="truncate">
+                                {rotuloContagemTipoBem(t.tipo, t.qtd)}
+                              </span>
+                            </span>
+                            {t.valorBrl > 0 ? (
+                              <span className="shrink-0 tabular-nums text-[var(--color-gold)]">
+                                {formatBRL(t.valorBrl)}
+                              </span>
+                            ) : null}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
                 </li>
               );
             })}

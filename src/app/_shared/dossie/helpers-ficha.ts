@@ -27,5 +27,17 @@ export function areasDoDevedor(casos: CasoResumo[]): string | null {
 }
 
 export function somaCredito(casos: CasoResumo[]): number {
-  return casos.reduce((acc, c) => acc + (c.valor_credito_brl ?? 0), 0);
+  // Processo principal + desdobramentos da MESMA pasta do Themis carregam
+  // o mesmo débito (o cumprimento repete o valor da fase de conhecimento) —
+  // somar tudo dobraria a dívida. Vale o maior valor de cada pasta; caso
+  // sem pasta conta sozinho.
+  const porPasta = new Map<string, number>();
+  for (const c of casos) {
+    const chave = c.pasta_themis ?? `caso:${c.id}`;
+    const valor = c.valor_credito_brl ?? 0;
+    porPasta.set(chave, Math.max(porPasta.get(chave) ?? 0, valor));
+  }
+  let total = 0;
+  for (const v of porPasta.values()) total += v;
+  return total;
 }

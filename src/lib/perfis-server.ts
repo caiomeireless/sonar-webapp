@@ -14,6 +14,7 @@ const PERFIL_DEMO_EQUIPE: Perfil = {
   fotoUrl: null,
   papel: "admin",
   acessos: [],
+  credorId: null,
 };
 const PERFIL_DEMO_CLIENTE: Perfil = {
   email: "cliente.demo@battaglia.com.br",
@@ -22,6 +23,7 @@ const PERFIL_DEMO_CLIENTE: Perfil = {
   fotoUrl: null,
   papel: "cliente",
   acessos: [],
+  credorId: null,
 };
 
 // Perfil do usuario logado (sessao atual). Usar em paginas/acoes server-side.

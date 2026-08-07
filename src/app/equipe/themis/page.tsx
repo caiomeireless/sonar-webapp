@@ -39,9 +39,10 @@ function normalizar(s: string | null | undefined): string {
 function matchBusca(p: ProcessoThemis, q: string): boolean {
   if (!q) return true;
   const alvo = normalizar(q);
-  // Busca por número do processo, pasta (= ID interno), nome do devedor ou credor.
+  // Busca por número do processo, pasta do Themis, nome do devedor ou credor.
   const campos = [
     p.numero_processo,
+    p.pasta_themis,
     String(p.caso_id),
     p.devedor.nome,
     p.devedor.documento,
@@ -178,10 +179,13 @@ function CardProcesso({
           <span className="font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-signal)]">
             Processo Themis
           </span>
-          {/* Chip PASTA #X — número da pasta interna do Themis */}
+          {/* Chip PASTA — a pasta REAL do Themis (mig 022). Fallback pro
+              id interno soh enquanto o backfill nao roda. */}
           <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-ivory-22)] bg-[var(--color-surface-2)]/60 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
             <Hash className="h-3 w-3" />
-            Pasta {processo.caso_id}
+            {processo.pasta_themis
+              ? `Pasta ${processo.pasta_themis}`
+              : `Caso #${processo.caso_id}`}
           </span>
         </div>
         <h3 className="nome-devedor mt-3 font-serif text-[24px] leading-[1.15] text-[var(--color-devedor)]">
@@ -368,7 +372,7 @@ function LinhaProcesso({
         <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-gold)]/40 bg-[var(--color-gold)]/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-gold)]">
             <Hash className="h-3 w-3" aria-hidden="true" />
-            Pasta {p.caso_id}
+            {p.pasta_themis ? `Pasta ${p.pasta_themis}` : `Caso #${p.caso_id}`}
           </span>
           <span
             className="inline-flex rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.20em]"

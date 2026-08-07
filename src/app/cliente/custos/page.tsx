@@ -25,6 +25,7 @@ import {
   obterDashboardCustos,
   type PeriodoCustos,
 } from "@/lib/dashboard-custos";
+import { obterPreferenciasDoCliente } from "@/lib/preferencias";
 import { DEMO_CLIENTE_EMAIL } from "@/lib/mock-fixtures";
 
 import GastosPorDiaChart from "./GastosPorDiaChart";
@@ -106,20 +107,25 @@ export default async function CustosClientePage({ searchParams }: Props) {
   // Usar id=-1 garante que `obterDashboardCustos` devolve zerado (não casa
   // com nenhum devedor) em vez de quebrar.
   const periodo = parsePeriodo(params.periodo);
-  const dashboard = await obterDashboardCustos({
-    credorId: credorId ?? -1,
-    periodo,
-  });
+  const [dashboard, preferencias] = await Promise.all([
+    obterDashboardCustos({ credorId: credorId ?? -1, periodo }),
+    obterPreferenciasDoCliente(eu),
+  ]);
 
   const {
     totalMesBrl,
-    limiteMesBrl,
     totalConsultas,
     apiMaisUsada,
     gastosPorDia,
     porAPI,
     porDevedor,
   } = dashboard;
+  // Teto exibido pro CLIENTE = o limite que ELE configurou nas
+  // Preferências — nao o teto global do escritório (que vale pra equipe).
+  const limiteMesBrl =
+    preferencias?.limite_mensal_brl && preferencias.limite_mensal_brl > 0
+      ? preferencias.limite_mensal_brl
+      : dashboard.limiteMesBrl;
   const pct = limiteMesBrl > 0
     ? Math.min(100, Math.round((totalMesBrl / limiteMesBrl) * 100))
     : 0;
