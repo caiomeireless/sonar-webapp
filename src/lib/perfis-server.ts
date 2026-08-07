@@ -26,6 +26,24 @@ const PERFIL_DEMO_CLIENTE: Perfil = {
   credorId: null,
 };
 
+// Perfil de sessao REAL (Supabase) — sem o fallback do cookie demo.
+// OBRIGATORIO em paginas/acoes com dados sensiveis (PII de clientes,
+// cadastro, convites): o cookie `sonar.demo=equipe:*` devolve um perfil
+// sintetico com papel admin SEM revalidacao, entao qualquer visitante da
+// demo (ou cookie forjado) passaria por um gate baseado em perfilLogado().
+export async function perfilLogadoReal(): Promise<Perfil | null> {
+  try {
+    const sb = await createClient();
+    const {
+      data: { user },
+    } = await sb.auth.getUser();
+    if (user?.email) return perfilAtual(user.email);
+  } catch {
+    // sem sessao real
+  }
+  return null;
+}
+
 // Perfil do usuario logado (sessao atual). Usar em paginas/acoes server-side.
 export async function perfilLogado(): Promise<Perfil | null> {
   // 1) Sessao real (Supabase)

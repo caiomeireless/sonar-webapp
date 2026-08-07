@@ -297,7 +297,7 @@ function LinhaCliente({ credor }: { credor: CredorAdmin }) {
         <div className="flex shrink-0 items-center gap-2">
           {credor.email_contato ? (
             <a
-              href={`/cliente?eu=${encodeURIComponent(credor.email_contato)}`}
+              href={`/equipe/ver-como/entrar?eu=${encodeURIComponent(credor.email_contato)}`}
               target="_blank"
               rel="noopener noreferrer"
               title="Ver o portal como este cliente (modo visualização)"

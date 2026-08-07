@@ -23,10 +23,10 @@ const ICON_CLASS = "h-[18px] w-[18px]";
 
 export const NAV_EQUIPE: SidebarItem[] = [
   { href: "/equipe", label: "Painel", icon: <LayoutDashboard className={ICON_CLASS} /> },
-  { href: "/equipe/devedores", label: "Banco de devedores", icon: <Users className={ICON_CLASS} /> },
-  { href: "/equipe/consultas", label: "Consultas Pre-Processuais", icon: <Clock className={ICON_CLASS} /> },
+  { href: "/equipe/devedores", label: "Banco de Devedores", icon: <Users className={ICON_CLASS} /> },
+  { href: "/equipe/consultas", label: "Consultas Pré-Processuais", icon: <Clock className={ICON_CLASS} /> },
   { href: "/equipe/themis", label: "Fila Themis · Execuções", icon: <Search className={ICON_CLASS} /> },
-  { href: "/equipe/custos", label: "Monitor de custos", icon: <DollarSign className={ICON_CLASS} /> },
+  { href: "/equipe/custos", label: "Monitor de Custos", icon: <DollarSign className={ICON_CLASS} /> },
   { href: "/equipe/bugs", label: "Comunicação de Bugs", icon: <Bug className={ICON_CLASS} /> },
   { href: "/equipe/notificacoes", label: "Notificações", icon: <Bell className={ICON_CLASS} /> },
   // Pedidos de demo da landing — visivel pra todos, mas o redirect na page.tsx

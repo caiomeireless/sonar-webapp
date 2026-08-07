@@ -13,7 +13,7 @@
 import { redirect } from "next/navigation";
 import { Mail } from "lucide-react";
 
-import { perfilLogado } from "@/lib/perfis-server";
+import { perfilLogadoReal } from "@/lib/perfis-server";
 import { ehAdmin, ehSocio } from "@/lib/perfis";
 import { listarTodos } from "@/lib/demo-tokens";
 
@@ -23,7 +23,9 @@ import { TabelaDemos } from "./_components/TabelaDemos";
 export const dynamic = "force-dynamic";
 
 export default async function PedidosDeDemoPage() {
-  const perfil = await perfilLogado();
+  // Sessão REAL: a lista traz nome/e-mail dos prospects e o cookie demo
+  // forja papel admin sem revalidação.
+  const perfil = await perfilLogadoReal();
   if (!ehAdmin(perfil) && !ehSocio(perfil)) redirect("/equipe");
 
   const demos = await listarTodos(100);

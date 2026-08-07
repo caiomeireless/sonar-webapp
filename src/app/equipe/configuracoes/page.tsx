@@ -4,7 +4,7 @@
 import { redirect } from "next/navigation";
 import { Bug, Settings, Users, Plug, Eye, ShieldCheck } from "lucide-react";
 
-import { perfilLogado } from "@/lib/perfis-server";
+import { perfilLogadoReal } from "@/lib/perfis-server";
 import { ehAdmin, ehSocio } from "@/lib/perfis";
 import { DONO_EMAIL } from "@/lib/config";
 import { listarBugs, rotuloStatusBug } from "@/lib/bugs";
@@ -25,7 +25,9 @@ const SECOES = [
 ];
 
 export default async function ConfiguracoesPage() {
-  const perfil = await perfilLogado();
+  // Sessão REAL obrigatória (lista clientes com PII + ações administrativas);
+  // o cookie demo forja papel admin sem revalidação — não passa aqui.
+  const perfil = await perfilLogadoReal();
   if (!ehAdmin(perfil) && !ehSocio(perfil)) redirect("/equipe");
 
   // Bloco "Bugs Reportados" é EXCLUSIVO do Caio (DONO_EMAIL). Nem outros

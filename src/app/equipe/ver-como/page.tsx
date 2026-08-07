@@ -6,7 +6,7 @@
 import { redirect } from "next/navigation";
 import { Eye } from "lucide-react";
 
-import { perfilLogado } from "@/lib/perfis-server";
+import { perfilLogadoReal } from "@/lib/perfis-server";
 import { ehAdmin, ehSocio } from "@/lib/perfis";
 import { listarCredoresAdmin } from "@/lib/credores-admin";
 
@@ -15,7 +15,9 @@ import SeletorCliente from "./_components/SeletorCliente";
 export const dynamic = "force-dynamic";
 
 export default async function VerComoPage() {
-  const perfil = await perfilLogado();
+  // Sessão REAL obrigatória: a lista carrega PII de todos os clientes e o
+  // cookie demo (sonar.demo=equipe:*) forja papel admin sem revalidação.
+  const perfil = await perfilLogadoReal();
   if (!ehAdmin(perfil) && !ehSocio(perfil)) redirect("/equipe");
 
   const credores = await listarCredoresAdmin();

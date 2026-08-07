@@ -7,7 +7,7 @@
 import { revalidatePath } from "next/cache";
 
 import { DONO_EMAIL } from "@/lib/config";
-import { perfilLogado } from "@/lib/perfis-server";
+import { perfilLogado, perfilLogadoReal } from "@/lib/perfis-server";
 import { ehAdmin, ehSocio } from "@/lib/perfis";
 import { atualizarStatusBug, type BugStatus } from "@/lib/bugs";
 import {
@@ -25,7 +25,9 @@ export type EstadoAcaoCliente = {
 } | null;
 
 async function exigirAdminOuSocio(): Promise<boolean> {
-  const perfil = await perfilLogado();
+  // Sessão REAL: cadastro/edição/convite não podem aceitar o perfil
+  // sintético do cookie demo (que se apresenta como admin sem revalidação).
+  const perfil = await perfilLogadoReal();
   return ehAdmin(perfil) || ehSocio(perfil);
 }
 

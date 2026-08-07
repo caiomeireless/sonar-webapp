@@ -124,7 +124,7 @@ export async function listarCredoresAdmin(): Promise<CredorAdmin[]> {
     .select("id, tipo, documento, nome, email_contato, telefone, observacoes, criado_em")
     .eq("eh_demo", false)
     .order("criado_em", { ascending: false })
-    .limit(500);
+    .limit(1000); // teto do PostgREST — acima disso exige paginação real
   if (!credores || credores.length === 0) return [];
 
   // Emails com perfil de login (papel=cliente) — 1 query pro lote.

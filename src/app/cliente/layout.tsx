@@ -3,6 +3,7 @@
 // conteudo da pagina vai dentro do <main>.
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Eye } from "lucide-react";
 
@@ -13,7 +14,6 @@ import { TopBar } from "@/components/TopBar";
 import { NAV_CLIENTE } from "@/lib/nav-cliente";
 import { perfilLogado } from "@/lib/perfis-server";
 import { perfilAtual } from "@/lib/perfis";
-import { previewEuFromParam } from "@/lib/dev-auth";
 import { DEMO_CLIENTE_EMAIL } from "@/lib/mock-fixtures";
 import {
   contarNaoLidas,
@@ -22,12 +22,9 @@ import {
 
 export default async function ClienteLayout({
   children,
-  searchParams,
 }: {
   children: ReactNode;
-  searchParams?: Promise<{ eu?: string | string[] }>;
 }) {
-  const params = (await searchParams) ?? {};
   const perfilSessao = await perfilLogado();
   // Em producao, sem perfil = login. Em dev, paginas filhas resolvem via ?eu=.
   if (!perfilSessao && process.env.NODE_ENV === "production") {
@@ -39,13 +36,24 @@ export default async function ClienteLayout({
     perfilSessao?.papel === "admin" || perfilSessao?.papel === "socio";
 
   // Resolve o email "efetivo" do portal:
-  // - se admin/sócio passou ?eu=, usa esse;
-  // - se admin/sócio entrou em /cliente direto (sem ?eu=), auto-injeta o
-  //   cliente demo pra todos os links/queries baterem nele;
-  // - senão, cai no email da sessão (cliente real).
-  const euParam = previewEuFromParam(params.eu, perfilSessao);
-  const emailEfetivo =
-    euParam ?? (ehVisualizacao ? DEMO_CLIENTE_EMAIL : perfilSessao?.email ?? null);
+  // - admin/sócio escolheu um cliente no Ver Como Cliente -> cookie de
+  //   preview (layouts NUNCA recebem searchParams no App Router, então o
+  //   ?eu= da URL não chega aqui — o cookie é gravado em
+  //   /equipe/ver-como/entrar e é a fonte da verdade do layout);
+  // - admin/sócio sem preview escolhido -> cliente demo;
+  // - senão, e-mail da própria sessão (cliente real).
+  let previewCookie: string | null = null;
+  if (ehVisualizacao) {
+    try {
+      const cookieStore = await cookies();
+      previewCookie = cookieStore.get("sonar.preview_eu")?.value || null;
+    } catch {
+      previewCookie = null;
+    }
+  }
+  const emailEfetivo = ehVisualizacao
+    ? (previewCookie ?? DEMO_CLIENTE_EMAIL)
+    : (perfilSessao?.email ?? null);
 
   // Em modo visualização, carrega o perfil do cliente que está sendo
   // simulado (pra Sidebar/TopBar mostrarem nome/email DELE, não do admin).
@@ -130,7 +138,7 @@ export default async function ClienteLayout({
               <strong className="font-medium">Modo visualização —</strong>
               você está vendo a plataforma como o cliente vê.
             </span>
-            <Link href="/equipe" className="btn-neon-gold">
+            <Link href="/equipe/ver-como/sair" className="btn-neon-gold" prefetch={false}>
               ← Voltar para a equipe
             </Link>
           </div>

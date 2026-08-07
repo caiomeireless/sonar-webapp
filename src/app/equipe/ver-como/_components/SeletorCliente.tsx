@@ -9,6 +9,7 @@ import Link from "next/link";
 import { ArrowRight, FileText, Mail, MonitorPlay, Search } from "lucide-react";
 
 import type { CredorAdmin } from "@/lib/credores-admin";
+import { DEMO_CLIENTE_EMAIL } from "@/lib/mock-fixtures";
 
 function normalizar(s: string): string {
   return s
@@ -53,9 +54,12 @@ export default function SeletorCliente({ credores }: { credores: CredorAdmin[] }
         />
       </div>
 
-      {/* Cliente Demonstração — portfólio sintético do showroom */}
+      {/* Cliente Demonstração — portfólio sintético do showroom.
+          Passa pelo handler /entrar como os reais: grava o cookie de
+          preview e garante que sidebar/identidade sigam o demo. */}
       <Link
-        href="/cliente"
+        href={`/equipe/ver-como/entrar?eu=${encodeURIComponent(DEMO_CLIENTE_EMAIL)}`}
+        prefetch={false}
         className="glass mt-5 flex items-center justify-between gap-4 p-5 transition hover:border-[var(--color-gold)]/50"
       >
         <div className="flex min-w-0 items-center gap-4">
@@ -97,7 +101,7 @@ export default function SeletorCliente({ credores }: { credores: CredorAdmin[] }
                     <p className="nome-cliente truncate font-serif text-lg text-[var(--color-cliente)]">
                       {c.nome}
                     </p>
-                    <span className="inline-flex shrink-0 items-center rounded-full border border-[var(--color-ivory-22)] bg-[var(--color-surface-2)]/60 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.20em] text-[var(--color-ivory-66)]">
+                    <span className="inline-flex shrink-0 items-center rounded-full border border-[var(--color-ivory-22)] bg-[var(--color-surface-2)]/60 px-2 py-0.5 font-mono text-[12px] uppercase tracking-[0.20em] text-[var(--color-ivory-66)]">
                       {c.tipo}
                     </span>
                   </div>
@@ -141,7 +145,8 @@ export default function SeletorCliente({ credores }: { credores: CredorAdmin[] }
               <li key={c.id}>
                 {c.email_contato ? (
                   <Link
-                    href={`/cliente?eu=${encodeURIComponent(c.email_contato)}`}
+                    href={`/equipe/ver-como/entrar?eu=${encodeURIComponent(c.email_contato)}`}
+                    prefetch={false}
                     className="glass-flat flex items-center justify-between gap-4 p-4 transition hover:border-[var(--color-gold)]/50"
                   >
                     {conteudo}
