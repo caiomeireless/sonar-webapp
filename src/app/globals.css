@@ -1138,8 +1138,9 @@ body {
   --ml-c: #ffd93d;
 }
 
-/* Abas do nav lateral: contorno estático e discreto em todas; o giro
-   líquido acende na aba ATIVA e no hover (senão são 9 anéis girando). */
+/* .contorno-liquido: utilitário opt-in do anel metálico (as abas do nav
+   usaram e o Caio pediu pra voltar atrás em 21/08 — segue disponível pra
+   outros usos). Estático em repouso; gira no hover/quando --ativo. */
 .contorno-liquido {
   --ml-c: var(--color-signal);
 }
@@ -1161,6 +1162,16 @@ body {
   .contorno-liquido--ativo::after {
     animation: none;
   }
+}
+
+/* Esconde a BARRA de rolagem mantendo a rolagem (nav lateral com 9 abas
+   em telas baixas — mouse/trackpad continuam rolando normal). */
+.sem-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.sem-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 /* Canvas do BordaLiquidaMetal (shader WebGL) preenche o host. */

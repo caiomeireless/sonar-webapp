@@ -439,7 +439,9 @@ function NavLista({ items }: { items: SidebarItem[] }) {
   // carrega query. O calculo do ativo e' CENTRAL (um vencedor por vez).
   const ativoIdx = indiceItemAtivo(items, pathname);
   return (
-    <nav className="flex flex-col gap-1 overflow-y-auto">
+    // sem-scrollbar: com 9 abas o nav pode rolar em telas baixas, mas a
+    // BARRA fica invisível (rolagem continua no scroll do mouse/trackpad).
+    <nav className="sem-scrollbar flex flex-col gap-1 overflow-y-auto overflow-x-hidden">
       {items.map((item, i) => (
         <NavLinkItem key={item.href} item={item} ativo={i === ativoIdx} />
       ))}
@@ -449,10 +451,10 @@ function NavLista({ items }: { items: SidebarItem[] }) {
 
 function NavLinkItem({ item, ativo }: { item: SidebarItem; ativo: boolean }) {
 
-  // contorno-liquido: anel metálico animado na borda da aba (globals.css) —
-  // discreto em repouso, giro líquido no hover e na aba ativa.
+  // Sem contorno metal líquido nas abas (Caio, 21/08 — voltou o visual
+  // anterior; o efeito segue nos botões btn-neon-* e no Sincronizar).
   const base =
-    "group contorno-liquido relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm " +
+    "group relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm " +
     "transition outline-none focus-visible:ring-2 " +
     "focus-visible:ring-[var(--color-signal)]";
 
@@ -461,7 +463,7 @@ function NavLinkItem({ item, ativo }: { item: SidebarItem; ativo: boolean }) {
     "hover:text-[var(--color-fg)]";
 
   const ativoCls =
-    "contorno-liquido--ativo font-medium text-[var(--color-signal)] " +
+    "font-medium text-[var(--color-signal)] " +
     "bg-[var(--color-signal-soft)]";
 
   return (
