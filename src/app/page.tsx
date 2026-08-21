@@ -1,6 +1,5 @@
 // Landing pública do Sonar. Começa limpa, focada em apresentar a plataforma
 // e empurrar pro /login. Sem dashboard ainda (próximo dia).
-import Image from "next/image";
 import Link from "next/link";
 import { AssistantBot } from "@/components/AssistantBot";
 import { HeaderParticles } from "@/components/HeaderParticles";
@@ -354,17 +353,11 @@ export default function LandingPage() {
             </div>
             <div className="signal-dash -mt-6 ml-1 w-[min(540px,100%)]" aria-hidden="true" />
             <p className="mt-8 max-w-[520px] text-lg leading-relaxed text-white">
-              Plataforma de localização de bens de devedores, integrada ao banco de processos do escritório
+              Plataforma de localização de bens de devedores, integrada ao banco de processos do escritório{" "}
+              <span className="font-serif text-2xl font-medium tracking-tight text-[var(--color-gold)]">
+                Battaglia <span className="italic text-white">&amp;</span> Pedrosa Advogados.
+              </span>
             </p>
-            {/* Logo oficial novo (PNG do Caio) no lugar do nome em texto — faixa 2 */}
-            <Image
-              src="/logo-bp-novo.png"
-              alt="Battaglia & Pedrosa Advogados"
-              width={565}
-              height={94}
-              className="mt-4 h-auto w-[min(420px,80vw)]"
-              priority
-            />
             <div className="mt-10 flex flex-col items-start gap-4">
               <div className="flex flex-wrap items-center gap-4">
                 <Link
