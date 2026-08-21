@@ -64,7 +64,7 @@ export default async function ConsultasPreEquipePage({ searchParams }: Props) {
           Equipe · Análise de Efetividade
         </p>
         <h1 className="mt-3 font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
-          Buscas Pré-Processuais
+          Avaliação Pré-Processual
         </h1>
         <p className="mt-3 font-mono text-[13px] text-[var(--color-signal)]">
           Antes de processar, descubra se o devedor é solvente.

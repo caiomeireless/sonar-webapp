@@ -53,7 +53,6 @@ function FotoUsuarioSidebar({ nome }: { nome: string }) {
     </span>
   );
 }
-import { ThemeToggle } from "./ThemeToggle";
 
 // --------------------------------------------------------------------------
 // Tipos publicos
@@ -71,7 +70,44 @@ export type SidebarItem = {
   badge?: number;
   /** Prefixos extras que marcam o item como ativo (alem do proprio href). */
   matchPrefixes?: string[];
+  /**
+   * Substrings que "roubam" o ativo mesmo dentro do prefixo de OUTRA aba —
+   * ex.: /equipe/devedores/[id]/gerador-peca pertence ao Gerador de Peças,
+   * nao ao Banco de Dossiês. Vence qualquer match por prefixo.
+   */
+  matchContains?: string[];
 };
+
+/**
+ * Um unico item ativo por vez: vence o match mais especifico
+ * (matchContains > prefixo mais longo). Sem isso, "Banco de Dossiês"
+ * roubava o destaque no meio do fluxo do Gerador de Peças.
+ */
+function indiceItemAtivo(items: SidebarItem[], pathname: string): number {
+  let melhor = -1;
+  let melhorScore = 0;
+  items.forEach((item, i) => {
+    let score = 0;
+    const prefixes = (item.matchPrefixes ?? [item.href]).map(
+      (p) => p.split("?")[0]!,
+    );
+    for (const p of prefixes) {
+      const casa =
+        p === "/equipe" || p === "/cliente"
+          ? pathname === p
+          : pathname === p || pathname.startsWith(p + "/");
+      if (casa) score = Math.max(score, p.length);
+    }
+    for (const c of item.matchContains ?? []) {
+      if (pathname.includes(c)) score = Math.max(score, 1000 + c.length);
+    }
+    if (score > melhorScore) {
+      melhorScore = score;
+      melhor = i;
+    }
+  });
+  return melhor;
+}
 
 export type SidebarUsuario = {
   email: string;
@@ -354,11 +390,7 @@ function SidebarPanel({
       )}
 
       {/* Nav — fundo cinza herdado do glass-side (NAO leva o quadriculado) */}
-      <nav className="flex flex-col gap-1 overflow-y-auto">
-        {items.map((item) => (
-          <NavLinkItem key={item.href} item={item} />
-        ))}
-      </nav>
+      <NavLista items={items} />
 
       {/* === BLOCO INFERIOR — comeca LOGO abaixo do nav (quase grudado) e
           vai ate o fim. Recebe o MESMO quadriculado verde da faixa do
@@ -400,23 +432,27 @@ function SidebarPanel({
 // Item de navegacao
 // --------------------------------------------------------------------------
 
-function NavLinkItem({ item }: { item: SidebarItem }) {
+function NavLista({ items }: { items: SidebarItem[] }) {
   const pathname = usePathname();
-
   // Normaliza removendo querystring — em modo visualizacao o layout do
   // cliente injeta ?eu= em todos os hrefs do NAV, mas o pathname nao
-  // carrega query, entao a comparacao direta falhava e nenhum item
-  // ficava marcado como ativo.
-  const prefixes = (item.matchPrefixes ?? [item.href]).map(
-    (p) => p.split("?")[0]!,
+  // carrega query. O calculo do ativo e' CENTRAL (um vencedor por vez).
+  const ativoIdx = indiceItemAtivo(items, pathname);
+  return (
+    <nav className="flex flex-col gap-1 overflow-y-auto">
+      {items.map((item, i) => (
+        <NavLinkItem key={item.href} item={item} ativo={i === ativoIdx} />
+      ))}
+    </nav>
   );
-  const ativo = prefixes.some((p) => {
-    if (p === "/equipe" || p === "/cliente") return pathname === p;
-    return pathname === p || pathname.startsWith(p + "/");
-  });
+}
 
+function NavLinkItem({ item, ativo }: { item: SidebarItem; ativo: boolean }) {
+
+  // contorno-liquido: anel metálico animado na borda da aba (globals.css) —
+  // discreto em repouso, giro líquido no hover e na aba ativa.
   const base =
-    "group relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm " +
+    "group contorno-liquido relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm " +
     "transition outline-none focus-visible:ring-2 " +
     "focus-visible:ring-[var(--color-signal)]";
 
@@ -425,7 +461,7 @@ function NavLinkItem({ item }: { item: SidebarItem }) {
     "hover:text-[var(--color-fg)]";
 
   const ativoCls =
-    "font-medium text-[var(--color-signal)] " +
+    "contorno-liquido--ativo font-medium text-[var(--color-signal)] " +
     "bg-[var(--color-signal-soft)]";
 
   return (
@@ -476,7 +512,7 @@ function NavLinkItem({ item }: { item: SidebarItem }) {
 }
 
 // --------------------------------------------------------------------------
-// Footer: card do usuario + ThemeToggle + Sair
+// Footer: acoes (Sair) + assinatura — tema fixo escuro desde 21/08
 // --------------------------------------------------------------------------
 
 function SidebarFooter({
@@ -492,10 +528,9 @@ function SidebarFooter({
   void portal;
   return (
     <div className="flex flex-col items-center gap-3 text-center">
-      {/* Acoes em linha: tema + sair */}
+      {/* Acao unica: sair (o seletor de tema saiu — plataforma so escura,
+          decisao do Caio 21/08). */}
       <div className="flex w-full items-center justify-center gap-2">
-        <ThemeToggle />
-
         <form action="/auth/signout" method="post" className="flex-1">
           <button
             type="submit"

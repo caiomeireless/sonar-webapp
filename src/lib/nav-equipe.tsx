@@ -4,30 +4,45 @@
 // Os ícones são renderizados como JSX (ReactNode) — RSC não aceita
 // passar funções de Server -> Client.
 
-import { BarChart3, Briefcase, Home, Route, Search } from "lucide-react";
+import {
+  BarChart3,
+  Briefcase,
+  FileSignature,
+  Handshake,
+  Home,
+  Radar,
+  Route,
+  Search,
+  Users,
+} from "lucide-react";
 
 import type { SidebarItem } from "@/components/Sidebar";
 
 const ICON_CLASS = "h-[18px] w-[18px]";
 
-// Reestruturação 09/08: nav principal com 4 abas — as demais telas viram
-// CARDS dentro das centrais (Central de Buscas e Central Administrativa).
-// matchPrefixes mantém a central acesa quando o usuário está numa sub-tela.
+// Reestruturação 21/08 (Caio): Central de Buscas DISSOLVIDA — os cards dela
+// viraram abas principais (Banco de Dossiês e Avaliação Pré-Processual).
+// matchPrefixes mantém a aba acesa quando o usuário está numa sub-tela.
 export const NAV_EQUIPE: SidebarItem[] = [
   { href: "/equipe/inicio", label: "Início", icon: <Home className={ICON_CLASS} /> },
-  {
-    href: "/equipe/buscas",
-    label: "Central de Buscas",
-    icon: <Search className={ICON_CLASS} />,
-    matchPrefixes: [
-      "/equipe/buscas",
-      "/equipe/devedores",
-      "/equipe/consultas",
-    ],
-  },
-  // Promovida de card da Central de Buscas pra aba principal (Caio, 21/08).
+  { href: "/equipe/devedores", label: "Banco de Dossiês", icon: <Users className={ICON_CLASS} /> },
+  { href: "/equipe/consultas", label: "Avaliação Pré-Processual", icon: <Search className={ICON_CLASS} /> },
   { href: "/equipe/themis", label: "Rotas das Execuções", icon: <Route className={ICON_CLASS} /> },
+  // Abas novas 21/08: Radar (andamentos de alto sinal), Gerador de Peças
+  // (hub do gerador por devedor) e Central de Acordos (remete pra plataforma
+  // do Guilherme — ver /equipe/acordos).
+  { href: "/equipe/radar", label: "Radar de Movimentações", icon: <Radar className={ICON_CLASS} /> },
   { href: "/equipe", label: "Estatísticas da Plataforma", icon: <BarChart3 className={ICON_CLASS} /> },
+  {
+    href: "/equipe/pecas",
+    label: "Gerador de Peças",
+    icon: <FileSignature className={ICON_CLASS} />,
+    // O gerador em si vive DENTRO do dossiê (/equipe/devedores/[id]/
+    // gerador-peca e /peca/[template]) — matchContains rouba o ativo do
+    // Banco de Dossiês nesses trechos do fluxo.
+    matchContains: ["/gerador-peca", "/peca/"],
+  },
+  { href: "/equipe/acordos", label: "Central de Acordos", icon: <Handshake className={ICON_CLASS} /> },
   {
     href: "/equipe/administrativa",
     label: "Central Administrativa",

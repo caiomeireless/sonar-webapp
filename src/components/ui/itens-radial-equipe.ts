@@ -2,14 +2,28 @@
 // Duplicado de propósito: o nav usa ReactNode (server -> client) e o radial
 // precisa do COMPONENTE do ícone pra escalar por tamanho. Ao mexer num,
 // mexer no outro.
-import { BarChart3, Briefcase, Home, Route, Search } from "lucide-react";
+import {
+  BarChart3,
+  Briefcase,
+  FileSignature,
+  Handshake,
+  Home,
+  Radar,
+  Route,
+  Search,
+  Users,
+} from "lucide-react";
 
 import type { ItemRadial } from "./RadialHub";
 
 export const ITENS_RADIAL_EQUIPE: ItemRadial[] = [
   { href: "/equipe/inicio", label: "Início", curto: "Início", icon: Home },
-  { href: "/equipe/buscas", label: "Central de Buscas", curto: "Buscas", icon: Search },
+  { href: "/equipe/devedores", label: "Banco de Dossiês", curto: "Dossiês", icon: Users },
+  { href: "/equipe/consultas", label: "Avaliação Pré-Processual", curto: "Pré-Processual", icon: Search },
   { href: "/equipe/themis", label: "Rotas das Execuções", curto: "Rotas", icon: Route },
+  { href: "/equipe/radar", label: "Radar de Movimentações", curto: "Radar", icon: Radar },
   { href: "/equipe", label: "Estatísticas da Plataforma", curto: "Estatísticas", icon: BarChart3 },
+  { href: "/equipe/pecas", label: "Gerador de Peças", curto: "Peças", icon: FileSignature },
+  { href: "/equipe/acordos", label: "Central de Acordos", curto: "Acordos", icon: Handshake },
   { href: "/equipe/administrativa", label: "Central Administrativa", curto: "Administrativa", icon: Briefcase },
 ];

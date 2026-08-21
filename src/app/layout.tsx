@@ -6,7 +6,6 @@ import {
   Open_Sans,
 } from "next/font/google";
 import "./globals.css";
-import { lerTemaCookie } from "@/lib/theme-cookie";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -47,24 +46,19 @@ export const metadata: Metadata = {
   icons: { icon: "/favicon.svg" },
 };
 
-// Tema sem script anti-flash: o data-theme vem 100% do cookie via SSR
-// (lerTemaCookie) e o ThemeToggle grava cookie + localStorage a cada troca,
-// entao o SSR sempre renderiza o tema mais recente — sem FOUC. O script
-// inline que reconciliava localStorage foi removido: React 19 loga erro
-// pra <script> cru em componente (mesmo via next/script beforeInteractive)
-// e o caso que ele cobria (cookie e localStorage divergirem) nao acontece
-// no fluxo normal.
+// Tema: SOMENTE ESCURO por decisão do Caio (21/08 — "tire o modo claro").
+// O data-theme fica cravado em "dark"; o ThemeToggle saiu do nav lateral.
+// A infraestrutura de tema (cookie, tokens light no globals.css) continua
+// no lugar pra reativar depois se ele quiser.
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const tema = await lerTemaCookie();
-
   return (
     <html
       lang="pt-BR"
-      data-theme={tema}
+      data-theme="dark"
       suppressHydrationWarning
       className={`${manrope.variable} ${cormorant.variable} ${jetbrains.variable} ${openSans.variable}`}
     >
