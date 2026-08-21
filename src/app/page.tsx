@@ -385,9 +385,6 @@ export default function LandingPage() {
 
       <Divider reversed />
 
-
-      <Divider />
-
       {/* O que faz */}
       <section id="sobre" className="relative overflow-hidden">
         <HeaderParticles />
@@ -486,7 +483,7 @@ export default function LandingPage() {
               alt="Battaglia & Pedrosa Advogados"
               width={565}
               height={94}
-              className="h-auto w-[min(960px,92vw)] -translate-x-[38px]"
+              className="h-auto w-[min(768px,88vw)] -translate-x-[64px]"
             />
           </div>
 
@@ -544,9 +541,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
-      <Divider reversed />
-
 
       <Divider reversed />
 
