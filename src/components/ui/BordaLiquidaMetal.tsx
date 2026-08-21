@@ -12,17 +12,25 @@ import {
 import { useEffect, useRef } from "react";
 
 // Tinta por cima do metal prateado do shader — mantém a cor do contexto.
+// "prata" deixa o metal cru (só um ajuste fino de brilho).
 const TINTAS: Record<string, string> = {
   gold: "sepia(1) saturate(2.2) hue-rotate(8deg) brightness(1.06)",
   signal: "sepia(1) saturate(2.6) hue-rotate(85deg) brightness(1.05)",
+  prata: "saturate(0.85) brightness(1.08)",
 };
 
 type Props = {
   children: React.ReactNode;
   /** Cor do reflexo metálico (padrão: gold). */
-  cor?: "gold" | "signal";
+  cor?: "gold" | "signal" | "prata";
   /** Raio externo em px (o miolo desconta a espessura do anel). */
   radius?: number;
+  /**
+   * Modo ANEL: o shader vira só a moldura (máscara recorta o miolo) e o
+   * centro fica 100% transparente — pro conteúdo de vidro/translúcido
+   * (painéis). Sem ele, o miolo ganha fundo sólido onyx (botões).
+   */
+  anel?: boolean;
   className?: string;
 };
 
@@ -30,6 +38,7 @@ export function BordaLiquidaMetal({
   children,
   cor = "gold",
   radius = 14,
+  anel = false,
   className = "",
 }: Props) {
   const host = useRef<HTMLDivElement | null>(null);
@@ -73,12 +82,25 @@ export function BordaLiquidaMetal({
     };
   }, []);
 
+  // Modo anel: máscara content-box XOR recorta o centro do shader — sobra
+  // só a moldura de 2.5px e o miolo fica transparente de verdade.
+  const mascaraAnel: React.CSSProperties = anel
+    ? {
+        padding: 2.5,
+        WebkitMask:
+          "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+        WebkitMaskComposite: "xor",
+        mask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+        maskComposite: "exclude",
+      }
+    : {};
+
   return (
     <div
       className={`relative p-[2.5px] ${className}`}
       style={{ borderRadius: radius }}
     >
-      {/* Camada do shader — vira o "anel" porque o miolo cobre o centro. */}
+      {/* Camada do shader — anel (mascarado) ou fundo coberto pelo miolo. */}
       <div
         ref={host}
         aria-hidden="true"
@@ -89,13 +111,14 @@ export function BordaLiquidaMetal({
           // Fallback estático (antes do shader montar / sem WebGL).
           background:
             "linear-gradient(120deg, #6d6d68, #f2f2ec 30%, #8a8a84 55%, #e6e6e0 80%, #6d6d68)",
+          ...mascaraAnel,
         }}
       />
       <div
         className="relative h-full w-full"
         style={{
           borderRadius: Math.max(4, radius - 3),
-          background: "var(--color-onyx)",
+          background: anel ? "transparent" : "var(--color-onyx)",
         }}
       >
         {children}
