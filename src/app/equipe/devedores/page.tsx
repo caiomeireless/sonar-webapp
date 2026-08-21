@@ -64,7 +64,7 @@ export default async function DevedoresEquipePage({ searchParams }: Props) {
       {/* Cabeçalho enxuto: título + toggle de visão + ação primária */}
       <header className="title-shield mb-8 text-center">
         <h1 className="font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
-          Banco de Devedores
+          Banco de Dossiês
         </h1>
         <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
           {visao === "devedores"

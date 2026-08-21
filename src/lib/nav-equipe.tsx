@@ -4,34 +4,40 @@
 // Os ícones são renderizados como JSX (ReactNode) — RSC não aceita
 // passar funções de Server -> Client.
 
-import {
-  Bell,
-  Bug,
-  Clock,
-  DollarSign,
-  Eye,
-  Home,
-  LayoutDashboard,
-  Search,
-  Settings,
-  Users,
-} from "lucide-react";
+import { BarChart3, Briefcase, Home, Search } from "lucide-react";
 
 import type { SidebarItem } from "@/components/Sidebar";
 
 const ICON_CLASS = "h-[18px] w-[18px]";
 
+// Reestruturação 09/08: nav principal com 4 abas — as demais telas viram
+// CARDS dentro das centrais (Central de Buscas e Central Administrativa).
+// matchPrefixes mantém a central acesa quando o usuário está numa sub-tela.
 export const NAV_EQUIPE: SidebarItem[] = [
   { href: "/equipe/inicio", label: "Início", icon: <Home className={ICON_CLASS} /> },
-  { href: "/equipe", label: "Painel", icon: <LayoutDashboard className={ICON_CLASS} /> },
-  { href: "/equipe/devedores", label: "Banco de Devedores", icon: <Users className={ICON_CLASS} /> },
-  { href: "/equipe/consultas", label: "Consultas Pré-Processuais", icon: <Clock className={ICON_CLASS} /> },
-  { href: "/equipe/themis", label: "Fila Themis · Execuções", icon: <Search className={ICON_CLASS} /> },
-  { href: "/equipe/custos", label: "Monitor de Custos", icon: <DollarSign className={ICON_CLASS} /> },
-  { href: "/equipe/bugs", label: "Comunicação de Bugs", icon: <Bug className={ICON_CLASS} /> },
-  { href: "/equipe/notificacoes", label: "Notificações", icon: <Bell className={ICON_CLASS} /> },
-  // Janela de seleção: escolhe QUAL cliente simular (cada um vê um portal
-  // diferente) antes de entrar no /cliente em modo visualização.
-  { href: "/equipe/ver-como", label: "Ver Como Cliente", icon: <Eye className={ICON_CLASS} /> },
-  { href: "/equipe/configuracoes", label: "Configurações", icon: <Settings className={ICON_CLASS} /> },
+  {
+    href: "/equipe/buscas",
+    label: "Central de Buscas",
+    icon: <Search className={ICON_CLASS} />,
+    matchPrefixes: [
+      "/equipe/buscas",
+      "/equipe/devedores",
+      "/equipe/consultas",
+      "/equipe/themis",
+    ],
+  },
+  { href: "/equipe", label: "Estatísticas da Plataforma", icon: <BarChart3 className={ICON_CLASS} /> },
+  {
+    href: "/equipe/administrativa",
+    label: "Central Administrativa",
+    icon: <Briefcase className={ICON_CLASS} />,
+    matchPrefixes: [
+      "/equipe/administrativa",
+      "/equipe/custos",
+      "/equipe/notificacoes",
+      "/equipe/bugs",
+      "/equipe/ver-como",
+      "/equipe/configuracoes",
+    ],
+  },
 ];
