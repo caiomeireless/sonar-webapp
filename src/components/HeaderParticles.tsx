@@ -14,13 +14,25 @@ declare global {
 const SCRIPT_SRC = "/lib/particles.min.js";
 const CONTAINER_ID = "sonar-header-particles";
 
-export function HeaderParticles() {
+export function HeaderParticles({
+  densidade = 175,
+  detectarNaJanela = false,
+}: {
+  /** Quantidade de pontos (default = landing). */
+  densidade?: number;
+  /**
+   * Hover detectado na JANELA em vez do canvas — necessário quando as
+   * partículas ficam ATRÁS do conteúdo (Console do Início) e o canvas
+   * nunca recebe o ponteiro.
+   */
+  detectarNaJanela?: boolean;
+}) {
   useEffect(() => {
     const init = () => {
       if (!window.particlesJS) return;
       window.particlesJS(CONTAINER_ID, {
         particles: {
-          number: { value: 175, density: { enable: true, value_area: 650 } },
+          number: { value: densidade, density: { enable: true, value_area: 650 } },
           color: { value: "#C9A24A" },
           shape: { type: "circle", stroke: { width: 0.5, color: "#C9A24A" } },
           opacity: {
@@ -43,7 +55,7 @@ export function HeaderParticles() {
           move: { enable: true, speed: 2, random: true, out_mode: "bounce" },
         },
         interactivity: {
-          detect_on: "canvas",
+          detect_on: detectarNaJanela ? "window" : "canvas",
           events: {
             onhover: { enable: true, mode: "grab" },
             onclick: { enable: true, mode: "push" },
@@ -86,7 +98,7 @@ export function HeaderParticles() {
         window.pJSDom = [];
       }
     };
-  }, []);
+  }, [densidade, detectarNaJanela]);
 
   return (
     <div

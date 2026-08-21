@@ -30,13 +30,19 @@ function ensureListener() {
 type SpotlightCardProps = {
   children: ReactNode;
   className?: string;
+  /** Raio da borda em px (default 16) — pra encaixar dentro de molduras. */
+  radius?: number;
 };
 
 // Adaptado do prompt "spotlight-card" (GlowCard original) para o tema Sonar:
 // hue fixo em signal-green (146), vidro opaco em onyx-carbon, sem sizeMap
 // (grid pai decide a largura). Borda brilhante via ::before/::after com mask
 // 'intersect' — efeito de "anel iluminado seguindo o cursor".
-export function SpotlightCard({ children, className = "" }: SpotlightCardProps) {
+export function SpotlightCard({
+  children,
+  className = "",
+  radius = 16,
+}: SpotlightCardProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -53,7 +59,7 @@ export function SpotlightCard({ children, className = "" }: SpotlightCardProps) 
     // Tunables do efeito
     ["--base" as string]: "146",
     ["--spread" as string]: "0",
-    ["--radius" as string]: "16",
+    ["--radius" as string]: String(radius),
     ["--border" as string]: "1.5",
     ["--backdrop" as string]: "rgba(5, 7, 6, 0.82)",
     ["--backup-border" as string]: "rgba(232, 228, 214, 0.10)",

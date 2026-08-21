@@ -1,14 +1,16 @@
-// Aba Início — CONSOLE SONAR v5 (21/08, "cockpit de tela única"):
-//   TUDO cabe numa tela só com o nav aberto (lg+: altura travada em
-//   100svh - faixa 1, SEM barra de rolagem; mobile volta a rolar).
-//   - Fundo: EXATO o da faixa 3 da landing (preto + HeaderParticles gold)
-//   - Esquerda: card "Console Sonar · data" (vidro preto, anel líquido CSS
-//     LARANJA, escrita laranja neon) sobre o "Boas-Vindas" (moldura de
-//     metal líquido prata igual à dos painéis, escrita branca na fonte do
-//     wordmark, Title Case) sobre o painel VERTICAL dos números coloridos
-//   - Centro: menu radial VERDE NEON dentro de um anel de metal líquido
-//     (mesmo shader do Sincronizar) + "Para onde deseja ir?" no wordmark
-//   - Direita: Últimas Movimentações (cima) e Últimas Localizações (baixo)
+// Aba Início — CONSOLE SONAR v6 (21/08):
+//   - Cabeçalho ÚNICO centralizado no topo do centro: "Console Sonar ·
+//     data" (verde, 20% menor) + "Boas-Vindas, Nome." (wordmark branco,
+//     2x maior), juntos num só card de vidro com moldura prata
+//   - Esquerda: painel FINO dos ícones — ícone grande, valor e legenda
+//     embaixo, divisórias entre os itens
+//   - Centro: menu radial VERDE 2x (até 660px, auto-ajusta pra caber) +
+//     "Para onde deseja ir?" num card de vidro preto
+//   - Direita: Movimentações e Localizações com textos CENTRALIZADOS e
+//     fontes maiores
+//   - TODOS os cards com o spotlight da faixa 3 da landing (luz segue o
+//     mouse) e fundo com partículas MAIS densas e reativas ao ponteiro
+//   - Tela única no desktop (sem rolagem); mobile rola normal
 import { redirect } from "next/navigation";
 import {
   Activity,
@@ -22,13 +24,16 @@ import {
 
 import { perfilLogado } from "@/lib/perfis-server";
 import { obterDadosConsole } from "@/lib/console-inicio";
+import { listarNotificacoesEquipe } from "@/lib/notificacoes";
 import { CATEGORIAS_RADAR, type CategoriaRadarChave } from "@/lib/radar";
 import { formatBRL, formatData } from "@/lib/format";
 import { HeaderParticles } from "@/components/HeaderParticles";
 import { BordaLiquidaMetal } from "@/components/ui/BordaLiquidaMetal";
+import { SimboloSonar } from "@/components/ui/SimboloSonar";
+import { SpotlightCard } from "@/components/ui/SpotlightCard";
 
 import { NumeroTicker } from "./_components/NumeroTicker";
-import RadialMenor from "./_components/RadialMenor";
+import RadialCentro from "./_components/RadialCentro";
 
 export const dynamic = "force-dynamic";
 
@@ -77,12 +82,10 @@ const COR_CATEGORIA: Record<CategoriaRadarChave, string> = {
   pagamento: NEON.ciano,
 };
 
-const TAM_RADIAL = 330;
-
 function Chip({ cor, children }: { cor: string; children: React.ReactNode }) {
   return (
     <span
-      className="inline-flex shrink-0 items-center rounded-full px-2 py-0.5 font-mono text-[11px] uppercase tracking-[0.1em]"
+      className="inline-flex shrink-0 items-center rounded-full px-2 py-0.5 font-mono text-[12px] uppercase tracking-[0.1em]"
       style={{
         color: cor,
         backgroundColor: `color-mix(in srgb, ${cor} 13%, transparent)`,
@@ -94,7 +97,7 @@ function Chip({ cor, children }: { cor: string; children: React.ReactNode }) {
   );
 }
 
-// Painel de vidro com a moldura de metal líquido prata (identidade da tela).
+// Painel: moldura de metal líquido prata + vidro com spotlight (faixa 3).
 function PainelVidro({
   children,
   className = "",
@@ -104,16 +107,9 @@ function PainelVidro({
 }) {
   return (
     <BordaLiquidaMetal cor="prata" anel radius={20} className={`block ${className}`}>
-      <div
-        className="h-full w-full overflow-hidden rounded-[17px] p-4 backdrop-blur-xl"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012) 30%, rgba(8,12,10,0.55))",
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.1)",
-        }}
-      >
+      <SpotlightCard radius={17} className="h-full w-full overflow-hidden p-4">
         {children}
-      </div>
+      </SpotlightCard>
     </BordaLiquidaMetal>
   );
 }
@@ -121,7 +117,7 @@ function PainelVidro({
 function TituloPainel({ cor, children }: { cor: string; children: React.ReactNode }) {
   return (
     <h2
-      className="font-mono text-[12px] font-semibold uppercase tracking-[0.22em]"
+      className="text-center font-mono text-[14px] font-semibold uppercase tracking-[0.22em]"
       style={{
         color: cor,
         textShadow: `0 0 12px color-mix(in srgb, ${cor} 50%, transparent)`,
@@ -138,7 +134,10 @@ export default async function InicioPage() {
 
   const nome = perfil?.nome?.trim() || perfil?.email || "Equipe";
   const primeiroNome = nome.split(" ")[0];
-  const dados = await obterDadosConsole();
+  const [dados, avisos] = await Promise.all([
+    obterDadosConsole(),
+    listarNotificacoesEquipe().then((n) => n.slice(0, 3)).catch(() => []),
+  ]);
 
   const agora = new Date();
   const dataLonga = `${DIAS_SEMANA[agora.getDay()]}, ${formatData(agora.toISOString())}`;
@@ -164,113 +163,126 @@ export default async function InicioPage() {
 
   return (
     <main className="relative overflow-x-hidden lg:h-[calc(100svh-159px)] lg:overflow-hidden">
-      {/* Fundo EXATO da faixa 3 da landing: preto + partículas douradas */}
+      {/* Fundo faixa 3 turbinado: mais pontos + reativo ao ponteiro */}
       <div aria-hidden="true" className="absolute inset-0 bg-black">
-        <HeaderParticles />
+        <HeaderParticles densidade={300} detectarNaJanela />
       </div>
 
-      <div className="relative z-10 flex h-full flex-col gap-4 p-4 lg:grid lg:grid-cols-[300px_minmax(0,1fr)_340px] xl:grid-cols-[320px_minmax(0,1fr)_360px]">
-        {/* ================= COLUNA ESQUERDA ================= */}
+      <div className="relative z-10 flex h-full flex-col gap-4 p-4 lg:grid lg:grid-cols-[240px_minmax(0,1fr)_360px]">
+        {/* ================= ESQUERDA: painel FINO dos ícones + avisos ===== */}
         <div className="flex min-h-0 flex-col gap-4">
-          {/* Card Console Sonar — vidro preto, anel líquido LARANJA (CSS,
-              igual aos botões), escrita laranja neon */}
-          <div
-            className="contorno-liquido contorno-liquido--ativo rounded-xl bg-black/70 px-4 py-2.5 backdrop-blur-md"
-            style={{ "--ml-c": NEON.laranja } as React.CSSProperties}
-          >
-            <p
-              className="font-mono text-[12px] font-semibold uppercase tracking-[0.2em]"
-              style={{
-                color: NEON.laranja,
-                textShadow: `0 0 12px color-mix(in srgb, ${NEON.laranja} 60%, transparent)`,
-              }}
-            >
-              Console Sonar · {dataLonga}
-            </p>
+        <PainelVidro className="min-h-0 flex-1">
+          <div className="flex h-full flex-col justify-evenly">
+            {ESTATISTICAS.map(({ rotulo, valor, formato, cor, Icon }, i) => (
+              <div
+                key={rotulo}
+                className={`flex flex-col items-center gap-1 py-2 text-center ${
+                  i > 0 ? "border-t border-white/8" : ""
+                }`}
+              >
+                <Icon
+                  className="h-7 w-7"
+                  style={{ color: cor, filter: `drop-shadow(0 0 8px ${cor})` }}
+                  aria-hidden="true"
+                />
+                <span
+                  className="text-[15px] font-semibold leading-none tabular-nums"
+                  style={{
+                    color: cor,
+                    textShadow: `0 0 14px color-mix(in srgb, ${cor} 55%, transparent)`,
+                  }}
+                >
+                  <NumeroTicker valor={valor} formato={formato} />
+                </span>
+                <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--color-ivory-66)]">
+                  {rotulo}
+                </span>
+              </div>
+            ))}
           </div>
+        </PainelVidro>
 
-          {/* Boas-Vindas — moldura prata igual à dos painéis, escrita
-              BRANCA na fonte do wordmark, Title Case */}
-          <BordaLiquidaMetal cor="prata" anel radius={16} className="block">
-            <div className="rounded-[13px] bg-black/55 px-5 py-3.5 backdrop-blur-xl">
-              <h1 className="sonar-wordmark text-[clamp(19px,1.5vw,26px)]">
+        {/* Painel de Avisos da Plataforma */}
+        <PainelVidro className="shrink-0">
+          <TituloPainel cor={NEON.ciano}>Avisos da Plataforma</TituloPainel>
+          {avisos.length === 0 ? (
+            <p className="mt-3 text-center text-[12px] text-[var(--color-ivory-66)]">
+              Sem avisos no momento.
+            </p>
+          ) : (
+            <ul className="mt-2 divide-y divide-white/5">
+              {avisos.map((n) => (
+                <li key={n.id} className="py-2 text-center">
+                  <p className="line-clamp-1 text-[13px] text-ivory">
+                    {n.titulo}
+                  </p>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--color-ivory-66)]">
+                    {n.relativaEm}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </PainelVidro>
+        </div>
+
+        {/* ================= CENTRO ================= */}
+        <div className="flex min-h-0 flex-col items-center gap-4">
+          {/* Cabeçalho único: Console Sonar (verde, menor) + Boas-Vindas
+              (wordmark branco, 2x), centralizados no mesmo card */}
+          <BordaLiquidaMetal cor="prata" anel radius={18} className="block">
+            <SpotlightCard radius={15} className="px-10 py-4 text-center">
+              <p
+                className="font-mono text-[10px] font-semibold uppercase tracking-[0.24em]"
+                style={{
+                  color: NEON.verde,
+                  textShadow: `0 0 12px color-mix(in srgb, ${NEON.verde} 60%, transparent)`,
+                }}
+              >
+                Console Sonar · {dataLonga}
+              </p>
+              <h1 className="sonar-wordmark mt-1.5 text-[clamp(30px,2.8vw,48px)]">
                 Boas-Vindas, {primeiroNome}.
               </h1>
-            </div>
+            </SpotlightCard>
           </BordaLiquidaMetal>
 
-          {/* Painel VERTICAL dos números coloridos */}
-          <PainelVidro className="min-h-0 flex-1">
-            <div className="flex h-full flex-col justify-evenly">
-              {ESTATISTICAS.map(({ rotulo, valor, formato, cor, Icon }) => (
-                <div key={rotulo} className="flex items-center gap-3 py-1">
-                  <Icon
-                    className="h-4 w-4 shrink-0"
-                    style={{ color: cor, filter: `drop-shadow(0 0 6px ${cor})` }}
-                    aria-hidden="true"
-                  />
-                  <span className="flex-1 truncate font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--color-ivory-66)]">
-                    {rotulo}
-                  </span>
-                  <span
-                    className="text-[15px] font-semibold tabular-nums"
-                    style={{
-                      color: cor,
-                      textShadow: `0 0 14px color-mix(in srgb, ${cor} 55%, transparent)`,
-                    }}
-                  >
-                    <NumeroTicker valor={valor} formato={formato} />
-                  </span>
-                </div>
-              ))}
-            </div>
-          </PainelVidro>
+          {/* Símbolo do logo (escada + emissor com ondas), animado */}
+          <SimboloSonar height={100} className="shrink-0" />
+
+          {/* Radial verde 2x (auto-ajusta pra caber na tela) */}
+          <RadialCentro nome={nome} fotoUrl={perfil?.fotoUrl ?? null} />
+
+          {/* Frase no card de vidro preto */}
+          <SpotlightCard radius={14} className="px-8 py-2.5">
+            <p className="sonar-wordmark text-[clamp(17px,1.5vw,25px)]">
+              Para onde deseja ir?
+            </p>
+          </SpotlightCard>
         </div>
 
-        {/* ================= CENTRO: radial verde + wordmark ================= */}
-        <div className="flex min-h-0 flex-col items-center justify-center gap-6">
-          <BordaLiquidaMetal
-            cor="signal"
-            anel
-            radius={(TAM_RADIAL + 6) / 2}
-            className="block"
-          >
-            <div className="rounded-full p-[3px]">
-              <RadialMenor
-                nome={nome}
-                fotoUrl={perfil?.fotoUrl ?? null}
-                size={TAM_RADIAL}
-                paleta="verde"
-              />
-            </div>
-          </BordaLiquidaMetal>
-          <p className="sonar-wordmark text-[clamp(17px,1.5vw,25px)]">
-            Para onde deseja ir?
-          </p>
-        </div>
-
-        {/* ================= COLUNA DIREITA ================= */}
+        {/* ================= DIREITA ================= */}
         <div className="flex min-h-0 flex-col gap-4">
-          {/* Últimas Movimentações (cima) */}
+          {/* Últimas Movimentações (cima) — textos centralizados */}
           <PainelVidro className="min-h-0 flex-1">
             <TituloPainel cor={NEON.laranja}>Últimas Movimentações</TituloPainel>
             {dados.movimentacoes.length === 0 ? (
-              <p className="mt-3 text-sm text-[var(--color-ivory-66)]">
+              <p className="mt-3 text-center text-sm text-[var(--color-ivory-66)]">
                 Sem movimentações de alto sinal.
               </p>
             ) : (
               <ul className="mt-2 divide-y divide-white/5">
                 {dados.movimentacoes.map((a) => (
-                  <li key={a.id} className="py-2">
-                    <span className="flex items-center gap-2">
+                  <li key={a.id} className="py-2.5 text-center">
+                    <span className="flex items-center justify-center gap-2">
                       <Chip cor={COR_CATEGORIA[a.categoria]}>
                         {rotuloCategoria.get(a.categoria) ?? a.categoria}
                       </Chip>
-                      <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--color-ivory-66)]">
+                      <span className="font-mono text-[12px] uppercase tracking-[0.1em] text-[var(--color-ivory-66)]">
                         {a.data_andamento ? formatData(a.data_andamento) : "—"}
                       </span>
                     </span>
-                    <p className="mt-1 line-clamp-1 text-[12px] text-[var(--color-ivory-88)]">
+                    <p className="mt-1.5 line-clamp-1 text-[14px] text-[var(--color-ivory-88)]">
                       {a.descricao}
                     </p>
                   </li>
@@ -279,41 +291,36 @@ export default async function InicioPage() {
             )}
           </PainelVidro>
 
-          {/* Últimas Localizações (embaixo) */}
+          {/* Últimas Localizações (embaixo) — textos centralizados */}
           <PainelVidro className="min-h-0 flex-1">
             <TituloPainel cor={NEON.verde}>Últimas Localizações</TituloPainel>
             {dados.ultimasLocalizacoes.length === 0 ? (
-              <p className="mt-3 text-sm text-[var(--color-ivory-66)]">
+              <p className="mt-3 text-center text-sm text-[var(--color-ivory-66)]">
                 Nenhum bem localizado ainda.
               </p>
             ) : (
               <ul className="mt-2 divide-y divide-white/5">
                 {dados.ultimasLocalizacoes.slice(0, 4).map((b) => (
-                  <li
-                    key={b.id}
-                    className="flex items-center justify-between gap-3 py-2"
-                  >
-                    <span className="flex min-w-0 items-center gap-2">
+                  <li key={b.id} className="py-2.5 text-center">
+                    <span className="flex items-center justify-center gap-2">
                       <Chip cor={COR_TIPO_BEM[b.tipo] ?? NEON.verde}>
                         {ROTULO_TIPO_BEM[b.tipo] ?? b.tipo}
                       </Chip>
-                      <span className="min-w-0">
-                        <span className="block truncate text-[12px] text-ivory">
-                          {b.titulo}
-                        </span>
-                        {b.devedorNome && (
-                          <span className="block truncate font-mono text-[10px] text-[var(--color-ivory-66)]">
-                            {b.devedorNome}
-                          </span>
-                        )}
+                      <span
+                        className="font-mono text-[14px] font-semibold tabular-nums"
+                        style={{ color: NEON.verde }}
+                      >
+                        {b.valorBrl != null ? formatBRL(b.valorBrl) : "—"}
                       </span>
                     </span>
-                    <span
-                      className="shrink-0 font-mono text-[12px] font-semibold tabular-nums"
-                      style={{ color: NEON.verde }}
-                    >
-                      {b.valorBrl != null ? formatBRL(b.valorBrl) : "—"}
-                    </span>
+                    <p className="mt-1 truncate text-[14px] text-ivory">
+                      {b.titulo}
+                    </p>
+                    {b.devedorNome && (
+                      <p className="truncate font-mono text-[11px] text-[var(--color-ivory-66)]">
+                        {b.devedorNome}
+                      </p>
+                    )}
                   </li>
                 ))}
               </ul>
