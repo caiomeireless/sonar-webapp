@@ -165,7 +165,8 @@ export default async function InicioPage() {
       {/* Fundo: preto puro (partículas removidas a pedido do Caio, 21/08) */}
       <div aria-hidden="true" className="absolute inset-0 bg-black" />
 
-      <div className="relative z-10 flex h-full flex-col gap-4 p-4 lg:grid lg:grid-cols-[240px_minmax(0,1fr)_360px]">
+      {/* px maior no desktop: aproxima as colunas periféricas do centro */}
+      <div className="relative z-10 flex h-full flex-col gap-4 p-4 lg:grid lg:grid-cols-[240px_minmax(0,1fr)_360px] lg:px-12 xl:px-20">
         {/* ================= ESQUERDA: painel FINO dos ícones + avisos ===== */}
         <div className="flex min-h-0 flex-col gap-4">
         <PainelVidro className="min-h-0 flex-1">
