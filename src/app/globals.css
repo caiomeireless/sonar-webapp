@@ -1060,6 +1060,179 @@ body {
     inset 0 0 14px rgba(255, 217, 61, 0.12);
 }
 
+/* ==========================================================================
+   CONTORNO METAL LÍQUIDO (21/08 — pedido do Caio, ref. 21st.dev)
+   Anel metálico girando na BORDA, sem tocar no miolo do elemento — a cor
+   base de cada botão/aba é respeitada (a tinta vem de --ml-c). Feito em CSS
+   puro (conic-gradient + máscara) pra poder viver em TODAS as abas e botões
+   sem abrir um canvas WebGL por elemento (o navegador limita ~16 contextos;
+   o shader de verdade fica pro botão de sincronizar, via BordaLiquidaMetal).
+   ========================================================================== */
+@property --ml-ang {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes ml-girar {
+  to {
+    --ml-ang: 360deg;
+  }
+}
+
+/* position:relative vai em @layer components de propósito: fora de layer
+   ele venceria a utility `absolute` do Tailwind v4 (que vive em @layer
+   utilities) e quebraria os botões posicionados dos dashboards. O ::after
+   ancora em qualquer position != static, então `absolute` também serve. */
+@layer components {
+  .btn-neon-signal,
+  .btn-neon-gold,
+  .contorno-liquido {
+    position: relative;
+  }
+}
+
+/* Anel: highlights prateados + reforços na cor do elemento (--ml-c). */
+.btn-neon-signal::after,
+.btn-neon-gold::after,
+.contorno-liquido::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--ml-ang),
+    color-mix(in srgb, var(--ml-c) 32%, transparent),
+    #f2f2ec 12%,
+    color-mix(in srgb, var(--ml-c) 85%, #ffffff) 22%,
+    color-mix(in srgb, var(--ml-c) 24%, transparent) 40%,
+    #dededa 55%,
+    color-mix(in srgb, var(--ml-c) 80%, #ffffff) 68%,
+    color-mix(in srgb, var(--ml-c) 32%, transparent) 86%,
+    color-mix(in srgb, var(--ml-c) 32%, transparent)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  /* Estático em repouso (o Radar chega a ter 40+ btn-neon-gold numa página
+     — 40 conic-gradients girando a 60fps derrubariam a GPU); o giro
+     líquido acende no hover. */
+  --ml-ang: 40deg;
+  animation: none;
+}
+.btn-neon-signal:hover::after,
+.btn-neon-gold:hover::after {
+  animation: ml-girar 3.2s linear infinite;
+}
+.btn-neon-signal {
+  --ml-c: #3cff8a;
+}
+.btn-neon-gold {
+  --ml-c: #ffd93d;
+}
+
+/* Abas do nav lateral: contorno estático e discreto em todas; o giro
+   líquido acende na aba ATIVA e no hover (senão são 9 anéis girando). */
+.contorno-liquido {
+  --ml-c: var(--color-signal);
+}
+.contorno-liquido::after {
+  opacity: 0.35;
+  animation: none;
+}
+.contorno-liquido:hover::after,
+.contorno-liquido--ativo::after {
+  opacity: 1;
+  animation: ml-girar 3.2s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-neon-signal::after,
+  .btn-neon-gold::after,
+  .contorno-liquido::after,
+  .contorno-liquido:hover::after,
+  .contorno-liquido--ativo::after {
+    animation: none;
+  }
+}
+
+/* Canvas do BordaLiquidaMetal (shader WebGL) preenche o host. */
+.ml-shader-host canvas {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+}
+
+/* ==========================================================================
+   CONSOLE SONAR (aba Início, 21/08) — radar operacional + instrumentos.
+   ========================================================================== */
+
+/* Feixe do radar: gira só com transform (compositor puro, zero repaint). */
+@keyframes console-girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.console-sweep > div {
+  animation: console-girar 7s linear infinite;
+  transform-origin: 50% 50%;
+}
+
+/* Blip: pulso de eco (escala + fade), bem curto. */
+@keyframes console-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  80%,
+  100% {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+.console-blip-ping {
+  animation: console-ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Scanlines de monitor anos 70 — overlay sutil nos instrumentos. */
+@layer components {
+  .crt-scan {
+    position: relative;
+  }
+}
+.crt-scan::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 2px,
+    rgba(0, 0, 0, 0.16) 2px 3px
+  );
+  opacity: 0.35;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .console-sweep > div,
+  .console-blip-ping {
+    animation: none;
+  }
+  .console-blip-ping {
+    opacity: 0;
+  }
+}
+
 /* Botoes NEON CIRCULARES — setas do CardStack. MAIORES (4rem) com glow
    signal forte e SVG signal brilhante. */
 .btn-neon-circle {

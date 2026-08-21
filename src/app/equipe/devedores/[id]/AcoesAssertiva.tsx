@@ -12,6 +12,7 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { BordaLiquidaMetal } from "@/components/ui/BordaLiquidaMetal";
 import {
   Car,
   CheckCircle2,
@@ -159,30 +160,33 @@ export function AcoesAssertiva({
         ))}
 
         {/* Raspagem dos tribunais — GRATUITA (Playwright no GH Actions,
-            zero tokens de IA). Dourado pra diferenciar das pagas. */}
-        <button
-          type="button"
-          disabled={pendente}
-          onClick={() => setModalTribunais(true)}
-          title={
-            crawlOk
-              ? undefined
-              : "GITHUB_TOKEN não configurado — o disparo remoto fica indisponível"
-          }
-          className="group flex flex-1 items-center justify-between gap-3 rounded-xl border border-[var(--color-gold)]/45 bg-[var(--color-gold)]/10 px-5 py-4 text-left transition hover:bg-[var(--color-gold)]/20 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <span className="flex items-center gap-3">
-            <Landmark className="h-5 w-5 text-[var(--color-gold)]" aria-hidden="true" />
-            <span>
-              <span className="block text-sm font-semibold text-[var(--color-gold)]">
-                Atualizar dos Tribunais
-              </span>
-              <span className="block font-mono text-[12px] uppercase tracking-[0.16em] text-[var(--color-ivory-66)]">
-                Raspagem · Grátis
+            zero tokens de IA). Dourado pra diferenciar das pagas; a borda
+            metal líquido (shader) é o destaque pedido pelo Caio em 21/08. */}
+        <BordaLiquidaMetal cor="gold" radius={14} className="flex flex-1">
+          <button
+            type="button"
+            disabled={pendente}
+            onClick={() => setModalTribunais(true)}
+            title={
+              crawlOk
+                ? undefined
+                : "GITHUB_TOKEN não configurado — o disparo remoto fica indisponível"
+            }
+            className="group flex h-full w-full items-center justify-between gap-3 rounded-[11px] bg-[var(--color-gold)]/10 px-5 py-4 text-left transition hover:bg-[var(--color-gold)]/20 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <span className="flex items-center gap-3">
+              <Landmark className="h-5 w-5 text-[var(--color-gold)]" aria-hidden="true" />
+              <span>
+                <span className="block text-sm font-semibold text-[var(--color-gold)]">
+                  Atualizar dos Tribunais
+                </span>
+                <span className="block font-mono text-[12px] uppercase tracking-[0.16em] text-[var(--color-ivory-66)]">
+                  Raspagem · Grátis
+                </span>
               </span>
             </span>
-          </span>
-        </button>
+          </button>
+        </BordaLiquidaMetal>
       </div>
 
       <Resultado estado={estadoLocalize} />

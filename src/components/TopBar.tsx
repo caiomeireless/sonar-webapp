@@ -13,6 +13,7 @@ import { Camera, ChevronDown, CircleDot, Eye, LogOut, PanelLeft, RefreshCw, Tras
 
 import { AssistantBot } from "./AssistantBot";
 import { LogoSvg } from "./LogoSvg";
+import { BordaLiquidaMetal } from "./ui/BordaLiquidaMetal";
 import { SinoNotificacoes } from "./SinoNotificacoes";
 import { gravarNavModo, useNavModo } from "./ui/use-nav-modo";
 import type { Notificacao } from "@/lib/notificacoes";
@@ -130,23 +131,27 @@ function BotaoSincronizar() {
     setTimeout(() => setGirando(false), 1400);
   }
 
+  // Borda metal líquido (shader) VERDE — pedido do Caio 21/08: o botão
+  // continua verde, a borda ganha o efeito. Único canvas WebGL da faixa 1.
   return (
-    <button
-      type="button"
-      onClick={sincronizar}
-      className="
-        inline-flex items-center gap-2.5 rounded-xl border border-[var(--color-signal-soft-2)]
-        bg-[var(--color-signal-soft)] px-5 py-3 text-sm font-medium text-[var(--color-signal)]
-        transition hover:bg-[var(--color-signal-soft-2)]
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-signal)]
-      "
-    >
-      <RefreshCw
-        className={`h-5 w-5 ${girando ? "animate-spin" : ""}`}
-        aria-hidden="true"
-      />
-      Sincronizar
-    </button>
+    <BordaLiquidaMetal cor="signal" radius={14} className="inline-flex">
+      <button
+        type="button"
+        onClick={sincronizar}
+        className="
+          inline-flex h-full w-full items-center gap-2.5 rounded-[11px]
+          bg-[var(--color-signal-soft)] px-5 py-3 text-sm font-medium text-[var(--color-signal)]
+          transition hover:bg-[var(--color-signal-soft-2)]
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-signal)]
+        "
+      >
+        <RefreshCw
+          className={`h-5 w-5 ${girando ? "animate-spin" : ""}`}
+          aria-hidden="true"
+        />
+        Sincronizar
+      </button>
+    </BordaLiquidaMetal>
   );
 }
 
