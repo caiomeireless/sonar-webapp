@@ -5,16 +5,12 @@ import Link from "next/link";
 import { AssistantBot } from "@/components/AssistantBot";
 import { HeaderParticles } from "@/components/HeaderParticles";
 import { Logo } from "@/components/Logo";
-import { LogoSymbolStatic, STAIRCASE_PATTERN } from "@/components/LogoSvg";
+import { LogoSvg, LogoSymbolStatic, STAIRCASE_PATTERN } from "@/components/LogoSvg";
 import { SonarScene } from "@/components/SonarScene";
 import { CursorGlow } from "@/components/ui/CursorGlow";
 import { ImageAutoSlider } from "@/components/ui/ImageAutoSlider";
 import { LampLight } from "@/components/ui/LampLight";
-import { ShowcaseAction } from "@/components/landing/ShowcaseAction";
-import { GridBeam } from "@/components/landing/GridBeam";
 import { ScrollReveals } from "@/components/landing/ScrollReveals";
-import { SonarParticleText } from "@/components/ui/SonarParticleText";
-import { SonarWaveParticles } from "@/components/ui/SonarWaveParticles";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 
 export const dynamic = "force-static";
@@ -46,16 +42,9 @@ export default function LandingPage() {
           }}
           aria-hidden="true"
         />
-        {/* LOGO no canto superior-esquerdo — arte oficial nova (PNG enviado
-            pelo Caio 08/08), no tamanho natural pra não perder nitidez */}
+        {/* LOGO no canto superior-esquerdo, fundo preto em vidro */}
         <div className="absolute bottom-0 left-0 top-0 z-20 flex items-center px-6">
-          <Image
-            src="/logo-bp-novo.png"
-            alt="Battaglia & Pedrosa Advogados"
-            width={565}
-            height={94}
-            priority
-          />
+          <LogoSvg height={138} />
         </div>
         {/* Cluster (robô + caption + botões) pinado no canto direito */}
         <div className="absolute right-6 top-1/2 z-20 flex -translate-y-1/2 flex-col items-end gap-2 sm:right-10">
@@ -90,7 +79,11 @@ export default function LandingPage() {
             <span className="eyebrow mb-6 block">Busca patrimonial inteligente</span>
             <div>
             <div className="relative inline-block">
-              <SonarParticleText className="mt-2 block" aria-label="Sonar" />
+              {/* Wordmark estático — mesma fonte/tamanho do "Entre no Sonar."
+                  da faixa CTA (animação de partículas removida a pedido 09/08) */}
+              <h1 className="sonar-wordmark mt-2 block text-[clamp(40px,8vw,96px)]">
+                Sonar
+              </h1>
               {/* Colchete verde TEMP OCULTO — flip {false &&} pra reativar */}
               {false && (
               <svg
@@ -361,11 +354,17 @@ export default function LandingPage() {
             </div>
             <div className="signal-dash -mt-6 ml-1 w-[min(540px,100%)]" aria-hidden="true" />
             <p className="mt-8 max-w-[520px] text-lg leading-relaxed text-white">
-              Plataforma de localização de bens de devedores, integrada ao banco de processos do escritório{" "}
-              <span className="font-serif text-2xl font-medium tracking-tight text-[var(--color-gold)]">
-                Battaglia <span className="italic text-white">&amp;</span> Pedrosa Advogados.
-              </span>
+              Plataforma de localização de bens de devedores, integrada ao banco de processos do escritório
             </p>
+            {/* Logo oficial novo (PNG do Caio) no lugar do nome em texto — faixa 2 */}
+            <Image
+              src="/logo-bp-novo.png"
+              alt="Battaglia & Pedrosa Advogados"
+              width={565}
+              height={94}
+              className="mt-4 h-auto w-[min(420px,80vw)]"
+              priority
+            />
             <div className="mt-10 flex flex-col items-start gap-4">
               <div className="flex flex-wrap items-center gap-4">
                 <Link
@@ -375,6 +374,12 @@ export default function LandingPage() {
                   Acessar plataforma →
                 </Link>
               </div>
+              <Link
+                href="#sobre"
+                className="rounded-lg bg-white/5 px-8 py-4 text-base font-medium text-ivory shadow-[0_4px_24px_rgba(0,0,0,0.25)] ring-1 ring-[var(--color-ivory-22)] backdrop-blur-md transition hover:bg-white/10 hover:ring-[var(--color-ivory-66)]"
+              >
+                Como funciona
+              </Link>
             </div>
           </div>
         </div>
@@ -384,6 +389,89 @@ export default function LandingPage() {
 
 
       <Divider />
+
+      {/* O que faz */}
+      <section id="sobre" className="relative overflow-hidden">
+        <HeaderParticles />
+        <div className="pointer-events-none relative z-10 mx-auto max-w-[1400px] px-6 py-24 sm:px-10">
+          {/* Painel de vidro envolvendo o título + intro */}
+          <div className="reveal max-w-[840px] rounded-2xl border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.7)] p-8 backdrop-blur-md sm:p-10">
+            <div className="flex items-center gap-3">
+              {/* Radar miniatura girando animado */}
+              <svg
+                width="34"
+                height="34"
+                viewBox="0 0 40 40"
+                fill="none"
+                aria-hidden="true"
+                className="flex-none"
+              >
+                <defs>
+                  <linearGradient id="radar-sweep" x1="0" y1="0" x2="1" y2="-1">
+                    <stop offset="0%" stopColor="#3CFF8A" stopOpacity="0.95" />
+                    <stop offset="100%" stopColor="#3CFF8A" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+                {/* Anéis concêntricos */}
+                <circle cx="20" cy="20" r="16" fill="none" stroke="#3CFF8A" strokeWidth="0.7" strokeOpacity="0.55" />
+                <circle cx="20" cy="20" r="11" fill="none" stroke="#3CFF8A" strokeWidth="0.6" strokeOpacity="0.45" />
+                <circle cx="20" cy="20" r="6" fill="none" stroke="#3CFF8A" strokeWidth="0.5" strokeOpacity="0.35" />
+                {/* Crosshair */}
+                <line x1="20" y1="4" x2="20" y2="36" stroke="#3CFF8A" strokeWidth="0.35" strokeOpacity="0.3" />
+                <line x1="4" y1="20" x2="36" y2="20" stroke="#3CFF8A" strokeWidth="0.35" strokeOpacity="0.3" />
+                {/* Targets fixos */}
+                <circle cx="13" cy="11" r="0.9" fill="#3CFF8A" />
+                <circle cx="28" cy="15" r="0.7" fill="#3CFF8A" />
+                <circle cx="24" cy="28" r="0.7" fill="#3CFF8A" />
+                {/* Sweep girando */}
+                <g transform="translate(20 20)">
+                  <path d="M 0 0 L 16 0 A 16 16 0 0 0 11.3 -11.3 Z" fill="url(#radar-sweep)">
+                    <animateTransform
+                      attributeName="transform"
+                      type="rotate"
+                      from="0"
+                      to="360"
+                      dur="3s"
+                      repeatCount="indefinite"
+                    />
+                  </path>
+                </g>
+                {/* Centro */}
+                <circle cx="20" cy="20" r="1.5" fill="#3CFF8A" />
+              </svg>
+              <span className="eyebrow !text-base !text-[var(--color-signal)]">O que o Sonar faz?</span>
+            </div>
+            <h2 className="mt-4 max-w-[800px] font-serif text-[clamp(28px,4vw,44px)] font-medium leading-[1.15] tracking-tight text-ivory">
+              Um devedor entra. Um <em className="text-[var(--color-gold)]">dossiê de bens</em> sai.
+            </h2>
+            <p className="mt-6 max-w-[680px] text-justify text-[var(--color-ivory-88)]">
+              Integrado ao sistema interno do escritório, o Sonar lê os processos em que o cliente é
+              credor, identifica cada parte contrária e reúne, num só lugar e com
+              origem datada, os indícios de bens e créditos de cada devedor. O que
+              antes eram horas de garimpo em vários tipos de sistemas diferentes,
+              agora se transforma na rápida geração de uma ficha pronta com todos
+              os bens do devedor que serão utilizados para fundamentar os pedidos
+              judiciais de penhora.{" "}
+              <span className="text-[var(--color-ivory-88)] underline decoration-[var(--color-signal)] decoration-2 underline-offset-4">
+                Esse é um diferencial que só os clientes do{" "}
+                <span className="font-serif text-2xl font-medium tracking-tight text-[var(--color-gold)]">
+                  Battaglia <span className="italic text-white">&amp;</span> Pedrosa
+                </span>{" "}
+                possuem.
+              </span>
+            </p>
+          </div>
+
+          <div className="stagger reveal mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <Card titulo="Veículos" descricao="Encontre carros, motos, caminhões, barcos e outros." fonte="MAIS RÁPIDO QUE PEDIR RENAJUD (JUDICIAL)" />
+            <Card titulo="Imóveis Urbanos e Rurais" descricao="Em poucos segundos, encontre fazendas via SICAR, enquanto acha imóveis urbanos via ARISP." fonte="SICAR · ARISP" />
+            <Card titulo="Participações societárias" descricao="Empresas em que o devedor é sócio: quotas penhoráveis." fonte="QSA · Receita · JUCESP" />
+            <Card titulo="Créditos Processuais" descricao="Ações em que o devedor é credor: penhora no rosto dos autos." fonte={<>API<span className="normal-case">s</span> de Processo - DATAJUD</>} />
+            <Card titulo="Endereços e contatos" descricao="Endereços, telefones e e-mails atualizados para citação e penhora." fonte="APIs de localização" />
+            <Card titulo="Vínculos familiares" descricao="Cônjuge e parentes de 1º grau: pista para ocultação patrimonial." fonte="grafo de relacionados" />
+          </div>
+        </div>
+      </section>
 
       {/* Propósito */}
       <section className="relative overflow-hidden">
@@ -455,17 +543,6 @@ export default function LandingPage() {
 
       <Divider reversed />
 
-      {/* ============ SHOWCASE: NOTEBOOK EM ACAO (ShowcaseAction) ============
-          Envolto em GridBeam: background quadriculado degrade verde igual a
-          faixa 1 (header) + feixes signal->gold animados percorrendo as
-          linhas do grid. */}
-      <section className="relative overflow-hidden">
-        <div className="reveal">
-          <GridBeam>
-            <ShowcaseAction />
-          </GridBeam>
-        </div>
-      </section>
 
       <Divider reversed />
 
