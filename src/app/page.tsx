@@ -479,12 +479,14 @@ export default function LandingPage() {
           {/* Cabeçalho centralizado: eyebrow + logo oficial novo (PNG) */}
           <div className="flex flex-col items-center text-center">
             <span className="eyebrow mb-8">Propósito</span>
+            {/* Dobro do tamanho + ~1cm pra esquerda: o "&" do logo alinha
+                com o S de "Sonar" do título abaixo (pedido 09/08) */}
             <Image
               src="/logo-bp-novo.png"
               alt="Battaglia & Pedrosa Advogados"
               width={565}
               height={94}
-              className="h-auto w-[min(480px,85vw)]"
+              className="h-auto w-[min(960px,92vw)] -translate-x-[38px]"
             />
           </div>
 
