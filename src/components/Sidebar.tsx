@@ -15,7 +15,44 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 // Chave persistente do estado de colapso do nav (desktop).
 const COLLAPSED_KEY = "sonar.sidebar.collapsed";
 
-import { LogoSvg } from "./LogoSvg";
+import { useNavModo } from "./ui/use-nav-modo";
+
+// Mesma chave da foto carregada no menu do avatar (TopBar/localStorage).
+const FOTO_SIDEBAR_KEY = "sonar-user-photo";
+
+// Papel tecnico -> qualificacao exibida na plataforma.
+function qualificacaoDoPapel(papel: string, portal: SidebarPortal): string {
+  const p = (papel || "").toLowerCase();
+  if (p.includes("admin")) return "Administrador";
+  if (p.includes("socio") || p.includes("sócio")) return "Sócio";
+  if (p.includes("funcion")) return "Funcionário";
+  if (p.includes("advog")) return "Advogado";
+  if (p.includes("estagi")) return "Estagiário";
+  if (p.includes("cliente")) return "Cliente";
+  return portal === "equipe" ? "Equipe" : "Cliente";
+}
+
+// Foto do usuario (localStorage) com fallback pra inicial do nome.
+function FotoUsuarioSidebar({ nome }: { nome: string }) {
+  const [foto, setFoto] = useState<string | null>(null);
+  useEffect(() => {
+    try {
+      setFoto(localStorage.getItem(FOTO_SIDEBAR_KEY));
+    } catch {
+      // sem localStorage — fica na inicial
+    }
+  }, []);
+  return (
+    <span className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-[var(--color-gold)]/45 bg-[var(--color-signal-soft)] text-2xl font-semibold text-[var(--color-signal)] shadow-[0_0_18px_rgba(201,162,74,0.25)]">
+      {foto ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={foto} alt="Foto do usuário" className="h-full w-full object-cover" />
+      ) : (
+        (nome.trim().charAt(0) || "?").toUpperCase()
+      )}
+    </span>
+  );
+}
 import { ThemeToggle } from "./ThemeToggle";
 
 // --------------------------------------------------------------------------
@@ -61,6 +98,9 @@ export function Sidebar({ items, usuario, portal }: SidebarProps) {
   // Estado de colapso (desktop). Default = expandido. Hidrata do localStorage.
   const [recolhido, setRecolhido] = useState(false);
   const pathname = usePathname();
+  // Modo "radial" (seletor no avatar da faixa 1): o nav lateral da EQUIPE
+  // some inteiro — a navegação vira o menu radial flutuante.
+  const navModo = useNavModo();
 
   useEffect(() => {
     try {
@@ -109,6 +149,9 @@ export function Sidebar({ items, usuario, portal }: SidebarProps) {
   }, [open]);
 
   const homeHref = `/${portal}`;
+
+  // Modo radial (equipe): nav lateral desaparece por completo.
+  if (portal === "equipe" && navModo === "radial") return null;
 
   return (
     <>
@@ -255,13 +298,21 @@ function SidebarPanel({
           }}
         />
         <div className="relative flex items-center justify-between gap-2 px-4 py-5">
+          {/* Identidade do usuário no topo (logo migrou pra faixa 1):
+              foto + nome + qualificação na plataforma. */}
           <Link
             href={homeHref}
-            className="inline-flex items-center rounded-lg outline-none transition
+            className="flex w-full flex-col items-center gap-2 rounded-lg py-1 text-center outline-none transition
                        focus-visible:ring-2 focus-visible:ring-[var(--color-signal)]"
             aria-label="Sonar — página inicial"
           >
-            <LogoSvg height={82} />
+            <FotoUsuarioSidebar nome={usuario.nome?.trim() || usuario.email} />
+            <span className="max-w-full truncate px-2 text-[15px] font-medium text-[var(--color-fg)]">
+              {usuario.nome?.trim() || usuario.email}
+            </span>
+            <span className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-gold)]">
+              {qualificacaoDoPapel(usuario.papel, portal)}
+            </span>
           </Link>
 
           {isDrawer && (
@@ -435,33 +486,12 @@ function SidebarFooter({
   usuario: SidebarUsuario;
   portal: SidebarPortal;
 }) {
-  const nomeExibicao = usuario.nome?.trim() || usuario.email;
+  // Quadro do usuario REMOVIDO (09/08): a identidade (foto + nome +
+  // qualificacao) migrou pro TOPO do nav — aqui ficam so as acoes.
+  void usuario;
+  void portal;
   return (
     <div className="flex flex-col items-center gap-3 text-center">
-      {/* Card do usuario — TUDO CENTRALIZADO. Mostra nome (nao email),
-          pill de status da plataforma (Online signal) e nivel de
-          permissao (PortalBadge). */}
-      <div
-        className="flex w-full flex-col items-center gap-2 rounded-xl border border-[var(--color-line)]
-                   bg-[var(--color-surface-2)] px-3 py-3"
-      >
-        {/* Pill "Sistema Online" no topo */}
-        <span
-          className="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-signal-soft-2)] bg-[var(--color-signal-soft)] px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.22em] text-[var(--color-signal)]"
-          title="Plataforma online"
-        >
-          <span aria-hidden className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--color-signal)] shadow-[0_0_6px_rgba(60,255,138,0.85)]" />
-          Sistema Online
-        </span>
-        <span
-          className="max-w-full truncate text-[14px] font-medium text-[var(--color-fg)]"
-          title={usuario.email}
-        >
-          {nomeExibicao}
-        </span>
-        <PortalBadge portal={portal} papel={usuario.papel} />
-      </div>
-
       {/* Acoes em linha: tema + sair */}
       <div className="flex w-full items-center justify-center gap-2">
         <ThemeToggle />

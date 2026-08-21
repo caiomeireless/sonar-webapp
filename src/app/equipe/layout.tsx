@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 import { AetherBackground } from "@/components/AetherBackground";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
+import RadialFlutuante from "@/components/ui/RadialFlutuante";
 import { NAV_EQUIPE } from "@/lib/nav-equipe";
 import { ehCliente } from "@/lib/perfis";
 import { perfilLogado } from "@/lib/perfis-server";
@@ -56,6 +57,9 @@ export default async function EquipeLayout({ children }: { children: ReactNode }
         usuario={{ email, papel, nome }}
         portal="equipe"
       />
+      {/* Menu radial flutuante — só aparece quando o modo "radial" está
+          ativo no seletor do avatar (o nav lateral some). */}
+      <RadialFlutuante nome={nome} fotoUrl={perfil?.fotoUrl ?? null} />
       <div className="relative flex min-w-0 flex-1 flex-col">
         {/* AetherFlow — partículas signal+gold com conectores, bem discreto.
             FIXED (viewport), nao absolute (pagina inteira): numa pagina longa

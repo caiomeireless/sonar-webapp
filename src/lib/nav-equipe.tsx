@@ -10,6 +10,7 @@ import {
   Clock,
   DollarSign,
   Eye,
+  Home,
   LayoutDashboard,
   Search,
   Settings,
@@ -21,6 +22,7 @@ import type { SidebarItem } from "@/components/Sidebar";
 const ICON_CLASS = "h-[18px] w-[18px]";
 
 export const NAV_EQUIPE: SidebarItem[] = [
+  { href: "/equipe/inicio", label: "Início", icon: <Home className={ICON_CLASS} /> },
   { href: "/equipe", label: "Painel", icon: <LayoutDashboard className={ICON_CLASS} /> },
   { href: "/equipe/devedores", label: "Banco de Devedores", icon: <Users className={ICON_CLASS} /> },
   { href: "/equipe/consultas", label: "Consultas Pré-Processuais", icon: <Clock className={ICON_CLASS} /> },

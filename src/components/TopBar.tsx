@@ -2,108 +2,25 @@
 
 // Topbar global das áreas autenticadas (Equipe + Cliente).
 //
-// Estrutura:
-//   - Esquerda/centro: título + subtítulo da página corrente (mapa pathname→título).
-//   - Direita: botão Sincronizar (placeholder visual, ação real virá com
-//     integração Themis), sino de notificações (placeholder) e avatar
-//     do usuário com dropdown (e-mail + Sair).
-//
-// Inspirada no BP CRM. Cores Sonar.
+// Estrutura (reforma 09/08):
+//   - Esquerda: LOGO da plataforma, grande (títulos de página saíram).
+//   - Direita: Sincronizar, sino, avatar com dropdown (foto, modo de
+//     navegação lateral/radial, ver como cliente, Sair).
 
 import { useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Camera, ChevronDown, Eye, LogOut, RefreshCw, Trash2 } from "lucide-react";
+import { Camera, ChevronDown, CircleDot, Eye, LogOut, PanelLeft, RefreshCw, Trash2 } from "lucide-react";
 
 import { AssistantBot } from "./AssistantBot";
+import { LogoSvg } from "./LogoSvg";
 import { SinoNotificacoes } from "./SinoNotificacoes";
+import { gravarNavModo, useNavModo } from "./ui/use-nav-modo";
 import type { Notificacao } from "@/lib/notificacoes";
 
 const FOTO_STORAGE_KEY = "sonar-user-photo";
 
 type Usuario = { email: string; papel: string };
 
-type TitulosMap = Record<string, { titulo: string; subtitulo?: string }>;
-
-const TITULOS_EQUIPE: TitulosMap = {
-  "/equipe": {
-    titulo: "Dashboard",
-    subtitulo: "Visão geral da carteira do escritório",
-  },
-  "/equipe/devedores": {
-    titulo: "Banco de Devedores",
-    subtitulo: "Carteira hierárquica de clientes e casos",
-  },
-  "/equipe/themis": {
-    titulo: "Fila Themis",
-    subtitulo: "Execuções aguardando rastreamento patrimonial",
-  },
-  "/equipe/custos": {
-    titulo: "Monitor de Custos",
-    subtitulo: "Gastos com APIs por advogado, cliente e devedor",
-  },
-  "/equipe/configuracoes": {
-    titulo: "Configurações",
-    subtitulo: "Administração da plataforma",
-  },
-  "/equipe/notificacoes": {
-    titulo: "Central de Notificações",
-    subtitulo: "Eventos do escritório em ordem cronológica",
-  },
-};
-
-const TITULOS_CLIENTE: TitulosMap = {
-  "/cliente": {
-    titulo: "Dashboard",
-    subtitulo: "Visão geral dos seus processos",
-  },
-  "/cliente/casos": {
-    titulo: "Meus Casos",
-    subtitulo: "Acompanhamento patrimonial dos seus processos",
-  },
-  "/cliente/consultas": {
-    titulo: "Consultas Pré-Processuais",
-    subtitulo: "Análises de viabilidade preventivas",
-  },
-  "/cliente/custos": {
-    titulo: "Monitor de Custos",
-    subtitulo: "Quanto está sendo investido na sua carteira",
-  },
-  "/cliente/sugestoes": {
-    titulo: "Sugestões e Dúvidas",
-    subtitulo: "Fale com o escritório",
-  },
-  "/cliente/preferencias": {
-    titulo: "Preferências",
-    subtitulo: "Limites de gasto e regras de consulta",
-  },
-  "/cliente/notificacoes": {
-    titulo: "Central de Notificações",
-    subtitulo: "Tudo que aconteceu na sua carteira",
-  },
-};
-
-function resolverTitulo(
-  pathname: string,
-  mapa: TitulosMap,
-): { titulo: string; subtitulo?: string } {
-  // Match exato primeiro, depois maior prefixo.
-  if (mapa[pathname]) return mapa[pathname];
-  const chaves = Object.keys(mapa).sort((a, b) => b.length - a.length);
-  const k = chaves.find((c) => pathname.startsWith(c + "/"));
-  if (k) return mapa[k];
-  // Fallback inteligente por contexto.
-  if (pathname.startsWith("/equipe/devedores")) {
-    return mapa["/equipe/devedores"] ?? { titulo: "Devedores" };
-  }
-  if (pathname.startsWith("/equipe")) {
-    return { titulo: "Sonar", subtitulo: "Plataforma" };
-  }
-  if (pathname.startsWith("/cliente")) {
-    return { titulo: "Dashboard" };
-  }
-  return { titulo: "Sonar" };
-}
 
 export function TopBar({
   usuario,
@@ -118,10 +35,6 @@ export function TopBar({
   naoLidas: number;
   emailCliente?: string | null;
 }) {
-  const pathname = usePathname();
-  const mapa = portal === "equipe" ? TITULOS_EQUIPE : TITULOS_CLIENTE;
-  const { titulo, subtitulo } = resolverTitulo(pathname, mapa);
-
   const inicial = (usuario.email[0] || "?").toUpperCase();
 
   return (
@@ -170,21 +83,20 @@ export function TopBar({
         aria-hidden="true"
       />
 
-      <div className="relative flex min-h-[122px] items-center pl-6 pr-3 sm:pl-10 sm:pr-4">
-        {/* Centro absoluto: título + subtítulo, centralizados horizontal
-            e vertical, independentes do conteúdo lateral. Reservamos
-            ~460px de padding-right pra que o centramento ignore o espaco
-            ocupado pelo grupo direito (robo + botoes) e nao sobreponha. */}
-        <div className="pointer-events-none absolute inset-y-0 left-6 right-[460px] flex flex-col items-center justify-center text-center sm:left-10">
-          <h1 className="font-serif text-2xl font-medium uppercase tracking-[0.06em] text-[var(--color-fg)] sm:text-[28px]">
-            {titulo}
-          </h1>
-          {subtitulo ? (
-            <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-fg-muted)]">
-              {subtitulo}
-            </p>
-          ) : null}
-        </div>
+      {/* +30% de altura (122 -> 159, pedido 09/08). Título/subtítulo da
+          página SAÍRAM — no lugar, o logo da plataforma (o mesmo que vivia
+          no nav lateral) grande no canto esquerdo. Como a faixa começa
+          DEPOIS do aside no flex do layout, o logo nunca fica embaixo do
+          nav lateral aberto. */}
+      <div className="relative flex min-h-[159px] items-center pl-6 pr-3 sm:pl-10 sm:pr-4">
+        <Link
+          href={portal === "equipe" ? "/equipe/inicio" : "/cliente"}
+          className="inline-flex items-center rounded-lg outline-none transition
+                     focus-visible:ring-2 focus-visible:ring-[var(--color-signal)]"
+          aria-label="Sonar — página inicial"
+        >
+          <LogoSvg height={118} />
+        </Link>
 
         {/* Direita: tudo agrupado — robô + Sincronizar + Sino + Avatar.
             Aproximado da borda direita (pr-3/4) pra empurrar o robo pra
@@ -198,7 +110,7 @@ export function TopBar({
             naoLidas={naoLidas}
             emailCliente={emailCliente}
           />
-          <AvatarMenu usuario={usuario} inicial={inicial} />
+          <AvatarMenu usuario={usuario} inicial={inicial} portal={portal} />
         </div>
       </div>
     </header>
@@ -243,11 +155,14 @@ function BotaoSincronizar() {
 function AvatarMenu({
   usuario,
   inicial,
+  portal,
 }: {
   usuario: Usuario;
   inicial: string;
+  portal: "equipe" | "cliente";
 }) {
   const [aberto, setAberto] = useState(false);
+  const navModo = useNavModo();
   const [foto, setFoto] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -382,11 +297,48 @@ function AvatarMenu({
             </button>
           )}
 
-          {/* Admin/Sócio: pode entrar na visão do cliente demo (banner mostra
-              que está em modo visualização). */}
+          {/* Modo de navegação (só equipe): nav lateral clássico OU menu
+              radial (o lateral some e a roda flutuante assume). */}
+          {portal === "equipe" && (
+            <div className="border-b border-[var(--color-line)] px-4 py-2.5">
+              <p className="mb-2 font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+                Modo de Navegação
+              </p>
+              <div className="flex gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => gravarNavModo("lateral")}
+                  aria-pressed={navModo === "lateral"}
+                  className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg border px-2 py-1.5 text-xs transition ${
+                    navModo === "lateral"
+                      ? "border-[var(--color-signal)]/60 bg-[var(--color-signal-soft)] text-[var(--color-signal)]"
+                      : "border-[var(--color-line)] text-[var(--color-fg-muted)] hover:bg-[var(--color-surface-2)]"
+                  }`}
+                >
+                  <PanelLeft className="h-3.5 w-3.5" aria-hidden="true" />
+                  Nav Lateral
+                </button>
+                <button
+                  type="button"
+                  onClick={() => gravarNavModo("radial")}
+                  aria-pressed={navModo === "radial"}
+                  className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg border px-2 py-1.5 text-xs transition ${
+                    navModo === "radial"
+                      ? "border-[var(--color-gold)]/60 bg-[var(--color-gold)]/12 text-[var(--color-gold)]"
+                      : "border-[var(--color-line)] text-[var(--color-fg-muted)] hover:bg-[var(--color-surface-2)]"
+                  }`}
+                >
+                  <CircleDot className="h-3.5 w-3.5" aria-hidden="true" />
+                  Menu Radial
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Admin/Sócio: abre a tela de escolha do Ver Como Cliente. */}
           {(usuario.papel === "ADMIN" || usuario.papel === "SOCIO") && (
             <Link
-              href="/cliente?eu=cliente.demo@battaglia.com.br"
+              href="/equipe/ver-como"
               className="
                 flex items-center gap-2 border-b border-[var(--color-line)]
                 px-4 py-2.5 text-sm text-[var(--color-fg-muted)] transition
