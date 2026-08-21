@@ -23,12 +23,11 @@ import { perfilLogado } from "@/lib/perfis-server";
 import { obterDadosConsole } from "@/lib/console-inicio";
 import { CATEGORIAS_RADAR, type CategoriaRadarChave } from "@/lib/radar";
 import { formatBRL, formatData } from "@/lib/format";
-import { WireframeGlobe } from "@/components/ui/WireframeGlobe";
 import { PlacaMetalica } from "@/components/ui/PlacaMetalica";
 import { BordaLiquidaMetal } from "@/components/ui/BordaLiquidaMetal";
 
 import { NumeroTicker } from "./_components/NumeroTicker";
-import RadialMenor from "./_components/RadialMenor";
+import GloboMeio from "./_components/GloboMeio";
 
 export const dynamic = "force-dynamic";
 
@@ -129,33 +128,45 @@ export default async function InicioPage() {
       <div aria-hidden="true" className="absolute inset-0 bg-black" />
 
       <div className="relative z-10 mx-auto max-w-[1400px] px-6 pb-14 pt-10 sm:px-10">
-        {/* ===== Placas metálicas ===== */}
-        <header className="relative z-20 flex flex-col items-center gap-4 text-center">
+        {/* ===== Cabeçalho: boas-vindas em VIDRO NEON no canto esquerdo +
+               placa metálica da data à direita ===== */}
+        <header className="relative z-20 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div
+            className="rounded-2xl border border-white/12 px-8 py-4 backdrop-blur-xl"
+            style={{
+              background:
+                "linear-gradient(135deg, rgba(60,255,138,0.07), rgba(56,189,248,0.05) 50%, rgba(192,132,252,0.06))",
+              boxShadow:
+                "inset 0 1px 0 rgba(255,255,255,0.14), 0 10px 40px rgba(0,0,0,0.5)",
+            }}
+          >
+            <h1
+              className="text-[clamp(20px,2.4vw,32px)] font-bold uppercase leading-none tracking-[0.12em]"
+              style={{
+                fontFamily: "var(--font-manrope), sans-serif",
+                background:
+                  "linear-gradient(90deg, #3CFF8A, #38BDF8 55%, #C084FC)",
+                WebkitBackgroundClip: "text",
+                backgroundClip: "text",
+                color: "transparent",
+                filter:
+                  "drop-shadow(0 0 14px rgba(60,255,138,0.4)) drop-shadow(0 0 30px rgba(56,189,248,0.22))",
+              }}
+            >
+              Boas-Vindas, {primeiroNome}.
+            </h1>
+          </div>
           <PlacaMetalica metal="prata" className="px-7 py-2.5">
             <p className="placa-texto text-[13px]">
               Console Sonar · {dataLonga}
             </p>
           </PlacaMetalica>
-          <PlacaMetalica metal="gold" className="px-10 py-4 sm:px-14">
-            <h1 className="placa-texto text-[clamp(18px,2.4vw,30px)]">
-              Boas-Vindas, {primeiroNome}.
-            </h1>
-          </PlacaMetalica>
         </header>
 
-        {/* ===== Metade de cima do globo ===== */}
-        <div
-          aria-hidden="true"
-          className="relative mt-6 h-[320px] overflow-hidden"
-        >
-          <div className="pointer-events-none absolute left-1/2 top-0 h-[640px] w-[1040px] -translate-x-1/2">
-            <WireframeGlobe
-              width={1040}
-              height={640}
-              globeCenterX={520}
-              globeCenterY={320}
-            />
-          </div>
+        {/* ===== Metade de cima do globo — esfera na largura exata da linha
+               de estatísticas (mesmo padding horizontal do painel) ===== */}
+        <div className="mt-6 px-7 sm:px-12">
+          <GloboMeio />
         </div>
 
         {/* ===== Painel de vidro com moldura de metal líquido PRATA ===== */}
@@ -203,9 +214,16 @@ export default async function InicioPage() {
 
             <div className="my-9 h-px bg-white/10" />
 
-            {/* --- Últimas localizações + movimentações --- */}
-            <div className="grid gap-10 md:grid-cols-2">
-              <section>
+            {/* --- Últimas localizações + movimentações: cada uma no seu
+                   próprio cartão, bem separadas --- */}
+            <div className="grid gap-6 md:grid-cols-2">
+              <section
+                className="rounded-2xl border p-6"
+                style={{
+                  borderColor: `color-mix(in srgb, ${NEON.verde} 22%, transparent)`,
+                  background: `linear-gradient(180deg, color-mix(in srgb, ${NEON.verde} 6%, transparent), transparent 55%)`,
+                }}
+              >
                 <h2
                   className="font-mono text-[13px] font-semibold uppercase tracking-[0.26em]"
                   style={{ color: NEON.verde, textShadow: `0 0 14px color-mix(in srgb, ${NEON.verde} 50%, transparent)` }}
@@ -250,7 +268,13 @@ export default async function InicioPage() {
                 )}
               </section>
 
-              <section>
+              <section
+                className="rounded-2xl border p-6"
+                style={{
+                  borderColor: `color-mix(in srgb, ${NEON.laranja} 22%, transparent)`,
+                  background: `linear-gradient(180deg, color-mix(in srgb, ${NEON.laranja} 6%, transparent), transparent 55%)`,
+                }}
+              >
                 <h2
                   className="font-mono text-[13px] font-semibold uppercase tracking-[0.26em]"
                   style={{ color: NEON.laranja, textShadow: `0 0 14px color-mix(in srgb, ${NEON.laranja} 50%, transparent)` }}
@@ -284,15 +308,8 @@ export default async function InicioPage() {
             </div>
           </div>
         </BordaLiquidaMetal>
-
-        {/* ===== Menu radial menor ===== */}
-        <div className="mt-12 flex justify-center">
-          <RadialMenor
-            nome={nome}
-            fotoUrl={perfil?.fotoUrl ?? null}
-            size={300}
-          />
-        </div>
+        {/* Menu radial FORA da tela de início por enquanto (Caio, 21/08) —
+            segue vivo nas demais telas via RadialFlutuante/modo radial. */}
       </div>
     </main>
   );

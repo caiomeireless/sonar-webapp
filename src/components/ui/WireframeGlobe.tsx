@@ -9,6 +9,11 @@ interface WireframeGlobeProps {
   height?: number;
   globeCenterX?: number;
   globeCenterY?: number;
+  /**
+   * Cor dos pontos halftone dos continentes. Default = gold (landing);
+   * o Console do Início passa verde (pedido do Caio, 21/08).
+   */
+  corContinentes?: string;
   className?: string;
 }
 
@@ -204,6 +209,7 @@ export function WireframeGlobe({
   height = 320,
   globeCenterX,
   globeCenterY,
+  corContinentes = "rgba(201, 162, 74, 0.65)",
   className = "",
 }: WireframeGlobeProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -422,7 +428,7 @@ export function WireframeGlobe({
               0,
               2 * Math.PI,
             );
-            context.fillStyle = "rgba(201, 162, 74, 0.65)";
+            context.fillStyle = corContinentes;
             context.fill();
           }
         });
@@ -603,7 +609,7 @@ export function WireframeGlobe({
       document.removeEventListener("mouseup", onDocMouseUp);
       detachHeroScroll();
     };
-  }, [width, height, globeCenterX, globeCenterY]);
+  }, [width, height, globeCenterX, globeCenterY, corContinentes]);
 
   return (
     <canvas
