@@ -1,6 +1,7 @@
 // Central Administrativa — hub das ferramentas de gestão da plataforma:
-// Monitor de Custos, Notificações, Comunicação de Bugs, Modo de
-// Visualização (ver como cliente) e Configurações da Plataforma.
+// Monitor de Custos, Comunicação de Custos (ressarcimento -> BP INTERNAL),
+// Notificações, Comunicação de Bugs, Modo de Visualização (ver como
+// cliente) e Configurações da Plataforma.
 import Link from "next/link";
 import {
   ArrowRight,
@@ -8,6 +9,7 @@ import {
   Bug,
   DollarSign,
   Eye,
+  Receipt,
   Settings,
 } from "lucide-react";
 
@@ -20,6 +22,13 @@ const CARDS = [
     descricao:
       "Gastos com APIs pagas por advogado, cliente e devedor — com teto mensal e filtros.",
     Icon: DollarSign,
+  },
+  {
+    href: "/equipe/comunicacao-custos",
+    titulo: "Comunicação de Custos",
+    descricao:
+      "Pagou pesquisa do bolso (RI Digital, Registro Civil)? Envie o recibo pro financeiro repassar ao cliente.",
+    Icon: Receipt,
   },
   {
     href: "/equipe/notificacoes",
