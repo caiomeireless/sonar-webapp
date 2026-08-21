@@ -483,7 +483,7 @@ export default function LandingPage() {
               alt="Battaglia & Pedrosa Advogados"
               width={565}
               height={94}
-              className="h-auto w-[min(768px,88vw)] -translate-x-[64px]"
+              className="h-auto w-[min(614px,85vw)] -translate-x-[64px]"
             />
           </div>
 
