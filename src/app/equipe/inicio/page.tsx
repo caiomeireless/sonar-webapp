@@ -15,10 +15,9 @@ import { obterDadosConsole } from "@/lib/console-inicio";
 import { CATEGORIAS_RADAR } from "@/lib/radar";
 import { formatBRL, formatData } from "@/lib/format";
 import { WireframeGlobe } from "@/components/ui/WireframeGlobe";
-import RadialHub from "@/components/ui/RadialHub";
-import { ITENS_RADIAL_EQUIPE } from "@/components/ui/itens-radial-equipe";
 
 import { NumeroTicker } from "./_components/NumeroTicker";
+import RadialMenor from "./_components/RadialMenor";
 
 export const dynamic = "force-dynamic";
 
@@ -285,8 +284,7 @@ export default async function InicioPage() {
 
           {/* ===== Menu radial menor ===== */}
           <div className="flex justify-center lg:justify-end">
-            <RadialHub
-              itens={ITENS_RADIAL_EQUIPE}
+            <RadialMenor
               nome={nome}
               fotoUrl={perfil?.fotoUrl ?? null}
               size={300}
