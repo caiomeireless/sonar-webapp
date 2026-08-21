@@ -114,60 +114,6 @@ export default function LandingPage() {
                 />
               </svg>
               )}
-              {/* Emit dourado + ondas verde signal (arcos SMIL suaves, SEM partículas) */}
-              <svg
-                className="pointer-events-none absolute left-full top-1/2 ml-[-36px] mt-[93px] hidden -translate-y-1/2 md:block"
-                width="260"
-                height="340"
-                viewBox="0 0 260 340"
-                fill="none"
-                aria-hidden="true"
-              >
-                <defs>
-                  <filter id="sonar-wave-glow" x="-50%" y="-50%" width="200%" height="200%">
-                    <feGaussianBlur stdDeviation="2" result="g" />
-                    <feMerge>
-                      <feMergeNode in="g" />
-                      <feMergeNode in="SourceGraphic" />
-                    </feMerge>
-                  </filter>
-                </defs>
-                {/* Emit dourado — alvo dos sticks do globo */}
-                <circle data-emit-anchor cx="20" cy="170" r="2.5" fill="#C9A24A" filter="url(#sonar-wave-glow)">
-                  <animate attributeName="r" values="2;4;2" dur="1.5s" repeatCount="indefinite" />
-                  <animate attributeName="opacity" values="1;0.55;1" dur="1.5s" repeatCount="indefinite" />
-                </circle>
-                {/* Ondas verde signal — arcos suaves expandindo à direita */}
-                <g transform="translate(40 170)" filter="url(#sonar-wave-glow)">
-                  {[0, 0.65, 1.3, 1.95].map((delay, i) => (
-                    <path
-                      key={`green-hwave-${i}`}
-                      d="M 0 -30 A 18 30 0 0 1 0 30"
-                      fill="none"
-                      stroke="#3CFF8A"
-                      strokeWidth="1.8"
-                      strokeOpacity="0"
-                      transform="scale(0.1)"
-                    >
-                      <animateTransform
-                        attributeName="transform"
-                        type="scale"
-                        values="0.1;5.2"
-                        dur="2.6s"
-                        begin={`${delay}s`}
-                        repeatCount="indefinite"
-                      />
-                      <animate
-                        attributeName="stroke-opacity"
-                        values="0.95;0"
-                        dur="2.6s"
-                        begin={`${delay}s`}
-                        repeatCount="indefinite"
-                      />
-                    </path>
-                  ))}
-                </g>
-              </svg>
               {/* TEMP OCULTO — escada, ondas, emit, ícones vermelhos */}
               {false && (
               <svg
@@ -352,7 +298,65 @@ export default function LandingPage() {
               )}
             </div>
             </div>
-            <div className="signal-dash -mt-6 ml-1 w-[min(540px,100%)]" aria-hidden="true" />
+            {/* Linha verde + ondas: o emissor dourado fica NA PONTA da linha,
+                centrado nela — as ondas nascem do fim da linha (pedido 09/08) */}
+            <div className="relative -mt-6 ml-1 w-[min(540px,100%)]">
+              <div className="signal-dash w-full" aria-hidden="true" />
+              {/* Emit dourado + ondas verde signal (arcos SMIL suaves, SEM partículas) */}
+              <svg
+                className="pointer-events-none absolute left-full top-1/2 ml-[-20px] hidden -translate-y-1/2 md:block"
+                width="260"
+                height="340"
+                viewBox="0 0 260 340"
+                fill="none"
+                aria-hidden="true"
+              >
+                <defs>
+                  <filter id="sonar-wave-glow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="2" result="g" />
+                    <feMerge>
+                      <feMergeNode in="g" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
+                {/* Emit dourado — alvo dos sticks do globo */}
+                <circle data-emit-anchor cx="20" cy="170" r="2.5" fill="#C9A24A" filter="url(#sonar-wave-glow)">
+                  <animate attributeName="r" values="2;4;2" dur="1.5s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="1;0.55;1" dur="1.5s" repeatCount="indefinite" />
+                </circle>
+                {/* Ondas verde signal — arcos suaves expandindo à direita */}
+                <g transform="translate(40 170)" filter="url(#sonar-wave-glow)">
+                  {[0, 0.65, 1.3, 1.95].map((delay, i) => (
+                    <path
+                      key={`green-hwave-${i}`}
+                      d="M 0 -30 A 18 30 0 0 1 0 30"
+                      fill="none"
+                      stroke="#3CFF8A"
+                      strokeWidth="1.8"
+                      strokeOpacity="0"
+                      transform="scale(0.1)"
+                    >
+                      <animateTransform
+                        attributeName="transform"
+                        type="scale"
+                        values="0.1;5.2"
+                        dur="2.6s"
+                        begin={`${delay}s`}
+                        repeatCount="indefinite"
+                      />
+                      <animate
+                        attributeName="stroke-opacity"
+                        values="0.95;0"
+                        dur="2.6s"
+                        begin={`${delay}s`}
+                        repeatCount="indefinite"
+                      />
+                    </path>
+                  ))}
+                </g>
+              </svg>
+            </div>
             <p className="mt-8 max-w-[520px] text-lg leading-relaxed text-white">
               Plataforma de localização de bens de devedores, integrada ao banco de processos do escritório{" "}
               <span className="font-serif text-2xl font-medium tracking-tight text-[var(--color-gold)]">
