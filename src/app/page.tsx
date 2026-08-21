@@ -1,5 +1,6 @@
 // Landing pública do Sonar. Começa limpa, focada em apresentar a plataforma
 // e empurrar pro /login. Sem dashboard ainda (próximo dia).
+import Image from "next/image";
 import Link from "next/link";
 import { AssistantBot } from "@/components/AssistantBot";
 import { HeaderParticles } from "@/components/HeaderParticles";
@@ -471,12 +472,16 @@ export default function LandingPage() {
         {/* Luz "lamp" dourada descendo do topo */}
         <LampLight />
         <div className="relative mx-auto max-w-[1400px] px-6 py-24 sm:px-10 md:py-32">
-          {/* Cabeçalho centralizado: eyebrow + logo BP */}
+          {/* Cabeçalho centralizado: eyebrow + logo oficial novo (PNG) */}
           <div className="flex flex-col items-center text-center">
             <span className="eyebrow mb-8">Propósito</span>
-            <div className="-translate-x-16">
-              <BPSignature />
-            </div>
+            <Image
+              src="/logo-bp-novo.png"
+              alt="Battaglia & Pedrosa Advogados"
+              width={565}
+              height={94}
+              className="h-auto w-[min(480px,85vw)]"
+            />
           </div>
 
           {/* Título + história de origem */}
