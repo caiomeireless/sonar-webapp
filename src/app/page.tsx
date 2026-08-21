@@ -81,7 +81,7 @@ export default function LandingPage() {
             <div className="relative inline-block">
               {/* Wordmark estático — mesma fonte/tamanho do "Entre no Sonar."
                   da faixa CTA (animação de partículas removida a pedido 09/08) */}
-              <h1 className="sonar-wordmark mt-2 block text-[clamp(40px,8vw,96px)]">
+              <h1 className="sonar-wordmark mt-2 block text-[clamp(56px,10vw,150px)]">
                 Sonar
               </h1>
               {/* Colchete verde TEMP OCULTO — flip {false &&} pra reativar */}
@@ -300,7 +300,7 @@ export default function LandingPage() {
             </div>
             {/* Linha verde + ondas: o emissor dourado fica NA PONTA da linha,
                 centrado nela — as ondas nascem do fim da linha (pedido 09/08) */}
-            <div className="relative -mt-6 ml-1 w-[min(540px,100%)]">
+            <div className="relative mt-3 ml-1 w-[min(540px,100%)]">
               <div className="signal-dash w-full" aria-hidden="true" />
               {/* Emit dourado + ondas verde signal (arcos SMIL suaves, SEM partículas) */}
               <svg
