@@ -1,21 +1,19 @@
-// Dados do Console Sonar (aba Início) — queries LEVES de propósito: o
-// console abre a cada visita, então nada de agregação pesada aqui (o
-// dashboard completo vive em /equipe, cacheado). Tudo resiliente: qualquer
-// falha vira zero/lista vazia sem derrubar a página.
+// Dados do Console Sonar (aba Início, v2 "monitor") — queries LEVES de
+// propósito: o console abre a cada visita, então nada de agregação pesada
+// (o dashboard completo vive em /equipe). Tudo resiliente: falha vira
+// zero/lista vazia sem derrubar a página.
 import { createAdminClient } from "@/lib/supabase/admin";
 import { listarRadar, type ItemRadar } from "@/lib/radar";
 
-// Cota mensal consumível do contrato Assertiva (Q-19312-1).
-export const TETO_ASSERTIVA_BRL = 600;
-
-export type BlipRadar = {
+export type LocalizacaoRecente = {
   id: number;
-  /** Ângulo em graus (0-360) — espalhado pelo ângulo áureo, determinístico. */
-  angulo: number;
-  /** Distância do centro, fração do raio externo (0.74–0.97). */
-  raioFrac: number;
-  rotulo: string;
-  capturadoEm: string;
+  tipo: string;
+  titulo: string;
+  valorBrl: number | null;
+  fonte: string | null;
+  quando: string | null;
+  devedorId: number | null;
+  devedorNome: string | null;
 };
 
 export type DadosConsole = {
@@ -24,12 +22,12 @@ export type DadosConsole = {
   casosAtivos: number;
   devedores: number;
   capturas7d: number;
-  gastoMesBrl: number;
-  tetoMesBrl: number;
-  /** Últimos andamentos de alto sinal (Diário de Bordo). */
-  diario: ItemRadar[];
-  /** Contatos no mostrador do radar. */
-  blips: BlipRadar[];
+  /** Casos com crédito satisfeito (encerrados por quitação). */
+  quitados: number;
+  /** Casos com acordo/pagamento detectado nos andamentos dos robôs. */
+  casosComAcordo: number;
+  ultimasLocalizacoes: LocalizacaoRecente[];
+  movimentacoes: ItemRadar[];
 };
 
 const VAZIO: DadosConsole = {
@@ -38,21 +36,29 @@ const VAZIO: DadosConsole = {
   casosAtivos: 0,
   devedores: 0,
   capturas7d: 0,
-  gastoMesBrl: 0,
-  tetoMesBrl: TETO_ASSERTIVA_BRL,
-  diario: [],
-  blips: [],
+  quitados: 0,
+  casosComAcordo: 0,
+  ultimasLocalizacoes: [],
+  movimentacoes: [],
 };
+
+// Palavras de acordo/pagamento (mesmo vocabulário da categoria "pagamento"
+// do Radar) — conta CASOS distintos com esse sinal.
+const CLAUSULA_ACORDO = [
+  "acordo homologado",
+  "homologação de acordo",
+  "homologacao de acordo",
+  "acordo de parcelamento",
+]
+  .map((p) => `descricao.ilike.%${p}%`)
+  .join(",");
 
 export async function obterDadosConsole(): Promise<DadosConsole> {
   try {
     const sb = createAdminClient();
     const seteDias = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
-    const inicioMes = new Date();
-    inicioMes.setDate(1);
-    inicioMes.setHours(0, 0, 0, 0);
 
-    const [bens, casos, devedores, capturas, custosMes, radar] =
+    const [bens, casos, quitados, devedores, capturas, acordos, recentes, radar] =
       await Promise.all([
         sb
           .from("bens_encontrados")
@@ -65,6 +71,11 @@ export async function obterDadosConsole(): Promise<DadosConsole> {
           .eq("status", "ativo")
           .eq("eh_demo", false),
         sb
+          .from("casos")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "satisfeito")
+          .eq("eh_demo", false),
+        sb
           .from("devedores")
           .select("id", { count: "exact", head: true })
           .eq("eh_demo", false),
@@ -73,10 +84,19 @@ export async function obterDadosConsole(): Promise<DadosConsole> {
           .select("id", { count: "exact", head: true })
           .gte("capturado_em", seteDias),
         sb
-          .from("custos")
-          .select("custo")
-          .gte("criado_em", inicioMes.toISOString())
+          .from("andamentos")
+          .select("caso_id")
+          .or(CLAUSULA_ACORDO)
+          .not("caso_id", "is", null)
           .limit(1000),
+        sb
+          .from("bens_encontrados")
+          .select(
+            "id, tipo, titulo, valor_estimado_brl, fonte, fonte_consultada_em, devedor:devedores(id, nome)",
+          )
+          .eq("ativo", true)
+          .order("fonte_consultada_em", { ascending: false, nullsFirst: false })
+          .limit(6),
         listarRadar({ pagina: 1 }),
       ]);
 
@@ -84,21 +104,29 @@ export async function obterDadosConsole(): Promise<DadosConsole> {
       (acc, b) => acc + (Number(b.valor_estimado_brl) || 0),
       0,
     );
-    const gastoMesBrl = (custosMes.data ?? []).reduce(
-      (acc, c) => acc + (Number(c.custo) || 0),
-      0,
-    );
+    const casosComAcordo = new Set(
+      (acordos.data ?? []).map((a) => a.caso_id as number),
+    ).size;
 
-    const itensRadar = radar.erro ? [] : radar.itens;
-    // Blip determinístico por id: ângulo áureo espalha sem aleatoriedade
-    // (mesma página, mesmos pontos — nada "pula" a cada render).
-    const blips: BlipRadar[] = itensRadar.slice(0, 12).map((a) => ({
-      id: a.id,
-      angulo: (a.id * 137.5) % 360,
-      raioFrac: 0.74 + ((a.id * 53) % 24) / 100,
-      rotulo: a.descricao.slice(0, 120),
-      capturadoEm: a.capturado_em,
-    }));
+    const ultimasLocalizacoes: LocalizacaoRecente[] = (recentes.data ?? []).map(
+      (b) => {
+        const devedor = b.devedor as unknown as {
+          id: number;
+          nome: string;
+        } | null;
+        return {
+          id: b.id as number,
+          tipo: (b.tipo as string) ?? "",
+          titulo: (b.titulo as string) ?? "Bem localizado",
+          valorBrl:
+            b.valor_estimado_brl != null ? Number(b.valor_estimado_brl) : null,
+          fonte: (b.fonte as string | null) ?? null,
+          quando: (b.fonte_consultada_em as string | null) ?? null,
+          devedorId: devedor?.id ?? null,
+          devedorNome: devedor?.nome ?? null,
+        };
+      },
+    );
 
     return {
       patrimonioBrl,
@@ -106,10 +134,10 @@ export async function obterDadosConsole(): Promise<DadosConsole> {
       casosAtivos: casos.count ?? 0,
       devedores: devedores.count ?? 0,
       capturas7d: capturas.count ?? 0,
-      gastoMesBrl,
-      tetoMesBrl: TETO_ASSERTIVA_BRL,
-      diario: itensRadar.slice(0, 8),
-      blips,
+      quitados: quitados.count ?? 0,
+      casosComAcordo,
+      ultimasLocalizacoes,
+      movimentacoes: radar.erro ? [] : radar.itens.slice(0, 4),
     };
   } catch {
     return VAZIO;
