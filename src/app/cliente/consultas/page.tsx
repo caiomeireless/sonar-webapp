@@ -3,11 +3,9 @@
 // o que o escritório já analisou pra ele. Mostra um overview por devedor
 // consultado com score, recomendação e custo.
 //
-// Regra de visibilidade: filtra pelo credor_id correspondente ao email do
-// usuário logado. Pro demo (cliente.demo@battaglia.com.br) o mock usa
-// credorId=101 ("Comercial Vértice"), então mapeamos o email→101.
-// Se não encontrar nada pelo credorId mapeado, cai num fallback que
-// mostra todas as consultas do mock (preserva a demo).
+// DEMO REMOVIDA (08/08): o mapeamento do cliente demo pro mock saiu.
+// Enquanto a feature real não chega, cliente vê o estado vazio — nunca
+// dados fictícios misturados no portal real.
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -21,7 +19,6 @@ import {
 } from "@/lib/consultas-pre";
 import { perfilLogado } from "@/lib/perfis-server";
 import { previewEuFromParam } from "@/lib/dev-auth";
-import { DEMO_CLIENTE_EMAIL } from "@/lib/mock-fixtures";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { formatBRL, formatTempoRelativo } from "@/lib/format";
 
@@ -31,33 +28,15 @@ type Props = {
   searchParams?: Promise<{ eu?: string | string[] }>;
 };
 
-// Mapeia email do cliente → credorId no mock de consultas.
-// Pra demo, qualquer credor da fixture (CREDOR_DEMO id=1) com email
-// cliente.demo@battaglia.com.br vê as consultas do credorId=101
-// ("Comercial Vértice") — narrativa coerente da apresentação.
-function emailParaCredorId(email: string): number | null {
-  const e = email.toLowerCase().trim();
-  if (e === "cliente.demo@battaglia.com.br") return 101;
-  return null;
-}
-
 export default async function ConsultasClientePage({ searchParams }: Props) {
   const params = (await searchParams) ?? {};
   const perfil = await perfilLogado();
   const eu = previewEuFromParam(params.eu, perfil) ?? perfil?.email ?? null;
   if (!eu) redirect("/login");
 
-  // Cliente demo (showroom): ve todas as consultas mock — preserva a
-  // narrativa da apresentacao. Cliente REAL: filtra pelo credorId mapeado;
-  // sem mapeamento -> lista vazia (proibido cair pro mock geral, que era
-  // um leak de isolamento entre clientes).
-  const ehDemo = eu.toLowerCase() === DEMO_CLIENTE_EMAIL;
-  const credorId = emailParaCredorId(eu);
-  const consultas: ConsultaPreProcessual[] = ehDemo
-    ? await listarConsultasPre()
-    : credorId
-      ? await listarConsultasDoCliente(credorId)
-      : [];
+  // Consultas pré-processuais reais ainda não existem — lista vazia
+  // (o mock que preenchia a demo foi removido em 08/08).
+  const consultas: ConsultaPreProcessual[] = [];
 
   const qsBase = params.eu
     ? `?eu=${encodeURIComponent(Array.isArray(params.eu) ? params.eu[0]! : params.eu)}`

@@ -3,15 +3,15 @@
 // os devedores dos casos onde ELE é o email_contato do credor.
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { TipoBem, FonteBusca } from "./mock-fixtures";
-import { CASOS_DEMO } from "./mock-fixtures";
 import {
   calcularDistribuicaoGeografica,
   type DistribuicaoGeografica,
 } from "./distribuicao-bens";
 
-// WORKAROUND PRA DEMO: hidrata o juízo (vara/comarca/UF/gênero/classe da ação)
-// fazendo overlay com o mock CASOS_DEMO por id. No Sem 2, isso vira do Themis
-// API e este overlay sai daqui.
+// Juízo (vara/comarca/UF/gênero/classe da ação). O overlay MOCK que
+// preenchia isso a partir de CASOS_DEMO foi REMOVIDO (08/08 — misturava
+// dado fictício com processo real); o campo fica undefined até vir do
+// Themis/DataJud de verdade.
 export type JuizoInfo = {
   vara: number;
   classeVara: string;
@@ -20,11 +20,6 @@ export type JuizoInfo = {
   generoJuiz: "M" | "F";
   classeAcao: string;
 };
-
-function juizoMockPorId(casoId: number): JuizoInfo | undefined {
-  const c = CASOS_DEMO.find((x) => x.id === casoId);
-  return c?.juizo;
-}
 
 // ============================================================
 // TIPOS expostos pras páginas
@@ -147,11 +142,6 @@ function somarBens(bens: { valor_estimado_brl: number | null }[]): number {
 // LEITURA — CLIENTE (filtra por email_contato do credor)
 // ============================================================
 
-// E-mail demo: quando o "Visualizar como cliente" usa este alias, devolve
-// os casos do PRIMEIRO credor existente do banco (fallback que garante a
-// demo sempre ter conteúdo, sem precisar rodar o seed de novo).
-const DEMO_CLIENTE_EMAIL = "cliente.demo@battaglia.com.br";
-
 // Lista os casos visíveis pro cliente logado (devedores rastreados pelo
 // credor que tem email_contato = clienteEmail).
 export async function listarCasosDoCliente(clienteEmail: string): Promise<CasoListagem[]> {
@@ -164,22 +154,7 @@ export async function listarCasosDoCliente(clienteEmail: string): Promise<CasoLi
     .select("id")
     .eq("email_contato", email);
 
-  let credorIds = (credores ?? []).map((c) => c.id as number);
-
-  // Fallback demo: cliente.demo sempre cai num credor que TEM casos no banco
-  // (ignora vinculação por email_contato — se o seed criou esse perfil sem
-  // credor próprio ou sem casos, ele "empresta" do primeiro credor com casos).
-  if (email === DEMO_CLIENTE_EMAIL) {
-    const { data: credoresComCasos } = await sb
-      .from("casos")
-      .select("credor_id")
-      .order("credor_id", { ascending: true })
-      .limit(50);
-    const idsComCasos = Array.from(
-      new Set((credoresComCasos ?? []).map((c) => c.credor_id as number)),
-    );
-    if (idsComCasos.length > 0) credorIds = idsComCasos;
-  }
+  const credorIds = (credores ?? []).map((c) => c.id as number);
 
   if (credorIds.length === 0) return [];
 
@@ -223,7 +198,7 @@ export async function listarCasosDoCliente(clienteEmail: string): Promise<CasoLi
       total_bens: bens?.length ?? 0,
       valor_estimado_total_brl: somarBens(bens ?? []),
       ultima_consulta_em: ultima_consulta,
-      juizo: juizoMockPorId(c.id as number),
+      juizo: undefined,
     });
   }
 
@@ -259,12 +234,6 @@ export async function obterDossieParaCliente(
 ): Promise<Dossie | null> {
   const sb = createAdminClient();
   const email = clienteEmail.toLowerCase().trim();
-
-  // Fallback demo: cliente.demo vê qualquer devedor que exista (visão
-  // sintética de "todos os processos" pra apresentação).
-  if (email === DEMO_CLIENTE_EMAIL) {
-    return obterDossie(devedorId);
-  }
 
   // Verifica se este devedor está em algum caso de credor com esse email.
   const { data: autorizacao } = await sb
@@ -551,7 +520,7 @@ export async function obterDossie(devedorId: number): Promise<Dossie | null> {
 
   // Overlay do juízo a partir do mock — workaround pra demo, vai sair em Sem 2.
   const casosHidratados = ((casos ?? []) as unknown as CasoResumo[]).map(
-    (c) => ({ ...c, juizo: juizoMockPorId(c.id) }),
+    (c) => ({ ...c, juizo: undefined }),
   );
 
   // Campos rg/email/telefone/redes_sociais vem da migration 020 e sao
@@ -593,19 +562,7 @@ export async function listarBensPorLocalizacaoDoCliente(
     .select("id")
     .eq("email_contato", email);
 
-  let credorIds = (credores ?? []).map((c) => c.id as number);
-
-  if (email === DEMO_CLIENTE_EMAIL) {
-    const { data: credoresComCasos } = await sb
-      .from("casos")
-      .select("credor_id")
-      .order("credor_id", { ascending: true })
-      .limit(50);
-    const idsComCasos = Array.from(
-      new Set((credoresComCasos ?? []).map((c) => c.credor_id as number)),
-    );
-    if (idsComCasos.length > 0) credorIds = idsComCasos;
-  }
+  const credorIds = (credores ?? []).map((c) => c.id as number);
 
   if (credorIds.length === 0) return [];
 

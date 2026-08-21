@@ -10,7 +10,6 @@ import { Bell, CheckCheck } from "lucide-react";
 import { perfilLogado } from "@/lib/perfis-server";
 import { perfilAtual } from "@/lib/perfis";
 import { previewEuFromParam } from "@/lib/dev-auth";
-import { DEMO_CLIENTE_EMAIL } from "@/lib/mock-fixtures";
 import {
   CATEGORIAS_CLIENTE,
   configCategoria,
@@ -42,8 +41,9 @@ export default async function NotificacoesClientePage({ searchParams }: Props) {
     perfilSessao?.papel === "admin" || perfilSessao?.papel === "socio";
 
   const euParam = previewEuFromParam(params.eu, perfilSessao);
+  // Demo removida (08/08): admin sem ?eu= vê lista vazia, nunca a do demo.
   const emailEfetivo =
-    euParam ?? (ehVisualizacao ? DEMO_CLIENTE_EMAIL : perfilSessao?.email ?? null);
+    euParam ?? (ehVisualizacao ? null : perfilSessao?.email ?? null);
 
   // Carrega perfil de exibicao (modo visualizacao mostra o do cliente, nao do admin).
   if (emailEfetivo && emailEfetivo !== perfilSessao?.email) {

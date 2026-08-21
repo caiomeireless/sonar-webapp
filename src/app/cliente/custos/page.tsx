@@ -10,8 +10,7 @@
 // Resolução de credor:
 //   1. `previewEuFromParam` continua valendo (admin/sócio "visualizar como").
 //   2. O e-mail logado vira credor via `credores.email_contato`.
-//   3. Fallback `cliente.demo@battaglia.com.br` -> credorId=1 (CREDOR_DEMO),
-//      garante que a demo sempre renderiza algo mesmo sem seed específico.
+//   (Fallback do cliente demo REMOVIDO em 08/08 — demo desativada.)
 
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -26,7 +25,6 @@ import {
   type PeriodoCustos,
 } from "@/lib/dashboard-custos";
 import { obterPreferenciasDoCliente } from "@/lib/preferencias";
-import { DEMO_CLIENTE_EMAIL } from "@/lib/mock-fixtures";
 
 import GastosPorDiaChart from "./GastosPorDiaChart";
 import FiltrosClienteCustos from "./_components/FiltrosClienteCustos";
@@ -98,11 +96,8 @@ export default async function CustosClientePage({ searchParams }: Props) {
   const eu = previewEuFromParam(params.eu, perfil) ?? perfil?.email ?? null;
   if (!eu) redirect("/login");
 
-  // Resolve credorId: e-mail -> credor; demo cai no CREDOR_DEMO (id=1).
-  let credorId = await credorIdPorEmail(eu);
-  if (credorId === null && eu.toLowerCase() === DEMO_CLIENTE_EMAIL) {
-    credorId = 1;
-  }
+  // Resolve credorId: e-mail -> credor (sem fallback demo desde 08/08).
+  const credorId = await credorIdPorEmail(eu);
   // Sem credor vinculado: ainda renderiza a página, mas com dashboard vazio.
   // Usar id=-1 garante que `obterDashboardCustos` devolve zerado (não casa
   // com nenhum devedor) em vez de quebrar.

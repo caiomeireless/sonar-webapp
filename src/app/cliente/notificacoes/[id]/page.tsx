@@ -18,7 +18,6 @@ import {
 
 import { perfilLogado } from "@/lib/perfis-server";
 import { previewEuFromParam } from "@/lib/dev-auth";
-import { DEMO_CLIENTE_EMAIL } from "@/lib/mock-fixtures";
 import {
   buscarNotificacaoPorId,
   configCategoria,
@@ -72,20 +71,20 @@ export default async function NotificacaoClienteDetalhe({
   const ehVisualizacao =
     perfilSessao?.papel === "admin" || perfilSessao?.papel === "socio";
   const euParam = previewEuFromParam(sp.eu, perfilSessao);
+  // Demo removida (08/08): admin sem ?eu= não herda mais o e-mail do demo.
   const emailEfetivo =
-    euParam ?? (ehVisualizacao ? DEMO_CLIENTE_EMAIL : perfilSessao?.email ?? null);
+    euParam ?? (ehVisualizacao ? null : perfilSessao?.email ?? null);
 
   const { id } = await params;
   const notificacao = await buscarNotificacaoPorId(id);
   if (!notificacao || notificacao.portal !== "cliente") notFound();
 
   // Isolamento por email: uma notificacao com destinatarioEmail so pode ser
-  // aberta pelo dono ou pelo demo (showroom). Sem este bloco, qualquer cliente
-  // podia enumerar IDs e ler notificacoes de outro cliente.
+  // aberta pelo dono. Sem este bloco, qualquer cliente podia enumerar IDs e
+  // ler notificacoes de outro cliente. (Exceção do demo removida em 08/08.)
   const destinatario = notificacao.destinatarioEmail?.toLowerCase() ?? null;
   const meuEmail = emailEfetivo?.toLowerCase() ?? null;
-  const ehDemo = meuEmail === DEMO_CLIENTE_EMAIL.toLowerCase();
-  if (destinatario && meuEmail !== destinatario && !ehDemo) notFound();
+  if (destinatario && meuEmail !== destinatario) notFound();
 
   // Marca como lida ao abrir.
   if (!notificacao.lida) {

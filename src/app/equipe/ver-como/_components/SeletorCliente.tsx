@@ -6,10 +6,9 @@
 // então aparece desabilitado com atalho pras Configurações.
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, FileText, Mail, MonitorPlay, Search } from "lucide-react";
+import { ArrowRight, FileText, Mail, Search } from "lucide-react";
 
 import type { CredorAdmin } from "@/lib/credores-admin";
-import { DEMO_CLIENTE_EMAIL } from "@/lib/mock-fixtures";
 
 function normalizar(s: string): string {
   return s
@@ -53,28 +52,6 @@ export default function SeletorCliente({ credores }: { credores: CredorAdmin[] }
           className="w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)] py-3 pl-11 pr-4 text-sm text-ivory placeholder:text-[var(--color-ivory-40)] focus:border-[var(--color-gold)] focus:outline-none focus:ring-2 focus:ring-[var(--color-gold)]/25"
         />
       </div>
-
-      {/* Cliente Demonstração — portfólio sintético do showroom.
-          Passa pelo handler /entrar como os reais: grava o cookie de
-          preview e garante que sidebar/identidade sigam o demo. */}
-      <Link
-        href={`/equipe/ver-como/entrar?eu=${encodeURIComponent(DEMO_CLIENTE_EMAIL)}`}
-        prefetch={false}
-        className="glass mt-5 flex items-center justify-between gap-4 p-5 transition hover:border-[var(--color-gold)]/50"
-      >
-        <div className="flex min-w-0 items-center gap-4">
-          <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--color-gold)]/12 text-[var(--color-gold)]">
-            <MonitorPlay className="h-5 w-5" />
-          </div>
-          <div className="min-w-0">
-            <p className="font-serif text-lg text-ivory">Cliente Demonstração</p>
-            <p className="font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
-              Portfólio sintético do showroom
-            </p>
-          </div>
-        </div>
-        <ArrowRight className="h-4 w-4 shrink-0 text-[var(--color-gold)]" />
-      </Link>
 
       {/* Clientes reais */}
       <div className="mb-3 mt-8 flex items-baseline justify-between">

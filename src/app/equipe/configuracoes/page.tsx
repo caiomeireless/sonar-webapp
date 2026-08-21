@@ -12,7 +12,6 @@ import { listarCredoresAdmin } from "@/lib/credores-admin";
 import { formatTempoRelativo } from "@/lib/format";
 
 import SelectStatusBug from "./_components/SelectStatusBug";
-import BotaoReseedDemo from "./_components/BotaoReseedDemo";
 import ClientesPortal from "./_components/ClientesPortal";
 
 export const dynamic = "force-dynamic";
@@ -73,11 +72,6 @@ export default async function ConfiguracoesPage() {
       <ClientesPortal credores={credores} />
 
       {/* ============ DEMO TOOLS · DONO_EMAIL ============ */}
-      {ehDono ? (
-        <section className="mt-12">
-          <BotaoReseedDemo />
-        </section>
-      ) : null}
 
       {/* ============ BUGS REPORTADOS · ADMIN-ONLY (DONO_EMAIL) ============ */}
       {ehDono ? (

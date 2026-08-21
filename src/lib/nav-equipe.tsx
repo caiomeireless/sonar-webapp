@@ -11,7 +11,6 @@ import {
   DollarSign,
   Eye,
   LayoutDashboard,
-  Mail,
   Search,
   Settings,
   Users,
@@ -29,10 +28,6 @@ export const NAV_EQUIPE: SidebarItem[] = [
   { href: "/equipe/custos", label: "Monitor de Custos", icon: <DollarSign className={ICON_CLASS} /> },
   { href: "/equipe/bugs", label: "Comunicação de Bugs", icon: <Bug className={ICON_CLASS} /> },
   { href: "/equipe/notificacoes", label: "Notificações", icon: <Bell className={ICON_CLASS} /> },
-  // Pedidos de demo da landing — visivel pra todos, mas o redirect na page.tsx
-  // garante que so admin/socio entram. SidebarItem nao tem campo de papel
-  // hoje; controle de acesso fica na propria pagina.
-  { href: "/equipe/demos", label: "Pedidos de Demo", icon: <Mail className={ICON_CLASS} /> },
   // Janela de seleção: escolhe QUAL cliente simular (cada um vê um portal
   // diferente) antes de entrar no /cliente em modo visualização.
   { href: "/equipe/ver-como", label: "Ver Como Cliente", icon: <Eye className={ICON_CLASS} /> },

@@ -1,0 +1,159 @@
+{
+  "tjsp_total": 1623,
+  "pos_marco": 5,
+  "pos_marco_nao_encontrado": 2,
+  "pos_marco_ok": 3,
+  "pos_marco_pendente": 0,
+  "sem_data": 963,
+  "candidatos_eproc_total": 48,
+  "por_mes_pos": [
+    [
+      "2026-03",
+      1
+    ],
+    [
+      "2026-04",
+      2
+    ],
+    [
+      "2026-05",
+      1
+    ],
+    [
+      "2026-06",
+      1
+    ]
+  ],
+  "top_foros_pos": [
+    [
+      "0003",
+      2
+    ],
+    [
+      "0100",
+      1
+    ],
+    [
+      "0090",
+      1
+    ],
+    [
+      "0576",
+      1
+    ]
+  ],
+  "top_forocompleto_pos": [
+    [
+      "5a.  Vara Cível Fórum Regional do Jabaquara (São Paulo - SP)",
+      1
+    ],
+    [
+      "1a.  Vara da Família e Sucessões Fórum Regional do Jabaquara (São Paulo - SP)",
+      1
+    ],
+    [
+      "9a.  Vara da Família e Sucessões Fórum João Mendes Júnior (São Paulo - SP)",
+      1
+    ],
+    [
+      "Vara de Execuções Fiscais Fórum de Execuções Fiscais Municipais de São Paulo (Sã",
+      1
+    ],
+    [
+      "7a.  Vara Cível Fórum de São José do Rio Preto (São José do Rio Preto - SP)",
+      1
+    ]
+  ],
+  "top_forocompleto_ne": [
+    [
+      "(sem nome)",
+      83
+    ],
+    [
+      "10a.  Vara Cível Fórum de Sorocaba (Sorocaba - SP)",
+      2
+    ],
+    [
+      "FORO CENTRAL CIVEL DA COMARCA DE São Paulo (São Paulo - SP)",
+      2
+    ],
+    [
+      "5a.  Vara Cível Fórum Regional do Jabaquara (São Paulo - SP)",
+      1
+    ],
+    [
+      "6a.  Fórum Regional de Santo Amaro - Cível (São Paulo - SP)",
+      1
+    ],
+    [
+      "6a.  Vara Cível Fórum de Sorocaba (Sorocaba - SP)",
+      1
+    ],
+    [
+      "32a.  Vara Cível Fórum João Mendes Júnior (São Paulo - SP)",
+      1
+    ],
+    [
+      "7a.  Vara Cível Fórum de São José do Rio Preto (São José do Rio Preto - SP)",
+      1
+    ]
+  ],
+  "ne_por_ano": [
+    [
+      2010,
+      1
+    ],
+    [
+      2012,
+      1
+    ],
+    [
+      2014,
+      1
+    ],
+    [
+      2015,
+      1
+    ],
+    [
+      2016,
+      1
+    ],
+    [
+      2017,
+      1
+    ],
+    [
+      2018,
+      3
+    ],
+    [
+      2020,
+      4
+    ],
+    [
+      2021,
+      11
+    ],
+    [
+      2022,
+      8
+    ],
+    [
+      2023,
+      15
+    ],
+    [
+      2024,
+      9
+    ],
+    [
+      2025,
+      26
+    ],
+    [
+      2026,
+      10
+    ]
+  ]
+}

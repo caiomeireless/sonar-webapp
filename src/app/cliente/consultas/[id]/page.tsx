@@ -28,7 +28,6 @@ import {
 } from "@/lib/consultas-pre";
 import { perfilLogado } from "@/lib/perfis-server";
 import { previewEuFromParam } from "@/lib/dev-auth";
-import { DEMO_CLIENTE_EMAIL } from "@/lib/mock-fixtures";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { formatBRL, formatData } from "@/lib/format";
 
@@ -39,10 +38,9 @@ type Props = {
   searchParams?: Promise<{ eu?: string | string[] }>;
 };
 
-// Mesma regra de mapeamento email→credorId da listagem.
-function emailParaCredorId(email: string): number | null {
-  const e = email.toLowerCase().trim();
-  if (e === "cliente.demo@battaglia.com.br") return 101;
+// DEMO REMOVIDA (08/08): sem mapeamento email→credorId no mock — cliente
+// real nunca abre consulta fictícia por deep link.
+function emailParaCredorId(_email: string): number | null {
   return null;
 }
 
@@ -69,17 +67,11 @@ export default async function ConsultaClienteDetalhePage({
     return <AcessoNegado />;
   }
 
-  // Visibilidade: cliente demo (showroom) ve qualquer consulta mock —
-  // preserva a narrativa. Cliente REAL so ve consulta do proprio credorId
-  // mapeado; se nao ha mapeamento OU nao bate, 403.
-  // Admin/socio em modo visualizacao ja e' redirigido pro DEMO_CLIENTE_EMAIL
-  // no layout, entao esta clausula os libera junto com a demo.
-  const ehDemo = eu.toLowerCase() === DEMO_CLIENTE_EMAIL;
-  if (!ehDemo) {
-    const credorIdEsperado = emailParaCredorId(eu);
-    if (credorIdEsperado === null || consulta.credorId !== credorIdEsperado) {
-      return <AcessoNegado />;
-    }
+  // Visibilidade: só consulta do próprio credorId mapeado; sem mapeamento
+  // (caso atual — mock da demo removido), 403 sempre.
+  const credorIdEsperado = emailParaCredorId(eu);
+  if (credorIdEsperado === null || consulta.credorId !== credorIdEsperado) {
+    return <AcessoNegado />;
   }
 
   const qsBase = sp.eu

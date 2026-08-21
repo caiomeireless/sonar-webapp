@@ -207,7 +207,9 @@ export function SonarParticleText({
       if (!offCtx) return;
 
       offCtx.fillStyle = "white";
-      offCtx.font = `500 ${fontSize}px Manrope, system-ui, sans-serif`;
+      // Fonte ORIGINAL do wordmark (pedido Caio 08/08): a serifada da marca,
+      // mesma dos títulos dourados — era a fonte do "Sonar" antes da animação.
+      offCtx.font = `600 ${fontSize}px "Cormorant Garamond", Georgia, serif`;
       offCtx.textAlign = "left";
       offCtx.textBaseline = "middle";
       offCtx.fillText(word, 4, height / 2);
@@ -370,10 +372,26 @@ export function SonarParticleText({
     canvas.addEventListener("mouseleave", onLeave);
 
     const detachHeroScroll = attachHeroScrollTracker();
-    renderTextParticles();
-    animate();
+    // Garante a webfont carregada ANTES de amostrar os pixels — sem isso o
+    // canvas desenha com a serifa de sistema e as partículas formam letras
+    // erradas. Se a Font Loading API falhar, renderiza mesmo assim.
+    let cancelado = false;
+    const iniciar = () => {
+      if (cancelado) return;
+      renderTextParticles();
+      animate();
+    };
+    if (typeof document !== "undefined" && document.fonts?.load) {
+      document.fonts
+        .load(`600 ${fontSize}px "Cormorant Garamond"`)
+        .then(iniciar)
+        .catch(iniciar);
+    } else {
+      iniciar();
+    }
 
     return () => {
+      cancelado = true;
       if (animationRef.current !== undefined) {
         cancelAnimationFrame(animationRef.current);
       }

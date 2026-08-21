@@ -1,11 +1,11 @@
 // Landing pública do Sonar. Começa limpa, focada em apresentar a plataforma
 // e empurrar pro /login. Sem dashboard ainda (próximo dia).
+import Image from "next/image";
 import Link from "next/link";
 import { AssistantBot } from "@/components/AssistantBot";
-import { DemoButton } from "@/app/_demo/DemoButton";
 import { HeaderParticles } from "@/components/HeaderParticles";
 import { Logo } from "@/components/Logo";
-import { LogoSvg, LogoSymbolStatic, STAIRCASE_PATTERN } from "@/components/LogoSvg";
+import { LogoSymbolStatic, STAIRCASE_PATTERN } from "@/components/LogoSvg";
 import { SonarScene } from "@/components/SonarScene";
 import { CursorGlow } from "@/components/ui/CursorGlow";
 import { ImageAutoSlider } from "@/components/ui/ImageAutoSlider";
@@ -46,31 +46,21 @@ export default function LandingPage() {
           }}
           aria-hidden="true"
         />
-        {/* LOGO no canto superior-esquerdo, fundo preto em vidro */}
+        {/* LOGO no canto superior-esquerdo — arte oficial nova (PNG enviado
+            pelo Caio 08/08), no tamanho natural pra não perder nitidez */}
         <div className="absolute bottom-0 left-0 top-0 z-20 flex items-center px-6">
-          <LogoSvg height={138} />
+          <Image
+            src="/logo-bp-novo.png"
+            alt="Battaglia & Pedrosa Advogados"
+            width={565}
+            height={94}
+            priority
+          />
         </div>
         {/* Cluster (robô + caption + botões) pinado no canto direito */}
         <div className="absolute right-6 top-1/2 z-20 flex -translate-y-1/2 flex-col items-end gap-2 sm:right-10">
           <div className="flex items-center gap-3">
             <AssistantBot />
-            <nav className="flex flex-col items-stretch gap-1.5">
-              <a
-                href="https://bpadvogados.com.br/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-lg bg-[var(--color-gold)] px-2.5 py-1.5 text-center text-[10px] font-semibold tracking-tight text-onyx transition hover:bg-[var(--color-gold-soft)]"
-              >
-                VOLTAR PARA SITE
-              </a>
-              <Link
-                href="/login"
-                className="rounded-lg border border-[var(--color-signal)] bg-onyx/40 px-2.5 py-1.5 text-center text-[10px] font-semibold tracking-tight text-[var(--color-signal)] backdrop-blur-sm transition hover:bg-[var(--color-signal)] hover:text-onyx"
-              >
-                ENTRAR
-              </Link>
-              <DemoButton variant="mini" />
-            </nav>
           </div>
           <p className="mt-4 whitespace-nowrap text-[8px] font-mono uppercase tracking-[0.22em] text-[var(--color-gold)]">
             Projeto conduzido por Caio Vicentino
@@ -131,109 +121,6 @@ export default function LandingPage() {
                 />
               </svg>
               )}
-              {/* 4 ícones dourados stacked, posicionados à ESQUERDA do texto */}
-              <svg
-                className="pointer-events-none absolute right-full top-1/2 mt-[70px] hidden -translate-y-1/2 opacity-65 md:block"
-                width="130"
-                height="345"
-                viewBox="0 0 130 345"
-                fill="none"
-                style={{ overflow: "visible" }}
-                aria-hidden="true"
-              >
-                <defs>
-                  <filter id="gold-shine" x="-50%" y="-50%" width="200%" height="200%">
-                    <feGaussianBlur stdDeviation="1.8" result="g" />
-                    <feMerge>
-                      <feMergeNode in="g" />
-                      <feMergeNode in="SourceGraphic" />
-                    </feMerge>
-                  </filter>
-                  <radialGradient id="gold-shine-grad" cx="35%" cy="30%" r="75%">
-                    <stop offset="0%" stopColor="#F0DDA8" />
-                    <stop offset="55%" stopColor="#C9A24A" />
-                    <stop offset="100%" stopColor="#5C4318" />
-                  </radialGradient>
-                </defs>
-
-                {/* IMÓVEIS — casa em line-art dourado */}
-                <g
-                  transform="translate(65 15)"
-                  stroke="#F0DDA8"
-                  strokeWidth="1.4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  fill="none"
-                >
-                  <rect x="7" y="-22" width="5" height="9" />
-                  <path d="M -19 -5 L 0 -22 L 19 -5 Z" />
-                  <rect x="-17" y="-5" width="34" height="22" />
-                  <rect x="-3" y="5" width="8" height="12" />
-                  <rect x="-13" y="0" width="7" height="7" />
-                  <line x1="-9.5" y1="0" x2="-9.5" y2="7" />
-                  <line x1="-13" y1="3.5" x2="-6" y2="3.5" />
-                  <rect x="-3" y="-15" width="6" height="6" />
-                </g>
-                <text x="65" y="53" textAnchor="middle" fontSize="7" fontWeight="600" fill="#FFFFFF" fontFamily="JetBrains Mono, monospace" letterSpacing="1">IMÓVEIS</text>
-
-                {/* VEÍCULOS — sedan em line-art dourado */}
-                <g
-                  transform="translate(65 93)"
-                  stroke="#F0DDA8"
-                  strokeWidth="1.4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  fill="none"
-                >
-                  <path d="M -20 5 L -18 -3 L -12 -4 L -8 -12 L 8 -12 L 12 -4 L 18 -3 L 20 5 L 20 10 L -20 10 Z" />
-                  <path d="M -10 -4 L -7 -11 L 7 -11 L 10 -4" />
-                  <line x1="0" y1="-11" x2="0" y2="-4" />
-                  <circle cx="-11" cy="11" r="4.5" />
-                  <circle cx="11" cy="11" r="4.5" />
-                </g>
-                <text x="65" y="131" textAnchor="middle" fontSize="7" fontWeight="600" fill="#FFFFFF" fontFamily="JetBrains Mono, monospace" letterSpacing="1">VEÍCULOS</text>
-
-                {/* EMPRESAS — torre em line-art dourado */}
-                <g
-                  transform="translate(65 189)"
-                  stroke="#F0DDA8"
-                  strokeWidth="1.4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  fill="none"
-                >
-                  <line x1="0" y1="-22" x2="0" y2="-30" />
-                  <rect x="-16" y="-23" width="32" height="3" />
-                  <rect x="-14" y="-20" width="28" height="35" />
-                  {[-8, -2, 4].map((x) =>
-                    [-16, -10, -4, 2].map((y) => (
-                      <rect key={`gw-${x}-${y}`} x={x} y={y} width="4" height="4" strokeWidth="0.8" />
-                    )),
-                  )}
-                  <rect x="-3" y="8" width="6" height="7" />
-                </g>
-                <text x="65" y="223" textAnchor="middle" fontSize="7" fontWeight="600" fill="#FFFFFF" fontFamily="JetBrains Mono, monospace" letterSpacing="1">EMPRESAS</text>
-
-                {/* CRÉDITOS PROCESSUAIS — documento em line-art dourado */}
-                <g
-                  transform="translate(65 269)"
-                  stroke="#F0DDA8"
-                  strokeWidth="1.4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  fill="none"
-                >
-                  <path d="M -14 -18 L 8 -18 L 16 -10 L 16 18 L -14 18 Z" />
-                  <path d="M 8 -18 L 8 -10 L 16 -10" />
-                  <line x1="-10" y1="-4" x2="6" y2="-4" />
-                  <line x1="-10" y1="0" x2="10" y2="0" />
-                  <line x1="-10" y1="4" x2="8" y2="4" />
-                  <circle cx="0" cy="11" r="4" />
-                  <text x="0" y="13.5" textAnchor="middle" fontSize="6.5" fontWeight="700" fill="#F0DDA8" stroke="none">$</text>
-                </g>
-                <text x="65" y="310" textAnchor="middle" fontSize="6.5" fontWeight="600" fill="#FFFFFF" fontFamily="JetBrains Mono, monospace" letterSpacing="0.8">CRÉDITOS</text>
-                <text x="65" y="319" textAnchor="middle" fontSize="6.5" fontWeight="600" fill="#FFFFFF" fontFamily="JetBrains Mono, monospace" letterSpacing="0.8">PROCESSUAIS</text>
-              </svg>
               {/* Emit dourado + ondas verde signal (arcos SMIL suaves, SEM partículas) */}
               <svg
                 className="pointer-events-none absolute left-full top-1/2 ml-[-36px] mt-[93px] hidden -translate-y-1/2 md:block"
@@ -487,14 +374,7 @@ export default function LandingPage() {
                 >
                   Acessar plataforma →
                 </Link>
-                <DemoButton variant="hero" />
               </div>
-              <Link
-                href="#sobre"
-                className="rounded-lg bg-white/5 px-8 py-4 text-base font-medium text-ivory shadow-[0_4px_24px_rgba(0,0,0,0.25)] ring-1 ring-[var(--color-ivory-22)] backdrop-blur-md transition hover:bg-white/10 hover:ring-[var(--color-ivory-66)]"
-              >
-                Como funciona
-              </Link>
             </div>
           </div>
         </div>
@@ -502,88 +382,6 @@ export default function LandingPage() {
 
       <Divider reversed />
 
-      {/* O que faz */}
-      <section id="sobre" className="relative overflow-hidden">
-        <HeaderParticles />
-        <div className="pointer-events-none relative z-10 mx-auto max-w-[1400px] px-6 py-24 sm:px-10">
-          {/* Painel de vidro envolvendo o título + intro */}
-          <div className="reveal max-w-[840px] rounded-2xl border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.7)] p-8 backdrop-blur-md sm:p-10">
-            <div className="flex items-center gap-3">
-              {/* Radar miniatura girando animado */}
-              <svg
-                width="34"
-                height="34"
-                viewBox="0 0 40 40"
-                fill="none"
-                aria-hidden="true"
-                className="flex-none"
-              >
-                <defs>
-                  <linearGradient id="radar-sweep" x1="0" y1="0" x2="1" y2="-1">
-                    <stop offset="0%" stopColor="#3CFF8A" stopOpacity="0.95" />
-                    <stop offset="100%" stopColor="#3CFF8A" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                {/* Anéis concêntricos */}
-                <circle cx="20" cy="20" r="16" fill="none" stroke="#3CFF8A" strokeWidth="0.7" strokeOpacity="0.55" />
-                <circle cx="20" cy="20" r="11" fill="none" stroke="#3CFF8A" strokeWidth="0.6" strokeOpacity="0.45" />
-                <circle cx="20" cy="20" r="6" fill="none" stroke="#3CFF8A" strokeWidth="0.5" strokeOpacity="0.35" />
-                {/* Crosshair */}
-                <line x1="20" y1="4" x2="20" y2="36" stroke="#3CFF8A" strokeWidth="0.35" strokeOpacity="0.3" />
-                <line x1="4" y1="20" x2="36" y2="20" stroke="#3CFF8A" strokeWidth="0.35" strokeOpacity="0.3" />
-                {/* Targets fixos */}
-                <circle cx="13" cy="11" r="0.9" fill="#3CFF8A" />
-                <circle cx="28" cy="15" r="0.7" fill="#3CFF8A" />
-                <circle cx="24" cy="28" r="0.7" fill="#3CFF8A" />
-                {/* Sweep girando */}
-                <g transform="translate(20 20)">
-                  <path d="M 0 0 L 16 0 A 16 16 0 0 0 11.3 -11.3 Z" fill="url(#radar-sweep)">
-                    <animateTransform
-                      attributeName="transform"
-                      type="rotate"
-                      from="0"
-                      to="360"
-                      dur="3s"
-                      repeatCount="indefinite"
-                    />
-                  </path>
-                </g>
-                {/* Centro */}
-                <circle cx="20" cy="20" r="1.5" fill="#3CFF8A" />
-              </svg>
-              <span className="eyebrow !text-base !text-[var(--color-signal)]">O que o Sonar faz?</span>
-            </div>
-            <h2 className="mt-4 max-w-[800px] font-serif text-[clamp(28px,4vw,44px)] font-medium leading-[1.15] tracking-tight text-ivory">
-              Um devedor entra. Um <em className="text-[var(--color-gold)]">dossiê de bens</em> sai.
-            </h2>
-            <p className="mt-6 max-w-[680px] text-justify text-[var(--color-ivory-88)]">
-              Integrado ao sistema interno do escritório, o Sonar lê os processos em que o cliente é
-              credor, identifica cada parte contrária e reúne, num só lugar e com
-              origem datada, os indícios de bens e créditos de cada devedor. O que
-              antes eram horas de garimpo em vários tipos de sistemas diferentes,
-              agora se transforma na rápida geração de uma ficha pronta com todos
-              os bens do devedor que serão utilizados para fundamentar os pedidos
-              judiciais de penhora.{" "}
-              <span className="text-[var(--color-ivory-88)] underline decoration-[var(--color-signal)] decoration-2 underline-offset-4">
-                Esse é um diferencial que só os clientes do{" "}
-                <span className="font-serif text-2xl font-medium tracking-tight text-[var(--color-gold)]">
-                  Battaglia <span className="italic text-white">&amp;</span> Pedrosa
-                </span>{" "}
-                possuem.
-              </span>
-            </p>
-          </div>
-
-          <div className="stagger reveal mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <Card titulo="Veículos" descricao="Encontre carros, motos, caminhões, barcos e outros." fonte="MAIS RÁPIDO QUE PEDIR RENAJUD (JUDICIAL)" />
-            <Card titulo="Imóveis Urbanos e Rurais" descricao="Em poucos segundos, encontre fazendas via SICAR, enquanto acha imóveis urbanos via ARISP." fonte="SICAR · ARISP" />
-            <Card titulo="Participações societárias" descricao="Empresas em que o devedor é sócio: quotas penhoráveis." fonte="QSA · Receita · JUCESP" />
-            <Card titulo="Créditos Processuais" descricao="Ações em que o devedor é credor: penhora no rosto dos autos." fonte={<>API<span className="normal-case">s</span> de Processo - DATAJUD</>} />
-            <Card titulo="Endereços e contatos" descricao="Endereços, telefones e e-mails atualizados para citação e penhora." fonte="APIs de localização" />
-            <Card titulo="Vínculos familiares" descricao="Cônjuge e parentes de 1º grau: pista para ocultação patrimonial." fonte="grafo de relacionados" />
-          </div>
-        </div>
-      </section>
 
       <Divider />
 
@@ -686,7 +484,6 @@ export default function LandingPage() {
             >
               Acessar plataforma →
             </Link>
-            <DemoButton variant="cta" />
           </div>
         </div>
       </section>

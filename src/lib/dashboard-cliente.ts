@@ -11,12 +11,10 @@ import {
   type DashboardPlataforma,
 } from "@/lib/dashboard-plataforma";
 
-const DEMO_CLIENTE_EMAIL = "cliente.demo@battaglia.com.br";
-
-// Resolve quais credor_id(s) o cliente loga deve enxergar.
+// Resolve quais credor_id(s) o cliente logado deve enxergar.
 // Cliente real: linhas em `credores` com email_contato = emailCliente.
-// Cliente demo: empresta os credores que tem casos (mesmo fallback do
-// listarCasosDoCliente — pra demo nunca aparecer vazia).
+// (Fallback do cliente demo REMOVIDO em 08/08 — misturava dados reais
+// de outros credores na visão demo.)
 async function resolverCredorIdsDoCliente(
   emailCliente: string,
 ): Promise<number[]> {
@@ -28,21 +26,7 @@ async function resolverCredorIdsDoCliente(
     .select("id")
     .eq("email_contato", email);
 
-  let credorIds = (credores ?? []).map((c) => c.id as number);
-
-  if (email === DEMO_CLIENTE_EMAIL) {
-    const { data: credoresComCasos } = await sb
-      .from("casos")
-      .select("credor_id")
-      .order("credor_id", { ascending: true })
-      .limit(50);
-    const idsComCasos = Array.from(
-      new Set((credoresComCasos ?? []).map((c) => c.credor_id as number)),
-    );
-    if (idsComCasos.length > 0) credorIds = idsComCasos;
-  }
-
-  return credorIds;
+  return (credores ?? []).map((c) => c.id as number);
 }
 
 export interface DashboardCliente extends DashboardPlataforma {

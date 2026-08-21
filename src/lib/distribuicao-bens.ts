@@ -69,33 +69,9 @@ function localizacaoReal(
   return null;
 }
 
-const CIDADES_MOCK_SP: { cidade: string; uf: string }[] = [
-  { cidade: "São Paulo", uf: "SP" },
-  { cidade: "São Paulo", uf: "SP" },
-  { cidade: "São Paulo", uf: "SP" },
-  { cidade: "Sorocaba", uf: "SP" },
-  { cidade: "Campinas", uf: "SP" },
-  { cidade: "Santos", uf: "SP" },
-  { cidade: "Ribeirão Preto", uf: "SP" },
-  { cidade: "São José dos Campos", uf: "SP" },
-];
-
-const CIDADES_MOCK_FORA: { cidade: string; uf: string }[] = [
-  { cidade: "Rio de Janeiro", uf: "RJ" },
-  { cidade: "Belo Horizonte", uf: "MG" },
-  { cidade: "Curitiba", uf: "PR" },
-  { cidade: "Goiânia", uf: "GO" },
-];
-
-export function rotularBemMock(bemId: number): { cidade: string; uf: string } {
-  // Hash determinista: 80% cai em SP (lista SP tem repetição de São Paulo),
-  // 20% sai pra outras UFs.
-  const h = Math.abs(bemId * 2654435761) >>> 0; // Knuth multiplicative hash
-  if (h % 5 === 0) {
-    return CIDADES_MOCK_FORA[h % CIDADES_MOCK_FORA.length];
-  }
-  return CIDADES_MOCK_SP[h % CIDADES_MOCK_SP.length];
-}
+// Hash-mock de cidades REMOVIDO (08/08): bem sem localização real caía numa
+// cidade FICTÍCIA determinística — mapa exibia dado falso como se fosse
+// real. Agora bem sem cidade/uf entra no balde "sem UF informada".
 
 export function calcularDistribuicaoGeografica(
   bens: BemParaLocalizacao[],
@@ -109,16 +85,11 @@ export function calcularDistribuicaoGeografica(
   };
   const acc = new Map<string, Bucket>();
   for (const b of bens) {
-    // Localizacao REAL primeiro (colunas ou detalhes); hash-mock apenas
-    // como ultimo recurso pra nao deixar o mapa vazio na fase demo.
+    // Só localização REAL (colunas ou detalhes). Sem ela, o bem entra no
+    // balde uf="" — a UI reporta como "sem UF informada", nunca inventa.
     const real = localizacaoReal(b);
-    let cidade = real?.cidade ?? "";
-    let uf = real?.uf ?? "";
-    if (!cidade || !uf) {
-      const mock = rotularBemMock(b.id);
-      cidade = mock.cidade;
-      uf = mock.uf;
-    }
+    const cidade = real?.cidade ?? "";
+    const uf = real?.uf ?? "";
     const key = `${uf}|${cidade}`;
     let cur = acc.get(key);
     if (!cur) {

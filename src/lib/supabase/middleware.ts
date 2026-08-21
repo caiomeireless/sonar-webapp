@@ -47,12 +47,11 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
 
-  // Rotas publicas (landing, /login, /auth/*, demos do mapa 3D): nao redireciona.
+  // Rotas publicas (landing, /login, /auth/*): nao redireciona.
   const isLandingOuAuth =
     path === "/" ||
     path.startsWith("/login") ||
     path.startsWith("/auth") ||
-    path.startsWith("/api/demo") ||
     path.startsWith("/mapa-3d-demo");
 
   // Dev shortcut: em desenvolvimento, ?eu=<email> bypassa auth (pra
@@ -62,19 +61,11 @@ export async function updateSession(request: NextRequest) {
     process.env.NODE_ENV !== "production" &&
     request.nextUrl.searchParams.has("eu");
 
-  // Cookie de sessao demo (`sonar.demo`): liberado para /equipe se foi
-  // emitido pra equipe, /cliente se foi emitido pra cliente. Outros
-  // caminhos seguem fluxo normal de auth.
-  const demoCookie = request.cookies.get("sonar.demo")?.value ?? "";
-  const tipoDemo = demoCookie.split(":")[0]; // "equipe" | "cliente"
-  const isRotaEquipe = path === "/equipe" || path.startsWith("/equipe/");
-  const isRotaCliente = path === "/cliente" || path.startsWith("/cliente/");
-  const temDemoValidoParaRota =
-    (tipoDemo === "equipe" && isRotaEquipe) ||
-    (tipoDemo === "cliente" && isRotaCliente);
+  // DEMO REMOVIDA (08/08): o cookie `sonar.demo` nao libera mais rota
+  // nenhuma — auth real obrigatoria em /equipe e /cliente.
 
-  // Sem login + rota privada -> /login (a menos que tenha demo valido)
-  if (!user && !isLandingOuAuth && !hasDevEuParam && !temDemoValidoParaRota) {
+  // Sem login + rota privada -> /login
+  if (!user && !isLandingOuAuth && !hasDevEuParam) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);

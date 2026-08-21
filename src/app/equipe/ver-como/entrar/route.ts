@@ -9,7 +9,6 @@ import { NextResponse, type NextRequest } from "next/server";
 import { perfilLogadoReal } from "@/lib/perfis-server";
 import { ehAdmin, ehSocio } from "@/lib/perfis";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { DEMO_CLIENTE_EMAIL } from "@/lib/mock-fixtures";
 
 export const dynamic = "force-dynamic";
 
@@ -29,8 +28,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(new URL("/equipe/ver-como", req.url));
   }
 
-  // Só e-mails que são de fato clientes (ou o demo) viram preview.
-  let valido = eu === DEMO_CLIENTE_EMAIL;
+  // Só e-mails que são de fato clientes cadastrados viram preview.
+  let valido = false;
   if (!valido) {
     try {
       const sb = createAdminClient();

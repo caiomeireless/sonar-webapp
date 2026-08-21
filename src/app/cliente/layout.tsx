@@ -8,13 +8,11 @@ import { redirect } from "next/navigation";
 import { Eye } from "lucide-react";
 
 import { AetherBackground } from "@/components/AetherBackground";
-import { BannerModoDemo } from "@/components/BannerModoDemo";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
 import { NAV_CLIENTE } from "@/lib/nav-cliente";
 import { perfilLogado } from "@/lib/perfis-server";
 import { perfilAtual } from "@/lib/perfis";
-import { DEMO_CLIENTE_EMAIL } from "@/lib/mock-fixtures";
 import {
   contarNaoLidas,
   listarNotificacoesCliente,
@@ -40,7 +38,8 @@ export default async function ClienteLayout({
   //   preview (layouts NUNCA recebem searchParams no App Router, então o
   //   ?eu= da URL não chega aqui — o cookie é gravado em
   //   /equipe/ver-como/entrar e é a fonte da verdade do layout);
-  // - admin/sócio sem preview escolhido -> cliente demo;
+  // - admin/sócio SEM preview escolhido -> manda pra tela de seleção
+  //   (a demo que servia de fallback foi removida em 08/08);
   // - senão, e-mail da própria sessão (cliente real).
   let previewCookie: string | null = null;
   if (ehVisualizacao) {
@@ -51,8 +50,11 @@ export default async function ClienteLayout({
       previewCookie = null;
     }
   }
+  if (ehVisualizacao && !previewCookie) {
+    redirect("/equipe/ver-como");
+  }
   const emailEfetivo = ehVisualizacao
-    ? (previewCookie ?? DEMO_CLIENTE_EMAIL)
+    ? previewCookie
     : (perfilSessao?.email ?? null);
 
   // Em modo visualização, carrega o perfil do cliente que está sendo
@@ -101,7 +103,6 @@ export default async function ClienteLayout({
 
   return (
     <div className="flex min-h-svh flex-col bg-onyx text-ivory">
-      <BannerModoDemo />
       <div className="flex min-h-svh">
       <Sidebar
         items={itemsComEu}

@@ -6,10 +6,6 @@ export const ALLOWED_DOMAIN = "bpadvogados.com.br";
 // de usuarios e permissoes). Nem outros admins acessam.
 export const DONO_EMAIL = "caio@bpadvogados.com.br";
 
-// Email do cliente DEMO (seed). Sempre liberado — usado pra screencast e
-// onboarding sem precisar cadastrar perfil/credor antes.
-export const DEMO_CLIENTE_EMAIL = "cliente.demo@battaglia.com.br";
-
 import { createAdminClient } from "@/lib/supabase/admin";
 
 // Autoriza um email a acessar a plataforma.
@@ -27,7 +23,6 @@ export async function isEmailAutorizado(email: string | null | undefined): Promi
   const e = (email ?? "").toLowerCase().trim();
   if (!e) return false;
   if (e.endsWith("@" + ALLOWED_DOMAIN)) return true;
-  if (e === DEMO_CLIENTE_EMAIL) return true;
   try {
     const sb = createAdminClient();
     // Camada 1: perfis com papel=cliente (cadastro explicito pelo admin)
