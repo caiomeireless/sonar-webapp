@@ -1,6 +1,6 @@
 // Central de Buscas — hub que agrupa as três frentes de localização:
 // Banco de Dossiês (ex-Banco de Devedores), Buscas Pré-Processuais
-// (ex-Consultas Pré-Processuais) e Buscas Processuais (ex-Fila Themis).
+// (ex-Consultas Pré-Processuais) e Rotas das Execuções (ex-Fila Themis).
 // As rotas antigas continuam valendo — aqui é só a porta de entrada.
 import Link from "next/link";
 import { ArrowRight, FileSearch, Search, Users } from "lucide-react";
@@ -24,9 +24,9 @@ const CARDS = [
   },
   {
     href: "/equipe/themis",
-    titulo: "Buscas Processuais",
+    titulo: "Rotas das Execuções",
     descricao:
-      "Execuções vindas do Themis aguardando rastreamento patrimonial, com busca por processo e pasta.",
+      "A trajetória de cada execução: o que já foi feito, em que fase está e o que falta pra satisfazer o crédito.",
     Icon: FileSearch,
   },
 ];

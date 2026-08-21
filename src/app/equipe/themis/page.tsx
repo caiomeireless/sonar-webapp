@@ -92,10 +92,10 @@ export default async function ThemisPage({ searchParams }: Props) {
       {/* Cabeçalho */}
       <header className="title-shield relative mb-6 text-center">
         <h1 className="font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
-          Buscas Processuais
+          Rotas das Execuções
         </h1>
         <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
-          Themis · Fila do Escritório
+          Trajetória de Cada Processo · Via Themis
         </p>
         <p className="mx-auto mt-3 max-w-[680px] font-mono text-[13px] text-[var(--color-signal)]">
           {totalNaPagina === 0
