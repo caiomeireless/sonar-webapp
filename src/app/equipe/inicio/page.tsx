@@ -27,7 +27,6 @@ import { obterDadosConsole } from "@/lib/console-inicio";
 import { listarNotificacoesEquipe } from "@/lib/notificacoes";
 import { CATEGORIAS_RADAR, type CategoriaRadarChave } from "@/lib/radar";
 import { formatBRL, formatData } from "@/lib/format";
-import { HeaderParticles } from "@/components/HeaderParticles";
 import { BordaLiquidaMetal } from "@/components/ui/BordaLiquidaMetal";
 import { SimboloSonar } from "@/components/ui/SimboloSonar";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
@@ -163,10 +162,8 @@ export default async function InicioPage() {
 
   return (
     <main className="relative overflow-x-hidden lg:h-[calc(100svh-159px)] lg:overflow-hidden">
-      {/* Fundo faixa 3 turbinado: mais pontos + reativo ao ponteiro */}
-      <div aria-hidden="true" className="absolute inset-0 bg-black">
-        <HeaderParticles densidade={300} detectarNaJanela />
-      </div>
+      {/* Fundo: preto puro (partículas removidas a pedido do Caio, 21/08) */}
+      <div aria-hidden="true" className="absolute inset-0 bg-black" />
 
       <div className="relative z-10 flex h-full flex-col gap-4 p-4 lg:grid lg:grid-cols-[240px_minmax(0,1fr)_360px]">
         {/* ================= ESQUERDA: painel FINO dos ícones + avisos ===== */}
