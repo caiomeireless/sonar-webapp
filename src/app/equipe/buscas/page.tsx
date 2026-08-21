@@ -1,9 +1,10 @@
-// Central de Buscas — hub que agrupa as três frentes de localização:
-// Banco de Dossiês (ex-Banco de Devedores), Buscas Pré-Processuais
-// (ex-Consultas Pré-Processuais) e Rotas das Execuções (ex-Fila Themis).
+// Central de Buscas — hub que agrupa as frentes de localização:
+// Banco de Dossiês (ex-Banco de Devedores) e Buscas Pré-Processuais
+// (ex-Consultas Pré-Processuais). Rotas das Execuções foi promovida a
+// aba principal do nav (21/08) e saiu daqui.
 // As rotas antigas continuam valendo — aqui é só a porta de entrada.
 import Link from "next/link";
-import { ArrowRight, FileSearch, Search, Users } from "lucide-react";
+import { ArrowRight, Search, Users } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -22,13 +23,6 @@ const CARDS = [
       "Antes de processar, descubra se o devedor é solvente — análises de viabilidade preventivas.",
     Icon: Search,
   },
-  {
-    href: "/equipe/themis",
-    titulo: "Rotas das Execuções",
-    descricao:
-      "A trajetória de cada execução: o que já foi feito, em que fase está e o que falta pra satisfazer o crédito.",
-    Icon: FileSearch,
-  },
 ];
 
 export default function CentralDeBuscasPage() {
@@ -43,7 +37,7 @@ export default function CentralDeBuscasPage() {
         </p>
       </header>
 
-      <section className="grid gap-5 md:grid-cols-3">
+      <section className="mx-auto grid max-w-[840px] gap-5 md:grid-cols-2">
         {CARDS.map(({ href, titulo, descricao, Icon }) => (
           <Link
             key={href}

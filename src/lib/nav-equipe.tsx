@@ -4,7 +4,7 @@
 // Os ícones são renderizados como JSX (ReactNode) — RSC não aceita
 // passar funções de Server -> Client.
 
-import { BarChart3, Briefcase, Home, Search } from "lucide-react";
+import { BarChart3, Briefcase, Home, Route, Search } from "lucide-react";
 
 import type { SidebarItem } from "@/components/Sidebar";
 
@@ -23,9 +23,10 @@ export const NAV_EQUIPE: SidebarItem[] = [
       "/equipe/buscas",
       "/equipe/devedores",
       "/equipe/consultas",
-      "/equipe/themis",
     ],
   },
+  // Promovida de card da Central de Buscas pra aba principal (Caio, 21/08).
+  { href: "/equipe/themis", label: "Rotas das Execuções", icon: <Route className={ICON_CLASS} /> },
   { href: "/equipe", label: "Estatísticas da Plataforma", icon: <BarChart3 className={ICON_CLASS} /> },
   {
     href: "/equipe/administrativa",
