@@ -60,6 +60,7 @@ export default function RadialHub({
   fotoUrl,
   size = 460,
   compacto = false,
+  paleta = "gold",
   onCentroClick,
 }: {
   itens: ItemRadial[];
@@ -67,6 +68,8 @@ export default function RadialHub({
   fotoUrl?: string | null;
   size?: number;
   compacto?: boolean;
+  /** "gold" (padrão da plataforma) ou "verde" neon (Console do Início). */
+  paleta?: "gold" | "verde";
   onCentroClick?: () => void;
 }) {
   const router = useRouter();
@@ -97,6 +100,30 @@ export default function RadialHub({
   const fonte = Math.max(8, Math.round(size * 0.0242));
   const clipId = `radial-centro-${compacto ? "c" : "g"}`;
 
+  // Paleta da roda — gold (padrão) ou verde neon (Console do Início).
+  const P =
+    paleta === "verde"
+      ? {
+          halo: "rgba(60,255,138,0.05)",
+          fatiaOn: "var(--color-signal)",
+          fatiaOff: "rgba(60,255,138,0.30)",
+          bandaOn: "rgba(60,255,138,0.16)",
+          bordaOn: "rgba(60,255,138,0.55)",
+          destaque: "var(--color-signal)",
+          aroCentro: "rgba(60,255,138,0.40)",
+          centroBg: "rgba(60,255,138,0.12)",
+        }
+      : {
+          halo: "rgba(201,162,74,0.05)",
+          fatiaOn: "var(--color-gold)",
+          fatiaOff: "rgba(201,162,74,0.30)",
+          bandaOn: "rgba(201,162,74,0.16)",
+          bordaOn: "rgba(201,162,74,0.55)",
+          destaque: "var(--color-gold)",
+          aroCentro: "rgba(201,162,74,0.40)",
+          centroBg: "rgba(201,162,74,0.12)",
+        };
+
   return (
     <div className="relative select-none" style={{ width: size, height: size }}>
       <svg
@@ -109,8 +136,8 @@ export default function RadialHub({
           </clipPath>
         </defs>
 
-        {/* halo dourado atrás da roda */}
-        <circle cx={0} cy={0} r={raio * 0.9} fill="rgba(201,162,74,0.05)" />
+        {/* halo atrás da roda */}
+        <circle cx={0} cy={0} r={raio * 0.9} fill={P.halo} />
 
         {itens.map((item, i) => {
           const Icon = item.icon;
@@ -129,14 +156,14 @@ export default function RadialHub({
               {/* anel externo do gomo */}
               <path
                 d={slicePath(i, itens.length, anelExt, anelInt)}
-                fill={on ? "var(--color-gold)" : "rgba(201,162,74,0.30)"}
+                fill={on ? P.fatiaOn : P.fatiaOff}
                 style={{ transition: "fill .15s" }}
               />
               {/* banda principal */}
               <path
                 d={slicePath(i, itens.length, bandaExt, bandaInt)}
-                fill={on ? "rgba(201,162,74,0.16)" : "rgba(8,10,9,0.92)"}
-                stroke={on ? "rgba(201,162,74,0.55)" : "var(--color-line)"}
+                fill={on ? P.bandaOn : "rgba(8,10,9,0.92)"}
+                stroke={on ? P.bordaOn : "var(--color-line)"}
                 strokeWidth={1}
                 style={{ transition: "fill .15s, stroke .15s" }}
               />
@@ -152,14 +179,14 @@ export default function RadialHub({
                     style={{
                       width: icone,
                       height: icone,
-                      color: on ? "var(--color-gold)" : "var(--color-ivory-88)",
+                      color: on ? P.destaque : "var(--color-ivory-88)",
                     }}
                   />
                   <span
                     className="px-0.5 font-medium leading-tight"
                     style={{
                       fontSize: fonte,
-                      color: on ? "var(--color-gold)" : "var(--color-ivory-66)",
+                      color: on ? P.destaque : "var(--color-ivory-66)",
                     }}
                   >
                     {compacto ? (item.curto ?? item.label) : item.label}
@@ -181,7 +208,7 @@ export default function RadialHub({
             cy={0}
             r={raioCentro + 5}
             fill="var(--color-surface-2)"
-            stroke="rgba(201,162,74,0.40)"
+            stroke={P.aroCentro}
             strokeWidth={2}
           />
           {foto ? (
@@ -196,14 +223,14 @@ export default function RadialHub({
             />
           ) : (
             <>
-              <circle cx={0} cy={0} r={raioCentro} fill="rgba(201,162,74,0.12)" />
+              <circle cx={0} cy={0} r={raioCentro} fill={P.centroBg} />
               <text
                 x={0}
                 y={0}
                 textAnchor="middle"
                 dominantBaseline="central"
                 className="font-serif"
-                fill="var(--color-gold)"
+                fill={P.destaque}
                 style={{ fontSize: raioCentro * 0.6, fontWeight: 600 }}
               >
                 {iniciais(nome)}

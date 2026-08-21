@@ -12,10 +12,12 @@ export default function RadialMenor({
   nome,
   fotoUrl,
   size = 300,
+  paleta = "gold",
 }: {
   nome: string;
   fotoUrl: string | null;
   size?: number;
+  paleta?: "gold" | "verde";
 }) {
   return (
     <RadialHub
@@ -23,6 +25,7 @@ export default function RadialMenor({
       nome={nome}
       fotoUrl={fotoUrl}
       size={size}
+      paleta={paleta}
     />
   );
 }
