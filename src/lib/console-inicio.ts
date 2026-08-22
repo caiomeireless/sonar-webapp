@@ -16,6 +16,17 @@ export type LocalizacaoRecente = {
   devedorNome: string | null;
 };
 
+export type SincronizacaoConsole = {
+  /** Última sync do Themis (sync_themis_log). */
+  themisEm: string | null;
+  themisOk: boolean | null;
+  /** Última captura dos robôs por fonte. */
+  esajUltima: string | null;
+  eprocUltima: string | null;
+  /** Acervo total de andamentos capturados. */
+  totalAndamentos: number;
+};
+
 export type DadosConsole = {
   patrimonioBrl: number;
   totalBens: number;
@@ -26,9 +37,17 @@ export type DadosConsole = {
   quitados: number;
   /** Casos com acordo/pagamento detectado nos andamentos dos robôs. */
   casosComAcordo: number;
+  /** Gasto do mês com APIs pagas (registro próprio — a Assertiva NÃO expõe
+      o consumo da conta via API; conferido nos swaggers em 21/08). */
+  gastoMesBrl: number;
+  tetoMesBrl: number;
+  sincronizacao: SincronizacaoConsole;
   ultimasLocalizacoes: LocalizacaoRecente[];
   movimentacoes: ItemRadar[];
 };
+
+/** Cota mensal consumível do contrato Assertiva (Q-19312-1). */
+export const TETO_ASSERTIVA_BRL = 600;
 
 const VAZIO: DadosConsole = {
   patrimonioBrl: 0,
@@ -38,6 +57,15 @@ const VAZIO: DadosConsole = {
   capturas7d: 0,
   quitados: 0,
   casosComAcordo: 0,
+  gastoMesBrl: 0,
+  tetoMesBrl: TETO_ASSERTIVA_BRL,
+  sincronizacao: {
+    themisEm: null,
+    themisOk: null,
+    esajUltima: null,
+    eprocUltima: null,
+    totalAndamentos: 0,
+  },
   ultimasLocalizacoes: [],
   movimentacoes: [],
 };
@@ -57,8 +85,33 @@ export async function obterDadosConsole(): Promise<DadosConsole> {
   try {
     const sb = createAdminClient();
     const seteDias = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
+    const inicioMes = new Date();
+    inicioMes.setDate(1);
+    inicioMes.setHours(0, 0, 0, 0);
 
-    const [bens, casos, quitados, devedores, capturas, acordos, recentes, radar] =
+    const ultimaCaptura = (fonte: string) =>
+      sb
+        .from("andamentos")
+        .select("capturado_em")
+        .eq("fonte", fonte)
+        .order("capturado_em", { ascending: false })
+        .limit(1);
+
+    const [
+      bens,
+      casos,
+      quitados,
+      devedores,
+      capturas,
+      acordos,
+      recentes,
+      radar,
+      custosMes,
+      syncThemis,
+      esajUlt,
+      eprocUlt,
+      totalAnd,
+    ] =
       await Promise.all([
         sb
           .from("bens_encontrados")
@@ -98,6 +151,19 @@ export async function obterDadosConsole(): Promise<DadosConsole> {
           .order("fonte_consultada_em", { ascending: false, nullsFirst: false })
           .limit(6),
         listarRadar({ pagina: 1 }),
+        sb
+          .from("custos")
+          .select("custo")
+          .gte("criado_em", inicioMes.toISOString())
+          .limit(1000),
+        sb
+          .from("sync_themis_log")
+          .select("iniciado_em, ok")
+          .order("id", { ascending: false })
+          .limit(1),
+        ultimaCaptura("esaj-tjsp"),
+        ultimaCaptura("eproc-tjsp"),
+        sb.from("andamentos").select("id", { count: "exact", head: true }),
       ]);
 
     const patrimonioBrl = (bens.data ?? []).reduce(
@@ -128,6 +194,12 @@ export async function obterDadosConsole(): Promise<DadosConsole> {
       },
     );
 
+    const gastoMesBrl = (custosMes.data ?? []).reduce(
+      (acc, c) => acc + (Number(c.custo) || 0),
+      0,
+    );
+    const themis = (syncThemis.data ?? [])[0] ?? null;
+
     return {
       patrimonioBrl,
       totalBens: (bens.data ?? []).length,
@@ -136,6 +208,17 @@ export async function obterDadosConsole(): Promise<DadosConsole> {
       capturas7d: capturas.count ?? 0,
       quitados: quitados.count ?? 0,
       casosComAcordo,
+      gastoMesBrl,
+      tetoMesBrl: TETO_ASSERTIVA_BRL,
+      sincronizacao: {
+        themisEm: (themis?.iniciado_em as string | null) ?? null,
+        themisOk: themis ? Boolean(themis.ok) : null,
+        esajUltima:
+          ((esajUlt.data ?? [])[0]?.capturado_em as string | null) ?? null,
+        eprocUltima:
+          ((eprocUlt.data ?? [])[0]?.capturado_em as string | null) ?? null,
+        totalAndamentos: totalAnd.count ?? 0,
+      },
       ultimasLocalizacoes,
       movimentacoes: radar.erro ? [] : radar.itens.slice(0, 4),
     };

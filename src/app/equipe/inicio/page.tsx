@@ -113,6 +113,73 @@ function PainelVidro({
   );
 }
 
+// Rosca neon do consumo de APIs vs a cota Assertiva (R$600). A Assertiva
+// NÃO expõe o gasto da conta via API (conferido nos swaggers 21/08) — a
+// fonte é o registro próprio da plataforma (tabela custos, preços reais).
+function DonutCusto({ gasto, teto }: { gasto: number; teto: number }) {
+  const frac = teto > 0 ? Math.min(1, gasto / teto) : 0;
+  const restante = Math.max(0, teto - gasto);
+  const cor =
+    frac >= 0.85 ? NEON.rosa : frac >= 0.6 ? NEON.laranja : NEON.verde;
+  const R = 44;
+  const C = 2 * Math.PI * R;
+  return (
+    <div className="mt-2 flex items-center justify-center gap-5">
+      <div className="relative h-[116px] w-[116px] shrink-0">
+        <svg viewBox="0 0 116 116" className="h-full w-full -rotate-90">
+          <circle
+            cx="58"
+            cy="58"
+            r={R}
+            fill="none"
+            stroke="rgba(255,255,255,0.08)"
+            strokeWidth="11"
+          />
+          <circle
+            cx="58"
+            cy="58"
+            r={R}
+            fill="none"
+            stroke={cor}
+            strokeWidth="11"
+            strokeLinecap="round"
+            strokeDasharray={`${frac * C} ${C}`}
+            style={{ filter: `drop-shadow(0 0 8px ${cor})` }}
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span
+            className="text-[19px] font-semibold leading-none tabular-nums"
+            style={{ color: cor, textShadow: `0 0 14px ${cor}` }}
+          >
+            {Math.round(frac * 100)}%
+          </span>
+          <span className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--color-ivory-66)]">
+            da cota
+          </span>
+        </div>
+      </div>
+      <div className="flex flex-col gap-1.5 text-left">
+        <p className="font-mono text-[12px] uppercase tracking-[0.12em] text-[var(--color-ivory-66)]">
+          Gasto no mês{" "}
+          <span className="block text-[15px] font-semibold tabular-nums" style={{ color: cor }}>
+            {formatBRL(gasto)}
+          </span>
+        </p>
+        <p className="font-mono text-[12px] uppercase tracking-[0.12em] text-[var(--color-ivory-66)]">
+          Disponível{" "}
+          <span className="block text-[15px] font-semibold tabular-nums" style={{ color: NEON.verde }}>
+            {formatBRL(restante)}
+          </span>
+        </p>
+        <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--color-ivory-40)]">
+          Cota R$ {teto}/mês
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function TituloPainel({ cor, children }: { cor: string; children: React.ReactNode }) {
   return (
     <h2
@@ -169,13 +236,13 @@ export default async function InicioPage() {
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(135deg, rgba(142,255,192,0.5) 0%, rgba(60,255,138,0.18) 26%, #04120a 60%, #000000 100%), #000000",
+            "linear-gradient(135deg, rgba(60,255,138,0.13) 0%, rgba(24,90,52,0.09) 24%, #020a06 55%, #000000 100%), #000000",
         }}
       />
 
       {/* Layout v7: ícones | movimentações+localizações | boas-vindas +
           símbolo + frase + radial (tudo à direita) */}
-      <div className="relative z-10 flex h-full flex-col gap-4 p-4 lg:grid lg:grid-cols-[210px_330px_minmax(0,1fr)] lg:px-12 xl:px-20">
+      <div className="relative z-10 flex h-full flex-col gap-4 p-4 lg:grid lg:grid-cols-[210px_420px_minmax(0,1fr)] lg:px-12 xl:px-20">
         {/* ================= COLUNA 1: painel FINO dos ícones + avisos ===== */}
         <div className="flex min-h-0 flex-col gap-4 lg:order-1">
         <PainelVidro className="min-h-0 flex-1">
@@ -233,8 +300,9 @@ export default async function InicioPage() {
         </PainelVidro>
         </div>
 
-        {/* ====== DIREITA: boas-vindas + símbolo + frase + radial ====== */}
-        <div className="flex min-h-0 flex-col items-center gap-4 lg:order-3">
+        {/* ====== DIREITA: boas-vindas + símbolo + radial (frase ao lado)
+               + sincronizações ====== */}
+        <div className="flex min-h-0 flex-col items-center gap-3 lg:order-3">
           {/* Cabeçalho único: Console Sonar (verde, menor) + Boas-Vindas
               (wordmark branco, 2x), centralizados no mesmo card */}
           <BordaLiquidaMetal cor="prata" anel radius={18} className="block">
@@ -255,17 +323,72 @@ export default async function InicioPage() {
           </BordaLiquidaMetal>
 
           {/* Símbolo do logo (escada + emissor com ondas), animado — maior */}
-          <SimboloSonar height={150} className="shrink-0" />
+          <SimboloSonar height={190} className="shrink-0" />
 
-          {/* Frase ENTRE o símbolo e o radial, no card de vidro preto */}
-          <SpotlightCard radius={14} className="px-8 py-2.5">
-            <p className="sonar-wordmark text-[clamp(17px,1.5vw,25px)]">
-              Para onde deseja ir?
-            </p>
-          </SpotlightCard>
+          {/* Radial (colado no símbolo) com a frase ao lado DIREITO */}
+          <div className="flex min-h-0 w-full flex-1 items-center justify-center gap-4">
+            <RadialCentro nome={nome} fotoUrl={perfil?.fotoUrl ?? null} />
+            <SpotlightCard radius={14} className="shrink-0 px-6 py-4">
+              <p className="sonar-wordmark max-w-[190px] text-[clamp(17px,1.5vw,25px)]">
+                Para onde deseja ir?
+              </p>
+            </SpotlightCard>
+          </div>
 
-          {/* Radial verde 2x, mais embaixo (ocupa o espaço restante) */}
-          <RadialCentro nome={nome} fotoUrl={perfil?.fotoUrl ?? null} />
+          {/* Painel das sincronizações (Themis + robôs dos tribunais) */}
+          <PainelVidro className="w-full shrink-0">
+            <TituloPainel cor={NEON.turquesa}>Sincronizações</TituloPainel>
+            <div className="mt-2 flex flex-wrap items-center justify-center gap-x-7 gap-y-1.5">
+              <span className="font-mono text-[12px] uppercase tracking-[0.1em] text-[var(--color-ivory-88)]">
+                <span
+                  className="mr-1.5 inline-block h-2 w-2 rounded-full align-middle"
+                  style={{
+                    backgroundColor:
+                      dados.sincronizacao.themisOk === false
+                        ? NEON.rosa
+                        : NEON.verde,
+                    boxShadow: `0 0 6px ${dados.sincronizacao.themisOk === false ? NEON.rosa : NEON.verde}`,
+                  }}
+                />
+                Themis{" "}
+                <span style={{ color: NEON.turquesa }}>
+                  {dados.sincronizacao.themisEm
+                    ? formatData(dados.sincronizacao.themisEm)
+                    : "—"}
+                </span>
+              </span>
+              <span className="font-mono text-[12px] uppercase tracking-[0.1em] text-[var(--color-ivory-88)]">
+                e-SAJ{" "}
+                <span style={{ color: NEON.turquesa }}>
+                  {dados.sincronizacao.esajUltima
+                    ? formatData(dados.sincronizacao.esajUltima)
+                    : "—"}
+                </span>
+              </span>
+              <span className="font-mono text-[12px] uppercase tracking-[0.1em] text-[var(--color-ivory-88)]">
+                eproc{" "}
+                <span style={{ color: NEON.turquesa }}>
+                  {dados.sincronizacao.eprocUltima
+                    ? formatData(dados.sincronizacao.eprocUltima)
+                    : "—"}
+                </span>
+              </span>
+              <span className="font-mono text-[12px] uppercase tracking-[0.1em] text-[var(--color-ivory-88)]">
+                Acervo{" "}
+                <span style={{ color: NEON.verde }}>
+                  {dados.sincronizacao.totalAndamentos.toLocaleString("pt-BR")}
+                </span>{" "}
+                andamentos
+              </span>
+              <span className="font-mono text-[12px] uppercase tracking-[0.1em] text-[var(--color-ivory-88)]">
+                +
+                <span style={{ color: NEON.verde }}>
+                  {dados.capturas7d.toLocaleString("pt-BR")}
+                </span>{" "}
+                em 7 dias
+              </span>
+            </div>
+          </PainelVidro>
         </div>
 
         {/* ====== COLUNA 2: movimentações + localizações (ao lado dos
@@ -333,6 +456,12 @@ export default async function InicioPage() {
                 ))}
               </ul>
             )}
+          </PainelVidro>
+
+          {/* Rosca neon do consumo de APIs (cota Assertiva R$600) */}
+          <PainelVidro className="shrink-0">
+            <TituloPainel cor={NEON.laranja}>Consumo de APIs</TituloPainel>
+            <DonutCusto gasto={dados.gastoMesBrl} teto={dados.tetoMesBrl} />
           </PainelVidro>
         </div>
       </div>
