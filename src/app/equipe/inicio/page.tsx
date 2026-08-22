@@ -106,7 +106,7 @@ function PainelVidro({
 }) {
   return (
     <BordaLiquidaMetal cor="prata" anel radius={20} className={`block ${className}`}>
-      <SpotlightCard radius={17} className="h-full w-full overflow-hidden p-4">
+      <SpotlightCard radius={17} className="h-full w-full overflow-hidden p-3.5">
         {children}
       </SpotlightCard>
     </BordaLiquidaMetal>
@@ -116,7 +116,7 @@ function PainelVidro({
 function TituloPainel({ cor, children }: { cor: string; children: React.ReactNode }) {
   return (
     <h2
-      className="text-center font-mono text-[14px] font-semibold uppercase tracking-[0.22em]"
+      className="text-center font-mono text-[13px] font-semibold uppercase tracking-[0.2em]"
       style={{
         color: cor,
         textShadow: `0 0 12px color-mix(in srgb, ${cor} 50%, transparent)`,
@@ -162,13 +162,22 @@ export default async function InicioPage() {
 
   return (
     <main className="relative overflow-x-hidden lg:h-[calc(100svh-159px)] lg:overflow-hidden">
-      {/* Fundo: preto puro (partículas removidas a pedido do Caio, 21/08) */}
-      <div aria-hidden="true" className="absolute inset-0 bg-black" />
+      {/* Fundo: degradê verde neon claro (canto superior esquerdo) que
+          escurece até o preto no canto inferior direito */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(135deg, rgba(142,255,192,0.5) 0%, rgba(60,255,138,0.18) 26%, #04120a 60%, #000000 100%), #000000",
+        }}
+      />
 
-      {/* px maior no desktop: aproxima as colunas periféricas do centro */}
-      <div className="relative z-10 flex h-full flex-col gap-4 p-4 lg:grid lg:grid-cols-[240px_minmax(0,1fr)_360px] lg:px-12 xl:px-20">
-        {/* ================= ESQUERDA: painel FINO dos ícones + avisos ===== */}
-        <div className="flex min-h-0 flex-col gap-4">
+      {/* Layout v7: ícones | movimentações+localizações | boas-vindas +
+          símbolo + frase + radial (tudo à direita) */}
+      <div className="relative z-10 flex h-full flex-col gap-4 p-4 lg:grid lg:grid-cols-[210px_330px_minmax(0,1fr)] lg:px-12 xl:px-20">
+        {/* ================= COLUNA 1: painel FINO dos ícones + avisos ===== */}
+        <div className="flex min-h-0 flex-col gap-4 lg:order-1">
         <PainelVidro className="min-h-0 flex-1">
           <div className="flex h-full flex-col justify-evenly">
             {ESTATISTICAS.map(({ rotulo, valor, formato, cor, Icon }, i) => (
@@ -224,8 +233,8 @@ export default async function InicioPage() {
         </PainelVidro>
         </div>
 
-        {/* ================= CENTRO ================= */}
-        <div className="flex min-h-0 flex-col items-center gap-4">
+        {/* ====== DIREITA: boas-vindas + símbolo + frase + radial ====== */}
+        <div className="flex min-h-0 flex-col items-center gap-4 lg:order-3">
           {/* Cabeçalho único: Console Sonar (verde, menor) + Boas-Vindas
               (wordmark branco, 2x), centralizados no mesmo card */}
           <BordaLiquidaMetal cor="prata" anel radius={18} className="block">
@@ -245,22 +254,23 @@ export default async function InicioPage() {
             </SpotlightCard>
           </BordaLiquidaMetal>
 
-          {/* Símbolo do logo (escada + emissor com ondas), animado */}
-          <SimboloSonar height={100} className="shrink-0" />
+          {/* Símbolo do logo (escada + emissor com ondas), animado — maior */}
+          <SimboloSonar height={150} className="shrink-0" />
 
-          {/* Radial verde 2x (auto-ajusta pra caber na tela) */}
-          <RadialCentro nome={nome} fotoUrl={perfil?.fotoUrl ?? null} />
-
-          {/* Frase no card de vidro preto */}
+          {/* Frase ENTRE o símbolo e o radial, no card de vidro preto */}
           <SpotlightCard radius={14} className="px-8 py-2.5">
             <p className="sonar-wordmark text-[clamp(17px,1.5vw,25px)]">
               Para onde deseja ir?
             </p>
           </SpotlightCard>
+
+          {/* Radial verde 2x, mais embaixo (ocupa o espaço restante) */}
+          <RadialCentro nome={nome} fotoUrl={perfil?.fotoUrl ?? null} />
         </div>
 
-        {/* ================= DIREITA ================= */}
-        <div className="flex min-h-0 flex-col gap-4">
+        {/* ====== COLUNA 2: movimentações + localizações (ao lado dos
+               ícones) ====== */}
+        <div className="flex min-h-0 flex-col gap-4 lg:order-2">
           {/* Últimas Movimentações (cima) — textos centralizados */}
           <PainelVidro className="min-h-0 flex-1">
             <TituloPainel cor={NEON.laranja}>Últimas Movimentações</TituloPainel>
@@ -280,7 +290,7 @@ export default async function InicioPage() {
                         {a.data_andamento ? formatData(a.data_andamento) : "—"}
                       </span>
                     </span>
-                    <p className="mt-1.5 line-clamp-1 text-[14px] text-[var(--color-ivory-88)]">
+                    <p className="mt-1 line-clamp-1 text-[13px] text-[var(--color-ivory-88)]">
                       {a.descricao}
                     </p>
                   </li>
@@ -305,13 +315,13 @@ export default async function InicioPage() {
                         {ROTULO_TIPO_BEM[b.tipo] ?? b.tipo}
                       </Chip>
                       <span
-                        className="font-mono text-[14px] font-semibold tabular-nums"
+                        className="font-mono text-[13px] font-semibold tabular-nums"
                         style={{ color: NEON.verde }}
                       >
                         {b.valorBrl != null ? formatBRL(b.valorBrl) : "—"}
                       </span>
                     </span>
-                    <p className="mt-1 truncate text-[14px] text-ivory">
+                    <p className="mt-1 truncate text-[13px] text-ivory">
                       {b.titulo}
                     </p>
                     {b.devedorNome && (
