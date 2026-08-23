@@ -360,7 +360,7 @@ export default async function InicioPage() {
               </div>
             </Painel>
 
-            <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 overflow-hidden lg:flex-row lg:gap-6">
+            <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 overflow-hidden lg:flex-row lg:justify-end lg:gap-6">
               <p
                 className="sonar-wordmark shrink-0 whitespace-nowrap text-center text-[clamp(26px,2.6vw,44px)] leading-[1.1]"
                 style={{ color: "var(--color-signal)" }}
