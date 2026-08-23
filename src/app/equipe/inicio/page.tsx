@@ -350,10 +350,10 @@ export default async function InicioPage() {
             )}
           </Painel>
 
-          {/* Direita: Consumo de APIs no topo (colado na esquerda, junto
-              das Movimentações) e, abaixo, frase GRANDE verde neon em UMA
-              linha ao lado da roda (ditados 24/08). */}
-          <div className="flex min-h-0 flex-col gap-4">
+          {/* Direita: Consumo de APIs à esquerda e, no CANTO DIREITO, a
+              pilha sincronização (header acima) → "Para onde deseja ir?"
+              → roda radial maior (ditado 24/08). */}
+          <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
             <Painel className="w-full shrink-0 self-start p-5 lg:max-w-[400px]">
               <TituloPainel>Consumo de APIs</TituloPainel>
               <div className="mt-3">
@@ -361,10 +361,13 @@ export default async function InicioPage() {
               </div>
             </Painel>
 
-            <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 overflow-hidden lg:flex-row lg:justify-end lg:gap-6">
+            <div className="flex min-h-0 flex-1 flex-col items-center gap-2 overflow-hidden lg:items-end">
               <p
-                className="sonar-wordmark shrink-0 whitespace-nowrap text-center text-[clamp(26px,2.6vw,44px)] leading-[1.1]"
-                style={{ color: "var(--color-signal)" }}
+                className="sonar-wordmark shrink-0 whitespace-nowrap text-center text-[clamp(26px,2.6vw,44px)] leading-[1.1] lg:pr-2 lg:text-right"
+                style={{
+                  color: "var(--color-signal)",
+                  WebkitTextStroke: "1px rgba(255,255,255,0.75)",
+                }}
               >
                 Para onde deseja ir?
               </p>
