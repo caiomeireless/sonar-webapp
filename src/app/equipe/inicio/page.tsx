@@ -1,16 +1,15 @@
-// Aba Início — CONSOLE SONAR v6 (21/08):
-//   - Cabeçalho ÚNICO centralizado no topo do centro: "Console Sonar ·
-//     data" (verde, 20% menor) + "Boas-Vindas, Nome." (wordmark branco,
-//     2x maior), juntos num só card de vidro com moldura prata
-//   - Esquerda: painel FINO dos ícones — ícone grande, valor e legenda
-//     embaixo, divisórias entre os itens
-//   - Centro: menu radial VERDE 2x (até 660px, auto-ajusta pra caber) +
-//     "Para onde deseja ir?" num card de vidro preto
-//   - Direita: Movimentações e Localizações com textos CENTRALIZADOS e
-//     fontes maiores
-//   - TODOS os cards com o spotlight da faixa 3 da landing (luz segue o
-//     mouse) e fundo com partículas MAIS densas e reativas ao ponteiro
-//   - Tela única no desktop (sem rolagem); mobile rola normal
+// Aba Início — CONSOLE SONAR v9 "dashboard calmo" (22/08):
+// O Caio pediu pra DESPOLUIR mantendo todas as informações numa tela só.
+// Decisões de design:
+//   - UM material só: vidro quieto (borda branca 10%, blur) + spotlight
+//     no hover — as molduras de metal líquido saíram desta tela (seguem
+//     nos botões da plataforma); símbolo verde removido.
+//   - Cor neon SÓ nos números; títulos, rótulos e bordas neutros.
+//   - Chips-pílula viraram pontos coloridos discretos.
+//   - Sincronizações viraram uma LINHA do cabeçalho (sem painel próprio).
+//   - Hierarquia: cabeçalho → régua de 7 indicadores → área principal
+//     (Movimentações | Localizações | Radial + consumo de APIs).
+//   - Tela única no desktop (sem rolagem); mobile rola normal.
 import { redirect } from "next/navigation";
 import {
   Activity,
@@ -27,8 +26,6 @@ import { obterDadosConsole } from "@/lib/console-inicio";
 import { listarNotificacoesEquipe } from "@/lib/notificacoes";
 import { CATEGORIAS_RADAR, type CategoriaRadarChave } from "@/lib/radar";
 import { formatBRL, formatData } from "@/lib/format";
-import { BordaLiquidaMetal } from "@/components/ui/BordaLiquidaMetal";
-import { SimboloSonar } from "@/components/ui/SimboloSonar";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 
 import { NumeroTicker } from "./_components/NumeroTicker";
@@ -46,6 +43,7 @@ const DIAS_SEMANA = [
   "sábado",
 ];
 
+// Neon SÓ nos números — o resto da tela é neutro.
 const NEON = {
   verde: "#3CFF8A",
   laranja: "#FF9C41",
@@ -81,23 +79,19 @@ const COR_CATEGORIA: Record<CategoriaRadarChave, string> = {
   pagamento: NEON.ciano,
 };
 
-function Chip({ cor, children }: { cor: string; children: React.ReactNode }) {
+// Ponto colorido discreto (substitui os chips-pílula).
+function Ponto({ cor }: { cor: string }) {
   return (
     <span
-      className="inline-flex shrink-0 items-center rounded-full px-2 py-0.5 font-mono text-[12px] uppercase tracking-[0.1em]"
-      style={{
-        color: cor,
-        backgroundColor: `color-mix(in srgb, ${cor} 13%, transparent)`,
-        border: `1px solid color-mix(in srgb, ${cor} 45%, transparent)`,
-      }}
-    >
-      {children}
-    </span>
+      aria-hidden="true"
+      className="inline-block h-2 w-2 shrink-0 rounded-full"
+      style={{ backgroundColor: cor, boxShadow: `0 0 5px ${cor}` }}
+    />
   );
 }
 
-// Painel: moldura de metal líquido prata + vidro com spotlight (faixa 3).
-function PainelVidro({
+// Painel de vidro quieto — material único da tela.
+function Painel({
   children,
   className = "",
 }: {
@@ -105,92 +99,73 @@ function PainelVidro({
   className?: string;
 }) {
   return (
-    <BordaLiquidaMetal cor="prata" anel radius={20} className={`block ${className}`}>
-      <SpotlightCard radius={17} className="h-full w-full overflow-hidden p-3.5">
-        {children}
-      </SpotlightCard>
-    </BordaLiquidaMetal>
+    <SpotlightCard radius={16} className={`overflow-hidden ${className}`}>
+      {children}
+    </SpotlightCard>
   );
 }
 
-// Rosca neon do consumo de APIs vs a cota Assertiva (R$600). A Assertiva
-// NÃO expõe o gasto da conta via API (conferido nos swaggers 21/08) — a
-// fonte é o registro próprio da plataforma (tabela custos, preços reais).
+function TituloPainel({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="font-mono text-[12px] font-semibold uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+      {children}
+    </h2>
+  );
+}
+
+// Rosca compacta do consumo de APIs vs a cota Assertiva (R$600).
+// Fonte: registro próprio de custos — a Assertiva não expõe via API.
 function DonutCusto({ gasto, teto }: { gasto: number; teto: number }) {
   const frac = teto > 0 ? Math.min(1, gasto / teto) : 0;
   const restante = Math.max(0, teto - gasto);
   const cor =
     frac >= 0.85 ? NEON.rosa : frac >= 0.6 ? NEON.laranja : NEON.verde;
-  const R = 44;
+  const R = 34;
   const C = 2 * Math.PI * R;
   return (
-    <div className="mt-2 flex items-center justify-center gap-5">
-      <div className="relative h-[116px] w-[116px] shrink-0">
-        <svg viewBox="0 0 116 116" className="h-full w-full -rotate-90">
+    <div className="flex items-center gap-5">
+      <div className="relative h-[88px] w-[88px] shrink-0">
+        <svg viewBox="0 0 88 88" className="h-full w-full -rotate-90">
           <circle
-            cx="58"
-            cy="58"
+            cx="44"
+            cy="44"
             r={R}
             fill="none"
             stroke="rgba(255,255,255,0.08)"
-            strokeWidth="11"
+            strokeWidth="9"
           />
           <circle
-            cx="58"
-            cy="58"
+            cx="44"
+            cy="44"
             r={R}
             fill="none"
             stroke={cor}
-            strokeWidth="11"
+            strokeWidth="9"
             strokeLinecap="round"
             strokeDasharray={`${frac * C} ${C}`}
-            style={{ filter: `drop-shadow(0 0 8px ${cor})` }}
           />
         </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <div className="absolute inset-0 flex items-center justify-center">
           <span
-            className="text-[19px] font-semibold leading-none tabular-nums"
-            style={{ color: cor, textShadow: `0 0 14px ${cor}` }}
+            className="text-[16px] font-semibold tabular-nums"
+            style={{ color: cor }}
           >
             {Math.round(frac * 100)}%
           </span>
-          <span className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--color-ivory-66)]">
-            da cota
-          </span>
         </div>
       </div>
-      <div className="flex flex-col gap-1.5 text-left">
-        <p className="font-mono text-[12px] uppercase tracking-[0.12em] text-[var(--color-ivory-66)]">
-          Gasto no mês{" "}
-          <span className="block text-[15px] font-semibold tabular-nums" style={{ color: cor }}>
-            {formatBRL(gasto)}
-          </span>
+      <div className="min-w-0">
+        <p className="text-[15px] font-semibold tabular-nums" style={{ color: cor }}>
+          {formatBRL(gasto)}
         </p>
-        <p className="font-mono text-[12px] uppercase tracking-[0.12em] text-[var(--color-ivory-66)]">
-          Disponível{" "}
-          <span className="block text-[15px] font-semibold tabular-nums" style={{ color: NEON.verde }}>
-            {formatBRL(restante)}
-          </span>
+        <p className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--color-ivory-66)]">
+          gasto no mês · {formatBRL(restante)} livres
         </p>
         <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--color-ivory-40)]">
-          Cota R$ {teto}/mês
+          cota Assertiva R$ {teto}
         </p>
       </div>
     </div>
-  );
-}
-
-function TituloPainel({ cor, children }: { cor: string; children: React.ReactNode }) {
-  return (
-    <h2
-      className="text-center font-mono text-[13px] font-semibold uppercase tracking-[0.2em]"
-      style={{
-        color: cor,
-        textShadow: `0 0 12px color-mix(in srgb, ${cor} 50%, transparent)`,
-      }}
-    >
-      {children}
-    </h2>
   );
 }
 
@@ -202,7 +177,7 @@ export default async function InicioPage() {
   const primeiroNome = nome.split(" ")[0];
   const [dados, avisos] = await Promise.all([
     obterDadosConsole(),
-    listarNotificacoesEquipe().then((n) => n.slice(0, 3)).catch(() => []),
+    listarNotificacoesEquipe().then((n) => n.slice(0, 2)).catch(() => []),
   ]);
 
   const agora = new Date();
@@ -210,6 +185,7 @@ export default async function InicioPage() {
   const rotuloCategoria = new Map(
     CATEGORIAS_RADAR.map((c) => [c.chave, c.rotulo]),
   );
+  const sync = dados.sincronizacao;
 
   const ESTATISTICAS: {
     rotulo: string;
@@ -229,8 +205,7 @@ export default async function InicioPage() {
 
   return (
     <main className="relative overflow-x-hidden lg:h-[calc(100svh-159px)] lg:overflow-hidden">
-      {/* Fundo: degradê verde neon claro (canto superior esquerdo) que
-          escurece até o preto no canto inferior direito */}
+      {/* Fundo: degradê verde escuro → preto (mantido da v8) */}
       <div
         aria-hidden="true"
         className="absolute inset-0"
@@ -240,229 +215,168 @@ export default async function InicioPage() {
         }}
       />
 
-      {/* Layout v7: ícones | movimentações+localizações | boas-vindas +
-          símbolo + frase + radial (tudo à direita) */}
-      <div className="relative z-10 flex h-full flex-col gap-4 p-4 lg:grid lg:grid-cols-[210px_420px_minmax(0,1fr)] lg:px-12 xl:px-20">
-        {/* ================= COLUNA 1: painel FINO dos ícones + avisos ===== */}
-        <div className="flex min-h-0 flex-col gap-4 lg:order-1">
-        <PainelVidro className="min-h-0 flex-1">
-          <div className="flex h-full flex-col justify-evenly">
-            {ESTATISTICAS.map(({ rotulo, valor, formato, cor, Icon }, i) => (
+      <div className="relative z-10 mx-auto flex h-full max-w-[1480px] flex-col gap-4 p-4 lg:px-10 lg:py-5">
+        {/* ============ CABEÇALHO: boas-vindas + status de sync ============ */}
+        <Painel className="flex shrink-0 flex-col gap-3 px-6 py-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p
+              className="font-mono text-[11px] font-semibold uppercase tracking-[0.26em]"
+              style={{ color: NEON.verde }}
+            >
+              Console Sonar · {dataLonga}
+            </p>
+            <h1 className="sonar-wordmark mt-1 text-[clamp(22px,2vw,32px)]">
+              Boas-Vindas, {primeiroNome}.
+            </h1>
+          </div>
+          {/* Sincronizações — uma linha discreta, sem painel próprio */}
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-1 font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--color-ivory-66)]">
+            <span className="flex items-center gap-1.5">
+              <Ponto cor={sync.themisOk === false ? NEON.rosa : NEON.verde} />
+              Themis {sync.themisEm ? formatData(sync.themisEm) : "—"}
+            </span>
+            <span>
+              e-SAJ {sync.esajUltima ? formatData(sync.esajUltima) : "—"}
+            </span>
+            <span>
+              eproc {sync.eprocUltima ? formatData(sync.eprocUltima) : "—"}
+            </span>
+            <span>
+              {sync.totalAndamentos.toLocaleString("pt-BR")} andamentos no
+              acervo
+            </span>
+          </div>
+        </Painel>
+
+        {/* ============ AVISOS — faixa fina, SÓ quando existir aviso ====== */}
+        {avisos.length > 0 && (
+          <Painel className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-1 px-6 py-2.5">
+            <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: NEON.amarelo }}>
+              Avisos
+            </span>
+            {avisos.map((n) => (
+              <span key={n.id} className="flex min-w-0 items-center gap-2 text-[13px] text-[var(--color-ivory-88)]">
+                <Ponto cor={NEON.amarelo} />
+                <span className="truncate">{n.titulo}</span>
+                <span className="shrink-0 font-mono text-[11px] uppercase text-[var(--color-ivory-40)]">
+                  {n.relativaEm}
+                </span>
+              </span>
+            ))}
+          </Painel>
+        )}
+
+        {/* ============ RÉGUA DE INDICADORES ============ */}
+        <Painel className="shrink-0 px-2 py-3">
+          <div className="grid grid-cols-2 gap-y-3 divide-white/8 sm:grid-cols-4 lg:grid-cols-7 lg:divide-x">
+            {ESTATISTICAS.map(({ rotulo, valor, formato, cor, Icon }) => (
               <div
                 key={rotulo}
-                className={`flex flex-col items-center gap-1 py-2 text-center ${
-                  i > 0 ? "border-t border-white/8" : ""
-                }`}
+                className="flex flex-col items-center gap-1 px-2 text-center"
               >
-                <Icon
-                  className="h-7 w-7"
-                  style={{ color: cor, filter: `drop-shadow(0 0 8px ${cor})` }}
-                  aria-hidden="true"
-                />
                 <span
-                  className="text-[15px] font-semibold leading-none tabular-nums"
-                  style={{
-                    color: cor,
-                    textShadow: `0 0 14px color-mix(in srgb, ${cor} 55%, transparent)`,
-                  }}
+                  className="text-[clamp(17px,1.3vw,22px)] font-semibold leading-none tabular-nums"
+                  style={{ color: cor }}
                 >
                   <NumeroTicker valor={valor} formato={formato} />
                 </span>
-                <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--color-ivory-66)]">
+                <span className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--color-ivory-66)]">
+                  <Icon
+                    className="h-3.5 w-3.5"
+                    style={{ color: cor }}
+                    aria-hidden="true"
+                  />
                   {rotulo}
                 </span>
               </div>
             ))}
           </div>
-        </PainelVidro>
+        </Painel>
 
-        {/* Painel de Avisos da Plataforma */}
-        <PainelVidro className="shrink-0">
-          <TituloPainel cor={NEON.ciano}>Avisos da Plataforma</TituloPainel>
-          {avisos.length === 0 ? (
-            <p className="mt-3 text-center text-[12px] text-[var(--color-ivory-66)]">
-              Sem avisos no momento.
-            </p>
-          ) : (
-            <ul className="mt-2 divide-y divide-white/5">
-              {avisos.map((n) => (
-                <li key={n.id} className="py-2 text-center">
-                  <p className="line-clamp-1 text-[13px] text-ivory">
-                    {n.titulo}
-                  </p>
-                  <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--color-ivory-66)]">
-                    {n.relativaEm}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </PainelVidro>
-        </div>
-
-        {/* ====== DIREITA: boas-vindas + símbolo + radial (frase ao lado)
-               + sincronizações ====== */}
-        <div className="flex min-h-0 flex-col items-center gap-3 lg:order-3">
-          {/* Cabeçalho único: Console Sonar (verde, menor) + Boas-Vindas
-              (wordmark branco, 2x), centralizados no mesmo card */}
-          <BordaLiquidaMetal cor="prata" anel radius={18} className="block">
-            <SpotlightCard radius={15} className="px-10 py-4 text-center">
-              <p
-                className="font-mono text-[10px] font-semibold uppercase tracking-[0.24em]"
-                style={{
-                  color: NEON.verde,
-                  textShadow: `0 0 12px color-mix(in srgb, ${NEON.verde} 60%, transparent)`,
-                }}
-              >
-                Console Sonar · {dataLonga}
-              </p>
-              <h1 className="sonar-wordmark mt-1.5 text-[clamp(30px,2.8vw,48px)]">
-                Boas-Vindas, {primeiroNome}.
-              </h1>
-            </SpotlightCard>
-          </BordaLiquidaMetal>
-
-          {/* Símbolo do logo (escada + emissor com ondas), animado — maior */}
-          <SimboloSonar height={190} className="shrink-0" />
-
-          {/* Radial (colado no símbolo) com a frase ao lado DIREITO */}
-          <div className="flex min-h-0 w-full flex-1 items-center justify-center gap-4">
-            <RadialCentro nome={nome} fotoUrl={perfil?.fotoUrl ?? null} />
-            <SpotlightCard radius={14} className="shrink-0 px-6 py-4">
-              <p className="sonar-wordmark max-w-[190px] text-[clamp(17px,1.5vw,25px)]">
-                Para onde deseja ir?
-              </p>
-            </SpotlightCard>
-          </div>
-
-          {/* Painel das sincronizações (Themis + robôs dos tribunais) */}
-          <PainelVidro className="w-full shrink-0">
-            <TituloPainel cor={NEON.turquesa}>Sincronizações</TituloPainel>
-            <div className="mt-2 flex flex-wrap items-center justify-center gap-x-7 gap-y-1.5">
-              <span className="font-mono text-[12px] uppercase tracking-[0.1em] text-[var(--color-ivory-88)]">
-                <span
-                  className="mr-1.5 inline-block h-2 w-2 rounded-full align-middle"
-                  style={{
-                    backgroundColor:
-                      dados.sincronizacao.themisOk === false
-                        ? NEON.rosa
-                        : NEON.verde,
-                    boxShadow: `0 0 6px ${dados.sincronizacao.themisOk === false ? NEON.rosa : NEON.verde}`,
-                  }}
-                />
-                Themis{" "}
-                <span style={{ color: NEON.turquesa }}>
-                  {dados.sincronizacao.themisEm
-                    ? formatData(dados.sincronizacao.themisEm)
-                    : "—"}
-                </span>
-              </span>
-              <span className="font-mono text-[12px] uppercase tracking-[0.1em] text-[var(--color-ivory-88)]">
-                e-SAJ{" "}
-                <span style={{ color: NEON.turquesa }}>
-                  {dados.sincronizacao.esajUltima
-                    ? formatData(dados.sincronizacao.esajUltima)
-                    : "—"}
-                </span>
-              </span>
-              <span className="font-mono text-[12px] uppercase tracking-[0.1em] text-[var(--color-ivory-88)]">
-                eproc{" "}
-                <span style={{ color: NEON.turquesa }}>
-                  {dados.sincronizacao.eprocUltima
-                    ? formatData(dados.sincronizacao.eprocUltima)
-                    : "—"}
-                </span>
-              </span>
-              <span className="font-mono text-[12px] uppercase tracking-[0.1em] text-[var(--color-ivory-88)]">
-                Acervo{" "}
-                <span style={{ color: NEON.verde }}>
-                  {dados.sincronizacao.totalAndamentos.toLocaleString("pt-BR")}
-                </span>{" "}
-                andamentos
-              </span>
-              <span className="font-mono text-[12px] uppercase tracking-[0.1em] text-[var(--color-ivory-88)]">
-                +
-                <span style={{ color: NEON.verde }}>
-                  {dados.capturas7d.toLocaleString("pt-BR")}
-                </span>{" "}
-                em 7 dias
-              </span>
-            </div>
-          </PainelVidro>
-        </div>
-
-        {/* ====== COLUNA 2: movimentações + localizações (ao lado dos
-               ícones) ====== */}
-        <div className="flex min-h-0 flex-col gap-4 lg:order-2">
-          {/* Últimas Movimentações (cima) — textos centralizados */}
-          <PainelVidro className="min-h-0 flex-1">
-            <TituloPainel cor={NEON.laranja}>Últimas Movimentações</TituloPainel>
+        {/* ============ ÁREA PRINCIPAL ============ */}
+        <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[1fr_1fr_400px]">
+          {/* Últimas Movimentações */}
+          <Painel className="flex min-h-0 flex-col p-5">
+            <TituloPainel>Últimas Movimentações</TituloPainel>
             {dados.movimentacoes.length === 0 ? (
-              <p className="mt-3 text-center text-sm text-[var(--color-ivory-66)]">
+              <p className="mt-4 text-sm text-[var(--color-ivory-66)]">
                 Sem movimentações de alto sinal.
               </p>
             ) : (
-              <ul className="mt-2 divide-y divide-white/5">
+              <ul className="mt-2 min-h-0 divide-y divide-white/5 overflow-hidden">
                 {dados.movimentacoes.map((a) => (
-                  <li key={a.id} className="py-2.5 text-center">
-                    <span className="flex items-center justify-center gap-2">
-                      <Chip cor={COR_CATEGORIA[a.categoria]}>
-                        {rotuloCategoria.get(a.categoria) ?? a.categoria}
-                      </Chip>
-                      <span className="font-mono text-[12px] uppercase tracking-[0.1em] text-[var(--color-ivory-66)]">
-                        {a.data_andamento ? formatData(a.data_andamento) : "—"}
+                  <li key={a.id} className="py-3">
+                    <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--color-ivory-66)]">
+                      <Ponto cor={COR_CATEGORIA[a.categoria]} />
+                      {rotuloCategoria.get(a.categoria) ?? a.categoria}
+                      <span className="text-[var(--color-ivory-40)]">
+                        {a.data_andamento ? formatData(a.data_andamento) : ""}
                       </span>
-                    </span>
-                    <p className="mt-1 line-clamp-1 text-[13px] text-[var(--color-ivory-88)]">
+                    </p>
+                    <p className="mt-1 line-clamp-2 text-[13px] leading-snug text-[var(--color-ivory-88)]">
                       {a.descricao}
                     </p>
                   </li>
                 ))}
               </ul>
             )}
-          </PainelVidro>
+          </Painel>
 
-          {/* Últimas Localizações (embaixo) — textos centralizados */}
-          <PainelVidro className="min-h-0 flex-1">
-            <TituloPainel cor={NEON.verde}>Últimas Localizações</TituloPainel>
+          {/* Últimas Localizações */}
+          <Painel className="flex min-h-0 flex-col p-5">
+            <TituloPainel>Últimas Localizações</TituloPainel>
             {dados.ultimasLocalizacoes.length === 0 ? (
-              <p className="mt-3 text-center text-sm text-[var(--color-ivory-66)]">
+              <p className="mt-4 text-sm text-[var(--color-ivory-66)]">
                 Nenhum bem localizado ainda.
               </p>
             ) : (
-              <ul className="mt-2 divide-y divide-white/5">
-                {dados.ultimasLocalizacoes.slice(0, 4).map((b) => (
-                  <li key={b.id} className="py-2.5 text-center">
-                    <span className="flex items-center justify-center gap-2">
-                      <Chip cor={COR_TIPO_BEM[b.tipo] ?? NEON.verde}>
+              <ul className="mt-2 min-h-0 divide-y divide-white/5 overflow-hidden">
+                {dados.ultimasLocalizacoes.slice(0, 5).map((b) => (
+                  <li
+                    key={b.id}
+                    className="flex items-center justify-between gap-3 py-3"
+                  >
+                    <span className="min-w-0">
+                      <span className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--color-ivory-66)]">
+                        <Ponto cor={COR_TIPO_BEM[b.tipo] ?? NEON.verde} />
                         {ROTULO_TIPO_BEM[b.tipo] ?? b.tipo}
-                      </Chip>
-                      <span
-                        className="font-mono text-[13px] font-semibold tabular-nums"
-                        style={{ color: NEON.verde }}
-                      >
-                        {b.valorBrl != null ? formatBRL(b.valorBrl) : "—"}
                       </span>
+                      <span className="mt-1 block truncate text-[13px] text-ivory">
+                        {b.titulo}
+                      </span>
+                      {b.devedorNome && (
+                        <span className="block truncate font-mono text-[11px] text-[var(--color-ivory-40)]">
+                          {b.devedorNome}
+                        </span>
+                      )}
                     </span>
-                    <p className="mt-1 truncate text-[13px] text-ivory">
-                      {b.titulo}
-                    </p>
-                    {b.devedorNome && (
-                      <p className="truncate font-mono text-[11px] text-[var(--color-ivory-66)]">
-                        {b.devedorNome}
-                      </p>
-                    )}
+                    <span
+                      className="shrink-0 font-mono text-[13px] font-semibold tabular-nums"
+                      style={{ color: NEON.verde }}
+                    >
+                      {b.valorBrl != null ? formatBRL(b.valorBrl) : "—"}
+                    </span>
                   </li>
                 ))}
               </ul>
             )}
-          </PainelVidro>
+          </Painel>
 
-          {/* Rosca neon do consumo de APIs (cota Assertiva R$600) */}
-          <PainelVidro className="shrink-0">
-            <TituloPainel cor={NEON.laranja}>Consumo de APIs</TituloPainel>
-            <DonutCusto gasto={dados.gastoMesBrl} teto={dados.tetoMesBrl} />
-          </PainelVidro>
+          {/* Radial (herói da navegação) + consumo de APIs */}
+          <div className="flex min-h-0 flex-col gap-4">
+            <Painel className="flex min-h-0 flex-1 flex-col items-center justify-center p-4">
+              <RadialCentro nome={nome} fotoUrl={perfil?.fotoUrl ?? null} />
+              <p className="sonar-wordmark mt-2 shrink-0 text-[clamp(15px,1.2vw,20px)]">
+                Para onde deseja ir?
+              </p>
+            </Painel>
+            <Painel className="shrink-0 p-5">
+              <TituloPainel>Consumo de APIs</TituloPainel>
+              <div className="mt-3">
+                <DonutCusto gasto={dados.gastoMesBrl} teto={dados.tetoMesBrl} />
+              </div>
+            </Painel>
+          </div>
         </div>
       </div>
     </main>

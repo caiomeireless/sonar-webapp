@@ -1,16 +1,15 @@
 "use client";
 
-// Radial central do Console — 2x maior (até 660px), mas SEM estourar a
-// tela única: mede o espaço disponível (largura E altura da própria área)
-// e usa o maior tamanho que couber. Anel de metal líquido verde em volta
-// (mesmo shader do Sincronizar), roda na paleta verde neon.
+// Radial central do Console — mede o espaço disponível (largura E altura)
+// e usa o maior tamanho que couber, sem estourar a tela única. Paleta
+// verde neon; SEM moldura (v9: página descarregada de efeitos — o radial
+// é o herói sozinho).
 import { useEffect, useRef, useState } from "react";
 
-import { BordaLiquidaMetal } from "@/components/ui/BordaLiquidaMetal";
 import RadialHub from "@/components/ui/RadialHub";
 import { ITENS_RADIAL_EQUIPE } from "@/components/ui/itens-radial-equipe";
 
-const TAM_MAX = 660; // 2x o tamanho anterior (330)
+const TAM_MAX = 560;
 
 export default function RadialCentro({
   nome,
@@ -29,7 +28,7 @@ export default function RadialCentro({
       setTam(
         Math.max(
           260,
-          Math.min(TAM_MAX, el.clientWidth - 16, el.clientHeight - 16),
+          Math.min(TAM_MAX, el.clientWidth - 8, el.clientHeight - 8),
         ),
       );
     medir();
@@ -44,22 +43,13 @@ export default function RadialCentro({
       className="flex min-h-0 w-full flex-1 items-center justify-center"
     >
       {tam > 0 && (
-        <BordaLiquidaMetal
-          cor="signal"
-          anel
-          radius={(tam + 12) / 2}
-          className="block"
-        >
-          <div className="rounded-full p-[3px]">
-            <RadialHub
-              itens={ITENS_RADIAL_EQUIPE}
-              nome={nome}
-              fotoUrl={fotoUrl}
-              size={tam}
-              paleta="verde"
-            />
-          </div>
-        </BordaLiquidaMetal>
+        <RadialHub
+          itens={ITENS_RADIAL_EQUIPE}
+          nome={nome}
+          fotoUrl={fotoUrl}
+          size={tam}
+          paleta="verde"
+        />
       )}
     </div>
   );
