@@ -85,7 +85,12 @@ function Painel({
   className?: string;
 }) {
   return (
-    <SpotlightCard radius={16} className={`overflow-hidden ${className}`}>
+    <SpotlightCard
+      radius={16}
+      local
+      claro
+      className={`overflow-hidden ${className}`}
+    >
       {children}
     </SpotlightCard>
   );
@@ -208,8 +213,8 @@ export default async function InicioPage() {
               Boas-Vindas, {primeiroNome}.
             </h1>
           </Painel>
-          <Painel className="flex items-center px-6 py-4">
-          {/* Sincronizações — uma linha discreta, sem painel próprio.
+          <div className="flex items-center px-6 py-4">
+          {/* Sincronizações SOLTAS, sem card (ditado 24/08).
               Os robôs rodam juntos (Ter+Sex): quando e-SAJ e eproc capturaram
               no MESMO dia, mostra combinado pra não parecer dado faltando. */}
           <div className="flex flex-wrap items-center gap-x-5 gap-y-1 font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--color-ivory-66)]">
@@ -247,7 +252,7 @@ export default async function InicioPage() {
               acervo
             </span>
           </div>
-          </Painel>
+          </div>
         </div>
 
         {/* ============ AVISOS — faixa fina, SÓ quando existir aviso ====== */}
@@ -352,12 +357,13 @@ export default async function InicioPage() {
           </Painel>
           </div>
 
-          {/* Direita: radial GRANDE no espaço que sobra, frase embaixo */}
-          <div className="flex min-h-0 flex-col items-center gap-2">
-            <RadialCentro nome={nome} fotoUrl={perfil?.fotoUrl ?? null} />
-            <p className="sonar-wordmark shrink-0 pb-1 text-[clamp(16px,1.3vw,22px)]">
+          {/* Direita: frase à ESQUERDA do radial (fonte em dobro) e o
+              radial empurrado pra direita (ditado 24/08). */}
+          <div className="flex min-h-0 flex-col items-center gap-4 lg:flex-row lg:justify-end">
+            <p className="sonar-wordmark shrink-0 text-center text-[clamp(24px,2.6vw,44px)] leading-[1.15] lg:max-w-[300px] lg:text-left">
               Para onde deseja ir?
             </p>
+            <RadialCentro nome={nome} fotoUrl={perfil?.fotoUrl ?? null} />
           </div>
         </div>
       </div>
