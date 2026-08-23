@@ -302,10 +302,11 @@ export default async function InicioPage() {
         </Painel>
 
         {/* ============ ÁREA PRINCIPAL ============ */}
-        <div className="grid min-h-0 flex-1 gap-5 lg:grid-cols-[minmax(0,1fr)_440px]">
-          {/* Últimas Movimentações das Execuções — rola por dentro (barra
-              invisível) e fecha com Ver Mais → relatório completo (Radar) */}
-          <Painel className="flex min-h-0 flex-col p-5">
+        <div className="grid min-h-0 flex-1 gap-5 lg:grid-cols-[480px_minmax(0,1fr)]">
+          {/* Coluna esquerda: Movimentações (rolagem interna preservada)
+              com o Consumo de APIs logo embaixo */}
+          <div className="flex min-h-0 flex-col gap-4">
+          <Painel className="flex min-h-0 flex-1 flex-col p-5">
             <TituloPainel>Últimas Movimentações das Execuções</TituloPainel>
             {dados.movimentacoes.length === 0 ? (
               <p className="mt-4 text-sm text-[var(--color-ivory-66)]">
@@ -341,18 +342,20 @@ export default async function InicioPage() {
             )}
           </Painel>
 
-          {/* Radial FORA de caixa (herói da navegação) + consumo de APIs */}
-          <div className="flex min-h-0 flex-col items-center gap-3">
+          <Painel className="shrink-0 p-5">
+            <TituloPainel>Consumo de APIs</TituloPainel>
+            <div className="mt-3">
+              <DonutCusto gasto={dados.gastoMesBrl} teto={dados.tetoMesBrl} />
+            </div>
+          </Painel>
+          </div>
+
+          {/* Direita: radial GRANDE no espaço que sobra, frase embaixo */}
+          <div className="flex min-h-0 flex-col items-center gap-2">
             <RadialCentro nome={nome} fotoUrl={perfil?.fotoUrl ?? null} />
-            <p className="sonar-wordmark shrink-0 text-[clamp(15px,1.2vw,20px)]">
+            <p className="sonar-wordmark shrink-0 pb-1 text-[clamp(16px,1.3vw,22px)]">
               Para onde deseja ir?
             </p>
-            <Painel className="w-full shrink-0 p-5">
-              <TituloPainel>Consumo de APIs</TituloPainel>
-              <div className="mt-3">
-                <DonutCusto gasto={dados.gastoMesBrl} teto={dados.tetoMesBrl} />
-              </div>
-            </Painel>
           </div>
         </div>
       </div>
