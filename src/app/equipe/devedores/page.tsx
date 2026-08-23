@@ -11,7 +11,7 @@
 // Server Component. Em dev/preview, aceita ?eu=email pra simular login.
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Clock, FileText, Landmark, Plus, Users } from "lucide-react";
+import { Plus } from "lucide-react";
 import {
   listarCredoresComResumo,
   listarDevedoresPaginado,
@@ -22,8 +22,9 @@ import {
 import { perfilLogado } from "@/lib/perfis-server";
 import { ehCliente } from "@/lib/perfis";
 import { devEuFromParam } from "@/lib/dev-auth";
-import { formatBRL, formatTempoRelativo } from "@/lib/format";
+import { formatBRL, formatDocumento } from "@/lib/format";
 import { Paginacao } from "@/components/ui/Paginacao";
+import { BordaLiquidaMetal } from "@/components/ui/BordaLiquidaMetal";
 import { CarteiraView } from "./CarteiraView";
 import { BuscaCarteira } from "./BuscaCarteira";
 import { ControlesDevedores, ToggleVisaoBanco } from "./ControlesDevedores";
@@ -60,34 +61,43 @@ export default async function DevedoresEquipePage({ searchParams }: Props) {
   const visao = um(params.v) === "clientes" ? "clientes" : "devedores";
 
   return (
-    <main className="relative mx-auto max-w-[1200px] px-6 py-12 sm:px-10">
-      {/* Cabeçalho enxuto: título + toggle de visão + ação primária */}
-      <header className="title-shield mb-8 text-center">
-        <h1 className="font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
-          Banco de Dossiês
-        </h1>
-        <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
-          {visao === "devedores"
-            ? "Busca Direta · Todos os Rastreados"
-            : "Carteira Hierárquica · Por Cliente"}
-        </p>
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-          <ToggleVisaoBanco atual={visao} />
-          <Link
-            href={novoHref}
-            className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-signal)]/85 px-5 py-3 text-sm font-semibold text-onyx shadow-[0_4px_24px_rgba(60,255,138,0.28)] ring-1 ring-[var(--color-signal)]/60 transition hover:bg-[var(--color-tip-glow)]/90"
-          >
-            <Plus className="h-4 w-4" aria-hidden="true" />
-            Novo Devedor
-          </Link>
-        </div>
-      </header>
+    <main className="relative min-h-svh">
+      {/* Fundo: preto puro cobrindo a página toda (pedido 23/08). */}
+      <div aria-hidden="true" className="absolute inset-0 bg-black" />
 
-      {visao === "devedores" ? (
-        <VisaoDevedores params={params} linkBase={linkBase} />
-      ) : (
-        <VisaoClientes params={params} linkBase={linkBase} />
-      )}
+      <div className="relative z-10 mx-auto max-w-[1200px] px-6 py-12 sm:px-10">
+        {/* Cabeçalho enxuto: título + toggle de visão + ação primária */}
+        <header className="title-shield mb-8 text-center">
+          <h1 className="font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
+            Banco de Dossiês
+          </h1>
+          <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
+            {visao === "devedores"
+              ? "Busca Direta · Todos os Rastreados"
+              : "Carteira Hierárquica · Por Cliente"}
+          </p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <ToggleVisaoBanco atual={visao} />
+            {/* Metal líquido no botão principal — mesmo shader do
+                Sincronizar da TopBar (pedido 23/08). */}
+            <BordaLiquidaMetal cor="signal" radius={14} className="inline-flex">
+              <Link
+                href={novoHref}
+                className="inline-flex items-center gap-2 rounded-[11px] bg-[var(--color-signal)]/85 px-5 py-3 text-sm font-semibold text-onyx shadow-[0_4px_24px_rgba(60,255,138,0.28)] transition hover:bg-[var(--color-tip-glow)]/90"
+              >
+                <Plus className="h-4 w-4" aria-hidden="true" />
+                Novo Devedor
+              </Link>
+            </BordaLiquidaMetal>
+          </div>
+        </header>
+
+        {visao === "devedores" ? (
+          <VisaoDevedores params={params} linkBase={linkBase} />
+        ) : (
+          <VisaoClientes params={params} linkBase={linkBase} />
+        )}
+      </div>
     </main>
   );
 }
@@ -154,11 +164,24 @@ async function VisaoDevedores({
           </p>
         </div>
       ) : (
-        <div className="mt-4 flex flex-col gap-2.5">
-          {listagem.devedores.map((d) => (
-            <LinhaDevedor key={d.id} devedor={d} linkBase={linkBase} />
-          ))}
-        </div>
+        <>
+          {/* Cabeçalho de colunas — mesmo grid dos cards, então tudo
+              fica alinhado na vertical entre TODOS os cards. */}
+          <div
+            aria-hidden="true"
+            className={`mt-6 hidden px-5 sm:grid ${GRID_LINHA} gap-x-6 font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]`}
+          >
+            <span className="text-center sm:pr-5">Infos</span>
+            <span>Devedor · Cliente</span>
+            <span className="text-right">Execução Atualizada</span>
+          </div>
+
+          <div className="mt-2 flex flex-col gap-2">
+            {listagem.devedores.map((d) => (
+              <LinhaDevedor key={d.id} devedor={d} linkBase={linkBase} />
+            ))}
+          </div>
+        </>
       )}
 
       <Paginacao pagina={listagem.pagina} totalPaginas={totalPaginas} />
@@ -166,8 +189,18 @@ async function VisaoDevedores({
   );
 }
 
-// Linha-card do devedor: 1 clique = dossiê. Hierarquia de leitura:
-// nome (grande, cor devedor) -> credor(es) -> agregados à direita.
+// Grid compartilhado entre o cabeçalho de colunas e cada card — é ele que
+// garante o alinhamento horizontal pedido: trilho fixo de infos à esquerda,
+// identificação no meio, valor da execução na ponta direita.
+const GRID_LINHA = "sm:grid-cols-[104px_minmax(0,1fr)_200px]";
+
+// Linha-card do devedor: 1 clique = dossiê. Layout ditado (23/08):
+//   [nº de informações] | NOME EM CAIXA ALTA vermelho + CPF/CNPJ cinza
+//                       |   Cliente: … em amarelo                       | valor da execução
+// Os dois números são alimentados pelos robôs: infos = bens_encontrados
+// (buscas patrimoniais) e execução = débito judicial dos casos (sync
+// Themis hoje; robô de análise das planilhas de cálculo atualizará o
+// mesmo campo).
 function LinhaDevedor({
   devedor: d,
   linkBase,
@@ -176,86 +209,86 @@ function LinhaDevedor({
   linkBase: string;
 }) {
   const docLabel = d.tipo === "PF" ? "CPF" : "CNPJ";
-  const rastreado = d.total_bens > 0;
   const credoresLabel =
     d.credores.length === 0
       ? null
       : d.credores.length <= 2
         ? d.credores.map((c) => c.nome).join(" · ")
         : `${d.credores[0].nome} + ${d.credores.length - 1} outros`;
+  const temExecucao = d.debito_total_brl > 0;
 
   return (
     <Link
       href={`/equipe/devedores/${d.id}${linkBase}`}
-      className="glass-flat group flex flex-col gap-3 p-5 transition
+      className={`glass-flat group grid grid-cols-[72px_minmax(0,1fr)] items-center gap-x-4 gap-y-2 px-5 py-4 transition
                  hover:border-[var(--color-signal-soft-2)]
                  hover:shadow-[0_0_24px_-10px_rgba(60,255,138,0.4)]
-                 sm:flex-row sm:items-center sm:justify-between"
+                 ${GRID_LINHA} sm:gap-x-6`}
     >
-      {/* Identificação */}
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <h3 className="nome-devedor truncate font-serif text-xl leading-tight text-[var(--color-devedor)] transition group-hover:underline">
-            {d.nome}
-          </h3>
-          <span className="inline-flex shrink-0 items-center rounded-full border border-[var(--color-ivory-22)] bg-[var(--color-surface-2)]/60 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.20em] text-[var(--color-ivory-66)]">
-            {d.tipo}
-          </span>
-        </div>
-        <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[12px] text-[var(--color-ivory-66)]">
-          <span>
-            {docLabel} {d.documento}
-          </span>
-          {credoresLabel ? (
-            <span className="inline-flex min-w-0 items-center gap-1.5">
-              <Users className="h-3 w-3 shrink-0 text-[var(--color-cliente)]/70" aria-hidden="true" />
-              <span className="nome-cliente truncate text-[var(--color-cliente)]">
-                {credoresLabel}
-              </span>
-            </span>
-          ) : null}
-          {d.casos_count > 0 ? (
-            <span className="inline-flex items-center gap-1.5">
-              <FileText className="h-3 w-3 text-[var(--color-signal)]/70" aria-hidden="true" />
-              {d.casos_count} {d.casos_count === 1 ? "caso" : "casos"}
-            </span>
-          ) : null}
-        </div>
+      {/* Trilho esquerdo: nº de informações encontradas pelos robôs */}
+      <div className="text-center sm:border-r sm:border-white/10 sm:pr-5">
+        <p
+          className={`font-mono text-[26px] font-medium leading-none tabular-nums ${
+            d.total_bens > 0
+              ? "text-[var(--color-signal)]"
+              : "text-[var(--color-ivory-40)]"
+          }`}
+        >
+          {d.total_bens}
+        </p>
+        <p className="mt-1.5 font-mono text-[12px] uppercase tracking-[0.16em] text-[var(--color-ivory-66)]">
+          {d.total_bens === 1 ? "Info" : "Infos"}
+        </p>
       </div>
 
-      {/* Agregados — coluna direita */}
-      <div className="flex shrink-0 items-center gap-5">
-        {d.debito_total_brl > 0 ? (
-          <div className="text-right">
-            <p className="font-mono text-[15px] tabular-nums text-[var(--color-ivory-88)]">
-              {formatBRL(d.debito_total_brl)}
-            </p>
-            <p className="mt-0.5 font-mono text-[12px] uppercase tracking-[0.16em] text-[var(--color-ivory-66)]">
-              Débito Judicial
-            </p>
-          </div>
-        ) : null}
-        {rastreado ? (
-          <div className="text-right">
-            <p className="font-mono text-[15px] tabular-nums text-[var(--color-gold)]">
-              {d.valor_estimado_total_brl > 0
-                ? formatBRL(d.valor_estimado_total_brl)
-                : "—"}
-            </p>
-            <p className="mt-0.5 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--color-signal)]">
-              <Landmark className="h-3 w-3" aria-hidden="true" />
-              {d.total_bens} {d.total_bens === 1 ? "bem" : "bens"}
-            </p>
-          </div>
-        ) : (
-          <span className="inline-flex items-center rounded-full border border-[var(--color-ivory-22)] px-3 py-1 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--color-ivory-66)]">
-            Aguardando busca
+      {/* Identificação: nome CAIXA ALTA vermelho + documento cinza; embaixo,
+          o cliente (credor) em amarelo. */}
+      <div className="min-w-0">
+        <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-0.5">
+          <h3
+            className="min-w-0 max-w-full truncate font-serif text-[clamp(18px,1.8vw,24px)] font-semibold uppercase leading-tight tracking-[0.02em] text-[#FF5050] transition group-hover:underline"
+            style={{
+              textShadow:
+                "0 0 1px rgba(255,80,80,0.65), 0 0 14px rgba(255,80,80,0.20)",
+            }}
+          >
+            {d.nome}
+          </h3>
+          <span className="shrink-0 font-mono text-[12px] tracking-[0.04em] text-[var(--color-ivory-66)]">
+            {docLabel} {formatDocumento(d.tipo, d.documento)}
           </span>
-        )}
-        <span className="hidden items-center gap-1.5 font-mono text-[11px] text-[var(--color-ivory-40)] md:inline-flex">
-          <Clock className="h-3 w-3" aria-hidden="true" />
-          {formatTempoRelativo(d.ultima_consulta_em)}
-        </span>
+        </div>
+        <p className="mt-1 truncate font-mono text-[13px] leading-snug">
+          {credoresLabel ? (
+            <span className="text-[#FFD93D]">Cliente: {credoresLabel}</span>
+          ) : (
+            <span className="text-[var(--color-ivory-40)]">
+              Sem Cliente Vinculado
+            </span>
+          )}
+          {d.casos_count > 0 ? (
+            <span className="text-[var(--color-ivory-40)]">
+              {" "}
+              · {d.casos_count} {d.casos_count === 1 ? "caso" : "casos"}
+            </span>
+          ) : null}
+        </p>
+      </div>
+
+      {/* Ponta direita: valor da última atualização da execução */}
+      <div className="col-span-2 border-t border-white/10 pt-2 text-left sm:col-span-1 sm:border-t-0 sm:pt-0 sm:text-right">
+        <p
+          className={`font-mono text-[17px] tabular-nums leading-tight ${
+            temExecucao
+              ? "text-[var(--color-ivory)]"
+              : "text-[var(--color-ivory-40)]"
+          }`}
+        >
+          {temExecucao ? formatBRL(d.debito_total_brl) : "—"}
+        </p>
+        <p className="mt-0.5 font-mono text-[12px] uppercase tracking-[0.14em] text-[var(--color-ivory-66)]">
+          {temExecucao ? "Execução Atualizada" : "Aguardando Robôs"}
+        </p>
       </div>
     </Link>
   );
