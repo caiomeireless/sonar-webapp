@@ -32,6 +32,15 @@ type SpotlightCardProps = {
   className?: string;
   /** Raio da borda em px (default 16) — pra encaixar dentro de molduras. */
   radius?: number;
+  /** Desliga o backdrop-blur — obrigatório em LISTAS (dezenas de cards com
+      backdrop-filter travam o scroll; sobre fundo preto o blur é invisível). */
+  blur?: boolean;
+  /** Modo LOCAL: o glow segue o cursor em coordenadas do PRÓPRIO card
+      (handlers no elemento), sem listener global e sem background-attachment
+      fixed. Obrigatório em listas (attachment fixed repinta todas as linhas
+      a cada frame de scroll) e dentro de elementos com transform (CardStack:
+      fixed vira scroll pela spec e o glow some). */
+  local?: boolean;
 };
 
 // Adaptado do prompt "spotlight-card" (GlowCard original) para o tema Sonar:
@@ -42,10 +51,13 @@ export function SpotlightCard({
   children,
   className = "",
   radius = 16,
+  blur = true,
+  local = false,
 }: SpotlightCardProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (local) return; // modo local não usa o listener global
     const el = ref.current;
     if (!el) return;
     subscribers.add(el);
@@ -53,7 +65,23 @@ export function SpotlightCard({
     return () => {
       subscribers.delete(el);
     };
-  }, []);
+  }, [local]);
+
+  // Modo local: 1 getBoundingClientRect por frame SÓ no card sob o cursor
+  // (contra 4 writes × N cards do listener global).
+  function onMoveLocal(e: React.PointerEvent<HTMLDivElement>) {
+    const el = ref.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty("--x", (e.clientX - r.left).toFixed(2));
+    el.style.setProperty("--y", (e.clientY - r.top).toFixed(2));
+  }
+  function onLeaveLocal() {
+    const el = ref.current;
+    if (!el) return;
+    el.style.setProperty("--x", "-9999");
+    el.style.setProperty("--y", "-9999");
+  }
 
   const style: CSSProperties = {
     // Tunables do efeito
@@ -73,20 +101,42 @@ export function SpotlightCard({
       calc(var(--x, 0) * 1px) calc(var(--y, 0) * 1px),
       hsl(var(--hue) 100% 62% / 0.12), transparent 70%
     )`,
-    backgroundSize:
-      "calc(100% + (2 * var(--border-size))) calc(100% + (2 * var(--border-size)))",
-    backgroundPosition: "50% 50%",
-    backgroundAttachment: "fixed",
     backgroundRepeat: "no-repeat",
     border: "var(--border-size) solid var(--backup-border)",
     borderRadius: "calc(var(--radius) * 1px)",
     position: "relative",
-    backdropFilter: "blur(6px)",
-    WebkitBackdropFilter: "blur(6px)",
+    ...(local
+      ? {
+          // Coords locais + attachment scroll: glow inicia fora do card
+          // (-9999) até o primeiro pointermove sobre ele.
+          ["--x" as string]: "-9999",
+          ["--y" as string]: "-9999",
+          backgroundSize: "100% 100%",
+          backgroundPosition: "0 0",
+        }
+      : {
+          backgroundSize:
+            "calc(100% + (2 * var(--border-size))) calc(100% + (2 * var(--border-size)))",
+          backgroundPosition: "50% 50%",
+          backgroundAttachment: "fixed",
+        }),
+    ...(blur
+      ? {
+          backdropFilter: "blur(6px)",
+          WebkitBackdropFilter: "blur(6px)",
+        }
+      : {}),
   };
 
   return (
-    <div ref={ref} data-spotlight style={style} className={className}>
+    <div
+      ref={ref}
+      data-spotlight={local ? "local" : "true"}
+      style={style}
+      className={className}
+      onPointerMove={local ? onMoveLocal : undefined}
+      onPointerLeave={local ? onLeaveLocal : undefined}
+    >
       {children}
     </div>
   );

@@ -11,7 +11,6 @@
 // Server Component. Em dev/preview, aceita ?eu=email pra simular login.
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Plus } from "lucide-react";
 import {
   listarCredoresComResumo,
   listarDevedoresPaginado,
@@ -24,7 +23,7 @@ import { ehCliente } from "@/lib/perfis";
 import { devEuFromParam } from "@/lib/dev-auth";
 import { formatBRL, formatDocumento } from "@/lib/format";
 import { Paginacao } from "@/components/ui/Paginacao";
-import { BordaLiquidaMetal } from "@/components/ui/BordaLiquidaMetal";
+import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { CarteiraView } from "./CarteiraView";
 import { BuscaCarteira } from "./BuscaCarteira";
 import { ControlesDevedores, ToggleVisaoBanco } from "./ControlesDevedores";
@@ -56,7 +55,6 @@ export default async function DevedoresEquipePage({ searchParams }: Props) {
 
   const euDev = devEuFromParam(params.eu);
   const linkBase = euDev ? `?eu=${encodeURIComponent(euDev)}` : "";
-  const novoHref = `/equipe/devedores/novo${linkBase}`;
 
   const visao = um(params.v) === "clientes" ? "clientes" : "devedores";
 
@@ -66,8 +64,10 @@ export default async function DevedoresEquipePage({ searchParams }: Props) {
       <div aria-hidden="true" className="absolute inset-0 bg-black" />
 
       <div className="relative z-10 mx-auto max-w-[1200px] px-6 py-12 sm:px-10">
-        {/* Cabeçalho enxuto: título + toggle de visão + ação primária */}
-        <header className="title-shield mb-8 text-center">
+        {/* Cabeçalho enxuto: título + toggle de visão + ação primária.
+            SpotlightCard = luz do mouse igual à tela inicial (pedido 23/08). */}
+        <header className="mb-8">
+          <SpotlightCard local className="p-6 text-center sm:p-7">
           <h1 className="font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
             Banco de Dossiês
           </h1>
@@ -76,20 +76,12 @@ export default async function DevedoresEquipePage({ searchParams }: Props) {
               ? "Busca Direta · Todos os Rastreados"
               : "Carteira Hierárquica · Por Cliente"}
           </p>
+          {/* Sem botão de cadastro manual (ditado 23/08): devedor entra
+              automaticamente pela sync do Themis ou sistemas futuros. */}
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <ToggleVisaoBanco atual={visao} />
-            {/* Metal líquido no botão principal — mesmo shader do
-                Sincronizar da TopBar (pedido 23/08). */}
-            <BordaLiquidaMetal cor="signal" radius={14} className="inline-flex">
-              <Link
-                href={novoHref}
-                className="inline-flex items-center gap-2 rounded-[11px] bg-[var(--color-signal)]/85 px-5 py-3 text-sm font-semibold text-onyx shadow-[0_4px_24px_rgba(60,255,138,0.28)] transition hover:bg-[var(--color-tip-glow)]/90"
-              >
-                <Plus className="h-4 w-4" aria-hidden="true" />
-                Novo Devedor
-              </Link>
-            </BordaLiquidaMetal>
           </div>
+          </SpotlightCard>
         </header>
 
         {visao === "devedores" ? (
@@ -140,9 +132,13 @@ async function VisaoDevedores({
 
   return (
     <>
-      <ControlesDevedores />
+      {/* Busca + filtros num card só (pedido 23/08: "não fica tudo
+          flutuando"), com a mesma luz de mouse da tela inicial. */}
+      <SpotlightCard local className="p-4 sm:p-5">
+        <ControlesDevedores />
+      </SpotlightCard>
 
-      <p className="mt-4 font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+      <p className="mt-4 font-mono text-[12px] uppercase tracking-[0.22em] text-[#FF5050]">
         {listagem.total === 0
           ? q
             ? `Nenhum devedor encontrado para "${q}"`
@@ -153,7 +149,7 @@ async function VisaoDevedores({
       </p>
 
       {listagem.devedores.length === 0 ? (
-        <div className="mt-10 rounded-2xl border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.45)] p-10 text-center">
+        <SpotlightCard local className="mt-10 p-10 text-center">
           <p className="font-serif text-2xl text-ivory">
             {q ? "Nenhum resultado" : "Nenhum devedor rastreado"}
           </p>
@@ -162,26 +158,13 @@ async function VisaoDevedores({
               ? "Confira a grafia ou tente só parte do nome ou do documento."
               : "Os devedores chegam pela sincronização do Themis ou pelo cadastro manual."}
           </p>
-        </div>
+        </SpotlightCard>
       ) : (
-        <>
-          {/* Cabeçalho de colunas — mesmo grid dos cards, então tudo
-              fica alinhado na vertical entre TODOS os cards. */}
-          <div
-            aria-hidden="true"
-            className={`mt-6 hidden px-5 sm:grid ${GRID_LINHA} gap-x-6 font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]`}
-          >
-            <span className="text-center sm:pr-5">Infos</span>
-            <span>Devedor · Cliente</span>
-            <span className="text-right">Execução Atualizada</span>
-          </div>
-
-          <div className="mt-2 flex flex-col gap-2">
-            {listagem.devedores.map((d) => (
-              <LinhaDevedor key={d.id} devedor={d} linkBase={linkBase} />
-            ))}
-          </div>
-        </>
+        <div className="mt-4 flex flex-col gap-2">
+          {listagem.devedores.map((d) => (
+            <LinhaDevedor key={d.id} devedor={d} linkBase={linkBase} />
+          ))}
+        </div>
       )}
 
       <Paginacao pagina={listagem.pagina} totalPaginas={totalPaginas} />
@@ -189,9 +172,9 @@ async function VisaoDevedores({
   );
 }
 
-// Grid compartilhado entre o cabeçalho de colunas e cada card — é ele que
-// garante o alinhamento horizontal pedido: trilho fixo de infos à esquerda,
-// identificação no meio, valor da execução na ponta direita.
+// Grid único de todas as linhas — é ele que garante o alinhamento
+// horizontal pedido: trilho fixo de infos à esquerda, identificação no
+// meio, valor da execução na ponta direita.
 const GRID_LINHA = "sm:grid-cols-[104px_minmax(0,1fr)_200px]";
 
 // Linha-card do devedor: 1 clique = dossiê. Layout ditado (23/08):
@@ -218,12 +201,14 @@ function LinhaDevedor({
   const temExecucao = d.debito_total_brl > 0;
 
   return (
+    <SpotlightCard
+      blur={false}
+      local
+      className="transition hover:shadow-[0_0_24px_-10px_rgba(60,255,138,0.35)]"
+    >
     <Link
       href={`/equipe/devedores/${d.id}${linkBase}`}
-      className={`glass-flat group grid grid-cols-[72px_minmax(0,1fr)] items-center gap-x-4 gap-y-2 px-5 py-4 transition
-                 hover:border-[var(--color-signal-soft-2)]
-                 hover:shadow-[0_0_24px_-10px_rgba(60,255,138,0.4)]
-                 ${GRID_LINHA} sm:gap-x-6`}
+      className={`group grid grid-cols-[72px_minmax(0,1fr)] items-center gap-x-4 gap-y-2 px-5 py-4 ${GRID_LINHA} sm:gap-x-6`}
     >
       {/* Trilho esquerdo: nº de informações encontradas pelos robôs */}
       <div className="text-center sm:border-r sm:border-white/10 sm:pr-5">
@@ -260,7 +245,7 @@ function LinhaDevedor({
         </div>
         <p className="mt-1 truncate font-mono text-[13px] leading-snug">
           {credoresLabel ? (
-            <span className="text-[#FFD93D]">Cliente: {credoresLabel}</span>
+            <span className="text-ivory">Cliente: {credoresLabel}</span>
           ) : (
             <span className="text-[var(--color-ivory-40)]">
               Sem Cliente Vinculado
@@ -291,6 +276,7 @@ function LinhaDevedor({
         </p>
       </div>
     </Link>
+    </SpotlightCard>
   );
 }
 
@@ -327,21 +313,22 @@ async function VisaoClientes({
 
   return (
     <>
-      <p className="mb-4 text-center font-mono text-[13px] text-[var(--color-signal)]">
+      <SpotlightCard local className="p-4 sm:p-5">
+        <BuscaCarteira />
+      </SpotlightCard>
+
+      {/* Contador no MESMO lugar e tipografia da visão Devedores. */}
+      <p className="mb-2 mt-4 font-mono text-[12px] uppercase tracking-[0.22em] text-[#FF5050]">
         {credores.length === 0
           ? q
-            ? `Nenhum cliente encontrado para "${q}".`
-            : "Nenhum cliente cadastrado ainda."
+            ? `Nenhum cliente encontrado para "${q}"`
+            : "Nenhum cliente cadastrado ainda"
           : `${credores.length} ${
-              credores.length === 1 ? "Cliente Ativo" : "Clientes Ativos"
-            } · ${totalCasos} ${totalCasos === 1 ? "Caso" : "Casos"} · ${totalBens} ${
-              totalBens === 1 ? "Bem Rastreado" : "Bens Rastreados"
+              credores.length === 1 ? "cliente" : "clientes"
+            } · ${totalCasos} ${totalCasos === 1 ? "caso" : "casos"} · ${totalBens} ${
+              totalBens === 1 ? "bem" : "bens"
             } — ${formatBRL(totalEstimado)} estimado`}
       </p>
-
-      <div className="mb-6">
-        <BuscaCarteira />
-      </div>
 
       {credores.length > 0 ? (
         <CarteiraView credores={credores} euQuery={linkBase} />

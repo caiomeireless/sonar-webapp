@@ -772,6 +772,18 @@ body {
   );
 }
 
+/* Modo LOCAL do SpotlightCard (listas + baralho): --x/--y em coordenadas
+   do PRÓPRIO card, então os pseudo-elementos abandonam o attachment fixed
+   — que repintava TODAS as linhas a cada frame de scroll e, dentro de
+   elemento com transform (CardStack), vira "scroll" pela spec e desloca
+   o glow pra fora do card. */
+[data-spotlight="local"]::before,
+[data-spotlight="local"]::after {
+  background-attachment: scroll;
+  background-size: 100% 100%;
+  background-position: 0 0;
+}
+
 /* ============================================================
    Design system — classes globais unificadas
    Inspiradas no padrao do BP Customer Office. Sao layers de

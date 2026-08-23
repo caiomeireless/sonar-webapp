@@ -8,7 +8,7 @@
 // Default: cards.
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Mail, Phone, Hash, Clock, User2, FileText, Coins } from "lucide-react";
+import { Mail, Phone, Hash, Clock } from "lucide-react";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { CardStack } from "@/components/ui/CardStack";
 import { formatBRL, formatTempoRelativo } from "@/lib/format";
@@ -142,6 +142,7 @@ function CardCredor({
   // alem do scale ja aplicado pelo CardStack.
   const conteudo = (
     <SpotlightCard
+      local
       className={
         "h-full p-7 transition-opacity duration-300 " +
         (active ? "cursor-pointer opacity-100" : "opacity-[0.78]")
@@ -152,7 +153,14 @@ function CardCredor({
           <span className="font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-signal)]">
             Cliente
           </span>
-          <h3 className="nome-cliente mt-3 font-serif text-[26px] leading-[1.15] text-[var(--color-gold)]">
+          {/* Nome do cliente: LARANJA em caixa alta (ditado 23/08). */}
+          <h3
+            className="mt-3 font-serif text-[24px] font-semibold uppercase leading-[1.15] tracking-[0.02em] text-[#FF9C41]"
+            style={{
+              textShadow:
+                "0 0 1px rgba(255,156,65,0.6), 0 0 14px rgba(255,156,65,0.18)",
+            }}
+          >
             {credor.nome}
           </h3>
 
@@ -260,6 +268,11 @@ function CardCredor({
   );
 }
 
+// Lista de clientes no MESMO livro-razão do Banco de Dossiês (ditado
+// 23/08): trilho de infos alinhado à esquerda, NOME EM CAIXA ALTA laranja
+// + documento cinza + resumo embaixo, valor estimado na ponta direita.
+const GRID_LINHA_CREDOR = "sm:grid-cols-[104px_minmax(0,1fr)_200px]";
+
 function ListaCredores({
   credores,
   euQuery,
@@ -268,144 +281,91 @@ function ListaCredores({
   euQuery: string;
 }) {
   return (
-    <div className="mt-8 overflow-x-auto rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-1)]">
-      <table className="w-full border-collapse text-left text-base">
-        <thead>
-          <tr className="border-b border-[var(--color-line)] text-[var(--color-ivory)]">
-            <Th icon={<User2 className="h-3.5 w-3.5" />}>Cliente</Th>
-            <Th icon={<FileText className="h-3.5 w-3.5" />}>Tipo</Th>
-            <Th icon={<FileText className="h-3.5 w-3.5" />}>Documento</Th>
-            <Th align="right" icon={<Hash className="h-3.5 w-3.5" />}>
-              Casos
-            </Th>
-            <Th align="right" icon={<Hash className="h-3.5 w-3.5" />}>
-              Devedores
-            </Th>
-            <Th align="right" icon={<Hash className="h-3.5 w-3.5" />}>
-              Bens
-            </Th>
-            <Th align="right" icon={<Coins className="h-3.5 w-3.5" />}>
-              Valor Estimado
-            </Th>
-            <Th align="right" icon={<Clock className="h-3.5 w-3.5" />}>
-              Última Consulta
-            </Th>
-          </tr>
-        </thead>
-        <tbody>
-          {credores.map((c, i) => (
-            <tr
-              key={c.id}
-              className={
-                "group border-b border-[var(--color-line)] transition hover:bg-[var(--color-surface-2)] " +
-                (i % 2 === 1 ? "bg-[var(--color-surface-2)]/30" : "")
-              }
-            >
-              <Td>
-                <Link
-                  href={`/equipe/devedores/credor/${c.id}${euQuery}`}
-                  className="nome-cliente block font-serif text-lg leading-tight text-[var(--color-cliente)] hover:underline"
-                >
-                  {c.nome}
-                </Link>
-              </Td>
-              <Td>
-                <span
-                  className={
-                    "inline-flex rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] " +
-                    (c.tipo === "PF"
-                      ? "border-[var(--color-signal)]/40 bg-[var(--color-signal-soft)] text-[var(--color-signal)]"
-                      : "border-[var(--color-gold)]/40 bg-[var(--color-gold)]/10 text-[var(--color-gold)]")
-                  }
-                >
-                  {c.tipo}
-                </span>
-              </Td>
-              <Td>
-                <span className="font-mono text-sm text-ivory">
-                  {c.documento}
-                </span>
-              </Td>
-              <Td align="right">
-                <span className="font-mono text-base tabular-nums text-ivory">
-                  {c.total_casos}
-                </span>
-              </Td>
-              <Td align="right">
-                <span className="font-mono text-base tabular-nums text-ivory">
-                  {c.total_devedores}
-                </span>
-              </Td>
-              <Td align="right">
-                <span className="font-serif text-2xl text-[var(--color-gold)]">
-                  {c.total_bens}
-                </span>
-              </Td>
-              <Td align="right">
-                <span className="whitespace-nowrap font-mono text-base tabular-nums text-ivory">
-                  {c.valor_estimado_total_brl > 0
-                    ? formatBRL(c.valor_estimado_total_brl)
-                    : "—"}
-                </span>
-              </Td>
-              <Td align="right">
-                <span className="font-mono text-sm text-[var(--color-ivory-88)]">
-                  {formatTempoRelativo(c.ultima_consulta_em)}
-                </span>
-              </Td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="mt-6 flex flex-col gap-2">
+      {credores.map((c) => (
+        <LinhaCredor key={c.id} credor={c} euQuery={euQuery} />
+      ))}
     </div>
   );
 }
 
-function Th({
-  children,
-  align,
-  icon,
+function LinhaCredor({
+  credor: c,
+  euQuery,
 }: {
-  children: React.ReactNode;
-  align?: "right";
-  icon?: React.ReactNode;
+  credor: CredorListagem;
+  euQuery: string;
 }) {
+  const docLabel = c.tipo === "PF" ? "CPF" : "CNPJ";
+  const temValor = c.valor_estimado_total_brl > 0;
   return (
-    <th
-      className={
-        "px-5 py-5 font-mono text-[12px] uppercase tracking-[0.22em] font-normal " +
-        (align === "right" ? "text-right" : "text-left")
-      }
+    <SpotlightCard
+      blur={false}
+      local
+      className="transition hover:shadow-[0_0_24px_-10px_rgba(255,156,65,0.35)]"
     >
-      <span
-        className={
-          "inline-flex items-center gap-1.5 " +
-          (align === "right" ? "flex-row-reverse" : "")
-        }
+      <Link
+        href={`/equipe/devedores/credor/${c.id}${euQuery}`}
+        className={`group grid grid-cols-[72px_minmax(0,1fr)] items-center gap-x-4 gap-y-2 px-5 py-4 ${GRID_LINHA_CREDOR} sm:gap-x-6`}
       >
-        {icon ? (
-          <span className="text-[var(--color-signal)]/70">{icon}</span>
-        ) : null}
-        {children}
-      </span>
-    </th>
-  );
-}
+        {/* Trilho esquerdo: nº de informações encontradas (bens dos
+            devedores deste cliente) */}
+        <div className="text-center sm:border-r sm:border-white/10 sm:pr-5">
+          <p
+            className={`font-mono text-[26px] font-medium leading-none tabular-nums ${
+              c.total_bens > 0
+                ? "text-[var(--color-signal)]"
+                : "text-[var(--color-ivory-40)]"
+            }`}
+          >
+            {c.total_bens}
+          </p>
+          <p className="mt-1.5 font-mono text-[12px] uppercase tracking-[0.16em] text-[var(--color-ivory-66)]">
+            {c.total_bens === 1 ? "Info" : "Infos"}
+          </p>
+        </div>
 
-function Td({
-  children,
-  align,
-}: {
-  children: React.ReactNode;
-  align?: "right";
-}) {
-  return (
-    <td
-      className={
-        "px-5 py-5 align-middle " + (align === "right" ? "text-right" : "")
-      }
-    >
-      {children}
-    </td>
+        {/* Identificação: nome do CLIENTE em caixa alta laranja + doc cinza */}
+        <div className="min-w-0">
+          <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-0.5">
+            <h3
+              className="min-w-0 max-w-full truncate font-serif text-[clamp(18px,1.8vw,24px)] font-semibold uppercase leading-tight tracking-[0.02em] text-[#FF9C41] transition group-hover:underline"
+              style={{
+                textShadow:
+                  "0 0 1px rgba(255,156,65,0.6), 0 0 14px rgba(255,156,65,0.18)",
+              }}
+            >
+              {c.nome}
+            </h3>
+            <span className="shrink-0 font-mono text-[12px] tracking-[0.04em] text-[var(--color-ivory-66)]">
+              {docLabel} {c.documento}
+            </span>
+          </div>
+          <p className="mt-1 truncate font-mono text-[13px] leading-snug text-ivory">
+            {c.total_casos} {c.total_casos === 1 ? "caso" : "casos"}
+            <span className="text-[var(--color-ivory-66)]">
+              {" "}
+              · {c.total_devedores}{" "}
+              {c.total_devedores === 1 ? "devedor" : "devedores"} ·{" "}
+              {formatTempoRelativo(c.ultima_consulta_em)}
+            </span>
+          </p>
+        </div>
+
+        {/* Ponta direita: valor estimado dos bens rastreados */}
+        <div className="col-span-2 border-t border-white/10 pt-2 text-left sm:col-span-1 sm:border-t-0 sm:pt-0 sm:text-right">
+          <p
+            className={`font-mono text-[17px] tabular-nums leading-tight ${
+              temValor ? "text-[var(--color-ivory)]" : "text-[var(--color-ivory-40)]"
+            }`}
+          >
+            {temValor ? formatBRL(c.valor_estimado_total_brl) : "—"}
+          </p>
+          <p className="mt-0.5 font-mono text-[12px] uppercase tracking-[0.14em] text-[var(--color-ivory-66)]">
+            {temValor ? "Valor Estimado" : "Aguardando Robôs"}
+          </p>
+        </div>
+      </Link>
+    </SpotlightCard>
   );
 }

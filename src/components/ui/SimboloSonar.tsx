@@ -6,9 +6,13 @@ import { STAIRCASE_PATTERN } from "@/components/LogoSvg";
 export function SimboloSonar({
   height = 110,
   className = "",
+  animado = true,
 }: {
   height?: number;
   className?: string;
+  /** false = versão estática (SMIL não é pausável por CSS, então quem
+      respeita prefers-reduced-motion renderiza esta variante). */
+  animado?: boolean;
 }) {
   // Recorte do viewBox original (920x300 do LogoSvg ampliado): a escada
   // vive em x 100-280, e as ondas descem até y ~295.
@@ -53,11 +57,15 @@ export function SimboloSonar({
 
       {/* Ponto emissor pulsando */}
       <circle cx="190" cy="228" r="3.5" fill="#3CFF8A" filter="url(#simb-glow)">
-        <animate attributeName="r" values="3;5;3" dur="1.5s" repeatCount="indefinite" />
-        <animate attributeName="opacity" values="1;0.55;1" dur="1.5s" repeatCount="indefinite" />
+        {animado ? (
+          <>
+            <animate attributeName="r" values="3;5;3" dur="1.5s" repeatCount="indefinite" />
+            <animate attributeName="opacity" values="1;0.55;1" dur="1.5s" repeatCount="indefinite" />
+          </>
+        ) : null}
       </circle>
 
-      {/* 4 ondas descendo, staggered */}
+      {/* 4 ondas descendo, staggered (estáticas quando animado=false) */}
       <g transform="translate(190 228)" filter="url(#simb-glow)">
         {[0, 0.7, 1.4, 2.1].map((delay, i) => (
           <path
@@ -66,24 +74,28 @@ export function SimboloSonar({
             fill="none"
             stroke="#3CFF8A"
             strokeWidth="1.5"
-            strokeOpacity="0"
-            transform="scale(0.1)"
+            strokeOpacity={animado ? "0" : String(0.55 - i * 0.14)}
+            transform={animado ? "scale(0.1)" : `scale(${1.1 + i * 0.75})`}
           >
-            <animateTransform
-              attributeName="transform"
-              type="scale"
-              values="0.1;3.5"
-              dur="2.8s"
-              begin={`${delay}s`}
-              repeatCount="indefinite"
-            />
-            <animate
-              attributeName="stroke-opacity"
-              values="0.9;0"
-              dur="2.8s"
-              begin={`${delay}s`}
-              repeatCount="indefinite"
-            />
+            {animado ? (
+              <>
+                <animateTransform
+                  attributeName="transform"
+                  type="scale"
+                  values="0.1;3.5"
+                  dur="2.8s"
+                  begin={`${delay}s`}
+                  repeatCount="indefinite"
+                />
+                <animate
+                  attributeName="stroke-opacity"
+                  values="0.9;0"
+                  dur="2.8s"
+                  begin={`${delay}s`}
+                  repeatCount="indefinite"
+                />
+              </>
+            ) : null}
           </path>
         ))}
       </g>
