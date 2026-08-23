@@ -143,6 +143,7 @@ function CardCredor({
   const conteudo = (
     <SpotlightCard
       local
+      claro
       className={
         "h-full p-7 transition-opacity duration-300 " +
         (active ? "cursor-pointer opacity-100" : "opacity-[0.78]")
@@ -302,6 +303,7 @@ function LinhaCredor({
     <SpotlightCard
       blur={false}
       local
+      claro
       className="transition hover:shadow-[0_0_24px_-10px_rgba(255,156,65,0.35)]"
     >
       <Link

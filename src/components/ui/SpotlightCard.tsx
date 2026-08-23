@@ -41,6 +41,10 @@ type SpotlightCardProps = {
       a cada frame de scroll) e dentro de elementos com transform (CardStack:
       fixed vira scroll pela spec e o glow some). */
   local?: boolean;
+  /** Vidro CLARO/esbranquiçado (ditado 23/08): base ivory translúcida +
+      brilho branco no topo + borda mais visível. Usar junto com `local`
+      (a camada extra de gradiente assume attachment scroll). */
+  claro?: boolean;
 };
 
 // Adaptado do prompt "spotlight-card" (GlowCard original) para o tema Sonar:
@@ -53,6 +57,7 @@ export function SpotlightCard({
   radius = 16,
   blur = true,
   local = false,
+  claro = false,
 }: SpotlightCardProps) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -89,8 +94,12 @@ export function SpotlightCard({
     ["--spread" as string]: "0",
     ["--radius" as string]: String(radius),
     ["--border" as string]: "1.5",
-    ["--backdrop" as string]: "rgba(5, 7, 6, 0.82)",
-    ["--backup-border" as string]: "rgba(232, 228, 214, 0.10)",
+    ["--backdrop" as string]: claro
+      ? "rgba(236, 233, 226, 0.12)"
+      : "rgba(5, 7, 6, 0.82)",
+    ["--backup-border" as string]: claro
+      ? "rgba(232, 228, 214, 0.20)"
+      : "rgba(232, 228, 214, 0.10)",
     ["--size" as string]: "260",
     ["--border-size" as string]: "calc(var(--border) * 1px)",
     ["--spotlight-size" as string]: "calc(var(--size) * 1px)",
@@ -100,7 +109,11 @@ export function SpotlightCard({
       var(--spotlight-size) var(--spotlight-size) at
       calc(var(--x, 0) * 1px) calc(var(--y, 0) * 1px),
       hsl(var(--hue) 100% 62% / 0.12), transparent 70%
-    )`,
+    )${
+      claro
+        ? ", linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.015) 55%, transparent 80%)"
+        : ""
+    }`,
     backgroundRepeat: "no-repeat",
     border: "var(--border-size) solid var(--backup-border)",
     borderRadius: "calc(var(--radius) * 1px)",

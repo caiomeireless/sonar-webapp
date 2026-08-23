@@ -201,6 +201,7 @@ function LinhaDevedor({
     <SpotlightCard
       blur={false}
       local
+      claro
       className="transition hover:shadow-[0_0_24px_-10px_rgba(60,255,138,0.35)]"
     >
     <Link
