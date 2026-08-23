@@ -64,10 +64,8 @@ export default async function DevedoresEquipePage({ searchParams }: Props) {
       <div aria-hidden="true" className="absolute inset-0 bg-black" />
 
       <div className="relative z-10 mx-auto max-w-[1200px] px-6 py-12 sm:px-10">
-        {/* Cabeçalho enxuto: título + toggle de visão + ação primária.
-            SpotlightCard = luz do mouse igual à tela inicial (pedido 23/08). */}
-        <header className="mb-8">
-          <SpotlightCard local className="p-6 text-center sm:p-7">
+        {/* Cabeçalho SEM painel (ditado 23/08): título solto no preto. */}
+        <header className="mb-8 text-center">
           <h1 className="font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
             Banco de Dossiês
           </h1>
@@ -81,7 +79,6 @@ export default async function DevedoresEquipePage({ searchParams }: Props) {
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <ToggleVisaoBanco atual={visao} />
           </div>
-          </SpotlightCard>
         </header>
 
         {visao === "devedores" ? (
@@ -138,7 +135,7 @@ async function VisaoDevedores({
         <ControlesDevedores />
       </SpotlightCard>
 
-      <p className="mt-4 font-mono text-[12px] uppercase tracking-[0.22em] text-[#FF5050]">
+      <p className="mt-4 font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-devedor)]">
         {listagem.total === 0
           ? q
             ? `Nenhum devedor encontrado para "${q}"`
@@ -231,10 +228,10 @@ function LinhaDevedor({
       <div className="min-w-0">
         <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-0.5">
           <h3
-            className="min-w-0 max-w-full truncate font-serif text-[clamp(18px,1.8vw,24px)] font-semibold uppercase leading-tight tracking-[0.02em] text-[#FF5050] transition group-hover:underline"
+            className="min-w-0 max-w-full truncate font-serif text-[clamp(18px,1.8vw,24px)] font-semibold uppercase leading-tight tracking-[0.02em] text-[var(--color-devedor)] transition group-hover:underline"
             style={{
               textShadow:
-                "0 0 1px rgba(255,80,80,0.65), 0 0 14px rgba(255,80,80,0.20)",
+                "0 0 1px rgba(220,38,38,0.6), 0 0 12px rgba(220,38,38,0.16)",
             }}
           >
             {d.nome}
@@ -245,7 +242,10 @@ function LinhaDevedor({
         </div>
         <p className="mt-1 truncate font-mono text-[13px] leading-snug">
           {credoresLabel ? (
-            <span className="text-[#FF9C41]">Cliente: {credoresLabel}</span>
+            <>
+              <span className="text-ivory">Cliente: </span>
+              <span className="text-[#FF9C41]">{credoresLabel}</span>
+            </>
           ) : (
             <span className="text-[var(--color-ivory-40)]">
               Sem Cliente Vinculado
@@ -318,7 +318,7 @@ async function VisaoClientes({
       </SpotlightCard>
 
       {/* Contador no MESMO lugar e tipografia da visão Devedores. */}
-      <p className="mb-2 mt-4 font-mono text-[12px] uppercase tracking-[0.22em] text-[#FF5050]">
+      <p className="mb-2 mt-4 font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-devedor)]">
         {credores.length === 0
           ? q
             ? `Nenhum cliente encontrado para "${q}"`
