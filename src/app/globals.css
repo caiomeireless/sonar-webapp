@@ -772,6 +772,21 @@ body {
   );
 }
 
+/* Giro 3D do logo na tela de carregamento (ditado 24/08): rotação 360°
+   "de lado" (eixo Y) com perspectiva no pai. */
+@keyframes logo-giro-3d {
+  from { transform: rotateY(0deg); }
+  to   { transform: rotateY(360deg); }
+}
+.logo-giro-3d {
+  animation: logo-giro-3d 3.2s linear infinite;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .logo-giro-3d { animation: none; }
+}
+
 /* Modo LOCAL do SpotlightCard (listas + baralho): --x/--y em coordenadas
    do PRÓPRIO card, então os pseudo-elementos abandonam o attachment fixed
    — que repintava TODAS as linhas a cada frame de scroll e, dentro de
