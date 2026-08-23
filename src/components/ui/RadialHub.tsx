@@ -61,6 +61,7 @@ export default function RadialHub({
   size = 460,
   compacto = false,
   paleta = "gold",
+  escalaFonte = 1,
   onCentroClick,
 }: {
   itens: ItemRadial[];
@@ -70,6 +71,8 @@ export default function RadialHub({
   compacto?: boolean;
   /** "gold" (padrão da plataforma) ou "verde" neon (Console do Início). */
   paleta?: "gold" | "verde";
+  /** Multiplicador do tamanho das letras dos gomos (Início usa >1). */
+  escalaFonte?: number;
   onCentroClick?: () => void;
 }) {
   const router = useRouter();
@@ -95,9 +98,10 @@ export default function RadialHub({
   const raioIcones = (bandaExt + bandaInt) / 2;
   const raioCentro = bandaInt - Math.max(5, size * 0.024); // foto do usuário
 
-  const CAIXA = Math.round(size * 0.222);
+  // escalaFonte também alarga a caixa (senão a letra maior clipa no gomo).
+  const CAIXA = Math.round(size * 0.222 * Math.min(1.25, escalaFonte));
   const icone = Math.max(14, Math.round(size * 0.048));
-  const fonte = Math.max(8, Math.round(size * 0.0242));
+  const fonte = Math.max(8, Math.round(size * 0.0242 * escalaFonte));
   const clipId = `radial-centro-${compacto ? "c" : "g"}`;
 
   // Paleta da roda — gold (padrão) ou verde neon (Console do Início).

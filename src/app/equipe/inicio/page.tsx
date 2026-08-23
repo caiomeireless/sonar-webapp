@@ -195,9 +195,9 @@ export default async function InicioPage() {
       <div aria-hidden="true" className="absolute inset-0 bg-black" />
 
       <div className="relative z-10 mx-auto flex h-full max-w-[1480px] flex-col gap-4 p-4 lg:px-10 lg:py-5">
-        {/* ============ CABEÇALHO: boas-vindas + status de sync ============ */}
-        <Painel className="flex shrink-0 flex-col gap-3 px-6 py-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
+        {/* ============ CABEÇALHO: boas-vindas e sync em CARDS SEPARADOS == */}
+        <div className="flex shrink-0 flex-col gap-4 lg:flex-row lg:items-stretch">
+          <Painel className="flex-1 px-6 py-4">
             <p
               className="font-mono text-[11px] font-semibold uppercase tracking-[0.26em]"
               style={{ color: NEON.verde }}
@@ -207,7 +207,8 @@ export default async function InicioPage() {
             <h1 className="sonar-wordmark mt-1 text-[clamp(22px,2vw,32px)]">
               Boas-Vindas, {primeiroNome}.
             </h1>
-          </div>
+          </Painel>
+          <Painel className="flex items-center px-6 py-4">
           {/* Sincronizações — uma linha discreta, sem painel próprio.
               Os robôs rodam juntos (Ter+Sex): quando e-SAJ e eproc capturaram
               no MESMO dia, mostra combinado pra não parecer dado faltando. */}
@@ -246,7 +247,8 @@ export default async function InicioPage() {
               acervo
             </span>
           </div>
-        </Painel>
+          </Painel>
+        </div>
 
         {/* ============ AVISOS — faixa fina, SÓ quando existir aviso ====== */}
         {avisos.length > 0 && (

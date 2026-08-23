@@ -147,6 +147,21 @@ export function Sidebar({ items, usuario, portal }: SidebarProps) {
     }
   }, []);
 
+  // Tela INICIAL nasce com o nav FECHADO (padrão pedido em 23/08) — sem
+  // persistir: abrir manualmente funciona, e nas demais telas vale a
+  // preferência salva do usuário.
+  useEffect(() => {
+    if (pathname === "/equipe/inicio") {
+      setRecolhido(true);
+      return;
+    }
+    try {
+      setRecolhido(window.localStorage.getItem(COLLAPSED_KEY) === "1");
+    } catch {
+      // ignora
+    }
+  }, [pathname]);
+
   function alternarRecolhido() {
     setRecolhido((prev) => {
       const novo = !prev;
