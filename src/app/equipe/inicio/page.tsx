@@ -358,11 +358,13 @@ export default async function InicioPage() {
           </Painel>
           </div>
 
-          {/* Direita: frase à ESQUERDA do radial (máx 2 linhas, sem invadir
-              card nenhum) e a roda na metade do tamanho, encaixada no vão
+          {/* Direita: frase GRANDE em UMA linha, verde neon, colada na roda
               (ditado 24/08). */}
-          <div className="flex min-h-0 flex-col items-center justify-center gap-3 overflow-hidden lg:flex-row lg:gap-5">
-            <p className="sonar-wordmark shrink-0 text-center text-[clamp(17px,1.5vw,24px)] leading-[1.2] lg:max-w-[190px] lg:text-left">
+          <div className="flex min-h-0 flex-col items-center justify-center gap-3 overflow-hidden lg:flex-row lg:gap-6">
+            <p
+              className="sonar-wordmark shrink-0 whitespace-nowrap text-center text-[clamp(26px,2.6vw,44px)] leading-[1.1]"
+              style={{ color: "var(--color-signal)" }}
+            >
               Para onde deseja ir?
             </p>
             <RadialCentro nome={nome} fotoUrl={perfil?.fotoUrl ?? null} />

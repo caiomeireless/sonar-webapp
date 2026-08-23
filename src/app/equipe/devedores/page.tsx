@@ -66,13 +66,16 @@ export default async function DevedoresEquipePage({ searchParams }: Props) {
       <div className="relative z-10 mx-auto max-w-[1200px] px-6 py-12 sm:px-10">
         {/* Cabeçalho SEM painel (ditado 23/08): título solto no preto. */}
         <header className="mb-8 text-center">
-          <h1 className="font-serif text-[clamp(38px,5.5vw,68px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
+          {/* -10% no tamanho + contorno branco nas letras douradas
+              (ditado 24/08). */}
+          <h1
+            className="font-serif text-[clamp(34px,4.95vw,61px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]"
+            style={{ WebkitTextStroke: "1px rgba(255,255,255,0.65)" }}
+          >
             Banco de Dossiês
           </h1>
           <p className="mt-3 font-mono text-[clamp(15px,1.9vw,24px)] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
-            {visao === "devedores"
-              ? "Busca Direta · Todos os Rastreados"
-              : "Carteira Hierárquica · Por Cliente"}
+            Ficha das Informações de Todos os Devedores.
           </p>
           {/* Sem botão de cadastro manual (ditado 23/08): devedor entra
               automaticamente pela sync do Themis ou sistemas futuros. */}
@@ -175,10 +178,10 @@ async function VisaoDevedores({
 // meio, valor da execução na ponta direita.
 const GRID_LINHA = "sm:grid-cols-[104px_minmax(0,1fr)_200px]";
 
-// Degradê vidrificado do card de filtro: verde bem escuro na esquerda
-// morrendo no preto à direita (ditado 24/08).
+// Fundo do card de filtro: verde escuro UNIFORME (ditado 24/08 — o
+// degradê esquerda→preto foi substituído por verde escuro inteiro).
 const DEGRADE_FILTRO =
-  "linear-gradient(90deg, rgba(16,78,44,0.78) 0%, rgba(10,40,24,0.42) 42%, rgba(0,0,0,0) 78%)";
+  "linear-gradient(0deg, rgba(16,78,44,0.55), rgba(16,78,44,0.55))";
 
 // Linha-card do devedor: 1 clique = dossiê. Layout ditado (23/08):
 //   [nº de informações] | NOME EM CAIXA ALTA vermelho + CPF/CNPJ cinza

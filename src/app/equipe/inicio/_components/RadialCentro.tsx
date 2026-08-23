@@ -11,9 +11,9 @@ import { BordaLiquidaMetal } from "@/components/ui/BordaLiquidaMetal";
 import RadialHub from "@/components/ui/RadialHub";
 import { ITENS_RADIAL_EQUIPE } from "@/components/ui/itens-radial-equipe";
 
-// Metade do tamanho antigo (ditado 24/08): a roda tem que caber
-// direitinho no vão abaixo dos cards, sem passar por cima de nada.
-const TAM_MAX = 360;
+// Metade do tamanho antigo, depois -10% (ditados 24/08): a roda tem que
+// caber direitinho no vão abaixo dos cards, sem cortar nem sobrepor nada.
+const TAM_MAX = 324;
 
 export default function RadialCentro({
   nome,
