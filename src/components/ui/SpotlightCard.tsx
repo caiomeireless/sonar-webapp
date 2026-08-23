@@ -45,6 +45,10 @@ type SpotlightCardProps = {
       brilho branco no topo + borda mais visível. Usar junto com `local`
       (a camada extra de gradiente assume attachment scroll). */
   claro?: boolean;
+  /** Camada extra de fundo (CSS background-image, ex. linear-gradient)
+      pintada por baixo do glow — pro card de filtro com degradê verde
+      escuro → preto (ditado 24/08). Usar junto com `local`. */
+  degrade?: string;
 };
 
 // Adaptado do prompt "spotlight-card" (GlowCard original) para o tema Sonar:
@@ -58,6 +62,7 @@ export function SpotlightCard({
   blur = true,
   local = false,
   claro = false,
+  degrade,
 }: SpotlightCardProps) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -113,7 +118,7 @@ export function SpotlightCard({
       claro
         ? ", linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.015) 55%, transparent 80%)"
         : ""
-    }`,
+    }${degrade ? `, ${degrade}` : ""}`,
     backgroundRepeat: "no-repeat",
     border: "var(--border-size) solid var(--backup-border)",
     borderRadius: "calc(var(--radius) * 1px)",

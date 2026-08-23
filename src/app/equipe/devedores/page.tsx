@@ -66,10 +66,10 @@ export default async function DevedoresEquipePage({ searchParams }: Props) {
       <div className="relative z-10 mx-auto max-w-[1200px] px-6 py-12 sm:px-10">
         {/* Cabeçalho SEM painel (ditado 23/08): título solto no preto. */}
         <header className="mb-8 text-center">
-          <h1 className="font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
+          <h1 className="font-serif text-[clamp(38px,5.5vw,68px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
             Banco de Dossiês
           </h1>
-          <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
+          <p className="mt-3 font-mono text-[clamp(15px,1.9vw,24px)] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
             {visao === "devedores"
               ? "Busca Direta · Todos os Rastreados"
               : "Carteira Hierárquica · Por Cliente"}
@@ -130,8 +130,9 @@ async function VisaoDevedores({
   return (
     <>
       {/* Busca + filtros num card só (pedido 23/08: "não fica tudo
-          flutuando"), com a mesma luz de mouse da tela inicial. */}
-      <SpotlightCard local className="p-4 sm:p-5">
+          flutuando"), com a mesma luz de mouse da tela inicial e degradê
+          verde escuro → preto (ditado 24/08). */}
+      <SpotlightCard local degrade={DEGRADE_FILTRO} className="p-4 sm:p-5">
         <ControlesDevedores />
       </SpotlightCard>
 
@@ -173,6 +174,11 @@ async function VisaoDevedores({
 // horizontal pedido: trilho fixo de infos à esquerda, identificação no
 // meio, valor da execução na ponta direita.
 const GRID_LINHA = "sm:grid-cols-[104px_minmax(0,1fr)_200px]";
+
+// Degradê vidrificado do card de filtro: verde bem escuro na esquerda
+// morrendo no preto à direita (ditado 24/08).
+const DEGRADE_FILTRO =
+  "linear-gradient(90deg, rgba(16,78,44,0.78) 0%, rgba(10,40,24,0.42) 42%, rgba(0,0,0,0) 78%)";
 
 // Linha-card do devedor: 1 clique = dossiê. Layout ditado (23/08):
 //   [nº de informações] | NOME EM CAIXA ALTA vermelho + CPF/CNPJ cinza
@@ -314,7 +320,7 @@ async function VisaoClientes({
 
   return (
     <>
-      <SpotlightCard local className="p-4 sm:p-5">
+      <SpotlightCard local degrade={DEGRADE_FILTRO} className="p-4 sm:p-5">
         <BuscaCarteira />
       </SpotlightCard>
 
