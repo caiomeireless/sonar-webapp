@@ -33,8 +33,10 @@ export type DadosConsole = {
   casosAtivos: number;
   devedores: number;
   capturas7d: number;
-  /** Casos com crédito satisfeito (encerrados por quitação). */
-  quitados: number;
+  /** Penhoras EFETUADAS detectadas na última raspagem dos robôs —
+      andamentos com auto/termo de penhora ou penhora realizada/positiva
+      (padrões fortes; o índice trigram da mig 023 atende os ILIKEs). */
+  penhorasEfetuadas: number;
   /** Casos com acordo/pagamento detectado nos andamentos dos robôs. */
   casosComAcordo: number;
   /** Gasto do mês com APIs pagas (registro próprio — a Assertiva NÃO expõe
@@ -55,7 +57,7 @@ const VAZIO: DadosConsole = {
   casosAtivos: 0,
   devedores: 0,
   capturas7d: 0,
-  quitados: 0,
+  penhorasEfetuadas: 0,
   casosComAcordo: 0,
   gastoMesBrl: 0,
   tetoMesBrl: TETO_ASSERTIVA_BRL,
@@ -107,7 +109,7 @@ export async function obterDadosConsole(): Promise<DadosConsole> {
     const [
       bens,
       casos,
-      quitados,
+      penhoras,
       devedores,
       capturas,
       acordos,
@@ -131,10 +133,17 @@ export async function obterDadosConsole(): Promise<DadosConsole> {
           .eq("status", "ativo")
           .eq("eh_demo", false),
         sb
-          .from("casos")
+          .from("andamentos")
           .select("id", { count: "exact", head: true })
-          .eq("status", "satisfeito")
-          .eq("eh_demo", false),
+          .or(
+            [
+              "descricao.ilike.%auto de penhora%",
+              "descricao.ilike.%termo de penhora%",
+              "descricao.ilike.%penhora realizada%",
+              "descricao.ilike.%penhora efetivada%",
+              "descricao.ilike.%penhora positiva%",
+            ].join(","),
+          ),
         sb
           .from("devedores")
           .select("id", { count: "exact", head: true })
@@ -213,7 +222,7 @@ export async function obterDadosConsole(): Promise<DadosConsole> {
       casosAtivos: casos.count ?? 0,
       devedores: devedores.count ?? 0,
       capturas7d: capturas.count ?? 0,
-      quitados: quitados.count ?? 0,
+      penhorasEfetuadas: penhoras.count ?? 0,
       casosComAcordo,
       gastoMesBrl,
       tetoMesBrl: TETO_ASSERTIVA_BRL,

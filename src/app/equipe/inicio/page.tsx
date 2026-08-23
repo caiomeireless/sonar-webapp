@@ -15,7 +15,7 @@ import { redirect } from "next/navigation";
 import {
   Activity,
   Banknote,
-  CheckCircle2,
+  Lock,
   Gem,
   Handshake,
   Scale,
@@ -188,7 +188,7 @@ export default async function InicioPage() {
     { rotulo: "Bens Localizados", valor: dados.totalBens, formato: "int", cor: NEON.verde, Icon: Gem },
     { rotulo: "Valores Encontrados", valor: dados.patrimonioBrl, formato: "brl", cor: NEON.laranja, Icon: Banknote },
     { rotulo: "Casos Ativos", valor: dados.casosAtivos, formato: "int", cor: NEON.ciano, Icon: Scale },
-    { rotulo: "Quitações", valor: dados.quitados, formato: "int", cor: NEON.violeta, Icon: CheckCircle2 },
+    { rotulo: "Penhoras Efetuadas", valor: dados.penhorasEfetuadas, formato: "int", cor: NEON.violeta, Icon: Lock },
     { rotulo: "Com Acordo", valor: dados.casosComAcordo, formato: "int", cor: NEON.amarelo, Icon: Handshake },
     { rotulo: "Devedores", valor: dados.devedores, formato: "int", cor: NEON.rosa, Icon: Users },
     { rotulo: "Capturas 7d", valor: dados.capturas7d, formato: "int", cor: NEON.turquesa, Icon: Activity },
