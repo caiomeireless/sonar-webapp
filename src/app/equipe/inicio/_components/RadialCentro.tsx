@@ -28,13 +28,14 @@ export default function RadialCentro({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    // SEM piso forçado acima do espaço real (o piso antigo fazia a roda
-    // vazar por cima da régua de indicadores em telas baixas).
+    // SEM piso acima do espaço real: o piso de 200 fazia a roda estourar
+    // e ser cortada em janelas baixas (print 24/08). O -24 desconta o
+    // anel de metal líquido que envolve a roda (+10 de raio + folga).
     const medir = () =>
       setTam(
         Math.min(
           TAM_MAX,
-          Math.max(200, Math.min(el.clientWidth, el.clientHeight) - 8),
+          Math.max(140, Math.min(el.clientWidth, el.clientHeight) - 24),
         ),
       );
     medir();

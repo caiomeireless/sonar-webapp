@@ -25,7 +25,6 @@ import { formatBRL, formatDocumento } from "@/lib/format";
 import { Paginacao } from "@/components/ui/Paginacao";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { CarteiraView } from "./CarteiraView";
-import { BuscaCarteira } from "./BuscaCarteira";
 import { ControlesDevedores, ToggleVisaoBanco } from "./ControlesDevedores";
 
 function normalizar(s: string | null | undefined): string {
@@ -303,16 +302,43 @@ async function VisaoClientes({
 }) {
   const todosCredores = await listarCredoresComResumo();
   const q = um(params.q);
+  const tipoRaw = um(params.t);
+  const rastreioRaw = um(params.r);
+  const ordemRaw = um(params.o);
 
   const qNorm = normalizar(q);
   const qDigitos = soDigitos(q);
-  const credores = qNorm
+  let credores = qNorm
     ? todosCredores.filter((c) => {
         if (normalizar(c.nome).includes(qNorm)) return true;
         if (qDigitos && soDigitos(c.documento).includes(qDigitos)) return true;
         return false;
       })
     : todosCredores;
+
+  // Mesmos filtros da visão Devedores (ditado 24/08), aplicados aqui
+  // sobre os clientes: tipo PF/PJ, rastreio por bens e ordenação.
+  if (tipoRaw === "PF" || tipoRaw === "PJ") {
+    credores = credores.filter((c) => c.tipo === tipoRaw);
+  }
+  if (rastreioRaw === "com-bens") {
+    credores = credores.filter((c) => c.total_bens > 0);
+  } else if (rastreioRaw === "aguardando") {
+    credores = credores.filter((c) => c.total_bens === 0);
+  }
+  credores = [...credores];
+  if (ordemRaw === "nome") {
+    credores.sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+  } else if (ordemRaw === "valor") {
+    credores.sort(
+      (a, b) => b.valor_estimado_total_brl - a.valor_estimado_total_brl,
+    );
+  } else {
+    // "Mais Recentes" = última consulta mais nova primeiro (nulls no fim).
+    credores.sort((a, b) =>
+      (b.ultima_consulta_em ?? "").localeCompare(a.ultima_consulta_em ?? ""),
+    );
+  }
 
   const totalCasos = credores.reduce((s, c) => s + c.total_casos, 0);
   const totalBens = credores.reduce((s, c) => s + c.total_bens, 0);
@@ -323,8 +349,9 @@ async function VisaoClientes({
 
   return (
     <>
+      {/* Mesmo card de filtro da visão Devedores (ditado 24/08). */}
       <SpotlightCard local degrade={DEGRADE_FILTRO} className="p-4 sm:p-5">
-        <BuscaCarteira />
+        <ControlesDevedores />
       </SpotlightCard>
 
       {/* Contador no MESMO lugar e tipografia da visão Devedores. */}

@@ -238,7 +238,8 @@ export default async function InicioPage() {
 
         {/* ============ CABEÇALHO: boas-vindas e sync em CARDS SEPARADOS == */}
         <div className="flex shrink-0 flex-col gap-4 lg:flex-row lg:items-stretch">
-          <Painel className="flex-1 px-6 py-4">
+          {/* Boas-Vindas SEM card (ditado 24/08) — texto solto no preto. */}
+          <div className="flex-1 px-6 py-4">
             <p
               className="font-mono text-[11px] font-semibold uppercase tracking-[0.26em]"
               style={{ color: NEON.verde }}
@@ -248,7 +249,7 @@ export default async function InicioPage() {
             <h1 className="sonar-wordmark mt-1 text-[clamp(22px,2vw,32px)]">
               Boas-Vindas, {primeiroNome}.
             </h1>
-          </Painel>
+          </div>
           <div className="flex items-center px-6 py-4">
           {/* Sincronizações SOLTAS, sem card (ditado 24/08).
               Os robôs rodam juntos (Ter+Sex): quando e-SAJ e eproc capturaram
