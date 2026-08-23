@@ -89,11 +89,18 @@ export async function obterDadosConsole(): Promise<DadosConsole> {
     inicioMes.setDate(1);
     inicioMes.setHours(0, 0, 0, 0);
 
+    // Janela de 30 dias de propósito: sem ela o ORDER BY capturado_em com
+    // filtro de fonte estoura o statement timeout do Supabase (57014 — foi
+    // o "—" do e-SAJ em 21/08). O índice definitivo vem na migração 023.
+    const trintaDias = new Date(
+      Date.now() - 30 * 24 * 3600 * 1000,
+    ).toISOString();
     const ultimaCaptura = (fonte: string) =>
       sb
         .from("andamentos")
         .select("capturado_em")
         .eq("fonte", fonte)
+        .gte("capturado_em", trintaDias)
         .order("capturado_em", { ascending: false })
         .limit(1);
 
@@ -220,7 +227,7 @@ export async function obterDadosConsole(): Promise<DadosConsole> {
         totalAndamentos: totalAnd.count ?? 0,
       },
       ultimasLocalizacoes,
-      movimentacoes: radar.erro ? [] : radar.itens.slice(0, 4),
+      movimentacoes: radar.erro ? [] : radar.itens.slice(0, 12),
     };
   } catch {
     return VAZIO;

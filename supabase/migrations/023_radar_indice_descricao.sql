@@ -16,6 +16,12 @@ create index if not exists andamentos_descricao_trgm_idx
   on public.andamentos
   using gin (descricao gin_trgm_ops);
 
+-- "Última captura por fonte" do Console do Início: sem este índice o
+-- ORDER BY capturado_em filtrado por fonte estoura o statement timeout
+-- (erro 57014 visto em 21/08 — o e-SAJ aparecia como "—" na tela).
+create index if not exists andamentos_fonte_capturado_idx
+  on public.andamentos (fonte, capturado_em desc);
+
 -- ============================================================================
 --  CONFERÊNCIA:
 --    explain analyse

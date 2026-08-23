@@ -10,6 +10,7 @@
 //   - Hierarquia: cabeçalho → régua de 7 indicadores → área principal
 //     (Movimentações | Localizações | Radial + consumo de APIs).
 //   - Tela única no desktop (sem rolagem); mobile rola normal.
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   Activity,
@@ -52,21 +53,6 @@ const NEON = {
   amarelo: "#FFD93D",
   rosa: "#FB7185",
   turquesa: "#2DD4BF",
-};
-
-const COR_TIPO_BEM: Record<string, string> = {
-  imovel: NEON.laranja,
-  veiculo: NEON.ciano,
-  empresa: NEON.violeta,
-  credito: NEON.amarelo,
-  processo: NEON.turquesa,
-};
-const ROTULO_TIPO_BEM: Record<string, string> = {
-  imovel: "Imóvel",
-  veiculo: "Veículo",
-  empresa: "Empresa",
-  credito: "Crédito",
-  processo: "Processo",
 };
 
 const COR_CATEGORIA: Record<CategoriaRadarChave, string> = {
@@ -205,15 +191,8 @@ export default async function InicioPage() {
 
   return (
     <main className="relative overflow-x-hidden lg:h-[calc(100svh-159px)] lg:overflow-hidden">
-      {/* Fundo: degradê verde escuro → preto (mantido da v8) */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(60,255,138,0.13) 0%, rgba(24,90,52,0.09) 24%, #020a06 55%, #000000 100%), #000000",
-        }}
-      />
+      {/* Fundo: preto puro (pedido 22/08) */}
+      <div aria-hidden="true" className="absolute inset-0 bg-black" />
 
       <div className="relative z-10 mx-auto flex h-full max-w-[1480px] flex-col gap-4 p-4 lg:px-10 lg:py-5">
         {/* ============ CABEÇALHO: boas-vindas + status de sync ============ */}
@@ -229,18 +208,39 @@ export default async function InicioPage() {
               Boas-Vindas, {primeiroNome}.
             </h1>
           </div>
-          {/* Sincronizações — uma linha discreta, sem painel próprio */}
+          {/* Sincronizações — uma linha discreta, sem painel próprio.
+              Os robôs rodam juntos (Ter+Sex): quando e-SAJ e eproc capturaram
+              no MESMO dia, mostra combinado pra não parecer dado faltando. */}
           <div className="flex flex-wrap items-center gap-x-5 gap-y-1 font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--color-ivory-66)]">
             <span className="flex items-center gap-1.5">
               <Ponto cor={sync.themisOk === false ? NEON.rosa : NEON.verde} />
               Themis {sync.themisEm ? formatData(sync.themisEm) : "—"}
             </span>
-            <span>
-              e-SAJ {sync.esajUltima ? formatData(sync.esajUltima) : "—"}
-            </span>
-            <span>
-              eproc {sync.eprocUltima ? formatData(sync.eprocUltima) : "—"}
-            </span>
+            {sync.esajUltima &&
+            sync.eprocUltima &&
+            formatData(sync.esajUltima) === formatData(sync.eprocUltima) ? (
+              <span className="flex items-center gap-1.5">
+                <Ponto cor={NEON.verde} />
+                Robôs e-SAJ + eproc {formatData(sync.esajUltima)}
+              </span>
+            ) : (
+              <>
+                <span className="flex items-center gap-1.5">
+                  <Ponto cor={sync.esajUltima ? NEON.verde : NEON.rosa} />
+                  e-SAJ{" "}
+                  {sync.esajUltima
+                    ? formatData(sync.esajUltima)
+                    : "sem captura em 30 dias"}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Ponto cor={sync.eprocUltima ? NEON.verde : NEON.rosa} />
+                  eproc{" "}
+                  {sync.eprocUltima
+                    ? formatData(sync.eprocUltima)
+                    : "sem captura em 30 dias"}
+                </span>
+              </>
+            )}
             <span>
               {sync.totalAndamentos.toLocaleString("pt-BR")} andamentos no
               acervo
@@ -268,21 +268,29 @@ export default async function InicioPage() {
 
         {/* ============ RÉGUA DE INDICADORES ============ */}
         <Painel className="shrink-0 px-2 py-3">
+          {/* Slots de altura FIXA (número h-7, legenda h-5) + nowrap:
+              todas as células alinham pela mesma linha de base. */}
           <div className="grid grid-cols-2 gap-y-3 divide-white/8 sm:grid-cols-4 lg:grid-cols-7 lg:divide-x">
             {ESTATISTICAS.map(({ rotulo, valor, formato, cor, Icon }) => (
               <div
                 key={rotulo}
-                className="flex flex-col items-center gap-1 px-2 text-center"
+                className="flex flex-col items-center px-2 text-center"
               >
                 <span
-                  className="text-[clamp(17px,1.3vw,22px)] font-semibold leading-none tabular-nums"
-                  style={{ color: cor }}
+                  className="flex h-7 items-center whitespace-nowrap font-semibold tabular-nums"
+                  style={{
+                    color: cor,
+                    fontSize:
+                      formato === "brl"
+                        ? "clamp(14px,1.05vw,18px)"
+                        : "clamp(17px,1.3vw,22px)",
+                  }}
                 >
                   <NumeroTicker valor={valor} formato={formato} />
                 </span>
-                <span className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--color-ivory-66)]">
+                <span className="flex h-5 items-center gap-1.5 whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--color-ivory-66)]">
                   <Icon
-                    className="h-3.5 w-3.5"
+                    className="h-3.5 w-3.5 shrink-0"
                     style={{ color: cor }}
                     aria-hidden="true"
                   />
@@ -294,16 +302,17 @@ export default async function InicioPage() {
         </Painel>
 
         {/* ============ ÁREA PRINCIPAL ============ */}
-        <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[1fr_1fr_400px]">
-          {/* Últimas Movimentações */}
+        <div className="grid min-h-0 flex-1 gap-5 lg:grid-cols-[minmax(0,1fr)_440px]">
+          {/* Últimas Movimentações das Execuções — rola por dentro (barra
+              invisível) e fecha com Ver Mais → relatório completo (Radar) */}
           <Painel className="flex min-h-0 flex-col p-5">
-            <TituloPainel>Últimas Movimentações</TituloPainel>
+            <TituloPainel>Últimas Movimentações das Execuções</TituloPainel>
             {dados.movimentacoes.length === 0 ? (
               <p className="mt-4 text-sm text-[var(--color-ivory-66)]">
                 Sem movimentações de alto sinal.
               </p>
             ) : (
-              <ul className="mt-2 min-h-0 divide-y divide-white/5 overflow-hidden">
+              <ul className="sem-scrollbar mt-2 min-h-0 flex-1 divide-y divide-white/5 overflow-y-auto">
                 {dados.movimentacoes.map((a) => (
                   <li key={a.id} className="py-3">
                     <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--color-ivory-66)]">
@@ -318,59 +327,27 @@ export default async function InicioPage() {
                     </p>
                   </li>
                 ))}
-              </ul>
-            )}
-          </Painel>
-
-          {/* Últimas Localizações */}
-          <Painel className="flex min-h-0 flex-col p-5">
-            <TituloPainel>Últimas Localizações</TituloPainel>
-            {dados.ultimasLocalizacoes.length === 0 ? (
-              <p className="mt-4 text-sm text-[var(--color-ivory-66)]">
-                Nenhum bem localizado ainda.
-              </p>
-            ) : (
-              <ul className="mt-2 min-h-0 divide-y divide-white/5 overflow-hidden">
-                {dados.ultimasLocalizacoes.slice(0, 5).map((b) => (
-                  <li
-                    key={b.id}
-                    className="flex items-center justify-between gap-3 py-3"
+                {/* Último item da rolagem: Ver Mais */}
+                <li>
+                  <Link
+                    href="/equipe/radar"
+                    className="block py-3.5 text-center font-mono text-[12px] font-semibold uppercase tracking-[0.22em] transition hover:brightness-125"
+                    style={{ color: NEON.verde }}
                   >
-                    <span className="min-w-0">
-                      <span className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--color-ivory-66)]">
-                        <Ponto cor={COR_TIPO_BEM[b.tipo] ?? NEON.verde} />
-                        {ROTULO_TIPO_BEM[b.tipo] ?? b.tipo}
-                      </span>
-                      <span className="mt-1 block truncate text-[13px] text-ivory">
-                        {b.titulo}
-                      </span>
-                      {b.devedorNome && (
-                        <span className="block truncate font-mono text-[11px] text-[var(--color-ivory-40)]">
-                          {b.devedorNome}
-                        </span>
-                      )}
-                    </span>
-                    <span
-                      className="shrink-0 font-mono text-[13px] font-semibold tabular-nums"
-                      style={{ color: NEON.verde }}
-                    >
-                      {b.valorBrl != null ? formatBRL(b.valorBrl) : "—"}
-                    </span>
-                  </li>
-                ))}
+                    Ver Mais
+                  </Link>
+                </li>
               </ul>
             )}
           </Painel>
 
-          {/* Radial (herói da navegação) + consumo de APIs */}
-          <div className="flex min-h-0 flex-col gap-4">
-            <Painel className="flex min-h-0 flex-1 flex-col items-center justify-center p-4">
-              <RadialCentro nome={nome} fotoUrl={perfil?.fotoUrl ?? null} />
-              <p className="sonar-wordmark mt-2 shrink-0 text-[clamp(15px,1.2vw,20px)]">
-                Para onde deseja ir?
-              </p>
-            </Painel>
-            <Painel className="shrink-0 p-5">
+          {/* Radial FORA de caixa (herói da navegação) + consumo de APIs */}
+          <div className="flex min-h-0 flex-col items-center gap-3">
+            <RadialCentro nome={nome} fotoUrl={perfil?.fotoUrl ?? null} />
+            <p className="sonar-wordmark shrink-0 text-[clamp(15px,1.2vw,20px)]">
+              Para onde deseja ir?
+            </p>
+            <Painel className="w-full shrink-0 p-5">
               <TituloPainel>Consumo de APIs</TituloPainel>
               <div className="mt-3">
                 <DonutCusto gasto={dados.gastoMesBrl} teto={dados.tetoMesBrl} />
