@@ -311,10 +311,9 @@ export default async function InicioPage() {
 
         {/* ============ ÁREA PRINCIPAL ============ */}
         <div className="grid min-h-0 flex-1 gap-5 lg:grid-cols-[480px_minmax(0,1fr)]">
-          {/* Coluna esquerda: Movimentações (rolagem interna preservada)
-              com o Consumo de APIs logo embaixo */}
-          <div className="flex min-h-0 flex-col gap-4">
-          <Painel className="flex min-h-0 flex-1 flex-col p-5">
+          {/* Coluna esquerda: Movimentações expandida na VERTICAL inteira;
+              o Consumo de APIs foi pro topo-direita dela (ditado 24/08). */}
+          <Painel className="flex min-h-0 flex-col p-5">
             <TituloPainel>Últimas Movimentações das Execuções</TituloPainel>
             {dados.movimentacoes.length === 0 ? (
               <p className="mt-4 text-sm text-[var(--color-ivory-66)]">
@@ -350,24 +349,26 @@ export default async function InicioPage() {
             )}
           </Painel>
 
-          <Painel className="shrink-0 p-5">
-            <TituloPainel>Consumo de APIs</TituloPainel>
-            <div className="mt-3">
-              <DonutCusto gasto={dados.gastoMesBrl} teto={dados.tetoMesBrl} />
-            </div>
-          </Painel>
-          </div>
+          {/* Direita: Consumo de APIs no topo (colado na esquerda, junto
+              das Movimentações) e, abaixo, frase GRANDE verde neon em UMA
+              linha ao lado da roda (ditados 24/08). */}
+          <div className="flex min-h-0 flex-col gap-4">
+            <Painel className="w-full shrink-0 self-start p-5 lg:max-w-[400px]">
+              <TituloPainel>Consumo de APIs</TituloPainel>
+              <div className="mt-3">
+                <DonutCusto gasto={dados.gastoMesBrl} teto={dados.tetoMesBrl} />
+              </div>
+            </Painel>
 
-          {/* Direita: frase GRANDE em UMA linha, verde neon, colada na roda
-              (ditado 24/08). */}
-          <div className="flex min-h-0 flex-col items-center justify-center gap-3 overflow-hidden lg:flex-row lg:gap-6">
-            <p
-              className="sonar-wordmark shrink-0 whitespace-nowrap text-center text-[clamp(26px,2.6vw,44px)] leading-[1.1]"
-              style={{ color: "var(--color-signal)" }}
-            >
-              Para onde deseja ir?
-            </p>
-            <RadialCentro nome={nome} fotoUrl={perfil?.fotoUrl ?? null} />
+            <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 overflow-hidden lg:flex-row lg:gap-6">
+              <p
+                className="sonar-wordmark shrink-0 whitespace-nowrap text-center text-[clamp(26px,2.6vw,44px)] leading-[1.1]"
+                style={{ color: "var(--color-signal)" }}
+              >
+                Para onde deseja ir?
+              </p>
+              <RadialCentro nome={nome} fotoUrl={perfil?.fotoUrl ?? null} />
+            </div>
           </div>
         </div>
       </div>
