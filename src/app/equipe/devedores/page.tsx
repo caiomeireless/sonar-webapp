@@ -245,7 +245,7 @@ function LinhaDevedor({
         </div>
         <p className="mt-1 truncate font-mono text-[13px] leading-snug">
           {credoresLabel ? (
-            <span className="text-ivory">Cliente: {credoresLabel}</span>
+            <span className="text-[#FF9C41]">Cliente: {credoresLabel}</span>
           ) : (
             <span className="text-[var(--color-ivory-40)]">
               Sem Cliente Vinculado
