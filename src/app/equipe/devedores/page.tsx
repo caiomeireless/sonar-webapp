@@ -66,15 +66,15 @@ export default async function DevedoresEquipePage({ searchParams }: Props) {
       <div className="relative z-10 mx-auto max-w-[1200px] px-6 py-12 sm:px-10">
         {/* Cabeçalho SEM painel (ditado 23/08): título solto no preto. */}
         <header className="mb-8 text-center">
-          {/* -10% no tamanho + contorno branco nas letras douradas
-              (ditado 24/08). */}
+          {/* Laranja mais escuro com contorno branco; título e subtítulo
+              -15% (ditados 24/08). */}
           <h1
-            className="font-serif text-[clamp(34px,4.95vw,61px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]"
+            className="font-serif text-[clamp(29px,4.2vw,52px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[#C97B2A]"
             style={{ WebkitTextStroke: "1px rgba(255,255,255,0.65)" }}
           >
             Banco de Dossiês
           </h1>
-          <p className="mt-3 font-mono text-[clamp(15px,1.9vw,24px)] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
+          <p className="mt-3 font-mono text-[clamp(13px,1.6vw,20px)] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
             Ficha das Informações de Todos os Devedores.
           </p>
           {/* Sem botão de cadastro manual (ditado 23/08): devedor entra
