@@ -13,6 +13,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowRight, Pencil } from "lucide-react";
+import { SpotlightCard } from "@/components/ui/SpotlightCard";
+import { BordaLiquidaMetal } from "@/components/ui/BordaLiquidaMetal";
 import {
   obterDossie,
   outrosCredoresDoDevedor,
@@ -144,7 +146,10 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
     : "var(--color-ivory-66)";
 
   return (
-    <main>
+    <main className="relative">
+      {/* Fundo: preto puro cobrindo a ficha toda (cara nova 24/08). */}
+      <div aria-hidden="true" className="absolute inset-0 bg-black" />
+      <div className="relative z-10">
       {/* ============ HEADER + AÇÕES ============ */}
       <section className="relative overflow-hidden">
         <div className="relative mx-auto max-w-[1400px] px-6 py-14 sm:px-10">
@@ -210,13 +215,16 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
 
             <BlocoAcao titulo="Gerar Peça">
               <div className="flex flex-col gap-3">
-                <Link
-                  href={`/equipe/devedores/${devedor.id}/gerador-peca${linkBase}`}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-gold)] px-6 py-4 text-sm font-bold uppercase tracking-[0.12em] text-[var(--color-carbon)] shadow-[0_10px_40px_-10px_rgba(201,162,74,0.55)] transition hover:bg-[var(--color-tip-glow)]"
-                >
-                  Abrir Gerador de Peça
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
+                {/* Metal líquido no botão principal (padrão Sincronizar). */}
+                <BordaLiquidaMetal cor="gold" radius={14} className="flex">
+                  <Link
+                    href={`/equipe/devedores/${devedor.id}/gerador-peca${linkBase}`}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-[11px] bg-[var(--color-gold)] px-6 py-4 text-sm font-bold uppercase tracking-[0.12em] text-[var(--color-carbon)] shadow-[0_10px_40px_-10px_rgba(201,162,74,0.55)] transition hover:bg-[var(--color-tip-glow)]"
+                  >
+                    Abrir Gerador de Peça
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </BordaLiquidaMetal>
                 <BotaoGerarPeca
                   devedorId={devedor.id}
                   euQuery={linkBase}
@@ -383,7 +391,7 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
           <SectionTitle texto="Bens Encontrados por Categoria" eyebrow="Bens Encontrados" />
 
           {total_bens === 0 ? (
-            <div className="mt-10 rounded-2xl border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.45)] p-10 text-center">
+            <SpotlightCard local claro className="mt-10 p-10 text-center">
               <p className="font-serif text-2xl text-ivory">
                 Nenhum bem localizado ainda
               </p>
@@ -391,7 +399,7 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
                 Use a Central de Pesquisas acima para enriquecer os dados,
                 buscar veículos ou acionar os robôs dos tribunais.
               </p>
-            </div>
+            </SpotlightCard>
           ) : (
             <div className="mt-12 space-y-16">
               {ORDEM.filter((tipo) => por_tipo[tipo].length > 0).map((tipo) => {
@@ -478,6 +486,7 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
           </div>
         </section>
       ) : null}
+      </div>
     </main>
   );
 }
@@ -496,7 +505,7 @@ function BlocoAcao({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.45)] p-6 sm:p-7">
+    <SpotlightCard local claro className="p-6 sm:p-7">
       <div className="relative pl-4">
         <span
           aria-hidden="true"
@@ -507,7 +516,7 @@ function BlocoAcao({
         </h3>
       </div>
       <div className="mt-5">{children}</div>
-    </div>
+    </SpotlightCard>
   );
 }
 

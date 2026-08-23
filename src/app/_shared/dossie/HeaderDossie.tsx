@@ -5,6 +5,7 @@
 import Link from "next/link";
 import { ArrowRight, BarChart3, Building2, User } from "lucide-react";
 import { formatTempoRelativo } from "@/lib/format";
+import { SpotlightCard } from "@/components/ui/SpotlightCard";
 
 export type DevedorHeader = {
   id: number;
@@ -30,7 +31,12 @@ export function HeaderDossie({
 }) {
   return (
     <header className="mt-10">
-      <div className="glass mx-auto max-w-[1100px] px-8 py-10 sm:px-12 sm:py-12 text-center">
+      {/* Vidro claro esbranquiçado + luz do mouse — cara nova 24/08. */}
+      <SpotlightCard
+        local
+        claro
+        className="mx-auto max-w-[1100px] px-8 py-10 text-center sm:px-12 sm:py-12"
+      >
         <div className="flex flex-col items-center gap-3">
           <div className="inline-flex h-14 w-14 items-center justify-center rounded-xl border border-[var(--color-gold)]/35 bg-gradient-to-br from-[rgba(201,162,74,0.18)] to-[rgba(201,162,74,0.04)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
             {devedor.tipo === "PJ" ? (
@@ -95,7 +101,7 @@ export function HeaderDossie({
             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
           </Link>
         ) : null}
-      </div>
+      </SpotlightCard>
     </header>
   );
 }

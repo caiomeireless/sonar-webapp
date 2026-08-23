@@ -200,6 +200,42 @@ export default async function InicioPage() {
       <div aria-hidden="true" className="absolute inset-0 bg-black" />
 
       <div className="relative z-10 mx-auto flex h-full max-w-[1480px] flex-col gap-4 p-4 lg:px-10 lg:py-5">
+        {/* ============ RÉGUA DE INDICADORES — primeira linha da tela,
+            acima do Boas-Vindas (ditado 24/08) ============ */}
+        <Painel className="shrink-0 px-2 py-3">
+          {/* Slots de altura FIXA (número h-7, legenda h-5) + nowrap:
+              todas as células alinham pela mesma linha de base. */}
+          <div className="grid grid-cols-2 gap-y-3 divide-white/8 sm:grid-cols-4 lg:grid-cols-7 lg:divide-x">
+            {ESTATISTICAS.map(({ rotulo, valor, formato, cor, Icon }) => (
+              <div
+                key={rotulo}
+                className="flex flex-col items-center px-2 text-center"
+              >
+                <span
+                  className="flex h-7 items-center whitespace-nowrap font-semibold tabular-nums"
+                  style={{
+                    color: cor,
+                    fontSize:
+                      formato === "brl"
+                        ? "clamp(14px,1.05vw,18px)"
+                        : "clamp(17px,1.3vw,22px)",
+                  }}
+                >
+                  <NumeroTicker valor={valor} formato={formato} />
+                </span>
+                <span className="flex h-5 items-center gap-1.5 whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--color-ivory-66)]">
+                  <Icon
+                    className="h-3.5 w-3.5 shrink-0"
+                    style={{ color: cor }}
+                    aria-hidden="true"
+                  />
+                  {rotulo}
+                </span>
+              </div>
+            ))}
+          </div>
+        </Painel>
+
         {/* ============ CABEÇALHO: boas-vindas e sync em CARDS SEPARADOS == */}
         <div className="flex shrink-0 flex-col gap-4 lg:flex-row lg:items-stretch">
           <Painel className="flex-1 px-6 py-4">
@@ -273,41 +309,6 @@ export default async function InicioPage() {
           </Painel>
         )}
 
-        {/* ============ RÉGUA DE INDICADORES ============ */}
-        <Painel className="shrink-0 px-2 py-3">
-          {/* Slots de altura FIXA (número h-7, legenda h-5) + nowrap:
-              todas as células alinham pela mesma linha de base. */}
-          <div className="grid grid-cols-2 gap-y-3 divide-white/8 sm:grid-cols-4 lg:grid-cols-7 lg:divide-x">
-            {ESTATISTICAS.map(({ rotulo, valor, formato, cor, Icon }) => (
-              <div
-                key={rotulo}
-                className="flex flex-col items-center px-2 text-center"
-              >
-                <span
-                  className="flex h-7 items-center whitespace-nowrap font-semibold tabular-nums"
-                  style={{
-                    color: cor,
-                    fontSize:
-                      formato === "brl"
-                        ? "clamp(14px,1.05vw,18px)"
-                        : "clamp(17px,1.3vw,22px)",
-                  }}
-                >
-                  <NumeroTicker valor={valor} formato={formato} />
-                </span>
-                <span className="flex h-5 items-center gap-1.5 whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--color-ivory-66)]">
-                  <Icon
-                    className="h-3.5 w-3.5 shrink-0"
-                    style={{ color: cor }}
-                    aria-hidden="true"
-                  />
-                  {rotulo}
-                </span>
-              </div>
-            ))}
-          </div>
-        </Painel>
-
         {/* ============ ÁREA PRINCIPAL ============ */}
         <div className="grid min-h-0 flex-1 gap-5 lg:grid-cols-[480px_minmax(0,1fr)]">
           {/* Coluna esquerda: Movimentações (rolagem interna preservada)
@@ -357,10 +358,11 @@ export default async function InicioPage() {
           </Painel>
           </div>
 
-          {/* Direita: frase à ESQUERDA do radial (fonte em dobro) e o
-              radial empurrado pra direita (ditado 24/08). */}
-          <div className="flex min-h-0 flex-col items-center gap-4 lg:flex-row lg:justify-end">
-            <p className="sonar-wordmark shrink-0 text-center text-[clamp(24px,2.6vw,44px)] leading-[1.15] lg:max-w-[300px] lg:text-left">
+          {/* Direita: frase à ESQUERDA do radial (máx 2 linhas, sem invadir
+              card nenhum) e a roda na metade do tamanho, encaixada no vão
+              (ditado 24/08). */}
+          <div className="flex min-h-0 flex-col items-center justify-center gap-3 overflow-hidden lg:flex-row lg:gap-5">
+            <p className="sonar-wordmark shrink-0 text-center text-[clamp(17px,1.5vw,24px)] leading-[1.2] lg:max-w-[190px] lg:text-left">
               Para onde deseja ir?
             </p>
             <RadialCentro nome={nome} fotoUrl={perfil?.fotoUrl ?? null} />

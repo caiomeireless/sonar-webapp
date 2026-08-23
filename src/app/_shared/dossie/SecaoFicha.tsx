@@ -1,6 +1,7 @@
 // Card glass de bloco de ficha + CampoFicha + ChipOrigem.
 // CampoFicha aceita `mostrarChipOrigem` (default true) — cliente passa false
 // pra esconder a mecanica das APIs.
+import { SpotlightCard } from "@/components/ui/SpotlightCard";
 
 export type OrigemFicha = "VIA THEMIS" | "VIA ASSERTIVA" | "MANUAL";
 
@@ -14,7 +15,7 @@ export function SecaoFicha({
   eyebrowColor?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-[var(--color-ivory-12)] bg-[rgba(5,7,6,0.6)] p-6 sm:p-7">
+    <SpotlightCard local claro className="p-6 sm:p-7">
       <div className="relative pl-4">
         <span
           aria-hidden="true"
@@ -29,7 +30,7 @@ export function SecaoFicha({
         </h3>
       </div>
       <div className="mt-5 space-y-5">{children}</div>
-    </div>
+    </SpotlightCard>
   );
 }
 

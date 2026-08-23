@@ -18,7 +18,9 @@ export function SectionTitle({
           {eyebrow}
         </span>
       ) : null}
-      <h2 className="mt-2 font-serif text-3xl text-ivory">{texto}</h2>
+      <h2 className="mt-2 font-serif text-[clamp(26px,2.6vw,40px)] uppercase leading-[1.1] tracking-[0.06em] text-[var(--color-gold)]">
+        {texto}
+      </h2>
     </div>
   );
 }
