@@ -177,10 +177,10 @@ async function VisaoDevedores({
 // meio, valor da execução na ponta direita.
 const GRID_LINHA = "sm:grid-cols-[104px_minmax(0,1fr)_200px]";
 
-// Fundo do card de filtro: verde escuro UNIFORME (ditado 24/08 — o
-// degradê esquerda→preto foi substituído por verde escuro inteiro).
+// Fundo do card de filtro: verde escuro UNIFORME, tom fechado
+// (ditados 24/08 — saiu o degradê, depois escureceu mais um ponto).
 const DEGRADE_FILTRO =
-  "linear-gradient(0deg, rgba(16,78,44,0.55), rgba(16,78,44,0.55))";
+  "linear-gradient(0deg, rgba(10,48,28,0.7), rgba(10,48,28,0.7))";
 
 // Linha-card do devedor: 1 clique = dossiê. Layout ditado (23/08):
 //   [nº de informações] | NOME EM CAIXA ALTA vermelho + CPF/CNPJ cinza
