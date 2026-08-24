@@ -525,6 +525,86 @@ export default async function FichaDemoPage({ searchParams }: Props) {
                   corFonte={NEON.ciano}
                 />
               </div>
+
+              {/* Pesquisa manual RI Digital — prévia EMBAÇADA da matrícula
+                  + áreas de arrastar (mesma lógica do AR, ditado 25/08). */}
+              <div className="mt-5 grid gap-4 sm:grid-cols-[240px_minmax(0,1fr)]">
+                <figure
+                  className="overflow-hidden rounded-lg border"
+                  style={{ borderColor: "rgba(56,189,248,0.4)" }}
+                >
+                  <div className="relative h-56 select-none bg-[#f6f4ee] px-4 py-3 blur-[2.5px]">
+                    <p className="text-center font-serif text-[9px] font-bold uppercase leading-tight text-[#1a1a1a]">
+                      2º Oficial de Registro de Imóveis
+                      <br />
+                      Comarca de Sorocaba — SP
+                    </p>
+                    <p className="mt-1.5 text-center font-mono text-[10px] font-bold uppercase text-[#1a1a1a]">
+                      Matrícula Nº 45.678
+                    </p>
+                    <div className="mt-2 space-y-[5px]">
+                      {[98, 94, 100, 90, 96, 88, 99, 92, 97, 86, 95, 91].map(
+                        (w, i) => (
+                          <div
+                            key={i}
+                            className="h-[4px] rounded-sm bg-[#3a3a3a]/70"
+                            style={{ width: `${w}%` }}
+                          />
+                        ),
+                      )}
+                    </div>
+                    <p className="mt-2 font-mono text-[7px] uppercase text-[#1a1a1a]">
+                      Av.4 — Penhora nos autos 1002345-67.2024.8.26.0602
+                    </p>
+                    <div
+                      className="absolute bottom-3 right-4 flex h-14 w-14 rotate-[-8deg] items-center justify-center rounded-full border-2 text-center font-mono text-[6.5px] font-bold uppercase leading-tight"
+                      style={{ borderColor: "#3a6a4a", color: "#3a6a4a" }}
+                    >
+                      Certidão
+                      <br />
+                      Digital
+                      <br />
+                      RI
+                    </div>
+                  </div>
+                  <figcaption className="bg-black/70 px-2 py-1.5 text-center font-mono text-[11px] text-[#38BDF8]">
+                    matricula-45678.pdf · prévia embaçada (fictício)
+                  </figcaption>
+                </figure>
+
+                <div className="grid gap-4 sm:grid-rows-2">
+                  <div
+                    className="flex flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed px-4 py-4 text-center"
+                    style={{
+                      borderColor: "rgba(56,189,248,0.45)",
+                      backgroundColor: "rgba(56,189,248,0.05)",
+                    }}
+                  >
+                    <p className="font-mono text-[13px] uppercase tracking-[0.2em]" style={{ color: NEON.ciano }}>
+                      Arraste o Print da Pesquisa Aqui
+                    </p>
+                    <p className="max-w-[420px] text-[13px] leading-snug text-[var(--color-ivory-66)]">
+                      Resultado da busca no RI Digital — fica registrado com
+                      data e autor.
+                    </p>
+                  </div>
+                  <div
+                    className="flex flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed px-4 py-4 text-center"
+                    style={{
+                      borderColor: "rgba(56,189,248,0.45)",
+                      backgroundColor: "rgba(56,189,248,0.05)",
+                    }}
+                  >
+                    <p className="font-mono text-[13px] uppercase tracking-[0.2em]" style={{ color: NEON.ciano }}>
+                      Arraste os PDFs das Matrículas Aqui
+                    </p>
+                    <p className="max-w-[420px] text-[13px] leading-snug text-[var(--color-ivory-66)]">
+                      As matrículas anexadas ganham prévia instantânea, como
+                      esta ao lado.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </CategoriaDemo>
 
             <CategoriaDemo Icone={Briefcase} cor={NEON.violeta} titulo="Participações Societárias" sub="1 item encontrado">
