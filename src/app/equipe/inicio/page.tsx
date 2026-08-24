@@ -408,17 +408,9 @@ export default async function InicioPage() {
               (com rolagem interna, tipo colorido + ícone e devedor em
               vermelho — ditado 24/08); roda radial centrada no vão. */}
           <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
-            <div className="flex min-h-0 w-full shrink-0 flex-col gap-4 lg:max-w-[400px]">
-              <Painel className="shrink-0 p-5">
-                <TituloPainel>Consumo de APIs</TituloPainel>
-                <div className="mt-3">
-                  <DonutCusto
-                    gasto={dados.gastoMesBrl}
-                    teto={dados.tetoMesBrl}
-                  />
-                </div>
-              </Painel>
-
+            {/* Consumo de APIs SAIU (ditado 25/08) — o DonutCusto continua
+                no código caso volte. Bens Localizados expandiu na largura. */}
+            <div className="flex min-h-0 w-full shrink-0 flex-col gap-4 lg:max-w-[560px]">
               <Painel className="flex min-h-0 flex-1 flex-col p-5">
                 <TituloPainel>Últimos Bens Localizados</TituloPainel>
                 {dados.ultimasLocalizacoes.length === 0 ? (
