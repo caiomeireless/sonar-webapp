@@ -9,6 +9,14 @@
 // fica num sub-componente client (`./GlowSpot`) montado só quando interactive=true.
 import type { ReactNode } from "react";
 import { GlowSpot } from "./GlowSpot";
+import { SpotlightCard } from "@/components/ui/SpotlightCard";
+
+// Vidro POLIDO com brilho — mesma receita da tela de Início (ditado
+// 25/08: dashboard com a arte da tela inicial).
+const VIDRO_BRILHO = [
+  "linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.03) 38%, transparent 55%)",
+  "linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.06) 34%, rgba(255,255,255,0.13) 45%, rgba(255,255,255,0.05) 56%, transparent 72%)",
+].join(", ");
 
 export type DashboardCardAccent = "green" | "gold" | "neutral";
 export type DashboardCardVariant = "default" | "premium";
@@ -57,12 +65,11 @@ export function DashboardCard({
   const accentGlow = ACCENT_GLOW[accent];
 
   return (
-    <section
-      className={[
-        "glass p-5 text-fg",
-        interactive ? "glow-card" : "",
-        className ?? "",
-      ]
+    <SpotlightCard
+      local
+      degrade={VIDRO_BRILHO}
+      borda="rgba(232, 228, 214, 0.25)"
+      className={["overflow-hidden p-6 text-fg", className ?? ""]
         .filter(Boolean)
         .join(" ")}
     >
@@ -72,8 +79,8 @@ export function DashboardCard({
           className={[
             "flex items-center gap-2",
             variant === "premium"
-              ? "font-serif text-base font-medium tracking-[0.02em]"
-              : "eyebrow",
+              ? "font-serif text-lg font-medium tracking-[0.02em]"
+              : "font-mono text-[13px] font-semibold uppercase tracking-[0.26em]",
           ].join(" ")}
           style={variant === "premium" ? undefined : { color: accentColor }}
         >
@@ -90,23 +97,23 @@ export function DashboardCard({
             <span className="group relative ml-1 inline-flex">
               <span
                 aria-label="Mais informações"
-                className="flex h-3.5 w-3.5 cursor-help items-center justify-center rounded-full border border-line text-[10px] font-medium text-fg-muted transition group-hover:border-line-strong group-hover:text-fg"
+                className="flex h-4 w-4 cursor-help items-center justify-center rounded-full border border-line text-[11px] font-medium text-fg-muted transition group-hover:border-line-strong group-hover:text-fg"
               >
                 ?
               </span>
-              <span className="pointer-events-none invisible absolute left-0 top-full z-50 mt-2 w-72 whitespace-pre-line rounded-lg border border-line-strong bg-surface-solid p-3 text-[11px] normal-case leading-relaxed tracking-normal text-fg opacity-0 shadow-2xl transition group-hover:visible group-hover:opacity-100">
+              <span className="pointer-events-none invisible absolute left-0 top-full z-50 mt-2 w-80 whitespace-pre-line rounded-lg border border-line-strong bg-surface-solid p-3.5 text-[13px] normal-case leading-relaxed tracking-normal text-fg opacity-0 shadow-2xl transition group-hover:visible group-hover:opacity-100">
                 {info}
               </span>
             </span>
           ) : null}
         </div>
         {descricao ? (
-          <p className="mt-1 text-xs text-fg-muted">
+          <p className="mt-1.5 text-sm leading-snug text-[var(--color-ivory-88)]">
             {descricao}
           </p>
         ) : null}
       </header>
       <div className="relative text-fg">{children}</div>
-    </section>
+    </SpotlightCard>
   );
 }

@@ -187,6 +187,12 @@ export default function ConcentracaoPatrimonial({ dados }: Props) {
               />
               {hhi.label}
             </div>
+            <p className="mt-2 border-t border-[var(--color-ivory-12)] pt-2 text-[12px] leading-relaxed text-[var(--color-ivory-66)]">
+              O índice Herfindahl mede a dependência de um único bem: perto
+              de 1, o patrimônio inteiro está concentrado em um só bem
+              (perdê-lo esvazia a execução); perto de 0, está pulverizado em
+              vários bens equivalentes.
+            </p>
             <p className="mt-1 text-[11px] normal-case leading-relaxed text-[var(--color-ivory-66)]">
               {hhi.descricao}
             </p>

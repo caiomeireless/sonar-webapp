@@ -36,8 +36,10 @@ import { BotaoGerarPeca } from "./BotaoGerarPeca";
 import { listarMedidasPorDevedor } from "@/lib/medidas";
 import { templatesSugeridos } from "@/lib/pecas-templates";
 import { listarPesquisasImoveis } from "@/lib/imoveis-pesquisas";
+import { listarMandadosEndereco } from "@/lib/enderecos-mandados";
 import { obterDadosDashboardCasoV2 } from "@/lib/dashboard-caso";
 import { PainelImoveisManual } from "./_components/PainelImoveisManual";
+import { PainelMandadosEndereco } from "./_components/PainelMandadosEndereco";
 import { DashboardCasoGrid } from "./dashboard/_components/DashboardCasoGrid";
 
 // ---- Componentes compartilhados (cliente + advogado) ----
@@ -129,11 +131,13 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
   // pra não segurar a pintura da ficha — é a consulta mais pesada.
   // Andamentos/linha do tempo SAÍRAM da ficha — vão pras fichas de
   // processo da aba Rotas das Execuções (reforma 25/08).
-  const [medidas, pesquisasImoveis, ultimaVarredura] = await Promise.all([
-    listarMedidasPorDevedor(devedorId),
-    listarPesquisasImoveis(devedorId),
-    ultimaVarreduraTribunais(devedorId),
-  ]);
+  const [medidas, pesquisasImoveis, mandadosEndereco, ultimaVarredura] =
+    await Promise.all([
+      listarMedidasPorDevedor(devedorId),
+      listarPesquisasImoveis(devedorId),
+      listarMandadosEndereco(devedorId),
+      ultimaVarreduraTribunais(devedorId),
+    ]);
 
   // Status do devedor — devedor nao tem flag propria; usa o status do
   // primeiro caso vinculado ("ativo" se houver caso ativo, senao "pausado").
@@ -435,6 +439,17 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
                       <PainelImoveisManual
                         devedorId={devedor.id}
                         pesquisas={pesquisasImoveis}
+                      />
+                    </div>
+                  ) : null}
+
+                  {/* Endereços: registro do MANDADO de avaliação e penhora
+                      (resultado + certidão arrastada) — ditado 25/08. */}
+                  {tipo === "endereco" ? (
+                    <div className="mt-6">
+                      <PainelMandadosEndereco
+                        devedorId={devedor.id}
+                        mandados={mandadosEndereco}
                       />
                     </div>
                   ) : null}
