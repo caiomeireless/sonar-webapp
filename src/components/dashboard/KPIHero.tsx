@@ -89,20 +89,20 @@ export function KPIHero({
         />
       ) : null}
       <p
-        className="mt-3 break-all text-2xl font-medium leading-none tabular-nums tracking-tight sm:text-3xl md:text-4xl"
+        className="mt-3 break-all text-3xl font-medium leading-none tabular-nums tracking-tight sm:text-4xl md:text-5xl"
         style={{ color: valueColor }}
       >
         {valor}
       </p>
       {subtitulo ? (
-        <p className="mt-2 text-xs text-fg-faint">{subtitulo}</p>
+        <p className="mt-2.5 text-sm text-[var(--color-ivory-88)]">{subtitulo}</p>
       ) : null}
       {delta ? (
         <div
-          className="mt-2 inline-flex items-center gap-1.5 text-xs"
+          className="mt-2.5 inline-flex items-center gap-1.5 text-sm"
           style={{ color: DIRECTION_COLOR[delta.direction] }}
         >
-          <span aria-hidden className="text-xs leading-none">
+          <span aria-hidden className="text-sm leading-none">
             {DIRECTION_ARROW[delta.direction]}
           </span>
           <span className="font-medium tabular-nums">{delta.value}</span>

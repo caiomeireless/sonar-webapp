@@ -10,7 +10,7 @@
 // próprio chrome via DashboardCard/KPIHero.
 
 import { redirect } from "next/navigation";
-import { Eye } from "lucide-react";
+import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { perfilLogado } from "@/lib/perfis-server";
 import { ehEquipe, perfilAtual } from "@/lib/perfis";
 import { devEuFromParam } from "@/lib/dev-auth";
@@ -99,44 +99,38 @@ export default async function DashboardPlataformaPage({
     evol.length >= 2 ? evol[evol.length - 2].penhorasEfetivadas : 0;
 
   return (
-    <main className="py-10">
+    <main className="relative min-h-svh py-12">
+      {/* Fundo: preto puro (padrão da cara nova 25/08). */}
+      <div aria-hidden="true" className="absolute inset-0 bg-black" />
       {/* Cabeçalho centralizado dentro do container 1400 */}
-      <div className="mx-auto max-w-[1400px] px-6 sm:px-10">
-        <header className="title-shield mb-6 flex flex-col items-center text-center">
-          {/* Icone Eye dourado em cima do titulo — simboliza visao geral. */}
-          <div
-            className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--color-gold)]/45 bg-[var(--color-gold)]/10"
-            style={{
-              boxShadow:
-                "0 0 20px rgba(201,162,74,0.30), inset 0 0 12px rgba(201,162,74,0.10)",
-            }}
+      <div className="relative z-10 mx-auto max-w-[1400px] px-6 sm:px-10">
+        <header className="mb-8 text-center">
+          <h1
+            className="font-serif text-[clamp(29px,4.2vw,52px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[#C97B2A]"
+            style={{ WebkitTextStroke: "1px rgba(255,255,255,0.65)" }}
           >
-            <Eye
-              className="h-7 w-7 text-[var(--color-gold)]"
-              style={{
-                filter: "drop-shadow(0 0 8px rgba(201,162,74,0.7))",
-              }}
-              aria-hidden="true"
-            />
-          </div>
-          <h1 className="font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
             Estatísticas da Plataforma
           </h1>
-          <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
-            Visão Geral do Escritório
+          <p className="mt-3 font-mono text-[clamp(13px,1.6vw,20px)] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
+            Visão Geral do Escritório.
           </p>
         </header>
 
-        {/* Barra de filtros DENTRO do container 1400 — alinhada com os cards.
-            Estilo .glass igual o do Monitor de Custos. */}
-        <FiltrosPlataformaUI
-          advogados={opcoes.advogados}
-          credores={opcoes.credores}
-        />
+        {/* Barra de filtros num card verde escuro (padrão do Banco). */}
+        <SpotlightCard
+          local
+          degrade="linear-gradient(0deg, rgba(10,48,28,0.7), rgba(10,48,28,0.7))"
+          className="mb-4 p-4 sm:p-5"
+        >
+          <FiltrosPlataformaUI
+            advogados={opcoes.advogados}
+            credores={opcoes.credores}
+          />
+        </SpotlightCard>
       </div>
 
       {/* Grid principal centralizado */}
-      <div className="mx-auto grid max-w-[1400px] grid-cols-1 gap-4 px-6 sm:px-10 md:grid-cols-12">
+      <div className="relative z-10 mx-auto grid max-w-[1400px] grid-cols-1 gap-4 px-6 sm:px-10 md:grid-cols-12">
         {/* L1 — KPIs (5 + 3 + 2 + 2) */}
         <div className="md:col-span-5">
           <KPIPatrimonioTotal
