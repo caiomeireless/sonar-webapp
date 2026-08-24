@@ -1,11 +1,12 @@
-// Header glass do dossie: eyebrow gigante "DOSSIE PATRIMONIAL", icone PF/PJ,
-// nome serif gold, badges (tipo + status + ultima consulta).
-// Quando `dashboardHref` for null, NAO renderiza o atalho Dashboard Analitico
-// (visao do cliente nao tem dashboard analitico).
+// Header da FICHA DO DEVEDOR (reforma 25/08, ditado do Caio):
+// SEM card atrás, SEM ícone PF/PJ, eyebrow "Ficha do Devedor", nome
+// vermelho com contorno branco e etiquetas na ordem: tipo → em quantos
+// processos aparece → débito ativo → última medida.
+// O atalho Dashboard Analítico saiu da visão da EQUIPE (o dashboard vive
+// no fim da própria ficha) mas continua opcional pro portal do CLIENTE.
 import Link from "next/link";
-import { ArrowRight, BarChart3, Building2, User } from "lucide-react";
-import { formatTempoRelativo } from "@/lib/format";
-import { SpotlightCard } from "@/components/ui/SpotlightCard";
+import { ArrowRight, BarChart3 } from "lucide-react";
+import { formatData } from "@/lib/format";
 
 export type DevedorHeader = {
   id: number;
@@ -22,86 +23,73 @@ export function HeaderDossie({
   devedor,
   statusLabel,
   statusColor,
+  processos,
+  ultimaMedidaEm,
   dashboardHref,
 }: {
   devedor: DevedorHeader;
   statusLabel: string;
   statusColor: string;
-  dashboardHref: string | null;
+  /** Em quantos processos o devedor aparece (etiqueta 2). */
+  processos?: number;
+  /** Data da última medida tomada (etiqueta 4). */
+  ultimaMedidaEm?: string | null;
+  /** Atalho pro dashboard — SÓ o portal do cliente usa. */
+  dashboardHref?: string | null;
 }) {
   return (
-    <header className="mt-10">
-      {/* Vidro claro esbranquiçado + luz do mouse — cara nova 24/08. */}
-      <SpotlightCard
-        local
-        claro
-        className="mx-auto max-w-[1100px] px-8 py-10 text-center sm:px-12 sm:py-12"
+    <header className="mt-10 text-center">
+      <div className="inline-flex items-center gap-3">
+        <span
+          aria-hidden="true"
+          className="inline-block h-px w-10 bg-[var(--color-signal)] opacity-60 sm:w-14"
+        />
+        <span className="font-mono font-medium uppercase tracking-[0.34em] text-[14px] text-[var(--color-signal)]">
+          Ficha do Devedor
+        </span>
+        <span
+          aria-hidden="true"
+          className="inline-block h-px w-10 bg-[var(--color-signal)] opacity-60 sm:w-14"
+        />
+      </div>
+
+      <h1
+        className="nome-devedor mt-4 break-words font-serif text-[clamp(28px,4.2vw,52px)] font-medium uppercase leading-[1.05] tracking-[0.06em] text-[var(--color-devedor)]"
+        style={{ WebkitTextStroke: "1px rgba(255,255,255,0.6)" }}
       >
-        <div className="flex flex-col items-center gap-3">
-          <div className="inline-flex h-14 w-14 items-center justify-center rounded-xl border border-[var(--color-gold)]/35 bg-gradient-to-br from-[rgba(201,162,74,0.18)] to-[rgba(201,162,74,0.04)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-            {devedor.tipo === "PJ" ? (
-              <Building2 className="h-6 w-6 text-[var(--color-gold)]" />
-            ) : (
-              <User className="h-6 w-6 text-[var(--color-gold)]" />
-            )}
-          </div>
+        {devedor.nome}
+      </h1>
 
-          {/* Eyebrow discreto — o PROTAGONISTA do header é o nome do
-              devedor, não o letreiro (antes o mono chegava a 32px e
-              disputava com o nome). */}
-          <div className="inline-flex items-center gap-3">
-            <span
-              aria-hidden="true"
-              className="inline-block h-px w-10 bg-[var(--color-signal)] opacity-60 sm:w-14"
-            />
-            <span className="font-mono font-medium uppercase tracking-[0.34em] text-[14px] text-[var(--color-signal)]">
-              Dossiê Patrimonial
-            </span>
-            <span
-              aria-hidden="true"
-              className="inline-block h-px w-10 bg-[var(--color-signal)] opacity-60 sm:w-14"
-            />
-          </div>
-        </div>
-
-        <h1 className="nome-devedor mt-4 break-words font-serif text-[clamp(28px,4.2vw,52px)] font-medium uppercase leading-[1.05] tracking-[0.06em] text-[var(--color-devedor)]">
-          {devedor.nome}
-        </h1>
-
-        <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+      {/* Etiquetas — sempre da esquerda pra direita nesta ordem. */}
+      <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+        <BadgeFicha
+          label={devedor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"}
+          color="var(--color-gold)"
+        />
+        {typeof processos === "number" ? (
           <BadgeFicha
-            label={`${devedor.tipo === "PF" ? "CPF" : "CNPJ"} ${devedor.documento}`}
+            label={`Aparece em ${processos} ${processos === 1 ? "Processo" : "Processos"}`}
             color="var(--color-ivory-88)"
           />
-          <BadgeFicha
-            label={devedor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"}
-            color="var(--color-gold)"
-          />
-          <BadgeFicha label={statusLabel} color={statusColor} dot />
-          {devedor.ultima_consulta_em ? (
-            <BadgeFicha
-              label={`Última Consulta ${formatTempoRelativo(devedor.ultima_consulta_em)}`}
-              color="var(--color-ivory-66)"
-            />
-          ) : null}
-        </div>
-
-        {dashboardHref ? (
-          <Link href={dashboardHref} className="btn-neon-signal group mt-6">
-            <BarChart3
-              className="h-5 w-5"
-              style={{
-                color: "#FF6B00",
-                filter:
-                  "drop-shadow(0 0 6px rgba(255,107,0,0.85)) drop-shadow(0 0 12px rgba(255,107,0,0.45))",
-              }}
-              aria-hidden="true"
-            />
-            Dashboard Analítico
-            <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-          </Link>
         ) : null}
-      </SpotlightCard>
+        <BadgeFicha label={`Débito ${statusLabel}`} color={statusColor} dot />
+        <BadgeFicha
+          label={
+            ultimaMedidaEm
+              ? `Última Medida ${formatData(ultimaMedidaEm)}`
+              : "Sem Medida Registrada"
+          }
+          color="var(--color-ivory-66)"
+        />
+      </div>
+
+      {dashboardHref ? (
+        <Link href={dashboardHref} className="btn-neon-signal group mt-6">
+          <BarChart3 className="h-5 w-5" aria-hidden="true" />
+          Dashboard Analítico
+          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+        </Link>
+      ) : null}
     </header>
   );
 }

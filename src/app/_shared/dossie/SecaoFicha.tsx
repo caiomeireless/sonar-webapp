@@ -1,9 +1,18 @@
 // Card glass de bloco de ficha + CampoFicha + ChipOrigem.
 // CampoFicha aceita `mostrarChipOrigem` (default true) — cliente passa false
 // pra esconder a mecanica das APIs.
+// Reforma 25/08: estilo FOLHA DE CADERNO pautada — vidro preto com linhas
+// horizontais douradas + borda dourada (constantes exportadas pra reuso
+// nas outras seções da ficha).
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 
 export type OrigemFicha = "VIA THEMIS" | "VIA ASSERTIVA" | "MANUAL";
+
+/** Linhas de caderno: pauta dourada sutil a cada 28px. */
+export const LINHAS_CADERNO =
+  "repeating-linear-gradient(180deg, transparent 0px, transparent 27px, rgba(201,162,74,0.14) 27px, rgba(201,162,74,0.14) 28px)";
+/** Borda dourada de descanso dos cards pautados. */
+export const BORDA_CADERNO = "rgba(201, 162, 74, 0.30)";
 
 export function SecaoFicha({
   titulo,
@@ -15,7 +24,12 @@ export function SecaoFicha({
   eyebrowColor?: string;
 }) {
   return (
-    <SpotlightCard local claro className="p-6 sm:p-7">
+    <SpotlightCard
+      local
+      degrade={LINHAS_CADERNO}
+      borda={BORDA_CADERNO}
+      className="p-6 sm:p-7"
+    >
       <div className="relative pl-4">
         <span
           aria-hidden="true"

@@ -9,7 +9,7 @@ export function CardNumero({
   valor: string;
 }) {
   return (
-    <SpotlightCard local claro className="p-8">
+    <SpotlightCard local claro className="p-8 text-center">
       <span className="font-mono text-[13px] uppercase tracking-[0.28em] text-[var(--color-ivory-66)]">
         {rotulo}
       </span>

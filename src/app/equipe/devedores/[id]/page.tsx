@@ -12,7 +12,7 @@
 // Acoes de Busca, Gerar Peca, Calculo, Cross-Reference.
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, Pencil } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { BordaLiquidaMetal } from "@/components/ui/BordaLiquidaMetal";
 import {
@@ -32,23 +32,21 @@ import {
 import { crawlConfigurado } from "@/lib/crawl-tribunais";
 import { AcoesAssertiva } from "./AcoesAssertiva";
 import { BotaoGerarPeca } from "./BotaoGerarPeca";
-import { TimelineMedidas } from "./TimelineMedidas";
 import { listarMedidasPorDevedor } from "@/lib/medidas";
 import { templatesSugeridos } from "@/lib/pecas-templates";
-import {
-  listarAndamentosPorDevedor,
-  estatisticasAndamentosPorDevedor,
-} from "@/lib/andamentos";
-import { AndamentosProcessuais } from "@/app/_shared/dossie/AndamentosProcessuais";
+import { listarPesquisasImoveis } from "@/lib/imoveis-pesquisas";
+import { obterDadosDashboardCasoV2 } from "@/lib/dashboard-caso";
+import { PainelImoveisManual } from "./_components/PainelImoveisManual";
+import { DashboardCasoGrid } from "./dashboard/_components/DashboardCasoGrid";
 
 // ---- Componentes compartilhados (cliente + advogado) ----
 import { HeaderDossie } from "@/app/_shared/dossie/HeaderDossie";
-import { NavDossie } from "@/app/_shared/dossie/NavDossie";
 import { EstatisticasGrid } from "@/app/_shared/dossie/EstatisticasGrid";
-import { SectionTitle } from "@/app/_shared/dossie/SectionTitle";
 import {
   SecaoFicha,
   CampoFicha,
+  LINHAS_CADERNO,
+  BORDA_CADERNO,
 } from "@/app/_shared/dossie/SecaoFicha";
 import { CardCasoVinculado } from "@/app/_shared/dossie/CardCasoVinculado";
 import { CardBem } from "@/app/_shared/dossie/CardBem";
@@ -126,14 +124,14 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
   const credoresUnicos = new Set(outros.map((o) => o.credor.id));
   const mostrarAlertaCross = credoresUnicos.size >= 2;
 
-  // Medidas tomadas (timeline). Se a tabela ainda nao existir, devolve [].
-  const medidas = await listarMedidasPorDevedor(devedorId);
-
-  // Andamentos processuais (capturados pelo GH Actions e-SAJ/eproc Ter+Sex).
-  // Fonte: public.andamentos. Agrupa por numero_processo dos casos vinculados.
-  const [andamentos, estatisticasAndamentos] = await Promise.all([
-    listarAndamentosPorDevedor(devedorId, 200),
-    estatisticasAndamentosPorDevedor(devedorId),
+  // Medidas (etiqueta "Última Medida"), pesquisas manuais de imóveis
+  // (RI Digital) e dados do dashboard analítico (setor final da ficha).
+  // Andamentos/linha do tempo SAÍRAM da ficha — vão pras fichas de
+  // processo da aba Rotas das Execuções (reforma 25/08).
+  const [medidas, pesquisasImoveis, dadosDash] = await Promise.all([
+    listarMedidasPorDevedor(devedorId),
+    listarPesquisasImoveis(devedorId),
+    obterDadosDashboardCasoV2(devedorId),
   ]);
 
   // Status do devedor — devedor nao tem flag propria; usa o status do
@@ -153,31 +151,27 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
       {/* ============ HEADER + AÇÕES ============ */}
       <section className="relative overflow-hidden">
         <div className="relative mx-auto max-w-[1400px] px-6 py-14 sm:px-10">
-          {/* Top bar: Voltar (esq) + Editar (dir) */}
+          {/* Top bar: Voltar em metal líquido LARANJA (layout do
+              Sincronizar) — sem botão Editar (reforma 25/08). */}
           <div className="flex items-center justify-between">
-            <Link
-              href={`/equipe/devedores${linkBase}`}
-              className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-[0.18em] text-[var(--color-gold)] transition hover:text-[var(--color-tip-glow)]"
-            >
-              ← Voltar à Lista
-            </Link>
-            <button
-              type="button"
-              disabled
-              title="Edição em breve"
-              className="inline-flex cursor-not-allowed items-center gap-2 rounded-lg border border-[var(--color-ivory-22)] bg-white/5 px-3 py-1.5 font-mono text-xs uppercase tracking-[0.18em] text-[var(--color-ivory-66)] opacity-60"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-              Editar
-            </button>
+            <BordaLiquidaMetal cor="laranja" radius={14} className="inline-flex">
+              <Link
+                href={`/equipe/devedores${linkBase}`}
+                className="inline-flex h-full w-full items-center gap-2.5 rounded-[11px] bg-[rgba(255,156,65,0.10)] px-5 py-3 text-sm font-medium text-[#FF9C41] transition hover:bg-[rgba(255,156,65,0.18)]"
+              >
+                <ArrowLeft className="h-5 w-5" aria-hidden="true" />
+                Voltar à Lista
+              </Link>
+            </BordaLiquidaMetal>
           </div>
 
-          {/* ============ HEADER DOSSIÊ ============ */}
+          {/* ============ HEADER DA FICHA ============ */}
           <HeaderDossie
             devedor={devedor}
             statusLabel={statusLabel}
             statusColor={statusColor}
-            dashboardHref={`/equipe/devedores/${devedor.id}/dashboard${linkBase}`}
+            processos={casos.length}
+            ultimaMedidaEm={medidas[0]?.data ?? null}
           />
 
           {/* ============ ESTATÍSTICAS ============ */}
@@ -187,23 +181,9 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
             casosVinculados={casos.length}
           />
 
-          {/* ============ NAV INTERNA (scrollspy) ============ */}
-          <div className="mt-8">
-            <NavDossie
-              secoes={[
-                { id: "pesquisas", rotulo: "Pesquisas" },
-                { id: "ficha", rotulo: "Ficha" },
-                { id: "casos", rotulo: "Casos" },
-                { id: "andamentos", rotulo: "Andamentos" },
-                { id: "bens", rotulo: "Bens" },
-                { id: "timeline", rotulo: "Linha do Tempo" },
-              ]}
-            />
-          </div>
-
           {/* ============ AÇÕES: PESQUISAS + GERAR PEÇA (2 colunas) ============ */}
           <div id="pesquisas" className="mt-8 grid gap-4 scroll-mt-16 lg:grid-cols-2">
-            <BlocoAcao titulo="Central de Pesquisas">
+            <BlocoAcao titulo="Central de Pesquisas" tinta={TINTA_PESQUISAS}>
               <AcoesAssertiva
                 devedorId={devedor.id}
                 custoLocalizeBrl={CUSTO_LOCALIZE_BRL}
@@ -213,7 +193,7 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
               />
             </BlocoAcao>
 
-            <BlocoAcao titulo="Gerar Peça">
+            <BlocoAcao titulo="Gerar Peça" tinta={TINTA_PECA}>
               <div className="flex flex-col gap-3">
                 {/* Metal líquido no botão principal (padrão Sincronizar). */}
                 <BordaLiquidaMetal cor="gold" radius={14} className="flex">
@@ -241,9 +221,9 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
             </BlocoAcao>
           </div>
 
-          {/* ============ DADOS CADASTRAIS ============ */}
+          {/* ============ SETOR: DADOS PARA LOCALIZAÇÃO ============ */}
           <div id="ficha" className="mt-12 scroll-mt-16">
-            <SectionTitle texto="Dados Cadastrais" />
+            <TituloSetor texto="Dados para Localização" />
 
             <div className="mt-6 grid gap-5 md:grid-cols-2">
               <SecaoFicha titulo="Identificação">
@@ -308,6 +288,14 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
                 />
               </SecaoFicha>
 
+            </div>
+          </div>
+
+          {/* ============ SETOR: DADOS PROCESSUAIS ============ */}
+          <div id="casos" className="mt-12 scroll-mt-16">
+            <TituloSetor texto="Dados Processuais" />
+
+            <div className="mt-6 grid gap-5 md:grid-cols-2">
               <SecaoFicha titulo="Relacionamento">
                 <CampoFicha
                   rotulo="Responsável no Escritório"
@@ -345,124 +333,122 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
                 />
               </SecaoFicha>
             </div>
+
+            {/* Processos vinculados — lista com ROLAGEM dentro do setor
+                (fundiu a antiga seção Casos Vinculados aqui). */}
+            {casos.length > 0 ? (
+              <SpotlightCard
+                local
+                degrade={LINHAS_CADERNO}
+                borda={BORDA_CADERNO}
+                className="mt-5 p-6 sm:p-7"
+              >
+                <h3 className="font-mono text-[13px] uppercase tracking-[0.32em] text-[var(--color-gold)]">
+                  Processos Vinculados · {casos.length}
+                </h3>
+                <div className="sem-scrollbar mt-5 max-h-[480px] space-y-3 overflow-y-auto pr-1">
+                  {casos.map((c) => (
+                    <CardCasoVinculado key={c.id} caso={c} />
+                  ))}
+                </div>
+              </SpotlightCard>
+            ) : null}
           </div>
+
+          {/* Andamentos processuais e linha do tempo SAÍRAM da ficha do
+              devedor — passam a viver nas fichas de PROCESSO da aba
+              Rotas das Execuções (reforma 25/08, a construir). */}
         </div>
       </section>
 
-      {/* ============ CASOS ============ */}
-      {casos.length > 0 ? (
-        <section id="casos" className="scroll-mt-16 border-t border-[var(--color-ivory-12)]">
-          <div className="mx-auto max-w-[1400px] px-6 py-12 sm:px-10">
-            <SectionTitle texto="Casos Vinculados" eyebrow="Casos Onde Este Devedor Aparece" />
-            <div className="mt-6 space-y-3">
-              {casos.map((c) => (
-                <CardCasoVinculado key={c.id} caso={c} />
-              ))}
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      {/* ============ ANDAMENTOS PROCESSUAIS ============ */}
-      <section id="andamentos" className="scroll-mt-16 border-t border-[var(--color-ivory-12)]">
-        <div className="mx-auto max-w-[1400px] px-6 py-12 sm:px-10">
-          <SectionTitle
-            texto="Andamentos Processuais"
-            eyebrow="Movimentações Capturadas — TJSP (e-SAJ + eproc)"
-          />
-          <p className="mt-2 text-sm text-[var(--color-ivory-66)]">
-            Capturados automaticamente nos sistemas do TJSP às terças e sextas.
-          </p>
-          <div className="mt-6">
-            <AndamentosProcessuais
-              andamentos={andamentos}
-              estatisticas={estatisticasAndamentos}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* ============ CATEGORIAS ============ */}
-      {/* So renderiza categorias COM itens — antes as 6 apareciam sempre e
-          um dossie tipico carregava 4 blocos de "Nenhum item encontrado".
-          As vazias viram uma linha compacta de chips no rodape da secao. */}
+      {/* ============ SETOR: BENS ENCONTRADOS (ficha pautada) ============ */}
+      {/* TODAS as categorias aparecem SEMPRE (ditado 25/08) — mesmo sem
+          registro, o espacinho fica na ficha com a explicação do que os
+          robôs procuram ali. Imóveis é MANUAL (RI Digital, sem API). */}
       <section id="bens" className="scroll-mt-16 border-t border-[var(--color-ivory-12)]">
         <div className="mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
-          <SectionTitle texto="Bens Encontrados por Categoria" eyebrow="Bens Encontrados" />
+          <TituloSetor texto="Bens Encontrados" />
 
-          {total_bens === 0 ? (
-            <SpotlightCard local claro className="mt-10 p-10 text-center">
-              <p className="font-serif text-2xl text-ivory">
-                Nenhum bem localizado ainda
-              </p>
-              <p className="mx-auto mt-3 max-w-[520px] text-sm text-[var(--color-ivory-88)]">
-                Use a Central de Pesquisas acima para enriquecer os dados,
-                buscar veículos ou acionar os robôs dos tribunais.
-              </p>
-            </SpotlightCard>
-          ) : (
-            <div className="mt-12 space-y-16">
-              {ORDEM.filter((tipo) => por_tipo[tipo].length > 0).map((tipo) => {
-                const bens = por_tipo[tipo];
-                const Icone = ICONES_TIPO_BEM[tipo];
-                return (
-                  <div key={tipo}>
-                    {/* Header da categoria: icone + titulo serif gold uppercase + contador mono */}
-                    <div className="mb-6 flex items-center gap-4">
-                      <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)]">
-                        <Icone className="h-6 w-6 text-[var(--color-gold)]" />
-                      </div>
-                      <div>
-                        <h2 className="font-serif text-2xl uppercase tracking-[0.08em] text-[var(--color-gold)]">
-                          {TIPO_META[tipo].label}
-                        </h2>
-                        <p className="font-mono text-xs uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
-                          {bens.length} {bens.length === 1 ? "item encontrado" : "itens encontrados"}
-                        </p>
-                      </div>
+          <div className="mt-8 space-y-6">
+            {ORDEM.map((tipo) => {
+              const bens = por_tipo[tipo];
+              const Icone = ICONES_TIPO_BEM[tipo];
+              const cor = COR_TIPO_BEM[tipo] ?? "var(--color-gold)";
+              return (
+                <SpotlightCard
+                  key={tipo}
+                  local
+                  degrade={LINHAS_CADERNO}
+                  borda={BORDA_CADERNO}
+                  className="p-6 sm:p-7"
+                >
+                  <div className="flex items-center gap-4">
+                    <div
+                      className="inline-flex h-12 w-12 items-center justify-center rounded-xl border"
+                      style={{
+                        color: cor,
+                        borderColor: `color-mix(in srgb, ${cor} 45%, transparent)`,
+                        backgroundColor: `color-mix(in srgb, ${cor} 10%, transparent)`,
+                      }}
+                    >
+                      <Icone className="h-6 w-6" />
                     </div>
+                    <div>
+                      <h2
+                        className="font-serif text-2xl uppercase tracking-[0.08em]"
+                        style={{ color: cor }}
+                      >
+                        {TIPO_META[tipo].label}
+                      </h2>
+                      <p className="font-mono text-xs uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+                        {bens.length > 0
+                          ? `${bens.length} ${bens.length === 1 ? "item encontrado" : "itens encontrados"}`
+                          : "Sem registros até agora"}
+                      </p>
+                    </div>
+                  </div>
 
+                  {bens.length > 0 ? (
                     <div className="mt-6 grid gap-4 md:grid-cols-2">
                       {bens.map((bem) => (
                         <CardBem key={bem.id} bem={bem} />
                       ))}
                     </div>
-                  </div>
-                );
-              })}
+                  ) : tipo !== "imovel" ? (
+                    <p className="mt-4 max-w-[720px] text-sm leading-relaxed text-[var(--color-ivory-66)]">
+                      {FRASE_SEM_REGISTRO[tipo]}
+                    </p>
+                  ) : null}
 
-              {ORDEM.some((tipo) => por_tipo[tipo].length === 0) ? (
-                <div className="flex flex-wrap items-center gap-2 border-t border-[var(--color-ivory-12)] pt-6">
-                  <span className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
-                    Sem registros:
-                  </span>
-                  {ORDEM.filter((tipo) => por_tipo[tipo].length === 0).map(
-                    (tipo) => (
-                      <span
-                        key={tipo}
-                        className="inline-flex items-center rounded-full border border-[var(--color-ivory-12)] px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--color-ivory-40)]"
-                      >
-                        {TIPO_META[tipo].label}
-                      </span>
-                    ),
-                  )}
-                </div>
-              ) : null}
-            </div>
-          )}
+                  {/* Imóveis: atuação MANUAL do advogado via RI Digital —
+                      registro de pesquisa + prints + PDFs de matrículas. */}
+                  {tipo === "imovel" ? (
+                    <div className="mt-6">
+                      <PainelImoveisManual
+                        devedorId={devedor.id}
+                        pesquisas={pesquisasImoveis}
+                      />
+                    </div>
+                  ) : null}
+                </SpotlightCard>
+              );
+            })}
+          </div>
         </div>
       </section>
 
-      {/* ============ TIMELINE ============ */}
-      <section id="timeline" className="scroll-mt-16 border-t border-[var(--color-ivory-12)]">
-        <div className="mx-auto max-w-[1400px] px-6 py-12 sm:px-10">
-          <SectionTitle texto="Cronologia de Medidas" eyebrow="Linha do Tempo" />
-          <div className="mt-6 -mx-6 sm:-mx-10">
-            <TimelineMedidas
-              medidas={medidas}
-              casos={casos}
-              advogadoEmail={eu}
-            />
+      {/* ============ SETOR: DASHBOARD ANALÍTICO (fim da ficha) ============ */}
+      <section id="dashboard" className="scroll-mt-16 border-t border-[var(--color-ivory-12)]">
+        <div className="mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
+          <TituloSetor texto="Dashboard Analítico" />
+          <div className="mt-8">
+            {dadosDash ? (
+              <DashboardCasoGrid dados={dadosDash} />
+            ) : (
+              <p className="text-sm text-[var(--color-ivory-66)]">
+                Dados analíticos indisponíveis no momento.
+              </p>
+            )}
           </div>
         </div>
       </section>
@@ -471,11 +457,7 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
       {mostrarAlertaCross ? (
         <section className="border-t border-[var(--color-ivory-12)]">
           <div className="mx-auto max-w-[1400px] px-6 py-12 sm:px-10">
-            <SectionTitle
-              texto="Cross-Reference Detectado"
-              eyebrow="Atenção · Sinergia entre Carteiras"
-              eyebrowColor="var(--color-gold)"
-            />
+            <TituloSetor texto="Cross-Reference Detectado" />
             <div className="mt-6">
               <AlertaCrossReference
                 outros={outros}
@@ -495,17 +477,74 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
 // COMPONENTES LOCAIS (exclusivos da equipe)
 // ============================================================
 
-// ---------- BlocoAcao (wrapper com barra vertical signal) ----------
+// Tintas dos cards de ação (ditado 25/08: "fundo esbranquiçado de outra
+// cor" — a Central de Pesquisas é um dos cards mais importantes).
+const TINTA_PESQUISAS =
+  "linear-gradient(0deg, rgba(10,48,28,0.7), rgba(10,48,28,0.7))";
+const TINTA_PECA =
+  "linear-gradient(0deg, rgba(58,42,10,0.6), rgba(58,42,10,0.6))";
+
+// Classificação visual dos bens por tipo — mesma paleta neon do Início.
+const COR_TIPO_BEM: Record<string, string> = {
+  veiculo: "#FF9C41",
+  imovel: "#38BDF8",
+  empresa: "#C084FC",
+  processo_credito: "#FFD93D",
+  endereco: "#2DD4BF",
+  vinculo: "#FB7185",
+};
+
+// Frases dos espaços SEM registro — a ficha sempre mostra o espacinho
+// de cada categoria com o que os robôs procuram ali (ditado 25/08).
+const FRASE_SEM_REGISTRO: Record<string, string> = {
+  veiculo:
+    "Nenhum veículo localizado até agora. A busca Assertiva Veículos varre a frota registrada no CPF/CNPJ (placa, modelo, ano e restrições).",
+  empresa:
+    "Nenhuma participação societária localizada até agora. O Enriquecer Dados traz os vínculos societários registrados no documento.",
+  processo_credito:
+    "Os robôs pesquisam processos em que o devedor tem crédito a receber (é credor em outra ação) — nada localizado até agora.",
+  endereco:
+    "Nenhum endereço confirmado até agora. O Enriquecer Dados traz os endereços vinculados ao documento.",
+  vinculo:
+    "Nenhum vínculo familiar mapeado até agora. Os vínculos ajudam a rastrear patrimônio em nome de terceiros.",
+};
+
+// ---------- TituloSetor (título dourado neon com card pautado) ----------
+
+function TituloSetor({ texto }: { texto: string }) {
+  return (
+    <SpotlightCard
+      local
+      degrade={LINHAS_CADERNO}
+      borda={BORDA_CADERNO}
+      className="px-6 py-5"
+    >
+      <h2
+        className="font-serif text-[clamp(24px,2.4vw,36px)] uppercase leading-[1.1] tracking-[0.06em] text-[var(--color-gold)]"
+        style={{
+          WebkitTextStroke: "1px rgba(255,255,255,0.55)",
+          textShadow: "0 0 16px rgba(201,162,74,0.35)",
+        }}
+      >
+        {texto}
+      </h2>
+    </SpotlightCard>
+  );
+}
+
+// ---------- BlocoAcao (card de ação com tinta própria) ----------
 
 function BlocoAcao({
   titulo,
   children,
+  tinta,
 }: {
   titulo: string;
   children: React.ReactNode;
+  tinta?: string;
 }) {
   return (
-    <SpotlightCard local claro className="p-6 sm:p-7">
+    <SpotlightCard local claro degrade={tinta} className="p-6 sm:p-7">
       <div className="relative pl-4">
         <span
           aria-hidden="true"

@@ -17,12 +17,14 @@ const TINTAS: Record<string, string> = {
   gold: "sepia(1) saturate(2.2) hue-rotate(8deg) brightness(1.06)",
   signal: "sepia(1) saturate(2.6) hue-rotate(85deg) brightness(1.05)",
   prata: "saturate(0.85) brightness(1.08)",
+  laranja: "sepia(1) saturate(3) hue-rotate(-12deg) brightness(1.05)",
+  violeta: "sepia(1) saturate(2.4) hue-rotate(215deg) brightness(1.08)",
 };
 
 type Props = {
   children: React.ReactNode;
   /** Cor do reflexo metálico (padrão: gold). */
-  cor?: "gold" | "signal" | "prata";
+  cor?: "gold" | "signal" | "prata" | "laranja" | "violeta";
   /** Raio externo em px (o miolo desconta a espessura do anel). */
   radius?: number;
   /**

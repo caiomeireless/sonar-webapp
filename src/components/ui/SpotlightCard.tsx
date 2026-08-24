@@ -49,6 +49,9 @@ type SpotlightCardProps = {
       pintada por baixo do glow — pro card de filtro com degradê verde
       escuro → preto (ditado 24/08). Usar junto com `local`. */
   degrade?: string;
+  /** Cor da borda de descanso (sobrepõe o padrão ivory 10%) — usada pelo
+      estilo "caderno pautado" da ficha (borda dourada). */
+  borda?: string;
 };
 
 // Adaptado do prompt "spotlight-card" (GlowCard original) para o tema Sonar:
@@ -63,6 +66,7 @@ export function SpotlightCard({
   local = false,
   claro = false,
   degrade,
+  borda,
 }: SpotlightCardProps) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -102,9 +106,8 @@ export function SpotlightCard({
     ["--backdrop" as string]: claro
       ? "rgba(236, 233, 226, 0.12)"
       : "rgba(5, 7, 6, 0.82)",
-    ["--backup-border" as string]: claro
-      ? "rgba(232, 228, 214, 0.20)"
-      : "rgba(232, 228, 214, 0.10)",
+    ["--backup-border" as string]:
+      borda ?? (claro ? "rgba(232, 228, 214, 0.20)" : "rgba(232, 228, 214, 0.10)"),
     ["--size" as string]: "260",
     ["--border-size" as string]: "calc(var(--border) * 1px)",
     ["--spotlight-size" as string]: "calc(var(--size) * 1px)",

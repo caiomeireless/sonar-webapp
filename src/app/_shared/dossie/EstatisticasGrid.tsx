@@ -13,7 +13,7 @@ export function EstatisticasGrid({
 }) {
   return (
     <div className="mt-10 grid gap-4 sm:grid-cols-3">
-      <CardNumero rotulo="Total de Bens" valor={String(totalBens)} />
+      <CardNumero rotulo="Total de Bens Localizados" valor={String(totalBens)} />
       <CardNumero
         rotulo="Valor Estimado Total"
         valor={formatBRL(valorEstimado)}

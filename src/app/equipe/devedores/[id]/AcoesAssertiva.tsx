@@ -133,31 +133,51 @@ export function AcoesAssertiva({
       ) : null}
 
       <div className="flex flex-col gap-3 sm:flex-row">
-        {consultas.map((c) => (
-          <button
-            key={c.kind}
-            type="button"
-            disabled={!credenciaisOk || pendente}
-            onClick={() => setConfirmando(c)}
-            className="group flex flex-1 items-center justify-between gap-3 rounded-xl border border-[var(--color-signal-soft-2)] bg-[var(--color-signal-soft)] px-5 py-4 text-left transition hover:bg-[var(--color-signal)]/20 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <span className="flex items-center gap-3">
-              {c.kind === "localize" ? (
-                <Sparkles className="h-5 w-5 text-[var(--color-signal)]" aria-hidden="true" />
-              ) : (
-                <Car className="h-5 w-5 text-[var(--color-signal)]" aria-hidden="true" />
-              )}
-              <span>
-                <span className="block text-sm font-semibold text-[var(--color-signal)]">
-                  {c.titulo}
+        {/* Botões pagos no MESMO padrão do Atualizar dos Tribunais (borda
+            metal líquido + fundo escuro), cada um com a cor da API:
+            Localize = violeta, Veículos = laranja (ditado 25/08). */}
+        {consultas.map((c) => {
+          const cor = c.kind === "localize" ? "#C084FC" : "#FF9C41";
+          const tinta = c.kind === "localize" ? "violeta" : "laranja";
+          const Icone = c.kind === "localize" ? Sparkles : Car;
+          return (
+            <BordaLiquidaMetal
+              key={c.kind}
+              cor={tinta as "violeta" | "laranja"}
+              radius={14}
+              className="flex flex-1"
+            >
+              <button
+                type="button"
+                disabled={!credenciaisOk || pendente}
+                onClick={() => setConfirmando(c)}
+                className="group flex h-full w-full items-center justify-between gap-3 rounded-[11px] px-5 py-4 text-left transition disabled:cursor-not-allowed disabled:opacity-50"
+                style={{
+                  backgroundColor: `color-mix(in srgb, ${cor} 10%, transparent)`,
+                }}
+              >
+                <span className="flex items-center gap-3">
+                  <Icone
+                    className="h-5 w-5"
+                    style={{ color: cor }}
+                    aria-hidden="true"
+                  />
+                  <span>
+                    <span
+                      className="block text-sm font-semibold"
+                      style={{ color: cor }}
+                    >
+                      {c.titulo}
+                    </span>
+                    <span className="block font-mono text-[12px] uppercase tracking-[0.16em] text-[var(--color-ivory-66)]">
+                      Assertiva · {formatPreco(c.custo)}
+                    </span>
+                  </span>
                 </span>
-                <span className="block font-mono text-[12px] uppercase tracking-[0.16em] text-[var(--color-ivory-66)]">
-                  Assertiva · {formatPreco(c.custo)}
-                </span>
-              </span>
-            </span>
-          </button>
-        ))}
+              </button>
+            </BordaLiquidaMetal>
+          );
+        })}
 
         {/* Raspagem dos tribunais — GRATUITA (Playwright no GH Actions,
             zero tokens de IA). Dourado pra diferenciar das pagas; a borda
