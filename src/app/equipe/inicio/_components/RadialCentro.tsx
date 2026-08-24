@@ -32,14 +32,15 @@ export default function RadialCentro({
     // SEM piso acima do espaço real: o piso de 200 fazia a roda estourar
     // e ser cortada em janelas baixas (print 24/08). O -24 desconta o
     // anel de metal líquido que envolve a roda (+10 de raio + folga).
-    // -20% sobre o espaço disponível (ditado 25/08).
+    // -20% e depois -10% sobre o espaço disponível (ditados 24/08):
+    // fator acumulado 0.72.
     const medir = () =>
       setTam(
         Math.min(
           TAM_MAX,
           Math.max(
             140,
-            Math.round((Math.min(el.clientWidth, el.clientHeight) - 4) * 0.8),
+            Math.round((Math.min(el.clientWidth, el.clientHeight) - 4) * 0.72),
           ),
         ),
       );
