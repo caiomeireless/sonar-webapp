@@ -504,14 +504,14 @@ export default async function InicioPage() {
             </div>
 
             <div className="flex min-h-0 flex-1 flex-col items-center gap-1 overflow-hidden">
-              {/* Frase ACIMA da roda (ditado 25/08). */}
+              <RadialCentro nome={nome} fotoUrl={perfil?.fotoUrl ?? null} />
+              {/* Frase ABAIXO da roda (ditado 24/08 noite). */}
               <p
-                className="sonar-wordmark shrink-0 whitespace-nowrap pt-1 text-center text-[clamp(20px,1.9vw,32px)] leading-[1.1] text-ivory"
+                className="sonar-wordmark shrink-0 whitespace-nowrap pb-1 text-center text-[clamp(20px,1.9vw,32px)] leading-[1.1] text-ivory"
                 style={{ textShadow: "0 0 16px rgba(60,255,138,0.3)" }}
               >
                 Para onde deseja ir?
               </p>
-              <RadialCentro nome={nome} fotoUrl={perfil?.fotoUrl ?? null} />
             </div>
           </div>
         </div>
