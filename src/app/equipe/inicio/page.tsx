@@ -82,6 +82,13 @@ const META_TIPO_BEM: Record<
 };
 const META_TIPO_BEM_PADRAO = { rotulo: "Bem", cor: NEON.verde, Icon: Gem };
 
+// Vidro POLIDO com brilho pra régua de indicadores (ditado 25/08):
+// lâmina de luz no topo + varredura diagonal de brilho.
+const VIDRO_BRILHO = [
+  "linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.03) 38%, transparent 55%)",
+  "linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.06) 34%, rgba(255,255,255,0.13) 45%, rgba(255,255,255,0.05) 56%, transparent 72%)",
+].join(", ");
+
 // Ponto colorido discreto (substitui os chips-pílula).
 function Ponto({ cor }: { cor: string }) {
   return (
@@ -219,8 +226,13 @@ export default async function InicioPage() {
 
       <div className="relative z-10 mx-auto flex h-full max-w-[1480px] flex-col gap-4 p-4 lg:px-10 lg:py-5">
         {/* ============ RÉGUA DE INDICADORES — primeira linha da tela,
-            acima do Boas-Vindas (ditado 24/08) ============ */}
-        <Painel className="shrink-0 px-2 py-3">
+            vidro polido com brilho (ditados 24-25/08) ============ */}
+        <SpotlightCard
+          local
+          degrade={VIDRO_BRILHO}
+          borda="rgba(232, 228, 214, 0.25)"
+          className="shrink-0 overflow-hidden px-2 py-3"
+        >
           {/* Slots de altura FIXA (número h-7, legenda h-5) + nowrap:
               todas as células alinham pela mesma linha de base. */}
           <div className="grid grid-cols-2 gap-y-3 divide-white/8 sm:grid-cols-4 lg:grid-cols-7 lg:divide-x">
@@ -252,7 +264,7 @@ export default async function InicioPage() {
               </div>
             ))}
           </div>
-        </Painel>
+        </SpotlightCard>
 
         {/* ============ CABEÇALHO: boas-vindas e sync em CARDS SEPARADOS == */}
         <div className="flex shrink-0 flex-col gap-4 lg:flex-row lg:items-stretch">
