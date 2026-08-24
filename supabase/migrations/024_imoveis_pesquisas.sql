@@ -1,6 +1,6 @@
 -- 024_imoveis_pesquisas.sql
 -- ============================================================
--- DOIS módulos manuais do dossiê do devedor:
+-- TRÊS módulos manuais do dossiê do devedor:
 --
 --   1) Imóveis — pesquisa manual RI Digital (tabela
 --      `imoveis_pesquisas`): não existe API de matrículas de
@@ -15,7 +15,13 @@
 --      devedor (aguardando / cumprido positivo / cumprido
 --      negativo), anexando a certidão do oficial de justiça.
 --
--- Os dois módulos compartilham o MESMO bucket privado
+--   3) Intimação/Citação no Endereço (tabela
+--      `enderecos_intimacoes`): o advogado registra o resultado
+--      da tentativa de intimação ou citação do devedor no
+--      endereço encontrado (aguardando / êxito / sem êxito),
+--      anexando o AR positivo.
+--
+-- Os três módulos compartilham o MESMO bucket privado
 -- `imoveis-pesquisas` (paths com sufixos distintos por módulo).
 --
 -- Segurança (mesmo padrão das tabelas sensíveis):
@@ -88,9 +94,45 @@ grant all on table public.enderecos_mandados to service_role;
 grant usage, select on sequence public.enderecos_mandados_id_seq to service_role;
 
 -- ------------------------------------------------------------
--- Bucket PRIVADO COMPARTILHADO pelos dois módulos: anexos das
--- pesquisas de imóveis (print + matrículas) E certidões de
--- mandado de avaliação e penhora.
+-- Intimação/Citação no Endereço — resultado da tentativa de
+-- intimar ou citar o devedor no endereço encontrado. Um registro
+-- por tentativa; o AR positivo entra como anexo no MESMO bucket
+-- dos imóveis.
+-- ------------------------------------------------------------
+
+create table if not exists public.enderecos_intimacoes (
+  id bigint generated always as identity primary key,
+  devedor_id bigint not null references public.devedores(id),
+  -- Situação da intimação/citação no endereço.
+  resultado text not null
+    check (resultado in ('aguardando', 'exito', 'sem_exito')),
+  -- Endereço / observação livre do advogado.
+  observacao text,
+  -- E-mail de quem registrou a intimação (equipe).
+  criado_por text not null,
+  -- Lista de {path, nome, tipo: 'ar', content_type}.
+  anexos jsonb not null default '[]',
+  criado_em timestamptz default now()
+);
+
+create index if not exists enderecos_intimacoes_devedor_idx
+  on public.enderecos_intimacoes (devedor_id);
+
+-- RLS ligado SEM policies: nenhum acesso via anon/authenticated;
+-- somente o service_role (que ignora RLS) enxerga a tabela.
+alter table public.enderecos_intimacoes enable row level security;
+
+revoke all on table public.enderecos_intimacoes from anon, authenticated;
+
+-- GRANTs obrigatórios para a Data API (mudança Supabase out/2026):
+grant all on table public.enderecos_intimacoes to service_role;
+grant usage, select on sequence public.enderecos_intimacoes_id_seq to service_role;
+
+-- ------------------------------------------------------------
+-- Bucket PRIVADO COMPARTILHADO pelos três módulos: anexos das
+-- pesquisas de imóveis (print + matrículas), certidões de
+-- mandado de avaliação e penhora E ARs positivos de
+-- intimação/citação.
 -- Limite de 20 MB por arquivo e mimes restritos garantidos pelo bucket.
 -- ------------------------------------------------------------
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)

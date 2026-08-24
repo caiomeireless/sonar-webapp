@@ -37,9 +37,11 @@ import { listarMedidasPorDevedor } from "@/lib/medidas";
 import { templatesSugeridos } from "@/lib/pecas-templates";
 import { listarPesquisasImoveis } from "@/lib/imoveis-pesquisas";
 import { listarMandadosEndereco } from "@/lib/enderecos-mandados";
+import { listarIntimacoesEndereco } from "@/lib/enderecos-intimacoes";
 import { obterDadosDashboardCasoV2 } from "@/lib/dashboard-caso";
 import { PainelImoveisManual } from "./_components/PainelImoveisManual";
 import { PainelMandadosEndereco } from "./_components/PainelMandadosEndereco";
+import { PainelIntimacoesEndereco } from "./_components/PainelIntimacoesEndereco";
 import { DashboardCasoGrid } from "./dashboard/_components/DashboardCasoGrid";
 
 // ---- Componentes compartilhados (cliente + advogado) ----
@@ -131,13 +133,19 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
   // pra não segurar a pintura da ficha — é a consulta mais pesada.
   // Andamentos/linha do tempo SAÍRAM da ficha — vão pras fichas de
   // processo da aba Rotas das Execuções (reforma 25/08).
-  const [medidas, pesquisasImoveis, mandadosEndereco, ultimaVarredura] =
-    await Promise.all([
-      listarMedidasPorDevedor(devedorId),
-      listarPesquisasImoveis(devedorId),
-      listarMandadosEndereco(devedorId),
-      ultimaVarreduraTribunais(devedorId),
-    ]);
+  const [
+    medidas,
+    pesquisasImoveis,
+    mandadosEndereco,
+    intimacoesEndereco,
+    ultimaVarredura,
+  ] = await Promise.all([
+    listarMedidasPorDevedor(devedorId),
+    listarPesquisasImoveis(devedorId),
+    listarMandadosEndereco(devedorId),
+    listarIntimacoesEndereco(devedorId),
+    ultimaVarreduraTribunais(devedorId),
+  ]);
 
   // Status do devedor — devedor nao tem flag propria; usa o status do
   // primeiro caso vinculado ("ativo" se houver caso ativo, senao "pausado").
@@ -293,6 +301,15 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
                 />
               </SecaoFicha>
 
+            </div>
+
+            {/* Intimação/Citação no endereço encontrado + AR positivo
+                arrastável (ditado 25/08). */}
+            <div className="mt-5">
+              <PainelIntimacoesEndereco
+                devedorId={devedor.id}
+                intimacoes={intimacoesEndereco}
+              />
             </div>
           </div>
 
