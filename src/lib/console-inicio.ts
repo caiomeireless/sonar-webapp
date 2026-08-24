@@ -5,6 +5,13 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { listarRadar, type ItemRadar } from "@/lib/radar";
 
+export type PendentePesquisa = {
+  devedorId: number;
+  devedorNome: string;
+  credorNome: string | null;
+  numeroProcesso: string | null;
+};
+
 export type LocalizacaoRecente = {
   id: number;
   tipo: string;
@@ -46,6 +53,8 @@ export type DadosConsole = {
   sincronizacao: SincronizacaoConsole;
   ultimasLocalizacoes: LocalizacaoRecente[];
   movimentacoes: ItemRadar[];
+  /** Devedores ativos SEM nenhum bem localizado — falta pesquisa. */
+  pendentesPesquisa: PendentePesquisa[];
 };
 
 /** Cota mensal consumível do contrato Assertiva (Q-19312-1). */
@@ -70,6 +79,7 @@ const VAZIO: DadosConsole = {
   },
   ultimasLocalizacoes: [],
   movimentacoes: [],
+  pendentesPesquisa: [],
 };
 
 // Palavras de acordo/pagamento (mesmo vocabulário da categoria "pagamento"
@@ -120,11 +130,12 @@ export async function obterDadosConsole(): Promise<DadosConsole> {
       esajUlt,
       eprocUlt,
       totalAnd,
+      casosAtivosDetalhe,
     ] =
       await Promise.all([
         sb
           .from("bens_encontrados")
-          .select("valor_estimado_brl")
+          .select("devedor_id, valor_estimado_brl")
           .eq("ativo", true)
           .limit(1000),
         sb
@@ -180,6 +191,15 @@ export async function obterDadosConsole(): Promise<DadosConsole> {
         ultimaCaptura("esaj-tjsp"),
         ultimaCaptura("eproc-tjsp"),
         sb.from("andamentos").select("id", { count: "exact", head: true }),
+        sb
+          .from("casos")
+          .select(
+            "devedor_id, numero_processo, devedor:devedores(id, nome), credor:credores(nome)",
+          )
+          .eq("eh_demo", false)
+          .eq("status", "ativo")
+          .not("numero_processo", "is", null)
+          .limit(400),
       ]);
 
     const patrimonioBrl = (bens.data ?? []).reduce(
@@ -216,6 +236,29 @@ export async function obterDadosConsole(): Promise<DadosConsole> {
     );
     const themis = (syncThemis.data ?? [])[0] ?? null;
 
+    // Devedores que AINDA faltam pesquisa: caso ativo com processo, mas
+    // nenhum bem localizado. Dedupe por devedor, até 12.
+    const comBens = new Set(
+      (bens.data ?? []).map((b) => b.devedor_id as number),
+    );
+    const vistos = new Set<number>();
+    const pendentesPesquisa: PendentePesquisa[] = [];
+    for (const c of casosAtivosDetalhe.data ?? []) {
+      const did = c.devedor_id as number;
+      if (comBens.has(did) || vistos.has(did)) continue;
+      const dev = c.devedor as unknown as { id: number; nome: string } | null;
+      if (!dev) continue;
+      vistos.add(did);
+      pendentesPesquisa.push({
+        devedorId: dev.id,
+        devedorNome: dev.nome,
+        credorNome:
+          (c.credor as unknown as { nome: string } | null)?.nome ?? null,
+        numeroProcesso: (c.numero_processo as string | null) ?? null,
+      });
+      if (pendentesPesquisa.length >= 12) break;
+    }
+
     return {
       patrimonioBrl,
       totalBens: (bens.data ?? []).length,
@@ -237,6 +280,7 @@ export async function obterDadosConsole(): Promise<DadosConsole> {
       },
       ultimasLocalizacoes,
       movimentacoes: radar.erro ? [] : radar.itens.slice(0, 12),
+      pendentesPesquisa,
     };
   } catch {
     return VAZIO;

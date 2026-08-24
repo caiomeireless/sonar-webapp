@@ -408,9 +408,43 @@ export default async function InicioPage() {
               (com rolagem interna, tipo colorido + ícone e devedor em
               vermelho — ditado 24/08); roda radial centrada no vão. */}
           <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
-            {/* Consumo de APIs SAIU (ditado 25/08) — o DonutCusto continua
-                no código caso volte. Bens Localizados expandiu na largura. */}
-            <div className="flex min-h-0 w-full shrink-0 flex-col gap-4 lg:max-w-[560px]">
+            {/* No lugar do Consumo de APIs (ditado 25/08): devedores que
+                AINDA faltam pesquisa, com credor e processo. Click leva
+                direto à ficha. O DonutCusto segue no código caso volte. */}
+            <div className="flex min-h-0 w-full shrink-0 flex-col gap-4 lg:max-w-[400px]">
+              <Painel className="shrink-0 p-5">
+                <TituloPainel>Aguardando Pesquisa</TituloPainel>
+                {dados.pendentesPesquisa.length === 0 ? (
+                  <p className="mt-3 text-sm text-[var(--color-ivory-66)]">
+                    Todos os devedores ativos já têm pesquisa.
+                  </p>
+                ) : (
+                  <ul className="sem-scrollbar mt-2 max-h-[200px] divide-y divide-white/5 overflow-y-auto">
+                    {dados.pendentesPesquisa.map((p) => (
+                      <li key={p.devedorId}>
+                        <Link
+                          href={`/equipe/devedores/${p.devedorId}`}
+                          className="block py-2 transition hover:bg-white/[0.04]"
+                        >
+                          <p className="truncate text-[13px] font-semibold uppercase leading-snug text-[var(--color-devedor)]">
+                            {p.devedorNome}
+                          </p>
+                          <p className="mt-0.5 truncate font-mono text-[11px] uppercase tracking-[0.06em]">
+                            <span className="text-[#FF9C41]">
+                              {p.credorNome ?? "Sem credor"}
+                            </span>
+                            <span className="text-[var(--color-ivory-66)]">
+                              {" "}
+                              · {p.numeroProcesso ?? "sem processo"}
+                            </span>
+                          </p>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </Painel>
+
               <Painel className="flex min-h-0 flex-1 flex-col p-5">
                 <TituloPainel>Últimos Bens Localizados</TituloPainel>
                 {dados.ultimasLocalizacoes.length === 0 ? (
