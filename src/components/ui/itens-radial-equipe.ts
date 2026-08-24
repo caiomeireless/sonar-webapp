@@ -6,7 +6,6 @@ import {
   BarChart3,
   Briefcase,
   FileSignature,
-  Handshake,
   Home,
   Radar,
   Route,
@@ -24,6 +23,5 @@ export const ITENS_RADIAL_EQUIPE: ItemRadial[] = [
   { href: "/equipe/radar", label: "Radar de Movimentações", curto: "Radar", icon: Radar },
   { href: "/equipe", label: "Estatísticas da Plataforma", curto: "Estatísticas", icon: BarChart3 },
   { href: "/equipe/pecas", label: "Gerador de Peças", curto: "Peças", icon: FileSignature },
-  { href: "/equipe/acordos", label: "Central de Acordos", curto: "Acordos", icon: Handshake },
   { href: "/equipe/administrativa", label: "Central Administrativa", curto: "Administrativa", icon: Briefcase },
 ];

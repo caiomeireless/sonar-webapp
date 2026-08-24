@@ -8,7 +8,6 @@ import {
   BarChart3,
   Briefcase,
   FileSignature,
-  Handshake,
   Home,
   Radar,
   Route,
@@ -42,7 +41,8 @@ export const NAV_EQUIPE: SidebarItem[] = [
     // Banco de Dossiês nesses trechos do fluxo.
     matchContains: ["/gerador-peca", "/peca/"],
   },
-  { href: "/equipe/acordos", label: "Central de Acordos", icon: <Handshake className={ICON_CLASS} /> },
+  // Central de Acordos REMOVIDA do nav (ditado 25/08) — a rota
+  // /equipe/acordos continua existindo caso volte.
   {
     href: "/equipe/administrativa",
     label: "Central Administrativa",
