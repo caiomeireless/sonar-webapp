@@ -355,18 +355,38 @@ export default async function InicioPage() {
               </p>
             ) : (
               <ul className="sem-scrollbar mt-2 min-h-0 flex-1 divide-y divide-white/5 overflow-y-auto">
+                {/* Cada movimentação mostra DEVEDOR (vermelho) + PROCESSO
+                    (mono cinza) e clica pra Ficha do Processo na Rota das
+                    Execuções (ditado 25/08). */}
                 {dados.movimentacoes.map((a) => (
-                  <li key={a.id} className="py-3">
-                    <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--color-ivory-66)]">
-                      <Ponto cor={COR_CATEGORIA[a.categoria]} />
-                      {rotuloCategoria.get(a.categoria) ?? a.categoria}
-                      <span className="text-[var(--color-ivory-40)]">
-                        {a.data_andamento ? formatData(a.data_andamento) : ""}
-                      </span>
-                    </p>
-                    <p className="mt-1 line-clamp-2 text-[13px] leading-snug text-[var(--color-ivory-88)]">
-                      {a.descricao}
-                    </p>
+                  <li key={a.id}>
+                    <Link
+                      href={
+                        a.caso_id
+                          ? `/equipe/themis/processo/${a.caso_id}`
+                          : "/equipe/radar"
+                      }
+                      className="block py-3 transition hover:bg-white/[0.04]"
+                    >
+                      <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5 font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--color-ivory-66)]">
+                        <Ponto cor={COR_CATEGORIA[a.categoria]} />
+                        {rotuloCategoria.get(a.categoria) ?? a.categoria}
+                        <span className="text-[var(--color-ivory-40)]">
+                          {a.data_andamento ? formatData(a.data_andamento) : ""}
+                        </span>
+                      </p>
+                      <p className="mt-1 flex min-w-0 flex-wrap items-baseline gap-x-2">
+                        <span className="max-w-full truncate text-[13px] font-semibold uppercase leading-snug text-[var(--color-devedor)]">
+                          {a.devedor?.nome ?? "Devedor não vinculado"}
+                        </span>
+                        <span className="font-mono text-[11px] text-[var(--color-ivory-66)]">
+                          {a.numero_processo}
+                        </span>
+                      </p>
+                      <p className="mt-1 line-clamp-2 text-[13px] leading-snug text-[var(--color-ivory-88)]">
+                        {a.descricao}
+                      </p>
+                    </Link>
                   </li>
                 ))}
                 {/* Último item da rolagem: Ver Mais */}
