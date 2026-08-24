@@ -1,14 +1,19 @@
 // Drill-down da carteira — NÍVEL 2: casos de UM cliente (credor).
-// Header com dados do cliente + 3 cards de número + lista de casos.
-// Cada caso = 1 devedor + 1 processo; click leva ao dossiê em
-// /equipe/devedores/{devedor_id} (nível 3, já existente).
+// Reforma 25/08: mesma cara nova da Ficha do Devedor — fundo preto,
+// Voltar em metal laranja, nome do CLIENTE em laranja caixa alta com
+// contorno branco, cards centralizados e lista em livro-razão. Cada
+// caso clica SEMPRE pra ficha do devedor.
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import { obterCredorComCasos } from "@/lib/devedores";
 import { perfilLogado } from "@/lib/perfis-server";
 import { ehCliente } from "@/lib/perfis";
 import { devEuFromParam } from "@/lib/dev-auth";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
+import { BordaLiquidaMetal } from "@/components/ui/BordaLiquidaMetal";
+import { CardNumero } from "@/app/_shared/dossie/CardNumero";
+import { BORDA_CADERNO } from "@/app/_shared/dossie/SecaoFicha";
 import { formatBRL } from "@/lib/format";
 import { CasosCredorView } from "./CasosCredorView";
 
@@ -49,126 +54,178 @@ export default async function CredorDrilldownPage({
   const docLabel = credor.tipo === "PF" ? "CPF" : "CNPJ";
 
   return (
-    <main>
-      {/* ============ HEADER ============ */}
-      <section className="relative overflow-hidden">
-        {/* Glow gold removido — fundo unico (AetherBackground do layout). */}
-        <div className="relative mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
-          <Link href={`/equipe/devedores${linkBase}`} className="btn-neon-gold">
-            ← Carteira do Escritório
+    <main className="relative min-h-svh">
+      <div aria-hidden="true" className="absolute inset-0 bg-black" />
+      <div className="relative z-10 mx-auto max-w-[1400px] px-6 py-12 sm:px-10">
+        <BordaLiquidaMetal cor="laranja" radius={14} className="inline-flex">
+          <Link
+            href={`/equipe/devedores${linkBase}`}
+            className="inline-flex h-full w-full items-center gap-2.5 rounded-[11px] bg-[rgba(255,156,65,0.10)] px-5 py-3 text-sm font-medium text-[#FF9C41] transition hover:bg-[rgba(255,156,65,0.18)]"
+          >
+            <ArrowLeft className="h-5 w-5" aria-hidden="true" />
+            Voltar à Lista
           </Link>
+        </BordaLiquidaMetal>
 
-          <header className="title-shield mt-6 text-center">
-            <h1 className="font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
-              {credor.nome}
-            </h1>
-            <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
-              Cliente · Visão da Equipe
-            </p>
-            <p className="mt-3 font-mono text-sm text-[var(--color-signal)]">
-              {credor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"} ·{" "}
-              {docLabel} {credor.documento}
-            </p>
-
-            {credor.email_contato || credor.telefone ? (
-              <p className="mt-2 font-mono text-xs leading-snug text-[var(--color-ivory-88)]">
-                {credor.email_contato ? (
-                  <span className="mr-3">{credor.email_contato}</span>
-                ) : null}
-                {credor.telefone ? <span>{credor.telefone}</span> : null}
-              </p>
-            ) : null}
-
-            {credor.observacoes ? (
-              <p className="mx-auto mt-4 max-w-[720px] text-sm italic text-[var(--color-ivory-88)]">
-                {credor.observacoes}
-              </p>
-            ) : null}
-          </header>
-
-          {/* 3 cards de número grande */}
-          <div className="mt-10 grid gap-4 sm:grid-cols-3">
-            <CardNumero
-              rotulo={totalCasos === 1 ? "Caso" : "Casos"}
-              valor={String(totalCasos)}
+        {/* ============ HEADER DO CLIENTE (solto, sem card) ============ */}
+        <header className="mt-10 text-center">
+          <div className="inline-flex items-center gap-3">
+            <span
+              aria-hidden="true"
+              className="inline-block h-px w-10 bg-[var(--color-signal)] opacity-60 sm:w-14"
             />
-            <CardNumero
-              rotulo={
-                totalDevedores === 1
-                  ? "Devedor rastreado"
-                  : "Devedores rastreados"
-              }
-              valor={String(totalDevedores)}
-            />
-            <CardNumero
-              rotulo="Valor estimado total"
-              valor={formatBRL(valorEstimadoTotal)}
+            <span className="font-mono font-medium uppercase tracking-[0.34em] text-[14px] text-[var(--color-signal)]">
+              Carteira do Cliente
+            </span>
+            <span
+              aria-hidden="true"
+              className="inline-block h-px w-10 bg-[var(--color-signal)] opacity-60 sm:w-14"
             />
           </div>
+          <h1
+            className="mt-4 break-words font-serif text-[clamp(28px,4.2vw,52px)] font-medium uppercase leading-[1.05] tracking-[0.06em] text-[#FF9C41]"
+            style={{
+              WebkitTextStroke: "1px rgba(255,255,255,0.6)",
+              textShadow: "0 0 16px rgba(255,156,65,0.25)",
+            }}
+          >
+            {credor.nome}
+          </h1>
+
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+            <BadgeCliente
+              label={credor.tipo === "PF" ? "Pessoa Física" : "Pessoa Jurídica"}
+              color="var(--color-gold)"
+            />
+            <BadgeCliente
+              label={`${docLabel} ${credor.documento}`}
+              color="var(--color-ivory-88)"
+            />
+            {credor.email_contato ? (
+              <BadgeCliente
+                label={credor.email_contato}
+                color="var(--color-ivory-66)"
+                semCaixaAlta
+              />
+            ) : null}
+            {credor.telefone ? (
+              <BadgeCliente
+                label={credor.telefone}
+                color="var(--color-ivory-66)"
+              />
+            ) : null}
+          </div>
+
+          {credor.observacoes ? (
+            <p className="mx-auto mt-4 max-w-[720px] text-sm italic text-[var(--color-ivory-88)]">
+              {credor.observacoes}
+            </p>
+          ) : null}
+        </header>
+
+        {/* 3 cards de número centralizados (mesmo padrão da ficha) */}
+        <div className="mt-10 grid gap-4 sm:grid-cols-3">
+          <CardNumero
+            rotulo={totalCasos === 1 ? "Caso" : "Casos"}
+            valor={String(totalCasos)}
+          />
+          <CardNumero
+            rotulo={
+              totalDevedores === 1
+                ? "Devedor Rastreado"
+                : "Devedores Rastreados"
+            }
+            valor={String(totalDevedores)}
+          />
+          <CardNumero
+            rotulo="Valor Estimado Total"
+            valor={formatBRL(valorEstimadoTotal)}
+          />
         </div>
-      </section>
 
-      {/* ============ CASOS ============ */}
-      <section className="border-t border-[var(--color-ivory-12)]">
-        <div className="mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
-          <span className="eyebrow">Casos deste cliente</span>
-
+        {/* ============ DEVEDORES DESTE CLIENTE ============ */}
+        <div className="mt-14">
           {casos.length === 0 ? (
-            <>
-              <h2 className="mt-4 font-serif text-3xl text-ivory">
+            <SpotlightCard
+              local
+              claro
+              borda={BORDA_CADERNO}
+              className="p-10 text-center"
+            >
+              <p className="font-serif text-2xl text-ivory">
                 Nenhum caso vinculado
-              </h2>
-              <p className="mt-6 text-sm italic text-[var(--color-ivory-66)]">
+              </p>
+              <p className="mt-3 text-sm text-[var(--color-ivory-66)]">
                 Este cliente ainda não tem casos cadastrados.
               </p>
-            </>
+            </SpotlightCard>
           ) : (
             <>
-              <div className="mx-auto mt-10 mb-4 max-w-[1100px] text-center">
-                <p
-                  className="font-serif text-[clamp(28px,4vw,42px)] font-medium uppercase tracking-[0.10em] text-[var(--color-devedor)]"
-                  style={{ textShadow: "0 0 18px rgba(220,38,38,0.45)" }}
-                >
-                  Escolha o Devedor
-                </p>
-              </div>
+              <h2
+                className="text-center font-serif text-[clamp(26px,2.8vw,42px)] uppercase leading-[1.1] tracking-[0.08em] text-[var(--color-devedor)]"
+                style={{
+                  WebkitTextStroke: "1px rgba(255,255,255,0.55)",
+                  textShadow: "0 0 18px rgba(220,38,38,0.4)",
+                }}
+              >
+                Escolha o Devedor
+              </h2>
               <CasosCredorView casos={casos} euQuery={linkBase} />
             </>
           )}
         </div>
-      </section>
+      </div>
     </main>
   );
 }
 
-function CardNumero({ rotulo, valor }: { rotulo: string; valor: string }) {
+function BadgeCliente({
+  label,
+  color,
+  semCaixaAlta = false,
+}: {
+  label: string;
+  color: string;
+  semCaixaAlta?: boolean;
+}) {
   return (
-    <SpotlightCard className="p-6">
-      <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--color-ivory-66)]">
-        {rotulo}
-      </span>
-      <p className="mt-2 font-serif text-3xl text-[var(--color-gold)]">
-        {valor}
-      </p>
-    </SpotlightCard>
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[12px] tracking-[0.18em] ${
+        semCaixaAlta ? "lowercase tracking-[0.06em]" : "uppercase"
+      }`}
+      style={{
+        borderColor: color,
+        color,
+        backgroundColor: "rgba(255,255,255,0.03)",
+      }}
+    >
+      {label}
+    </span>
   );
 }
 
 function NaoEncontrado({ voltarHref }: { voltarHref: string }) {
   return (
-    <main className="relative mx-auto max-w-[1400px] px-6 py-24 sm:px-10">
-      <SpotlightCard className="mx-auto max-w-[520px] p-10 text-center">
-        <span className="eyebrow !text-[var(--color-gold)]">Não encontrado</span>
-        <h3 className="mt-4 font-serif text-2xl text-ivory">
-          Cliente não encontrado
-        </h3>
-        <p className="mt-3 text-sm text-[var(--color-ivory-88)]">
-          O cliente solicitado não existe ou foi removido da carteira.
-        </p>
-        <Link href={voltarHref} className="btn-neon-gold mt-6">
-          ← Voltar para a carteira
-        </Link>
-      </SpotlightCard>
+    <main className="relative min-h-svh">
+      <div aria-hidden="true" className="absolute inset-0 bg-black" />
+      <div className="relative z-10 mx-auto max-w-[1400px] px-6 py-24 sm:px-10">
+        <SpotlightCard
+          local
+          claro
+          borda={BORDA_CADERNO}
+          className="mx-auto max-w-[520px] p-10 text-center"
+        >
+          <h3 className="font-serif text-2xl text-ivory">
+            Cliente não encontrado
+          </h3>
+          <p className="mt-3 text-sm text-[var(--color-ivory-88)]">
+            O cliente solicitado não existe ou foi removido da carteira.
+          </p>
+          <Link href={voltarHref} className="btn-neon-gold mt-6">
+            ← Voltar à Lista
+          </Link>
+        </SpotlightCard>
+      </div>
     </main>
   );
 }

@@ -475,7 +475,7 @@ export default async function InicioPage() {
               </Painel>
             </div>
 
-            <div className="flex min-h-0 flex-1 flex-col items-center gap-2 overflow-hidden">
+            <div className="flex min-h-0 flex-1 flex-col items-center gap-1 overflow-hidden">
               <RadialCentro nome={nome} fotoUrl={perfil?.fotoUrl ?? null} />
               {/* De volta a pedido (25/08): embaixo da roda, verde neon
                   com contorno branco e brilho. */}

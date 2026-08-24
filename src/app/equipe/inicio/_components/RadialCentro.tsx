@@ -36,7 +36,7 @@ export default function RadialCentro({
       setTam(
         Math.min(
           TAM_MAX,
-          Math.max(140, Math.min(el.clientWidth, el.clientHeight) - 24),
+          Math.max(140, Math.min(el.clientWidth, el.clientHeight) - 12),
         ),
       );
     medir();
@@ -54,7 +54,7 @@ export default function RadialCentro({
   return (
     <div
       ref={ref}
-      className="flex min-h-0 w-full flex-1 items-center justify-center"
+      className="flex min-h-0 w-full flex-1 items-start justify-center"
     >
       {tam > 0 && (
         <BordaLiquidaMetal
