@@ -29,6 +29,8 @@ import { CATEGORIAS_RADAR, type CategoriaRadarChave } from "@/lib/radar";
 import { formatBRL, formatData } from "@/lib/format";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 
+import { ICONES_TIPO_BEM } from "@/app/_shared/dossie/icones-tipo-bem";
+
 import { NumeroTicker } from "./_components/NumeroTicker";
 import RadialCentro from "./_components/RadialCentro";
 
@@ -64,6 +66,21 @@ const COR_CATEGORIA: Record<CategoriaRadarChave, string> = {
   citacao: NEON.violeta,
   pagamento: NEON.ciano,
 };
+
+// Classificação visual dos BENS por tipo (ditado 24/08): cor + ícone +
+// rótulo curto — mesmos ícones do dossiê (icones-tipo-bem).
+const META_TIPO_BEM: Record<
+  string,
+  { rotulo: string; cor: string; Icon: React.ComponentType<{ className?: string }> }
+> = {
+  veiculo: { rotulo: "Veículo", cor: NEON.laranja, Icon: ICONES_TIPO_BEM.veiculo },
+  imovel: { rotulo: "Imóvel", cor: NEON.ciano, Icon: ICONES_TIPO_BEM.imovel },
+  empresa: { rotulo: "Participação", cor: NEON.violeta, Icon: ICONES_TIPO_BEM.empresa },
+  processo_credito: { rotulo: "Crédito Judicial", cor: NEON.amarelo, Icon: ICONES_TIPO_BEM.processo_credito },
+  endereco: { rotulo: "Endereço", cor: NEON.turquesa, Icon: ICONES_TIPO_BEM.endereco },
+  vinculo: { rotulo: "Vínculo", cor: NEON.rosa, Icon: ICONES_TIPO_BEM.vinculo },
+};
+const META_TIPO_BEM_PADRAO = { rotulo: "Bem", cor: NEON.verde, Icon: Gem };
 
 // Ponto colorido discreto (substitui os chips-pílula).
 function Ponto({ cor }: { cor: string }) {
@@ -351,11 +368,12 @@ export default async function InicioPage() {
             )}
           </Painel>
 
-          {/* Direita: coluna Consumo de APIs + Últimos Bens Localizados;
-              roda radial +50% centrada no vão (ditados 24/08). */}
+          {/* Direita: coluna Consumo de APIs + Últimos Bens Localizados
+              (com rolagem interna, tipo colorido + ícone e devedor em
+              vermelho — ditado 24/08); roda radial centrada no vão. */}
           <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
-            <div className="flex w-full shrink-0 flex-col gap-4 self-start lg:max-w-[400px]">
-              <Painel className="p-5">
+            <div className="flex min-h-0 w-full shrink-0 flex-col gap-4 lg:max-w-[400px]">
+              <Painel className="shrink-0 p-5">
                 <TituloPainel>Consumo de APIs</TituloPainel>
                 <div className="mt-3">
                   <DonutCusto
@@ -365,35 +383,57 @@ export default async function InicioPage() {
                 </div>
               </Painel>
 
-              <Painel className="p-5">
+              <Painel className="flex min-h-0 flex-1 flex-col p-5">
                 <TituloPainel>Últimos Bens Localizados</TituloPainel>
                 {dados.ultimasLocalizacoes.length === 0 ? (
                   <p className="mt-3 text-sm text-[var(--color-ivory-66)]">
                     Nenhum bem localizado recentemente.
                   </p>
                 ) : (
-                  <ul className="mt-2 divide-y divide-white/5">
-                    {dados.ultimasLocalizacoes.slice(0, 4).map((b) => (
-                      <li
-                        key={b.id}
-                        className="flex items-baseline justify-between gap-3 py-2"
-                      >
-                        <div className="min-w-0">
-                          <p className="truncate text-[13px] leading-snug text-[var(--color-ivory-88)]">
-                            {b.titulo}
-                          </p>
-                          <p className="mt-0.5 truncate font-mono text-[11px] uppercase tracking-[0.08em] text-[var(--color-ivory-66)]">
-                            {b.devedorNome ?? "—"}
-                          </p>
-                        </div>
-                        <span
-                          className="shrink-0 font-mono text-[13px] tabular-nums"
-                          style={{ color: NEON.verde }}
+                  <ul className="sem-scrollbar mt-2 min-h-0 flex-1 divide-y divide-white/5 overflow-y-auto">
+                    {dados.ultimasLocalizacoes.map((b) => {
+                      const meta =
+                        META_TIPO_BEM[b.tipo] ?? META_TIPO_BEM_PADRAO;
+                      const Icone = meta.Icon;
+                      return (
+                        <li
+                          key={b.id}
+                          className="flex items-center gap-3 py-2.5"
                         >
-                          {b.valorBrl ? formatBRL(b.valorBrl) : "—"}
-                        </span>
-                      </li>
-                    ))}
+                          <div
+                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border"
+                            style={{
+                              color: meta.cor,
+                              borderColor: `${meta.cor}55`,
+                              backgroundColor: `${meta.cor}14`,
+                            }}
+                          >
+                            <Icone className="h-4 w-4" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p
+                              className="truncate font-mono text-[11px] uppercase tracking-[0.1em]"
+                              style={{ color: meta.cor }}
+                            >
+                              {meta.rotulo}
+                              <span className="text-[var(--color-ivory-66)]">
+                                {" "}
+                                · {b.titulo}
+                              </span>
+                            </p>
+                            <p className="mt-0.5 truncate text-[13px] font-semibold uppercase leading-snug text-[var(--color-devedor)]">
+                              {b.devedorNome ?? "—"}
+                            </p>
+                          </div>
+                          <span
+                            className="shrink-0 font-mono text-[13px] tabular-nums"
+                            style={{ color: NEON.verde }}
+                          >
+                            {b.valorBrl ? formatBRL(b.valorBrl) : "—"}
+                          </span>
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
               </Painel>

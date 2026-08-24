@@ -165,7 +165,7 @@ export async function obterDadosConsole(): Promise<DadosConsole> {
           )
           .eq("ativo", true)
           .order("fonte_consultada_em", { ascending: false, nullsFirst: false })
-          .limit(6),
+          .limit(14),
         listarRadar({ pagina: 1 }),
         sb
           .from("custos")
