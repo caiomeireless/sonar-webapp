@@ -95,7 +95,7 @@ const CONSULTAS_MOCK: ConsultaPreProcessual[] = [
     credorNome: "Cliente Exemplo S/A",
     advogadoEmail: "demonstracao@battagliaepedrosa.com.br",
     dataConsulta: "2026-08-20T10:15:00-03:00",
-    custoBrl: 45.75,
+    custoBrl: 45.1,
     devedor: {
       tipo: "PF",
       documento: "123.456.789-00",
@@ -139,10 +139,10 @@ const CONSULTAS_MOCK: ConsultaPreProcessual[] = [
     observacoes:
       "DEMONSTRAÇÃO — dados fictícios. Perfil de BAIXA insolvência: nenhuma execução em curso, nenhuma restrição em Serasa/SPC, patrimônio aparente superior a R$ 2,4 milhões (dois imóveis com matrícula livre, frota própria e participação societária ativa). A causa de R$ 380 mil representa fração pequena do patrimônio localizável. Execução de baixo risco com alta probabilidade de satisfação rápida via penhora on-line ou dos imóveis. Recomenda-se ajuizamento imediato.",
     buscasRealizadas: [
-      { api: "assertiva.enderecos", rotulo: "Assertiva — endereços/telefones", custoBrl: 0.3, status: "ok", dataConsulta: "2026-08-20T10:15:00-03:00" },
-      { api: "assertiva.veiculos", rotulo: "Assertiva — veículos", custoBrl: 14.8, status: "ok", dataConsulta: "2026-08-20T10:15:09-03:00" },
-      { api: "datajud.processos", rotulo: "DataJud — processos CNJ", custoBrl: 0, status: "ok", dataConsulta: "2026-08-20T10:15:16-03:00" },
-      { api: "onr.matricula", rotulo: "ONR — matrícula urbana BR", custoBrl: 30.0, status: "ok", dataConsulta: "2026-08-20T10:15:48-03:00" },
+      { api: "assertiva.enderecos", rotulo: "Assertiva Localize", custoBrl: 0.3, status: "ok", dataConsulta: "2026-08-20T10:15:00-03:00" },
+      { api: "assertiva.veiculos", rotulo: "Assertiva Veículos", custoBrl: 14.8, status: "ok", dataConsulta: "2026-08-20T10:15:09-03:00" },
+      { api: "serasa.restricoes", rotulo: "Pesquisa Serasa", custoBrl: 30.0, status: "ok", dataConsulta: "2026-08-20T10:15:26-03:00" },
+      { api: "manual.matricula", rotulo: "Matrículas — RI Digital (manual)", custoBrl: 0, status: "ok", dataConsulta: "2026-08-20T10:40:00-03:00" },
     ],
   },
 
@@ -184,11 +184,10 @@ const CONSULTAS_MOCK: ConsultaPreProcessual[] = [
     observacoes:
       "DEMONSTRAÇÃO — dados fictícios. Perfil de ALTA insolvência: 4 execuções em curso somando mais de R$ 640 mil, protestos e negativações acumulados e CNPJ declarado INAPTO pela Receita em 2026. Sede comercial desocupada (sala alugada, contrato rescindido). Nenhum imóvel, veículo ou saldo bancário aparente; sócios com patrimônio pessoal já constrito em outras execuções. Relação custo/benefício claramente desfavorável — recomenda-se não executar e avaliar desconsideração da personalidade jurídica apenas se surgirem indícios de confusão patrimonial.",
     buscasRealizadas: [
-      { api: "minhareceita.cnpj", rotulo: "minhareceita — CNPJ + QSA", custoBrl: 0, status: "ok", dataConsulta: "2026-08-21T15:40:00-03:00" },
-      { api: "datajud.processos", rotulo: "DataJud — processos CNJ", custoBrl: 0, status: "ok", dataConsulta: "2026-08-21T15:40:11-03:00" },
-      { api: "cenprot.protestos", rotulo: "Cenprot — protestos consolidados", custoBrl: 15.0, status: "ok", dataConsulta: "2026-08-21T15:40:29-03:00" },
-      { api: "assertiva.veiculos", rotulo: "Assertiva — veículos", custoBrl: 14.8, status: "sem_dados", dataConsulta: "2026-08-21T15:40:44-03:00" },
-      { api: "junta.certidao", rotulo: "Junta Comercial — certidão + atos PJ", custoBrl: 20.55, status: "ok", dataConsulta: "2026-08-21T15:41:20-03:00" },
+      { api: "assertiva.enderecos", rotulo: "Assertiva Localize", custoBrl: 0.3, status: "ok", dataConsulta: "2026-08-21T15:40:00-03:00" },
+      { api: "assertiva.veiculos", rotulo: "Assertiva Veículos", custoBrl: 14.8, status: "sem_dados", dataConsulta: "2026-08-21T15:40:29-03:00" },
+      { api: "serasa.restricoes", rotulo: "Pesquisa Serasa", custoBrl: 30.0, status: "ok", dataConsulta: "2026-08-21T15:40:44-03:00" },
+      { api: "manual.matricula", rotulo: "Matrículas — RI Digital (manual)", custoBrl: 0, status: "sem_dados", dataConsulta: "2026-08-21T16:05:00-03:00" },
     ],
   },
 
@@ -231,10 +230,9 @@ const CONSULTAS_MOCK: ConsultaPreProcessual[] = [
     observacoes:
       "DEMONSTRAÇÃO — dados fictícios. Perfil intermediário: renda estável de autônomo, uma execução recente e uma negativação em aberto. Único bem penhorável é um veículo sem alienação, suficiente para cobrir a causa de R$ 64 mil com folga apertada. Não há imóveis em nome próprio (residência em nome do cônjuge — investigar regime de bens). Recomenda-se tentativa prévia de acordo; frustrada, ajuizar com pedido direto de restrição via Renajud.",
     buscasRealizadas: [
-      { api: "assertiva.enderecos", rotulo: "Assertiva — endereços/telefones", custoBrl: 0.3, status: "ok", dataConsulta: "2026-08-22T09:05:00-03:00" },
-      { api: "assertiva.veiculos", rotulo: "Assertiva — veículos", custoBrl: 14.8, status: "ok", dataConsulta: "2026-08-22T09:05:07-03:00" },
-      { api: "datajud.processos", rotulo: "DataJud — processos CNJ", custoBrl: 0, status: "ok", dataConsulta: "2026-08-22T09:05:15-03:00" },
-      { api: "cenprot.protestos", rotulo: "Cenprot — protestos consolidados", custoBrl: 15.0, status: "ok", dataConsulta: "2026-08-22T09:05:33-03:00" },
+      { api: "assertiva.enderecos", rotulo: "Assertiva Localize", custoBrl: 0.3, status: "ok", dataConsulta: "2026-08-22T09:05:00-03:00" },
+      { api: "assertiva.veiculos", rotulo: "Assertiva Veículos", custoBrl: 14.8, status: "ok", dataConsulta: "2026-08-22T09:05:07-03:00" },
+      { api: "serasa.restricoes", rotulo: "Pesquisa Serasa", custoBrl: 30.0, status: "ok", dataConsulta: "2026-08-22T09:05:33-03:00" },
     ],
   },
 ];
