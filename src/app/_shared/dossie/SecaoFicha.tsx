@@ -1,18 +1,16 @@
 // Card glass de bloco de ficha + CampoFicha + ChipOrigem.
 // CampoFicha aceita `mostrarChipOrigem` (default true) — cliente passa false
 // pra esconder a mecanica das APIs.
-// Reforma 25/08: estilo FOLHA DE CADERNO pautada — vidro preto com linhas
-// horizontais douradas + borda dourada (constantes exportadas pra reuso
-// nas outras seções da ficha).
+// Reforma 25/08 v2: a pauta de caderno SAIU (ditado do Caio — "ficou
+// muito ruim"). O estilo de FICHA agora vem dos próprios campos: vidro
+// claro com borda dourada, rótulos maiores e cada campo sobre a sua
+// linha (border-b), com valores grandes.
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 
 export type OrigemFicha = "VIA THEMIS" | "VIA ASSERTIVA" | "MANUAL";
 
-/** Linhas de caderno: pauta dourada sutil a cada 28px. */
-export const LINHAS_CADERNO =
-  "repeating-linear-gradient(180deg, transparent 0px, transparent 27px, rgba(201,162,74,0.14) 27px, rgba(201,162,74,0.14) 28px)";
-/** Borda dourada de descanso dos cards pautados. */
-export const BORDA_CADERNO = "rgba(201, 162, 74, 0.30)";
+/** Borda dourada de descanso dos cards da ficha. */
+export const BORDA_CADERNO = "rgba(201, 162, 74, 0.28)";
 
 export function SecaoFicha({
   titulo,
@@ -24,26 +22,21 @@ export function SecaoFicha({
   eyebrowColor?: string;
 }) {
   return (
-    <SpotlightCard
-      local
-      degrade={LINHAS_CADERNO}
-      borda={BORDA_CADERNO}
-      className="p-6 sm:p-7"
-    >
+    <SpotlightCard local claro borda={BORDA_CADERNO} className="p-6 sm:p-8">
       <div className="relative pl-4">
         <span
           aria-hidden="true"
-          className="absolute left-0 top-0 h-6 w-1 rounded-full"
+          className="absolute left-0 top-0.5 h-6 w-1 rounded-full"
           style={{ backgroundColor: eyebrowColor }}
         />
         <h3
-          className="font-mono text-[13px] uppercase tracking-[0.32em]"
+          className="font-mono text-[15px] font-semibold uppercase tracking-[0.28em]"
           style={{ color: eyebrowColor }}
         >
           {titulo}
         </h3>
       </div>
-      <div className="mt-5 space-y-5">{children}</div>
+      <div className="mt-6">{children}</div>
     </SpotlightCard>
   );
 }
@@ -62,17 +55,19 @@ export function CampoFicha({
   mostrarChipOrigem?: boolean;
 }) {
   const valorFinal = valor && valor.trim() !== "" ? valor : null;
+  // Cada campo é uma LINHA de ficha: rótulo maior, valor grande e a
+  // linha de preenchimento embaixo (a "pauta" agora acompanha o campo).
   return (
-    <div>
-      <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+    <div className="border-b border-[rgba(201,162,74,0.16)] pb-4 last:border-b-0 last:pb-0 [&:not(:first-child)]:pt-4">
+      <p className="font-mono text-[13px] uppercase tracking-[0.24em] text-[var(--color-gold)]/80">
         {rotulo}
       </p>
-      <div className="mt-2 flex flex-wrap items-center gap-2">
+      <div className="mt-1.5 flex flex-wrap items-center gap-2.5">
         <span
           className={
             valorFinal
-              ? `text-lg ${valorClassName ?? "text-ivory"}`
-              : "text-lg text-[var(--color-ivory-66)]"
+              ? `text-xl leading-snug ${valorClassName ?? "text-ivory"}`
+              : "text-xl leading-snug text-[var(--color-ivory-40)]"
           }
         >
           {valorFinal ?? "—"}

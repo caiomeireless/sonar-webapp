@@ -164,6 +164,21 @@ export async function registrarPesquisaImovel(
 
   const sb = createAdminClient();
 
+  // Limpeza de órfãos (achado da revisão 25/08): qualquer retorno de erro
+  // DEPOIS do upload precisa remover o que já subiu — senão o bucket
+  // acumula lixo de 20MB a cada tentativa frustrada.
+  const limparAnexos = async (paths: string[]) => {
+    if (paths.length === 0) return;
+    await sb.storage
+      .from(IMOVEIS_PESQUISAS_BUCKET)
+      .remove(paths)
+      .then(
+        () => undefined,
+        () => undefined,
+      );
+  };
+  const todosPaths = anexos.map((a) => a.path);
+
   // O devedor existe mesmo? (evita FK estourar com mensagem feia)
   const { data: devedor, error: errDevedor } = await sb
     .from("devedores")
@@ -171,7 +186,10 @@ export async function registrarPesquisaImovel(
     .eq("id", devedorId)
     .maybeSingle();
   if (errDevedor) return { erro: `Falha ao conferir o devedor: ${errDevedor.message}` };
-  if (!devedor) return { erro: "Devedor não encontrado." };
+  if (!devedor) {
+    await limparAnexos(todosPaths);
+    return { erro: "Devedor não encontrado." };
+  }
 
   for (const a of anexos) {
     // Existe de verdade no bucket? (o navegador pode ter falhado no PUT)
@@ -180,6 +198,8 @@ export async function registrarPesquisaImovel(
       .from(IMOVEIS_PESQUISAS_BUCKET)
       .list(`dev-${devedorId}`, { limit: 1, search: nomeArquivo });
     if (listErr || !achados || achados.length === 0) {
+      // Os DEMAIS podem ter subido — limpa (remover path ausente é no-op).
+      await limparAnexos(todosPaths.filter((p) => p !== a.path));
       return {
         erro: `O arquivo "${a.nome}" não chegou ao servidor — tente anexar de novo.`,
       };
@@ -192,6 +212,8 @@ export async function registrarPesquisaImovel(
       .limit(1);
     if (donosErr) return { erro: ERRO_MIGRACAO };
     if (donos && donos.length > 0) {
+      // NUNCA remover o path que pertence à outra pesquisa — só os novos.
+      await limparAnexos(todosPaths.filter((p) => p !== a.path));
       return { erro: "Este anexo já pertence a outra pesquisa." };
     }
   }

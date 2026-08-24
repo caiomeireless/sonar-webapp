@@ -278,10 +278,9 @@ export function PainelImoveisManual({
     <section
       className="rounded-2xl p-6"
       style={{
-        border: "1px solid rgba(201,162,74,0.25)",
-        backgroundColor: "#000",
-        backgroundImage:
-          "repeating-linear-gradient(180deg, transparent 0 27px, rgba(201,162,74,0.14) 27px 28px)",
+        border: "1px solid rgba(201,162,74,0.28)",
+        background:
+          "linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.015) 45%, transparent 70%), rgba(20,22,20,0.72)",
       }}
     >
       {/* Cabeçalho */}

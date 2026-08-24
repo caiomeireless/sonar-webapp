@@ -14,7 +14,7 @@ import { ITENS_RADIAL_EQUIPE } from "@/components/ui/itens-radial-equipe";
 // Roda +50% (ditado 24/08, madrugada), mais pra esquerda (centrada no
 // vão em vez de colada no canto). O piso baixo evita corte em janela
 // pequena; o teto dá presença em tela cheia.
-const TAM_MAX = 864;
+const TAM_MAX = 1040;
 
 export default function RadialCentro({
   nome,

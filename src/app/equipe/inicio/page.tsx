@@ -112,7 +112,8 @@ function Painel({
     <SpotlightCard
       radius={16}
       local
-      claro
+      degrade={VIDRO_BRILHO}
+      borda="rgba(232, 228, 214, 0.25)"
       className={`overflow-hidden ${className}`}
     >
       {children}
@@ -475,18 +476,19 @@ export default async function InicioPage() {
             </div>
 
             <div className="flex min-h-0 flex-1 flex-col items-center gap-2 overflow-hidden">
-              {/* "Para onde deseja ir?" APAGADO a pedido (24/08) — manter
-                  aqui comentado: o Caio pode querer de volta no futuro.
-                  <p
-                    className="sonar-wordmark shrink-0 whitespace-nowrap text-center text-[clamp(26px,2.6vw,44px)] leading-[1.1]"
-                    style={{
-                      color: "var(--color-signal)",
-                      WebkitTextStroke: "1px rgba(255,255,255,0.75)",
-                    }}
-                  >
-                    Para onde deseja ir?
-                  </p> */}
               <RadialCentro nome={nome} fotoUrl={perfil?.fotoUrl ?? null} />
+              {/* De volta a pedido (25/08): embaixo da roda, verde neon
+                  com contorno branco e brilho. */}
+              <p
+                className="sonar-wordmark shrink-0 whitespace-nowrap pb-1 text-center text-[clamp(20px,1.9vw,32px)] leading-[1.1]"
+                style={{
+                  color: "var(--color-signal)",
+                  WebkitTextStroke: "1px rgba(255,255,255,0.7)",
+                  textShadow: "0 0 18px rgba(60,255,138,0.35)",
+                }}
+              >
+                Para onde deseja ir?
+              </p>
             </div>
           </div>
         </div>

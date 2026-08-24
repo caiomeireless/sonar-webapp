@@ -45,7 +45,15 @@ function TituloSecaoDash({
   );
 }
 
-export function DashboardCasoGrid({ dados }: { dados: DadosDashboardCaso }) {
+export function DashboardCasoGrid({
+  dados,
+  ocultarProcessuais = false,
+}: {
+  dados: DadosDashboardCaso;
+  /** true na FICHA do devedor: Próxima Ação, Cronologia, Próximos Atos e
+      Sazonalidade saem daqui — moram na Ficha do PROCESSO (ditado 25/08). */
+  ocultarProcessuais?: boolean;
+}) {
   return (
     <div>
       {/* ==================== SEÇÃO 1 — Visão Operacional ============= */}
@@ -87,11 +95,13 @@ export function DashboardCasoGrid({ dados }: { dados: DadosDashboardCaso }) {
           <CustosPorAPI dados={dados.custosPorAPI} />
         </div>
 
-        <div className="col-span-1 md:col-span-12">
-          <div className="rounded-xl bg-gradient-to-br from-[rgba(60,255,138,0.04)] to-transparent p-px">
-            <ProximaAcao proximaAcao={dados.proximaAcaoSugerida} />
+        {!ocultarProcessuais ? (
+          <div className="col-span-1 md:col-span-12">
+            <div className="rounded-xl bg-gradient-to-br from-[rgba(60,255,138,0.04)] to-transparent p-px">
+              <ProximaAcao proximaAcao={dados.proximaAcaoSugerida} />
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
 
       {/* ==================== SEÇÃO 2 — Análise de Risco ============== */}
@@ -129,19 +139,28 @@ export function DashboardCasoGrid({ dados }: { dados: DadosDashboardCaso }) {
           <MapaDistribuicaoBens distribuicao={dados.distribuicaoGeografica} />
         </div>
 
-        <div className="col-span-1 md:col-span-6">
+        <div
+          className={
+            ocultarProcessuais
+              ? "col-span-1 md:col-span-12"
+              : "col-span-1 md:col-span-6"
+          }
+        >
           <VinculosPatrimoniais vinculos={dados.vinculosPatrimoniais} />
         </div>
-        <div className="col-span-1 md:col-span-6">
-          <CronologiaCaso cronologia={dados.cronologiaCaso} />
-        </div>
-
-        <div className="col-span-1 md:col-span-7">
-          <ProximosAtosProcessuais atos={dados.proximosAtosProcessuais} />
-        </div>
-        <div className="col-span-1 md:col-span-5">
-          <SazonalidadeAtividade sazonalidade={dados.sazonalidadeAtividade} />
-        </div>
+        {!ocultarProcessuais ? (
+          <>
+            <div className="col-span-1 md:col-span-6">
+              <CronologiaCaso cronologia={dados.cronologiaCaso} />
+            </div>
+            <div className="col-span-1 md:col-span-7">
+              <ProximosAtosProcessuais atos={dados.proximosAtosProcessuais} />
+            </div>
+            <div className="col-span-1 md:col-span-5">
+              <SazonalidadeAtividade sazonalidade={dados.sazonalidadeAtividade} />
+            </div>
+          </>
+        ) : null}
       </div>
     </div>
   );

@@ -126,6 +126,8 @@ export default async function DossieClientePage({ params, searchParams }: Props)
             devedor={devedor}
             statusLabel={statusLabel}
             statusColor={statusColor}
+            processos={casos.length}
+            ultimaMedidaEm={medidas[0]?.data ?? null}
             dashboardHref={`/cliente/casos/${devedor.id}/dashboard${qsEu}`}
           />
 

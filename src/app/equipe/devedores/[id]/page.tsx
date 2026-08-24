@@ -11,6 +11,7 @@
 // (paridade visual). Esta pagina mantem o que e EXCLUSIVO da equipe:
 // Acoes de Busca, Gerar Peca, Calculo, Cross-Reference.
 import Link from "next/link";
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
@@ -45,7 +46,6 @@ import { EstatisticasGrid } from "@/app/_shared/dossie/EstatisticasGrid";
 import {
   SecaoFicha,
   CampoFicha,
-  LINHAS_CADERNO,
   BORDA_CADERNO,
 } from "@/app/_shared/dossie/SecaoFicha";
 import { CardCasoVinculado } from "@/app/_shared/dossie/CardCasoVinculado";
@@ -124,14 +124,15 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
   const credoresUnicos = new Set(outros.map((o) => o.credor.id));
   const mostrarAlertaCross = credoresUnicos.size >= 2;
 
-  // Medidas (etiqueta "Última Medida"), pesquisas manuais de imóveis
-  // (RI Digital) e dados do dashboard analítico (setor final da ficha).
+  // Medidas (etiqueta "Última Medida") e pesquisas manuais de imóveis
+  // (RI Digital). O dashboard analítico carrega em STREAMING (Suspense)
+  // pra não segurar a pintura da ficha — é a consulta mais pesada.
   // Andamentos/linha do tempo SAÍRAM da ficha — vão pras fichas de
   // processo da aba Rotas das Execuções (reforma 25/08).
-  const [medidas, pesquisasImoveis, dadosDash] = await Promise.all([
+  const [medidas, pesquisasImoveis, ultimaVarredura] = await Promise.all([
     listarMedidasPorDevedor(devedorId),
     listarPesquisasImoveis(devedorId),
-    obterDadosDashboardCasoV2(devedorId),
+    ultimaVarreduraTribunais(devedorId),
   ]);
 
   // Status do devedor — devedor nao tem flag propria; usa o status do
@@ -339,11 +340,11 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
             {casos.length > 0 ? (
               <SpotlightCard
                 local
-                degrade={LINHAS_CADERNO}
+                claro
                 borda={BORDA_CADERNO}
-                className="mt-5 p-6 sm:p-7"
+                className="mt-5 p-6 sm:p-8"
               >
-                <h3 className="font-mono text-[13px] uppercase tracking-[0.32em] text-[var(--color-gold)]">
+                <h3 className="font-mono text-[15px] font-semibold uppercase tracking-[0.28em] text-[var(--color-gold)]">
                   Processos Vinculados · {casos.length}
                 </h3>
                 <div className="sem-scrollbar mt-5 max-h-[480px] space-y-3 overflow-y-auto pr-1">
@@ -378,9 +379,9 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
                 <SpotlightCard
                   key={tipo}
                   local
-                  degrade={LINHAS_CADERNO}
+                  claro
                   borda={BORDA_CADERNO}
-                  className="p-6 sm:p-7"
+                  className="p-6 sm:p-8"
                 >
                   <div className="flex items-center gap-4">
                     <div
@@ -400,10 +401,17 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
                       >
                         {TIPO_META[tipo].label}
                       </h2>
-                      <p className="font-mono text-xs uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+                      <p className="font-mono text-[13px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
                         {bens.length > 0
                           ? `${bens.length} ${bens.length === 1 ? "item encontrado" : "itens encontrados"}`
                           : "Sem registros até agora"}
+                        {tipo === "processo_credito"
+                          ? ` · Última varredura ${
+                              ultimaVarredura
+                                ? formatData(ultimaVarredura)
+                                : "ainda não realizada"
+                            }`
+                          : ""}
                       </p>
                     </div>
                   </div>
@@ -442,13 +450,15 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
         <div className="mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
           <TituloSetor texto="Dashboard Analítico" />
           <div className="mt-8">
-            {dadosDash ? (
-              <DashboardCasoGrid dados={dadosDash} />
-            ) : (
-              <p className="text-sm text-[var(--color-ivory-66)]">
-                Dados analíticos indisponíveis no momento.
-              </p>
-            )}
+            <Suspense
+              fallback={
+                <p className="animate-pulse text-center font-mono text-[13px] uppercase tracking-[0.28em] text-[var(--color-ivory-66)]">
+                  Calculando indicadores…
+                </p>
+              }
+            >
+              <SetorDashboardFicha devedorId={devedorId} />
+            </Suspense>
           </div>
         </div>
       </section>
@@ -509,26 +519,55 @@ const FRASE_SEM_REGISTRO: Record<string, string> = {
     "Nenhum vínculo familiar mapeado até agora. Os vínculos ajudam a rastrear patrimônio em nome de terceiros.",
 };
 
-// ---------- TituloSetor (título dourado neon com card pautado) ----------
+// ---------- Última varredura dos robôs (e-SAJ/eproc) ----------
+// Data mais recente em que os robôs varreram algum processo deste
+// devedor — exibida na categoria "Processos Onde é Credor".
+
+async function ultimaVarreduraTribunais(
+  devedorId: number,
+): Promise<string | null> {
+  const { createAdminClient } = await import("@/lib/supabase/admin");
+  const sb = createAdminClient();
+  const { data } = await sb
+    .from("casos")
+    .select("esaj_synced_at")
+    .eq("devedor_id", devedorId)
+    .not("esaj_synced_at", "is", null)
+    .order("esaj_synced_at", { ascending: false })
+    .limit(1);
+  return ((data ?? [])[0]?.esaj_synced_at as string | null) ?? null;
+}
+
+// ---------- SetorDashboardFicha (streaming, versão enxuta) ----------
+// Async server component dentro de <Suspense>: a ficha pinta primeiro e
+// os indicadores chegam depois. Próxima Ação, Cronologia, Próximos Atos
+// e Sazonalidade ficam FORA (moram na Ficha do Processo).
+
+async function SetorDashboardFicha({ devedorId }: { devedorId: number }) {
+  const dados = await obterDadosDashboardCasoV2(devedorId);
+  if (!dados) {
+    return (
+      <p className="text-center text-sm text-[var(--color-ivory-66)]">
+        Dados analíticos indisponíveis no momento.
+      </p>
+    );
+  }
+  return <DashboardCasoGrid dados={dados} ocultarProcessuais />;
+}
+
+// ---------- TituloSetor (dourado neon CENTRALIZADO, sem card) ----------
 
 function TituloSetor({ texto }: { texto: string }) {
   return (
-    <SpotlightCard
-      local
-      degrade={LINHAS_CADERNO}
-      borda={BORDA_CADERNO}
-      className="px-6 py-5"
+    <h2
+      className="text-center font-serif text-[clamp(26px,2.8vw,42px)] uppercase leading-[1.1] tracking-[0.08em] text-[var(--color-gold)]"
+      style={{
+        WebkitTextStroke: "1px rgba(255,255,255,0.55)",
+        textShadow: "0 0 18px rgba(201,162,74,0.4)",
+      }}
     >
-      <h2
-        className="font-serif text-[clamp(24px,2.4vw,36px)] uppercase leading-[1.1] tracking-[0.06em] text-[var(--color-gold)]"
-        style={{
-          WebkitTextStroke: "1px rgba(255,255,255,0.55)",
-          textShadow: "0 0 16px rgba(201,162,74,0.35)",
-        }}
-      >
-        {texto}
-      </h2>
-    </SpotlightCard>
+      {texto}
+    </h2>
   );
 }
 

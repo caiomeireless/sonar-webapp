@@ -5,6 +5,7 @@
 // Toda métrica devolvida já vem pronta pra UI consumir — a view NÃO faz
 // agregação no client.
 
+import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
   obterDossie,
@@ -1032,7 +1033,17 @@ function calcularSazonalidadeAtividade(
 // V2 — ENTRY POINT
 // ============================================================
 
-export async function obterDadosDashboardCasoV2(
+// Cache de 60s (achado da revisão 25/08): embutido na FICHA, este cálculo
+// rodava as varreduras do escritório inteiro (comparativo) em TODA visita
+// à página mais acessada da equipe. Média do escritório não muda a cada
+// page view — 60s de validade resolve sem perder frescor perceptível.
+export const obterDadosDashboardCasoV2 = unstable_cache(
+  obterDadosDashboardCasoV2SemCache,
+  ["dashboard-caso-v2"],
+  { revalidate: 60 },
+);
+
+async function obterDadosDashboardCasoV2SemCache(
   devedorId: number,
 ): Promise<DashboardCasoV2 | null> {
   const v1 = await obterDadosDashboardCaso(devedorId);
