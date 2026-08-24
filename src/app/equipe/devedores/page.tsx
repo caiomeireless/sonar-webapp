@@ -138,6 +138,36 @@ async function VisaoDevedores({
         <ControlesDevedores />
       </SpotlightCard>
 
+      {/* Card de DEMONSTRAÇÃO (ditado 25/08, pré-reunião): abre a ficha
+          FICTÍCIA do João da Silva — recheada, sem dado sigiloso. */}
+      <SpotlightCard
+        local
+        degrade="linear-gradient(0deg, rgba(58,32,88,0.55), rgba(58,32,88,0.55))"
+        borda="rgba(192, 132, 252, 0.45)"
+        className="mt-4"
+      >
+        <Link
+          href={`/equipe/devedores/demo${linkBase}`}
+          className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 px-5 py-4"
+        >
+          <div className="min-w-0">
+            <p className="font-mono text-[13px] font-semibold uppercase tracking-[0.26em] text-[#C084FC]">
+              Demonstração
+            </p>
+            <p className="mt-1 text-[15px] leading-snug text-ivory">
+              Ficha completa do devedor fictício{" "}
+              <span className="font-semibold uppercase text-[var(--color-devedor)]">
+                João da Silva
+              </span>{" "}
+              — dados de exemplo, sem expor informações sigilosas.
+            </p>
+          </div>
+          <span className="inline-flex shrink-0 items-center rounded-full border border-[#C084FC]/60 bg-[#C084FC]/10 px-4 py-2 font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-[#C084FC]">
+            Abrir Ficha Demo
+          </span>
+        </Link>
+      </SpotlightCard>
+
       <p className="mt-4 font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-devedor)]">
         {listagem.total === 0
           ? q
