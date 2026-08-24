@@ -14,7 +14,9 @@ import { devEuFromParam } from "@/lib/dev-auth";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { BORDA_CADERNO } from "@/app/_shared/dossie/SecaoFicha";
 
-type Props = { searchParams?: Promise<{ eu?: string | string[] }> };
+type Props = {
+  searchParams?: Promise<{ eu?: string | string[]; demo?: string | string[] }>;
+};
 
 const NEON = {
   verde: "#3CFF8A",
@@ -120,6 +122,13 @@ export default async function CentralAcordosPage({ searchParams }: Props) {
   if (!eu) redirect("/login");
   const linkBase = euDev ? `?eu=${encodeURIComponent(euDev)}` : "";
 
+  // Demo OPT-IN (mesmo padrão da Avaliação Pré-Processual): a aba abre
+  // limpa; os 3 acordos fictícios só aparecem ao clicar no card roxo.
+  const demoRaw = Array.isArray(sp.demo) ? sp.demo[0] : sp.demo;
+  const mostrarDemo = demoRaw === "1";
+  const demoHref = `/equipe/acordos?demo=1${euDev ? `&eu=${encodeURIComponent(euDev)}` : ""}`;
+  const acordos = mostrarDemo ? ACORDOS_DEMO : [];
+
   return (
     <main className="relative min-h-svh">
       <div aria-hidden="true" className="absolute inset-0 bg-black" />
@@ -137,9 +146,51 @@ export default async function CentralAcordosPage({ searchParams }: Props) {
           </p>
         </header>
 
+        {!mostrarDemo ? (
+          <>
+            {/* Card DEMONSTRAÇÃO (roxo) — aba abre limpa. */}
+            <SpotlightCard
+              local
+              degrade="linear-gradient(0deg, rgba(58,32,88,0.55), rgba(58,32,88,0.55))"
+              borda="rgba(192, 132, 252, 0.45)"
+              className="mb-4"
+            >
+              <Link
+                href={demoHref}
+                className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 px-5 py-4"
+              >
+                <div className="min-w-0">
+                  <p className="font-mono text-[13px] font-semibold uppercase tracking-[0.26em] text-[#C084FC]">
+                    Demonstração
+                  </p>
+                  <p className="mt-1 text-[15px] leading-snug text-ivory">
+                    Três acordos fictícios — homologado em dia, aguardando
+                    homologação e inadimplente com alerta de cláusula penal.
+                  </p>
+                </div>
+                <span className="inline-flex shrink-0 items-center rounded-full border border-[#C084FC]/60 bg-[#C084FC]/10 px-4 py-2 font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-[#C084FC]">
+                  Ver Demonstração
+                </span>
+              </Link>
+            </SpotlightCard>
+
+            {/* Estado real: nenhum acordo cadastrado ainda. */}
+            <SpotlightCard local claro className="mt-8 p-10 text-center">
+              <p className="font-serif text-2xl text-ivory">
+                Nenhum acordo registrado ainda
+              </p>
+              <p className="mx-auto mt-3 max-w-[520px] text-sm text-[var(--color-ivory-88)]">
+                O cadastro real de acordos — com parcelas, conciliação
+                financeira e alertas de inadimplência — chega na próxima
+                etapa.
+              </p>
+            </SpotlightCard>
+          </>
+        ) : (
+          <>
         {/* Aviso demo */}
         <div
-          className="mb-4 flex items-center justify-center gap-3 rounded-2xl border px-5 py-3.5"
+          className="mb-4 flex flex-wrap items-center justify-center gap-3 rounded-2xl border px-5 py-3.5"
           style={{
             borderColor: "rgba(255,217,61,0.55)",
             backgroundColor: "rgba(255,217,61,0.10)",
@@ -157,17 +208,23 @@ export default async function CentralAcordosPage({ searchParams }: Props) {
             Demonstração — Acordos Fictícios · O Cadastro Real Chega na
             Próxima Etapa
           </p>
+          <Link
+            href={`/equipe/acordos${linkBase}`}
+            className="font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)] underline-offset-2 hover:underline"
+          >
+            Ocultar
+          </Link>
         </div>
 
         {/* Contador vermelho */}
         <p className="mb-4 font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-devedor)]">
-          {ACORDOS_DEMO.length} acordos · 1 homologado · 1 aguardando · 1
+          {acordos.length} acordos · 1 homologado · 1 aguardando · 1
           inadimplente · {fmtBRL(336000)} já recuperados
         </p>
 
         {/* ============ LISTA DE ACORDOS ============ */}
         <div className="flex flex-col gap-4">
-          {ACORDOS_DEMO.map((a) => {
+          {acordos.map((a) => {
             const meta = META_STATUS[a.status];
             const pct = Math.round((a.quitadoBrl / a.valorAcordoBrl) * 100);
             const saldo = a.valorAcordoBrl - a.quitadoBrl;
@@ -334,6 +391,8 @@ export default async function CentralAcordosPage({ searchParams }: Props) {
             );
           })}
         </div>
+          </>
+        )}
 
         {/* Rodapé: visão da ponte financeira */}
         <SpotlightCard
