@@ -11,10 +11,10 @@ import { BordaLiquidaMetal } from "@/components/ui/BordaLiquidaMetal";
 import RadialHub from "@/components/ui/RadialHub";
 import { ITENS_RADIAL_EQUIPE } from "@/components/ui/itens-radial-equipe";
 
-// Roda maior no canto direito, abaixo da sincronização (ditado 24/08).
-// O piso baixo evita corte em janela pequena; o teto dá presença em tela
-// cheia.
-const TAM_MAX = 480;
+// Roda +50% (ditado 24/08, madrugada), mais pra esquerda (centrada no
+// vão em vez de colada no canto). O piso baixo evita corte em janela
+// pequena; o teto dá presença em tela cheia.
+const TAM_MAX = 720;
 
 export default function RadialCentro({
   nome,
@@ -54,7 +54,7 @@ export default function RadialCentro({
   return (
     <div
       ref={ref}
-      className="flex min-h-0 w-full flex-1 items-center justify-center lg:justify-end lg:pr-2"
+      className="flex min-h-0 w-full flex-1 items-center justify-center"
     >
       {tam > 0 && (
         <BordaLiquidaMetal

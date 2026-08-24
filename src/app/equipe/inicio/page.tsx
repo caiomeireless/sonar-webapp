@@ -97,8 +97,9 @@ function Painel({
 }
 
 function TituloPainel({ children }: { children: React.ReactNode }) {
+  // Títulos dos cards em laranja neon (ditado 24/08).
   return (
-    <h2 className="font-mono text-[12px] font-semibold uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+    <h2 className="font-mono text-[12px] font-semibold uppercase tracking-[0.22em] text-[#FF9C41]">
       {children}
     </h2>
   );
@@ -350,27 +351,66 @@ export default async function InicioPage() {
             )}
           </Painel>
 
-          {/* Direita: Consumo de APIs à esquerda e, no CANTO DIREITO, a
-              pilha sincronização (header acima) → "Para onde deseja ir?"
-              → roda radial maior (ditado 24/08). */}
+          {/* Direita: coluna Consumo de APIs + Últimos Bens Localizados;
+              roda radial +50% centrada no vão (ditados 24/08). */}
           <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
-            <Painel className="w-full shrink-0 self-start p-5 lg:max-w-[400px]">
-              <TituloPainel>Consumo de APIs</TituloPainel>
-              <div className="mt-3">
-                <DonutCusto gasto={dados.gastoMesBrl} teto={dados.tetoMesBrl} />
-              </div>
-            </Painel>
+            <div className="flex w-full shrink-0 flex-col gap-4 self-start lg:max-w-[400px]">
+              <Painel className="p-5">
+                <TituloPainel>Consumo de APIs</TituloPainel>
+                <div className="mt-3">
+                  <DonutCusto
+                    gasto={dados.gastoMesBrl}
+                    teto={dados.tetoMesBrl}
+                  />
+                </div>
+              </Painel>
 
-            <div className="flex min-h-0 flex-1 flex-col items-center gap-2 overflow-hidden lg:items-end">
-              <p
-                className="sonar-wordmark shrink-0 whitespace-nowrap text-center text-[clamp(26px,2.6vw,44px)] leading-[1.1] lg:pr-2 lg:text-right"
-                style={{
-                  color: "var(--color-signal)",
-                  WebkitTextStroke: "1px rgba(255,255,255,0.75)",
-                }}
-              >
-                Para onde deseja ir?
-              </p>
+              <Painel className="p-5">
+                <TituloPainel>Últimos Bens Localizados</TituloPainel>
+                {dados.ultimasLocalizacoes.length === 0 ? (
+                  <p className="mt-3 text-sm text-[var(--color-ivory-66)]">
+                    Nenhum bem localizado recentemente.
+                  </p>
+                ) : (
+                  <ul className="mt-2 divide-y divide-white/5">
+                    {dados.ultimasLocalizacoes.slice(0, 4).map((b) => (
+                      <li
+                        key={b.id}
+                        className="flex items-baseline justify-between gap-3 py-2"
+                      >
+                        <div className="min-w-0">
+                          <p className="truncate text-[13px] leading-snug text-[var(--color-ivory-88)]">
+                            {b.titulo}
+                          </p>
+                          <p className="mt-0.5 truncate font-mono text-[11px] uppercase tracking-[0.08em] text-[var(--color-ivory-66)]">
+                            {b.devedorNome ?? "—"}
+                          </p>
+                        </div>
+                        <span
+                          className="shrink-0 font-mono text-[13px] tabular-nums"
+                          style={{ color: NEON.verde }}
+                        >
+                          {b.valorBrl ? formatBRL(b.valorBrl) : "—"}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </Painel>
+            </div>
+
+            <div className="flex min-h-0 flex-1 flex-col items-center gap-2 overflow-hidden">
+              {/* "Para onde deseja ir?" APAGADO a pedido (24/08) — manter
+                  aqui comentado: o Caio pode querer de volta no futuro.
+                  <p
+                    className="sonar-wordmark shrink-0 whitespace-nowrap text-center text-[clamp(26px,2.6vw,44px)] leading-[1.1]"
+                    style={{
+                      color: "var(--color-signal)",
+                      WebkitTextStroke: "1px rgba(255,255,255,0.75)",
+                    }}
+                  >
+                    Para onde deseja ir?
+                  </p> */}
               <RadialCentro nome={nome} fotoUrl={perfil?.fotoUrl ?? null} />
             </div>
           </div>
