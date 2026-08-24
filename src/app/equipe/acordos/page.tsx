@@ -622,7 +622,9 @@ export default async function CentralAcordosPage({ searchParams }: Props) {
                     <h3 className="font-mono text-[15px] font-semibold uppercase tracking-[0.28em] text-[var(--color-gold)]">
                       Pré-Visualização · Notificação Extrajudicial
                     </h3>
-                    <div className="mx-auto mt-5 max-w-[820px] overflow-hidden rounded-lg bg-white px-10 py-8 text-[#1a1a1a] shadow-2xl">
+                    {/* Prévia EMBAÇADA (ditado 25/08) — o conteúdo real só
+                        aparece na geração de verdade. */}
+                    <div className="mx-auto mt-5 max-w-[820px] select-none overflow-hidden rounded-lg bg-white px-10 py-8 text-[#1a1a1a] shadow-2xl blur-[2.5px]">
                       <TimbreBP />
                       <h4
                         className="mt-8 text-center font-serif text-[15pt] font-bold uppercase tracking-wide"
@@ -666,6 +668,9 @@ export default async function CentralAcordosPage({ searchParams }: Props) {
                       <AssinaturasBP />
                       <RodapeBP />
                     </div>
+                    <p className="mt-3 text-center font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
+                      Prévia embaçada · documento fictício
+                    </p>
                   </SpotlightCard>
 
                   {/* ===== Fluxo: corrigir → arrastar versão final → disparar ===== */}
@@ -681,11 +686,46 @@ export default async function CentralAcordosPage({ searchParams }: Props) {
                     <p className="mt-3 max-w-[820px] text-sm leading-relaxed text-[var(--color-ivory-88)]">
                       O Sonar gera a minuta acima, o advogado ajusta o texto no
                       Word, e a <strong className="text-ivory">versão final</strong>{" "}
-                      volta pra cá — arrastando o PDF na caixa abaixo. O disparo
-                      sai pela própria plataforma: o e-mail do devedor é
-                      localizado via <span style={{ color: NEON.violeta }}>Assertiva Localize</span>{" "}
-                      e o envio fica registrado com data e trilha de leitura.
+                      volta pra cá — arrastando o PDF na caixa abaixo. Antes do
+                      disparo, informe o e-mail do devedor (ou consulte via
+                      Assertiva se não tiver);{" "}
+                      <strong className="text-ivory">
+                        os advogados responsáveis vão sempre em cópia
+                      </strong>
+                      , e o envio fica registrado com data e trilha de leitura.
                     </p>
+
+                    {/* E-mail do destinatário: preenchimento + consulta
+                        Assertiva quando não houver (ditado 25/08). */}
+                    <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end">
+                      <label className="block min-w-0 flex-1">
+                        <span className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
+                          E-mail do Devedor
+                        </span>
+                        <input
+                          readOnly
+                          placeholder="preencha ou consulte via Assertiva…"
+                          className="mt-1.5 w-full rounded-lg border border-[var(--color-ivory-22)] bg-[var(--color-carbon)] px-3.5 py-2.5 text-sm text-ivory outline-none placeholder:text-[var(--color-ivory-40)]"
+                        />
+                      </label>
+                      <span
+                        className="inline-flex shrink-0 cursor-default items-center gap-2 rounded-lg border px-4 py-2.5 font-mono text-[12px] font-semibold uppercase tracking-[0.16em]"
+                        style={{
+                          color: NEON.violeta,
+                          borderColor: "rgba(192,132,252,0.5)",
+                          backgroundColor: "rgba(192,132,252,0.08)",
+                        }}
+                      >
+                        Consultar E-mail via Assertiva
+                      </span>
+                    </div>
+                    <p className="mt-2 font-mono text-[12px] uppercase tracking-[0.16em] text-[var(--color-ivory-66)]">
+                      CC automático:{" "}
+                      <span className="text-[var(--color-advogado)]">
+                        advogados responsáveis pelo caso
+                      </span>
+                    </p>
+
                     <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
                       <div
                         className="flex min-h-[130px] flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed px-4 py-4 text-center"
@@ -710,7 +750,7 @@ export default async function CentralAcordosPage({ searchParams }: Props) {
                           </span>
                         </BordaLiquidaMetal>
                         <p className="text-center font-mono text-[12px] uppercase tracking-[0.14em] text-[var(--color-ivory-66)]">
-                          E-mail via Assertiva · Trilha de Leitura
+                          Advogados em Cópia · Trilha de Leitura
                         </p>
                       </div>
                     </div>
