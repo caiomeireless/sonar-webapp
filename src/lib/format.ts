@@ -43,8 +43,14 @@ export function formatDocumento(_tipo: "PF" | "PJ", doc: string): string {
 }
 
 // Data curta DD/MM/YYYY.
+// Data SEM hora ("2026-07-28", padrão da coluna medidas.data) é tratada
+// como data de CALENDÁRIO — new Date() a leria como meia-noite UTC e,
+// no fuso de Brasília, recuaria um dia (28/07 virava 27/07: inaceitável
+// em registro jurídico; bug visto em 25/08).
 export function formatData(iso: string | null | undefined): string {
   if (!iso) return "—";
+  const soData = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso.trim());
+  if (soData) return `${soData[3]}/${soData[2]}/${soData[1]}`;
   const ts = new Date(iso);
   if (Number.isNaN(ts.getTime())) return "—";
   const dd = String(ts.getDate()).padStart(2, "0");
