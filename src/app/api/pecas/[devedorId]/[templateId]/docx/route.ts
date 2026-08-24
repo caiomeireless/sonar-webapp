@@ -23,6 +23,7 @@ import {
 import { perfilLogado } from "@/lib/perfis-server";
 import { ehCliente } from "@/lib/perfis";
 import { gerarDocxPeca } from "@/lib/peca-to-docx";
+import { DOSSIE_DEMO } from "@/app/equipe/devedores/demo/dossie-ficticio";
 
 export const dynamic = "force-dynamic";
 
@@ -39,10 +40,13 @@ export async function GET(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  // 2. Validação dos params da rota
+  // 2. Validação dos params da rota. "demo" = dossiê FICTÍCIO do João da
+  // Silva (Banco de Peças/gerador demo) — permite baixar o .docx de
+  // demonstração sem tocar em dado real (auth acima continua valendo).
   const { devedorId: devedorIdRaw, templateId } = await params;
-  const devedorId = Number.parseInt(devedorIdRaw, 10);
-  if (!Number.isFinite(devedorId)) {
+  const ehDemo = devedorIdRaw === "demo";
+  const devedorId = ehDemo ? 0 : Number.parseInt(devedorIdRaw, 10);
+  if (!ehDemo && !Number.isFinite(devedorId)) {
     return NextResponse.json({ error: "Invalid devedorId" }, { status: 400 });
   }
 
@@ -52,7 +56,7 @@ export async function GET(
   }
 
   // 3. Carrega o dossiê + escolhe o caso
-  const dossie = await obterDossie(devedorId);
+  const dossie = ehDemo ? DOSSIE_DEMO : await obterDossie(devedorId);
   if (!dossie) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }

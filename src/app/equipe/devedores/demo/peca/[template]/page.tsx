@@ -96,6 +96,14 @@ export default async function PecaDemoPage({ params, searchParams }: Props) {
             ← voltar ao gerador demo
           </Link>
           <div className="flex items-center gap-3">
+            {/* .docx da DEMO habilitado: a API aceita devedorId "demo" e
+                gera o arquivo real com o dossiê fictício. */}
+            <a
+              href={`/api/pecas/demo/${template}/docx${euQuery}`}
+              className="inline-flex items-center gap-2 rounded-lg border border-[var(--color-signal)]/50 bg-[var(--color-signal)]/10 px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-signal)] transition hover:bg-[var(--color-signal)]/20"
+            >
+              ⬇ Baixar .docx
+            </a>
             <BotaoImprimir />
           </div>
         </div>

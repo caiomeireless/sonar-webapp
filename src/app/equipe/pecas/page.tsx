@@ -136,6 +136,10 @@ export default async function GeradorPecasHubPage({ searchParams }: Props) {
         >
           Catálogo de Peças Disponíveis
         </h2>
+        <p className="mb-5 text-center font-mono text-[13px] uppercase tracking-[0.2em] text-[var(--color-ivory-66)]">
+          Clique numa peça para ver a prévia com dados fictícios · baixe em
+          PDF ou .docx
+        </p>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {TEMPLATES.map((t) => (
             <SpotlightCard
@@ -143,17 +147,30 @@ export default async function GeradorPecasHubPage({ searchParams }: Props) {
               blur={false}
               local
               claro
-              className="flex flex-col p-6"
+              className="transition hover:shadow-[0_0_24px_-10px_rgba(201,162,74,0.4)]"
             >
-              <span className="text-2xl" aria-hidden="true">
-                {t.emoji}
-              </span>
-              <h3 className="mt-3 font-serif text-xl font-semibold uppercase tracking-[0.02em] text-ivory">
-                {t.nome}
-              </h3>
-              <p className="mt-2 flex-1 text-sm leading-relaxed text-[var(--color-ivory-88)]">
-                {t.descricao}
-              </p>
+              {/* Prévia REAL da peça com o dossiê fictício do João —
+                  abre em nova aba com Imprimir/PDF e Baixar .docx. */}
+              <Link
+                href={`/equipe/devedores/demo/peca/${t.id}${euQuery}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex h-full flex-col p-6"
+              >
+                <span className="text-2xl" aria-hidden="true">
+                  {t.emoji}
+                </span>
+                <h3 className="mt-3 font-serif text-xl font-semibold uppercase tracking-[0.02em] text-ivory transition group-hover:text-[var(--color-gold)]">
+                  {t.nome}
+                </h3>
+                <p className="mt-2 flex-1 text-sm leading-relaxed text-[var(--color-ivory-88)]">
+                  {t.descricao}
+                </p>
+                <span className="mt-4 inline-flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-gold)]">
+                  Ver Prévia · PDF · .docx
+                  <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-1" />
+                </span>
+              </Link>
             </SpotlightCard>
           ))}
         </div>
