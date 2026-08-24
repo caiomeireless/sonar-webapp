@@ -25,6 +25,7 @@ import {
   type ApiSonar,
   formatBRL,
 } from "@/lib/sonar-apis";
+import { BordaLiquidaMetal } from "@/components/ui/BordaLiquidaMetal";
 
 type ModalKind = "lead" | "doc" | "individual" | null;
 type ExecState = "idle" | "executing" | "done";
@@ -273,27 +274,83 @@ export default function NovaConsultaPage() {
             </p>
           ) : null}
 
-          <div className="mt-5 flex flex-wrap items-center gap-3">
+          {/* Botões IGUAIS aos da ficha do devedor (ditado 25/08):
+              Localize violeta, Veículos laranja, Raspagem dourada —
+              cada um pré-seleciona a fonte e abre o modal de custo. */}
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+            {[
+              {
+                rotulo: "Enriquecer Dados",
+                sub: "Assertiva Localize",
+                cor: "#C084FC",
+                tinta: "violeta" as const,
+                ids: ["assertiva.enderecos", "bigdatacorp.vinculos"],
+              },
+              {
+                rotulo: "Buscar Veículos",
+                sub: "Frota no CPF/CNPJ",
+                cor: "#FF9C41",
+                tinta: "laranja" as const,
+                ids: ["bigdatacorp.veiculos"],
+              },
+              {
+                rotulo: "Atualizar dos Tribunais",
+                sub: "Raspagem · Processos CNJ",
+                cor: "#C9A24A",
+                tinta: "gold" as const,
+                ids: ["datajud.processos"],
+              },
+            ].map((b) => (
+              <BordaLiquidaMetal
+                key={b.rotulo}
+                cor={b.tinta}
+                radius={14}
+                className="flex flex-1"
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelecionadas(new Set(b.ids));
+                    tentarAbrirModal("individual");
+                  }}
+                  className="flex h-full w-full flex-col justify-center gap-0.5 rounded-[11px] px-5 py-4 text-left transition hover:brightness-110"
+                  style={{
+                    backgroundColor: `color-mix(in srgb, ${b.cor} 10%, transparent)`,
+                  }}
+                >
+                  <span
+                    className="text-sm font-semibold"
+                    style={{ color: b.cor }}
+                  >
+                    {b.rotulo}
+                  </span>
+                  <span className="font-mono text-[12px] uppercase tracking-[0.16em] text-[var(--color-ivory-66)]">
+                    {b.sub}
+                  </span>
+                </button>
+              </BordaLiquidaMetal>
+            ))}
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center gap-3">
             <button
               type="button"
               onClick={() => tentarAbrirModal("lead")}
-              className="inline-flex items-center gap-2 rounded-lg bg-[var(--color-signal)]/85 px-5 py-2.5 text-sm font-semibold text-onyx shadow-[0_4px_24px_rgba(60,255,138,0.28)] ring-1 ring-[var(--color-signal)]/60 transition hover:bg-[var(--color-tip-glow)]/90"
+              className="inline-flex items-center gap-2 rounded-lg border border-[var(--color-signal)]/45 bg-[var(--color-signal)]/10 px-4 py-2 text-[13px] font-medium text-[var(--color-signal)] transition hover:bg-[var(--color-signal)]/20"
             >
-              ⚡ Buscar Tudo (Lead) · ~{formatBRL(TOTAL_LEAD)}
+              Combo Lead · ~{formatBRL(TOTAL_LEAD)}
             </button>
-
             <button
               type="button"
               onClick={() => tentarAbrirModal("doc")}
-              className="inline-flex items-center gap-2 rounded-lg bg-[var(--color-gold)] px-5 py-2.5 text-sm font-semibold text-onyx shadow-[0_4px_24px_rgba(201,162,74,0.4)] transition hover:bg-[var(--color-tip-glow)]"
+              className="inline-flex items-center gap-2 rounded-lg border border-[var(--color-gold)]/45 bg-[var(--color-gold)]/10 px-4 py-2 text-[13px] font-medium text-[var(--color-gold)] transition hover:bg-[var(--color-gold)]/20"
             >
-              📄 Buscar Tudo (Combo Documento) · {formatBRL(TOTAL_DOC)}
+              Combo Documento · {formatBRL(TOTAL_DOC)}
             </button>
-
             <button
               type="button"
               onClick={() => setDropdownAberto((a) => !a)}
-              className="inline-flex items-center gap-2 rounded-lg border border-[var(--color-ivory-22)] bg-white/5 px-5 py-2.5 text-sm font-medium text-ivory transition hover:border-[var(--color-signal)] hover:text-[var(--color-signal)]"
+              className="inline-flex items-center gap-2 rounded-lg border border-[var(--color-ivory-22)] bg-white/5 px-4 py-2 text-[13px] font-medium text-ivory transition hover:border-[var(--color-signal)] hover:text-[var(--color-signal)]"
             >
               Buscas Individuais {dropdownAberto ? "▴" : "▾"}
             </button>

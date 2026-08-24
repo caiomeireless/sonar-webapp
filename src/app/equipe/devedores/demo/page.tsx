@@ -21,6 +21,8 @@ import { ehCliente } from "@/lib/perfis";
 import { devEuFromParam } from "@/lib/dev-auth";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { BordaLiquidaMetal } from "@/components/ui/BordaLiquidaMetal";
+import { DashboardCasoGrid } from "@/app/equipe/devedores/[id]/dashboard/_components/DashboardCasoGrid";
+import { DADOS_DASH_DEMO } from "./dados-dash-demo";
 import { HeaderDossie } from "@/app/_shared/dossie/HeaderDossie";
 import { EstatisticasGrid } from "@/app/_shared/dossie/EstatisticasGrid";
 import {
@@ -223,6 +225,86 @@ export default async function FichaDemoPage({ searchParams }: Props) {
           valorEstimado={2415380}
           casosVinculados={3}
         />
+
+        {/* ============ AÇÕES: PESQUISAS + GERAR PEÇA (demo) ========== */}
+        <div className="mt-8 grid gap-4 lg:grid-cols-2">
+          <SpotlightCard
+            local
+            claro
+            degrade="linear-gradient(0deg, rgba(10,48,28,0.7), rgba(10,48,28,0.7))"
+            className="p-6 sm:p-7"
+          >
+            <div className="relative pl-4">
+              <span
+                aria-hidden="true"
+                className="absolute left-0 top-0 h-6 w-1 rounded-full bg-[var(--color-signal)]"
+              />
+              <h3 className="font-mono text-[13px] uppercase tracking-[0.32em] text-[var(--color-signal)]">
+                Central de Pesquisas
+              </h3>
+            </div>
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+              {[
+                { rotulo: "Enriquecer Dados", sub: "Assertiva · R$ 0,20", cor: "#C084FC", tinta: "violeta" as const },
+                { rotulo: "Buscar Veículos", sub: "Assertiva · R$ 14,80", cor: "#FF9C41", tinta: "laranja" as const },
+                { rotulo: "Atualizar dos Tribunais", sub: "Raspagem · Grátis", cor: "var(--color-gold)", tinta: "gold" as const },
+              ].map((b) => (
+                <BordaLiquidaMetal
+                  key={b.rotulo}
+                  cor={b.tinta}
+                  radius={14}
+                  className="flex flex-1"
+                >
+                  <span
+                    className="flex h-full w-full cursor-default flex-col justify-center gap-0.5 rounded-[11px] px-5 py-4"
+                    style={{
+                      backgroundColor: `color-mix(in srgb, ${b.cor} 10%, transparent)`,
+                    }}
+                    title="Demonstração — os botões reais disparam as consultas"
+                  >
+                    <span className="text-sm font-semibold" style={{ color: b.cor }}>
+                      {b.rotulo}
+                    </span>
+                    <span className="font-mono text-[12px] uppercase tracking-[0.16em] text-[var(--color-ivory-66)]">
+                      {b.sub}
+                    </span>
+                  </span>
+                </BordaLiquidaMetal>
+              ))}
+            </div>
+          </SpotlightCard>
+
+          <SpotlightCard
+            local
+            claro
+            degrade="linear-gradient(0deg, rgba(58,42,10,0.6), rgba(58,42,10,0.6))"
+            className="p-6 sm:p-7"
+          >
+            <div className="relative pl-4">
+              <span
+                aria-hidden="true"
+                className="absolute left-0 top-0 h-6 w-1 rounded-full bg-[var(--color-signal)]"
+              />
+              <h3 className="font-mono text-[13px] uppercase tracking-[0.32em] text-[var(--color-signal)]">
+                Gerar Peça
+              </h3>
+            </div>
+            <div className="mt-5">
+              <BordaLiquidaMetal cor="gold" radius={14} className="flex">
+                <Link
+                  href={`/equipe/devedores/demo/gerador-peca${linkBase}`}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-[11px] bg-[var(--color-gold)] px-6 py-4 text-sm font-bold uppercase tracking-[0.12em] text-[var(--color-carbon)] transition hover:bg-[var(--color-tip-glow)]"
+                >
+                  Abrir Gerador de Peça
+                </Link>
+              </BordaLiquidaMetal>
+              <p className="mt-3 text-sm leading-snug text-[var(--color-ivory-88)]">
+                Monta a minuta com os bens fictícios do João da Silva —
+                seletor de bens e visualização prévia iguais aos reais.
+              </p>
+            </div>
+          </SpotlightCard>
+        </div>
 
         {/* ============ DADOS PARA LOCALIZAÇÃO ============ */}
         <div className="mt-12">
@@ -593,96 +675,12 @@ export default async function FichaDemoPage({ searchParams }: Props) {
           </SpotlightCard>
         </div>
 
-        {/* ============ DASHBOARD ANALÍTICO (fake) ============ */}
+        {/* ============ DASHBOARD ANALÍTICO — grid REAL com dados
+            fictícios (mapa do Brasil clicável incluso) ============ */}
         <div className="mt-12">
           <TituloSetor texto="Dashboard Analítico" />
-          <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-12">
-            {/* Score de recuperabilidade */}
-            <div className="col-span-1 md:col-span-4">
-              <DashCardDemo titulo="Score de Recuperabilidade" cor={NEON.verde}>
-                <div className="flex items-center justify-center gap-6 py-2">
-                  <svg viewBox="0 0 100 100" className="h-28 w-28">
-                    <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="10" />
-                    <circle
-                      cx="50" cy="50" r="42" fill="none"
-                      stroke={NEON.verde} strokeWidth="10" strokeLinecap="round"
-                      strokeDasharray={`${0.87 * 2 * Math.PI * 42} ${2 * Math.PI * 42}`}
-                      transform="rotate(-90 50 50)"
-                    />
-                    <text x="50" y="55" textAnchor="middle" fontSize="24" fontWeight="700" fill={NEON.verde}>87</text>
-                  </svg>
-                  <div>
-                    <p className="font-serif text-2xl text-ivory">Alta</p>
-                    <p className="mt-1 max-w-[160px] text-[13px] leading-snug text-[var(--color-ivory-66)]">
-                      Patrimônio livre supera 6x o valor da causa.
-                    </p>
-                  </div>
-                </div>
-              </DashCardDemo>
-            </div>
-
-            {/* Patrimônio localizado */}
-            <div className="col-span-1 md:col-span-4">
-              <DashCardDemo titulo="Patrimônio Localizado" cor="var(--color-gold)">
-                <p className="py-3 text-center font-serif text-[clamp(30px,2.6vw,42px)] leading-none text-[var(--color-gold)]">
-                  R$ 2.415.380
-                </p>
-                <p className="text-center font-mono text-[13px] uppercase tracking-[0.2em] text-[var(--color-ivory-66)]">
-                  12 bens mapeados neste devedor
-                </p>
-              </DashCardDemo>
-            </div>
-
-            {/* Concentração patrimonial */}
-            <div className="col-span-1 md:col-span-4">
-              <DashCardDemo titulo="Concentração Patrimonial" cor={NEON.ciano}>
-                <div className="flex items-center justify-center gap-6 py-2">
-                  <svg viewBox="0 0 100 100" className="h-28 w-28">
-                    <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="12" />
-                    <circle
-                      cx="50" cy="50" r="42" fill="none"
-                      stroke={NEON.ciano} strokeWidth="12"
-                      strokeDasharray={`${0.37 * 2 * Math.PI * 42} ${2 * Math.PI * 42}`}
-                      transform="rotate(-90 50 50)"
-                    />
-                    <text x="50" y="55" textAnchor="middle" fontSize="19" fontWeight="700" fill={NEON.ciano}>37%</text>
-                  </svg>
-                  <div>
-                    <p className="font-mono text-lg tabular-nums text-ivory">HHI 0,21</p>
-                    <p className="mt-1 max-w-[170px] text-[13px] leading-snug text-[var(--color-ivory-66)]">
-                      Diversificado: nenhum bem domina o patrimônio.
-                    </p>
-                  </div>
-                </div>
-              </DashCardDemo>
-            </div>
-
-            {/* Funil operacional */}
-            <div className="col-span-1 md:col-span-12">
-              <DashCardDemo titulo="Funil Operacional" cor={NEON.verde}>
-                <div className="space-y-3 py-2">
-                  {[
-                    { rotulo: "Tentativas", n: 6, pct: 100, cor: NEON.verde },
-                    { rotulo: "Positivas", n: 4, pct: 66, cor: "#1FAE5C" },
-                    { rotulo: "Penhoras Efetivadas", n: 2, pct: 33, cor: "var(--color-gold)" },
-                  ].map((f) => (
-                    <div key={f.rotulo} className="flex items-center gap-4">
-                      <span className="w-44 shrink-0 text-right font-mono text-[13px] uppercase tracking-[0.14em] text-[var(--color-ivory-66)]">
-                        {f.rotulo}
-                      </span>
-                      <div className="h-7 flex-1 overflow-hidden rounded-md bg-white/5">
-                        <div
-                          className="flex h-full items-center rounded-md pl-3 font-mono text-[13px] font-bold text-black"
-                          style={{ width: `${f.pct}%`, backgroundColor: f.cor }}
-                        >
-                          {f.n}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </DashCardDemo>
-            </div>
+          <div className="mt-8">
+            <DashboardCasoGrid dados={DADOS_DASH_DEMO} ocultarProcessuais />
           </div>
         </div>
 
@@ -691,41 +689,5 @@ export default async function FichaDemoPage({ searchParams }: Props) {
         </div>
       </div>
     </main>
-  );
-}
-
-// Card fake do dashboard demo — mesmo vidro polido do DashboardCard real.
-function DashCardDemo({
-  titulo,
-  cor,
-  children,
-}: {
-  titulo: string;
-  cor: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <SpotlightCard
-      local
-      degrade={[
-        "linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.03) 38%, transparent 55%)",
-        "linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.06) 34%, rgba(255,255,255,0.13) 45%, rgba(255,255,255,0.05) 56%, transparent 72%)",
-      ].join(", ")}
-      borda="rgba(232, 228, 214, 0.25)"
-      className="h-full overflow-hidden p-6"
-    >
-      <div
-        className="flex items-center gap-2 font-mono text-[13px] font-semibold uppercase tracking-[0.26em]"
-        style={{ color: cor }}
-      >
-        <span
-          aria-hidden="true"
-          className="inline-block h-2 w-2 rounded-full"
-          style={{ backgroundColor: cor, boxShadow: `0 0 10px ${cor}` }}
-        />
-        {titulo}
-      </div>
-      <div className="mt-4">{children}</div>
-    </SpotlightCard>
   );
 }

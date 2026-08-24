@@ -26,15 +26,15 @@ export const NAV_EQUIPE: SidebarItem[] = [
   { href: "/equipe/inicio", label: "Início", icon: <Home className={ICON_CLASS} /> },
   { href: "/equipe/devedores", label: "Banco de Dossiês", icon: <Users className={ICON_CLASS} /> },
   { href: "/equipe/consultas", label: "Avaliação Pré-Processual", icon: <Search className={ICON_CLASS} /> },
-  { href: "/equipe/themis", label: "Rotas das Execuções", icon: <Route className={ICON_CLASS} /> },
-  // Abas novas 21/08: Radar (andamentos de alto sinal), Gerador de Peças
+  { href: "/equipe/themis", label: "Ficha das Execuções", icon: <Route className={ICON_CLASS} /> },
+  // Abas novas 21/08: Radar (andamentos de alto sinal), Banco de Peças
   // (hub do gerador por devedor) e Central de Acordos (remete pra plataforma
   // do Guilherme — ver /equipe/acordos).
   { href: "/equipe/radar", label: "Radar de Movimentações", icon: <Radar className={ICON_CLASS} /> },
   { href: "/equipe", label: "Estatísticas da Plataforma", icon: <BarChart3 className={ICON_CLASS} /> },
   {
     href: "/equipe/pecas",
-    label: "Gerador de Peças",
+    label: "Banco de Peças",
     icon: <FileSignature className={ICON_CLASS} />,
     // O gerador em si vive DENTRO do dossiê (/equipe/devedores/[id]/
     // gerador-peca e /peca/[template]) — matchContains rouba o ativo do

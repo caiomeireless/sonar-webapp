@@ -4,7 +4,8 @@
 // o catálogo de peças que o Sonar monta com os bens reais do dossiê.
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, FileSignature, Search } from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
+import { SpotlightCard } from "@/components/ui/SpotlightCard";
 
 import { ehCliente } from "@/lib/perfis";
 import { perfilLogado } from "@/lib/perfis-server";
@@ -34,27 +35,34 @@ export default async function GeradorPecasHubPage({ searchParams }: Props) {
     : null;
 
   return (
-    <main className="mx-auto max-w-[1100px] px-6 py-10 sm:px-10">
-      {/* ============ HEADER ============ */}
-      <header className="title-shield mb-8 text-center">
-        <div className="mx-auto mb-3 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)]">
-          <FileSignature className="h-5 w-5 text-[var(--color-signal)]" />
-        </div>
-        <h1 className="font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
-          Gerador de Peças
+    <main className="relative min-h-svh">
+      {/* Fundo: preto puro (padrão da cara nova). */}
+      <div aria-hidden="true" className="absolute inset-0 bg-black" />
+      <div className="relative z-10 mx-auto max-w-[1200px] px-6 py-12 sm:px-10">
+      {/* ============ HEADER (padrão Banco de Dossiês) ============ */}
+      <header className="mb-8 text-center">
+        <h1
+          className="font-serif text-[clamp(29px,4.2vw,52px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[#C97B2A]"
+          style={{ WebkitTextStroke: "1px rgba(255,255,255,0.65)" }}
+        >
+          Banco de Peças
         </h1>
-        <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
-          Peças Montadas com os Bens Reais do Dossiê
+        <p className="mt-3 font-mono text-[clamp(13px,1.6vw,20px)] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
+          Peças Montadas com os Bens Reais do Dossiê.
         </p>
-        <p className="mx-auto mt-3 max-w-[680px] text-sm leading-relaxed text-[var(--color-ivory-88)]">
+        <p className="mx-auto mt-4 max-w-[680px] text-sm leading-relaxed text-[var(--color-ivory-88)]">
           Escolha o devedor e o Sonar redige a minuta com os bens que já
           localizou: matrícula, placa, CNPJ e localização entram no texto
           automaticamente, no timbre do escritório, prontos pra baixar em Word.
         </p>
       </header>
 
-      {/* ============ BUSCA DE DEVEDOR ============ */}
-      <section className="glass mx-auto max-w-[720px] p-7">
+      {/* ============ BUSCA DE DEVEDOR (card de filtro verde) ======== */}
+      <SpotlightCard
+        local
+        degrade="linear-gradient(0deg, rgba(10,48,28,0.7), rgba(10,48,28,0.7))"
+        className="mx-auto max-w-[820px] p-6 sm:p-7"
+      >
         <h2 className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
           Para Qual Devedor?
         </h2>
@@ -115,27 +123,42 @@ export default async function GeradorPecasHubPage({ searchParams }: Props) {
             )}
           </div>
         )}
-      </section>
+      </SpotlightCard>
 
-      {/* ============ CATÁLOGO DE PEÇAS ============ */}
+      {/* ============ CATÁLOGO DE PEÇAS (cards mantidos) ============ */}
       <section className="mt-10">
-        <h2 className="mb-4 text-center font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-ivory-66)]">
+        <h2
+          className="mb-6 text-center font-serif text-[clamp(22px,2.2vw,32px)] uppercase leading-[1.1] tracking-[0.08em] text-[var(--color-gold)]"
+          style={{
+            WebkitTextStroke: "1px rgba(255,255,255,0.5)",
+            textShadow: "0 0 16px rgba(201,162,74,0.35)",
+          }}
+        >
           Catálogo de Peças Disponíveis
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {TEMPLATES.map((t) => (
-            <div key={t.id} className="glass-flat flex flex-col p-5">
+            <SpotlightCard
+              key={t.id}
+              blur={false}
+              local
+              claro
+              className="flex flex-col p-6"
+            >
               <span className="text-2xl" aria-hidden="true">
                 {t.emoji}
               </span>
-              <h3 className="mt-3 font-serif text-lg text-ivory">{t.nome}</h3>
-              <p className="mt-2 flex-1 text-sm leading-relaxed text-[var(--color-ivory-66)]">
+              <h3 className="mt-3 font-serif text-xl font-semibold uppercase tracking-[0.02em] text-ivory">
+                {t.nome}
+              </h3>
+              <p className="mt-2 flex-1 text-sm leading-relaxed text-[var(--color-ivory-88)]">
                 {t.descricao}
               </p>
-            </div>
+            </SpotlightCard>
           ))}
         </div>
       </section>
+      </div>
     </main>
   );
 }

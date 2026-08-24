@@ -36,7 +36,7 @@ export default function RadialCentro({
       setTam(
         Math.min(
           TAM_MAX,
-          Math.max(140, Math.min(el.clientWidth, el.clientHeight) - 12),
+          Math.max(140, Math.min(el.clientWidth, el.clientHeight) - 4),
         ),
       );
     medir();

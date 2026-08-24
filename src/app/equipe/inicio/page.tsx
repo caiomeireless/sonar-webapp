@@ -506,12 +506,8 @@ export default async function InicioPage() {
               {/* De volta a pedido (25/08): embaixo da roda, verde neon
                   com contorno branco e brilho. */}
               <p
-                className="sonar-wordmark shrink-0 whitespace-nowrap pb-1 text-center text-[clamp(20px,1.9vw,32px)] leading-[1.1]"
-                style={{
-                  color: "var(--color-signal)",
-                  WebkitTextStroke: "1px rgba(255,255,255,0.7)",
-                  textShadow: "0 0 18px rgba(60,255,138,0.35)",
-                }}
+                className="sonar-wordmark shrink-0 whitespace-nowrap pb-1 text-center text-[clamp(20px,1.9vw,32px)] leading-[1.1] text-ivory"
+                style={{ textShadow: "0 0 16px rgba(60,255,138,0.3)" }}
               >
                 Para onde deseja ir?
               </p>

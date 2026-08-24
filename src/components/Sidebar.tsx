@@ -9,7 +9,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronLeft, ChevronRight, Menu, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, DoorOpen, Menu, X } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 // Chave persistente do estado de colapso do nav (desktop).
@@ -43,7 +43,7 @@ function FotoUsuarioSidebar({ nome }: { nome: string }) {
     }
   }, []);
   return (
-    <span className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-[var(--color-gold)]/45 bg-[var(--color-signal-soft)] text-2xl font-semibold text-[var(--color-signal)] shadow-[0_0_18px_rgba(201,162,74,0.25)]">
+    <span className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-2 border-[var(--color-gold)]/45 bg-[var(--color-signal-soft)] text-3xl font-semibold text-[var(--color-signal)] shadow-[0_0_18px_rgba(201,162,74,0.25)]">
       {foto ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={foto} alt="Foto do usuário" className="h-full w-full object-cover" />
@@ -358,10 +358,10 @@ function SidebarPanel({
             aria-label="Sonar — página inicial"
           >
             <FotoUsuarioSidebar nome={usuario.nome?.trim() || usuario.email} />
-            <span className="max-w-full truncate px-2 text-[15px] font-medium text-[var(--color-fg)]">
+            <span className="max-w-full truncate px-2 text-[19px] font-semibold text-[var(--color-fg)]">
               {usuario.nome?.trim() || usuario.email}
             </span>
-            <span className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-gold)]">
+            <span className="font-mono text-[14px] uppercase tracking-[0.24em] text-[var(--color-gold)]">
               {qualificacaoDoPapel(usuario.papel, portal)}
             </span>
           </Link>
@@ -547,20 +547,20 @@ function SidebarFooter({
     <div className="flex flex-col items-center gap-3 text-center">
       {/* Acao unica: sair (o seletor de tema saiu — plataforma so escura,
           decisao do Caio 21/08). */}
+      {/* Sair ALARANJADO com porta (ditado 25/08). */}
       <div className="flex w-full items-center justify-center gap-2">
         <form action="/auth/signout" method="post" className="flex-1">
           <button
             type="submit"
             className="flex w-full items-center justify-between gap-2 rounded-xl
-                       border border-[var(--color-line)] bg-[var(--color-surface-2)]
-                       px-3 py-2 text-[13px] text-[var(--color-fg-muted)]
-                       transition hover:bg-[var(--color-line)]
-                       hover:text-[var(--color-fg)]
+                       border border-[#FF9C41]/45 bg-[rgba(255,156,65,0.08)]
+                       px-3 py-2.5 text-[14px] font-medium text-[#FF9C41]
+                       transition hover:bg-[rgba(255,156,65,0.16)]
                        focus-visible:outline-none focus-visible:ring-2
-                       focus-visible:ring-[var(--color-signal)]"
+                       focus-visible:ring-[#FF9C41]"
           >
             <span>Sair</span>
-            <ChevronRight className="h-3.5 w-3.5 opacity-60" aria-hidden="true" />
+            <DoorOpen className="h-4.5 w-4.5" aria-hidden="true" />
           </button>
         </form>
       </div>

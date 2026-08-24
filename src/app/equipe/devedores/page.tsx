@@ -74,7 +74,7 @@ export default async function DevedoresEquipePage({ searchParams }: Props) {
             Banco de Dossiês
           </h1>
           <p className="mt-3 font-mono text-[clamp(13px,1.6vw,20px)] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
-            Ficha das Informações de Todos os Devedores.
+            Fichas das Informações de Todos os Devedores.
           </p>
           {/* Sem botão de cadastro manual (ditado 23/08): devedor entra
               automaticamente pela sync do Themis ou sistemas futuros. */}

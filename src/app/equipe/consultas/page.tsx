@@ -23,7 +23,7 @@ import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { formatBRL, formatTempoRelativo } from "@/lib/format";
 
 type Props = {
-  searchParams?: Promise<{ eu?: string | string[] }>;
+  searchParams?: Promise<{ eu?: string | string[]; demo?: string | string[] }>;
 };
 
 export default async function ConsultasPreEquipePage({ searchParams }: Props) {
@@ -37,7 +37,13 @@ export default async function ConsultasPreEquipePage({ searchParams }: Props) {
   const linkBase = euDev ? `?eu=${encodeURIComponent(euDev)}` : "";
   const novaHref = `/equipe/consultas/nova${linkBase}`;
 
-  const consultas = await listarConsultasPre();
+  // As 3 consultas fictícias só aparecem em MODO DEMONSTRAÇÃO (?demo=1)
+  // — senão a aba inteira parece de mentira (feedback do Caio 25/08).
+  const demoRaw = Array.isArray(params.demo) ? params.demo[0] : params.demo;
+  const mostrarDemo = demoRaw === "1";
+  const demoHref = `/equipe/consultas?demo=1${euDev ? `&eu=${encodeURIComponent(euDev)}` : ""}`;
+
+  const consultas = mostrarDemo ? await listarConsultasPre() : [];
 
   const totalAlta = consultas.filter((c) => c.score === "alta").length;
   const totalMedia = consultas.filter((c) => c.score === "media").length;
@@ -72,35 +78,72 @@ export default async function ConsultasPreEquipePage({ searchParams }: Props) {
         </div>
       </header>
 
-      {/* Aviso: os 3 cards são DEMONSTRAÇÃO (dados fictícios). */}
-      <div
-        className="mb-4 flex items-center justify-center gap-3 rounded-2xl border px-5 py-3.5"
-        style={{
-          borderColor: "rgba(255,217,61,0.55)",
-          backgroundColor: "rgba(255,217,61,0.10)",
-        }}
-      >
-        <TriangleAlert
-          className="h-5 w-5 shrink-0 text-[#FFD93D]"
-          aria-hidden="true"
-        />
-        <p className="font-mono text-[13px] font-semibold uppercase tracking-[0.22em] text-[#FFD93D]">
-          Demonstração — As Consultas Abaixo Usam Dados Fictícios
-        </p>
-      </div>
+      {/* Card DEMONSTRAÇÃO (roxo): só ao clicar aparecem os 3 cards
+          fictícios — a aba abre limpa. */}
+      {!mostrarDemo ? (
+        <SpotlightCard
+          local
+          degrade="linear-gradient(0deg, rgba(58,32,88,0.55), rgba(58,32,88,0.55))"
+          borda="rgba(192, 132, 252, 0.45)"
+          className="mb-4"
+        >
+          <Link
+            href={demoHref}
+            className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 px-5 py-4"
+          >
+            <div className="min-w-0">
+              <p className="font-mono text-[13px] font-semibold uppercase tracking-[0.26em] text-[#C084FC]">
+                Demonstração
+              </p>
+              <p className="mt-1 text-[15px] leading-snug text-ivory">
+                Três avaliações fictícias — João da Silva (solvente), Empresa
+                ABC (insolvente) e Jefferson da Silva (intermediário).
+              </p>
+            </div>
+            <span className="inline-flex shrink-0 items-center rounded-full border border-[#C084FC]/60 bg-[#C084FC]/10 px-4 py-2 font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-[#C084FC]">
+              Ver Demonstração
+            </span>
+          </Link>
+        </SpotlightCard>
+      ) : (
+        <>
+          {/* Aviso: os 3 cards são DEMONSTRAÇÃO (dados fictícios). */}
+          <div
+            className="mb-4 flex flex-wrap items-center justify-center gap-3 rounded-2xl border px-5 py-3.5"
+            style={{
+              borderColor: "rgba(255,217,61,0.55)",
+              backgroundColor: "rgba(255,217,61,0.10)",
+            }}
+          >
+            <TriangleAlert
+              className="h-5 w-5 shrink-0 text-[#FFD93D]"
+              aria-hidden="true"
+            />
+            <p className="font-mono text-[13px] font-semibold uppercase tracking-[0.22em] text-[#FFD93D]">
+              Demonstração — As Consultas Abaixo Usam Dados Fictícios
+            </p>
+            <Link
+              href={`/equipe/consultas${linkBase}`}
+              className="font-mono text-[12px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)] underline-offset-2 hover:underline"
+            >
+              Ocultar
+            </Link>
+          </div>
 
-      <p className="mb-4 font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-devedor)]">
-        {consultas.length} {consultas.length === 1 ? "consulta" : "consultas"} ·{" "}
-        {totalAlta} alta · {totalMedia} média · {totalBaixa} baixa ·{" "}
-        {formatBRL(custoTotal)} em consultas
-      </p>
+          <p className="mb-4 font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-devedor)]">
+            {consultas.length}{" "}
+            {consultas.length === 1 ? "consulta" : "consultas"} · {totalAlta}{" "}
+            alta · {totalMedia} média · {totalBaixa} baixa ·{" "}
+            {formatBRL(custoTotal)} em consultas
+          </p>
+        </>
+      )}
 
       {/* ============ LISTA ============ */}
       {consultas.length === 0 ? (
         <div className="mt-12 grid place-items-center">
-          <SpotlightCard className="max-w-[520px] p-10 text-center">
-            <span className="eyebrow !text-[var(--color-signal)]">Vazio</span>
-            <h3 className="mt-4 font-serif text-2xl text-ivory">
+          <SpotlightCard local claro className="max-w-[520px] p-10 text-center">
+            <h3 className="font-serif text-2xl text-ivory">
               Nenhuma consulta realizada ainda
             </h3>
             <p className="mt-3 text-sm text-[var(--color-ivory-88)]">

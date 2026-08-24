@@ -29,6 +29,14 @@ type Props = {
   devedorId: number;
   euQuery: string; // "" ou "?eu=..."
   sugeridos: TemplateId[];
+  /**
+   * MODO DEMONSTRAÇÃO (opcional, retrocompatível — default undefined = real).
+   * Quando presente, sobrescreve a base da URL do preview (ex.:
+   * "/equipe/devedores/demo/peca") e desabilita o download .docx, já que a
+   * rota /api/pecas exige devedor real no banco. O preview ao vivo e o
+   * Imprimir/PDF continuam funcionando normalmente.
+   */
+  demoBasePeca?: string;
 };
 
 const TIPO_EMOJI: Record<TipoBem, string> = {
@@ -104,7 +112,14 @@ function montarUrl(opts: {
   return partes.length > 0 ? `${base}?${partes.join("&")}` : base;
 }
 
-export function GeradorPecaApp({ dossie, devedorId, euQuery, sugeridos }: Props) {
+export function GeradorPecaApp({
+  dossie,
+  devedorId,
+  euQuery,
+  sugeridos,
+  demoBasePeca,
+}: Props) {
+  const ehDemo = Boolean(demoBasePeca);
   // ===== Template selecionado =====
   const idInicial: TemplateId = useMemo(() => {
     const primeiroSug = TEMPLATES.find((t) => sugeridos.includes(t.id));
@@ -152,12 +167,14 @@ export function GeradorPecaApp({ dossie, devedorId, euQuery, sugeridos }: Props)
   const previewUrlAlvo = useMemo(
     () =>
       montarUrl({
-        base: `/equipe/devedores/${devedorId}/peca/${templateId}`,
+        base: demoBasePeca
+          ? `${demoBasePeca}/${templateId}`
+          : `/equipe/devedores/${devedorId}/peca/${templateId}`,
         euQuery,
         opcoesCsv,
         bensCsv,
       }),
-    [devedorId, templateId, euQuery, opcoesCsv, bensCsv],
+    [demoBasePeca, devedorId, templateId, euQuery, opcoesCsv, bensCsv],
   );
 
   const [previewUrl, setPreviewUrl] = useState<string>(previewUrlAlvo);
@@ -210,6 +227,9 @@ export function GeradorPecaApp({ dossie, devedorId, euQuery, sugeridos }: Props)
   }
 
   async function baixarDocx() {
+    // Demonstração: dados fictícios não existem no banco — a rota
+    // /api/pecas falharia. O botão já fica desabilitado; guarda extra.
+    if (ehDemo) return;
     if (downloading) return;
     setDownloading(true);
     try {
@@ -421,9 +441,18 @@ export function GeradorPecaApp({ dossie, devedorId, euQuery, sugeridos }: Props)
             <button
               type="button"
               onClick={baixarDocx}
-              disabled={downloading}
+              disabled={downloading || ehDemo}
               aria-busy={downloading}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-gold)] px-4 py-1.5 text-[11px] font-semibold text-onyx shadow-[0_4px_16px_rgba(201,162,74,0.3)] transition hover:bg-[var(--color-tip-glow)] disabled:cursor-wait disabled:opacity-70"
+              title={
+                ehDemo
+                  ? "Indisponível na demonstração — o .docx é gerado apenas para devedores reais"
+                  : undefined
+              }
+              className={`inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-gold)] px-4 py-1.5 text-[11px] font-semibold text-onyx shadow-[0_4px_16px_rgba(201,162,74,0.3)] transition hover:bg-[var(--color-tip-glow)] ${
+                ehDemo
+                  ? "disabled:cursor-not-allowed disabled:opacity-50"
+                  : "disabled:cursor-wait disabled:opacity-70"
+              }`}
             >
               {downloading ? (
                 <>

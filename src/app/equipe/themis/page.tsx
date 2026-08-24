@@ -85,45 +85,82 @@ export default async function ThemisPage({ searchParams }: Props) {
   const totalPendentes = totalNaPagina - totalRastreados;
 
   return (
-    <main className="relative mx-auto max-w-[1100px] px-6 py-16 sm:px-10">
-      {/* Glow de fundo gold removido — agora o AetherBackground global
-          do layout vale pra todas as páginas (uniformidade visual). */}
-
-      {/* Cabeçalho */}
-      <header className="title-shield relative mb-6 text-center">
-        <h1 className="font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
-          Rotas das Execuções
+    <main className="relative min-h-svh">
+      {/* Fundo: preto puro (padrão da cara nova). */}
+      <div aria-hidden="true" className="absolute inset-0 bg-black" />
+      <div className="relative z-10 mx-auto max-w-[1200px] px-6 py-12 sm:px-10">
+      {/* Cabeçalho (padrão Banco de Dossiês) */}
+      <header className="mb-8 text-center">
+        <h1
+          className="font-serif text-[clamp(29px,4.2vw,52px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[#C97B2A]"
+          style={{ WebkitTextStroke: "1px rgba(255,255,255,0.65)" }}
+        >
+          Ficha das Execuções
         </h1>
-        <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
-          Trajetória de Cada Processo · Via Themis
+        <p className="mt-3 font-mono text-[clamp(13px,1.6vw,20px)] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
+          Uma Ficha para Cada Processo · Via Themis
         </p>
-        <p className="mx-auto mt-3 max-w-[680px] font-mono text-[13px] text-[var(--color-signal)]">
-          {totalNaPagina === 0
-            ? q
-              ? `Nenhum processo encontrado para "${q}".`
-              : "Nenhum processo recebido do Themis ainda."
-            : `${listagem.total.toLocaleString("pt-BR")} ${
-                listagem.total === 1 ? "processo" : "processos"
-              } no total · página ${paginaAtual} de ${totalPaginas} · ${totalPendentes} ${
-                totalPendentes === 1 ? "pendente" : "pendentes"
-              } · ${totalRastreados} já rastreado${
-                totalRastreados === 1 ? "" : "s"
-              } nesta página`}
-        </p>
+      </header>
 
-        {/* Filtro + toggle de visualização */}
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+      {/* Filtro + toggle num card verde escuro (padrão do Banco). */}
+      <SpotlightCard
+        local
+        degrade="linear-gradient(0deg, rgba(10,48,28,0.7), rgba(10,48,28,0.7))"
+        className="p-4 sm:p-5"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <FiltroThemis />
           <ToggleVisao atual={visao} />
         </div>
-      </header>
+      </SpotlightCard>
+
+      {/* Card de DEMONSTRAÇÃO — ficha de processo fictícia pra reunião. */}
+      <SpotlightCard
+        local
+        degrade="linear-gradient(0deg, rgba(58,32,88,0.55), rgba(58,32,88,0.55))"
+        borda="rgba(192, 132, 252, 0.45)"
+        className="mt-4"
+      >
+        <Link
+          href={`/equipe/themis/processo/demo${linkBase}`}
+          className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 px-5 py-4"
+        >
+          <div className="min-w-0">
+            <p className="font-mono text-[13px] font-semibold uppercase tracking-[0.26em] text-[#C084FC]">
+              Demonstração
+            </p>
+            <p className="mt-1 text-[15px] leading-snug text-ivory">
+              Ficha completa do processo fictício{" "}
+              <span className="font-mono text-[var(--color-gold)]">
+                1002345-67.2024.8.26.0602
+              </span>{" "}
+              — dados de exemplo, sem expor informações sigilosas.
+            </p>
+          </div>
+          <span className="inline-flex shrink-0 items-center rounded-full border border-[#C084FC]/60 bg-[#C084FC]/10 px-4 py-2 font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-[#C084FC]">
+            Abrir Ficha Demo
+          </span>
+        </Link>
+      </SpotlightCard>
+
+      {/* Contador vermelho (padrão do Banco). */}
+      <p className="mt-4 font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-devedor)]">
+        {totalNaPagina === 0
+          ? q
+            ? `Nenhum processo encontrado para "${q}"`
+            : "Nenhum processo recebido do Themis ainda"
+          : `${listagem.total.toLocaleString("pt-BR")} ${
+              listagem.total === 1 ? "processo" : "processos"
+            } · página ${paginaAtual} de ${totalPaginas} · ${totalPendentes} ${
+              totalPendentes === 1 ? "pendente" : "pendentes"
+            } · ${totalRastreados} rastreados nesta página`}
+      </p>
 
       {/* Lista */}
       {processos.length === 0 ? (
-        <div className="relative mt-12 grid place-items-center">
-          <SpotlightCard className="max-w-[520px] p-10 text-center">
-            <span className="eyebrow !text-[var(--color-signal)]">Fila vazia</span>
-            <h3 className="mt-4 font-serif text-2xl text-ivory">
+        <div className="relative mt-10 grid place-items-center">
+          <SpotlightCard local claro className="max-w-[520px] p-10 text-center">
+            <h3 className="font-serif text-2xl text-ivory">
               Nenhum processo recebido
             </h3>
             <p className="mt-3 text-sm text-[var(--color-ivory-88)]">
@@ -133,13 +170,13 @@ export default async function ThemisPage({ searchParams }: Props) {
           </SpotlightCard>
         </div>
       ) : visao === "lista" ? (
-        <div className="mt-8 flex flex-col gap-3">
+        <div className="mt-4 flex flex-col gap-2">
           {processos.map((p) => (
             <LinhaProcesso key={p.caso_id} processo={p} eu={euDev} linkBase={linkBase} />
           ))}
         </div>
       ) : (
-        <div className="relative mt-12 space-y-4">
+        <div className="relative mt-8 space-y-4">
           {processos.map((p) => (
             <CardProcesso
               key={p.caso_id}
@@ -155,6 +192,7 @@ export default async function ThemisPage({ searchParams }: Props) {
           filtra por numero_processo no banco, entao paginar em cima da
           busca navega os hits corretamente. */}
       <PaginacaoThemis pagina={paginaAtual} totalPaginas={totalPaginas} />
+      </div>
     </main>
   );
 }
@@ -360,107 +398,113 @@ function LinhaProcesso({
   linkBase: string;
 }) {
   const status = formatStatus(p.status);
-  const tipoLabel = p.devedor.tipo === "PF" ? "PF" : "PJ";
   const docLabel = p.devedor.tipo === "PF" ? "CPF" : "CNPJ";
   const advogado = nomeAdvogado(p.responsavel_email);
-  const dossieHref = `/equipe/devedores/${p.devedor.id}${linkBase}`;
+  const fichaHref = `/equipe/themis/processo/${p.caso_id}${linkBase}`;
 
+  // Livro-razão (padrão Banco de Dossiês, reforma 25/08): trilho de infos
+  // alinhado, PROCESSO + DEVEDOR CAIXA ALTA no centro, execução na ponta.
+  // A área principal clica pra FICHA DO PROCESSO; os botões de busca
+  // continuam no rodapé da linha.
   return (
-    <div className="glass-flat group flex flex-col gap-3 p-5 transition hover:bg-[var(--color-surface-2)]/40">
-      {/* ROW 1 — Header: chips (Pasta + Status + Tipo) + Recebido ha' X */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-gold)]/40 bg-[var(--color-gold)]/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-gold)]">
-            <Hash className="h-3 w-3" aria-hidden="true" />
-            {p.pasta_themis ? `Pasta ${p.pasta_themis}` : `Caso #${p.caso_id}`}
-          </span>
-          <span
-            className="inline-flex rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.20em]"
-            style={{
-              borderColor: `${status.color}66`,
-              backgroundColor: `${status.color}14`,
-              color: status.color,
-            }}
+    <SpotlightCard
+      blur={false}
+      local
+      claro
+      className="transition hover:shadow-[0_0_24px_-10px_rgba(60,255,138,0.35)]"
+    >
+      <Link
+        href={fichaHref}
+        className="group grid grid-cols-[72px_minmax(0,1fr)] items-center gap-x-4 gap-y-2 px-5 pt-4 sm:grid-cols-[104px_minmax(0,1fr)_200px] sm:gap-x-6"
+      >
+        {/* Trilho esquerdo: bens encontrados */}
+        <div className="text-center sm:border-r sm:border-white/10 sm:pr-5">
+          <p
+            className={`font-mono text-[26px] font-medium leading-none tabular-nums ${
+              p.total_bens > 0
+                ? "text-[var(--color-signal)]"
+                : "text-[var(--color-ivory-40)]"
+            }`}
           >
-            {status.label}
-          </span>
-          <span className="inline-flex items-center rounded-full border border-[var(--color-signal-soft-2)] bg-[var(--color-signal-soft)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.20em] text-[var(--color-signal)]">
-            {tipoLabel}
-          </span>
+            {p.total_bens}
+          </p>
+          <p className="mt-1.5 font-mono text-[12px] uppercase tracking-[0.16em] text-[var(--color-ivory-66)]">
+            {p.total_bens === 1 ? "Info" : "Infos"}
+          </p>
         </div>
-        <span className="inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--color-ivory-66)]">
-          <Clock className="h-3 w-3" aria-hidden="true" />
-          Recebido {formatTempoRelativo(p.recebido_em)}
-        </span>
-      </div>
 
-      {/* ROW 2 — Devedor (clicavel) + Doc + Processo em linha */}
-      <div>
-        <Link href={dossieHref} className="block min-w-0">
-          <h3 className="nome-devedor truncate font-serif text-[22px] leading-tight text-[var(--color-devedor)] transition group-hover:underline">
-            {p.devedor.nome}
-          </h3>
-        </Link>
-        <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[12px] text-[var(--color-ivory-88)]">
-          <span>
-            <span className="text-[var(--color-ivory-66)]">{docLabel}:</span>{" "}
-            {p.devedor.documento}
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <FileText className="h-3 w-3 text-[var(--color-signal)]/70" aria-hidden="true" />
-            <span className="text-[var(--color-ivory-66)]">Processo:</span>
-            <span className="break-all text-[var(--color-gold)]">
-              {p.numero_processo ?? "Sem numero"}
+        {/* Identificação: processo em destaque + devedor CAIXA ALTA */}
+        <div className="min-w-0">
+          <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+            <span className="break-all font-mono text-[15px] text-[var(--color-gold)]">
+              {p.numero_processo ?? "Sem número de processo"}
             </span>
-          </span>
-        </div>
-      </div>
-
-      {/* ROW 3 — Grid 3-col: Credor | Advogado | Credito + Bens */}
-      <div className="grid grid-cols-1 gap-4 border-t border-[var(--color-ivory-12)] pt-3 sm:grid-cols-3">
-        <div className="min-w-0">
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
-            Credor
-          </p>
-          <p className="nome-cliente mt-1 truncate font-serif text-[15px] text-[var(--color-cliente)]">
-            {p.credor.nome}
-          </p>
-        </div>
-        <div className="min-w-0">
-          <p className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
-            <Scale className="h-3 w-3" aria-hidden="true" />
-            Advogado responsavel
-          </p>
-          <p className="mt-1 truncate font-serif text-[15px] text-[var(--color-advogado)]">
-            {advogado}
-          </p>
-        </div>
-        <div className="min-w-0">
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
-            Credito e bens
-          </p>
-          <div className="mt-1 flex items-baseline gap-3 font-mono">
-            <span className="text-[15px] tabular-nums text-[var(--color-gold)]">
-              {p.valor_credito_brl !== null ? formatBRL(p.valor_credito_brl) : "—"}
+            <span className="shrink-0 font-mono text-[12px] uppercase tracking-[0.12em] text-[var(--color-ivory-66)]">
+              {p.pasta_themis ? `Pasta ${p.pasta_themis}` : `Caso #${p.caso_id}`}
             </span>
-            <span className="text-[11px] text-[var(--color-ivory-88)]">
-              {p.ja_rastreado
-                ? `${p.total_bens} ${p.total_bens === 1 ? "bem" : "bens"}`
-                : "Aguardando"}
+            <span
+              className="inline-flex shrink-0 rounded-full border px-2.5 py-0.5 font-mono text-[11px] uppercase tracking-[0.16em]"
+              style={{
+                borderColor: `${status.color}66`,
+                backgroundColor: `${status.color}14`,
+                color: status.color,
+              }}
+            >
+              {status.label}
             </span>
           </div>
+          <div className="mt-1 flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-0.5">
+            <h3
+              className="min-w-0 max-w-full truncate font-serif text-[clamp(17px,1.6vw,22px)] font-semibold uppercase leading-tight tracking-[0.02em] text-[var(--color-devedor)] transition group-hover:underline"
+              style={{
+                textShadow:
+                  "0 0 1px rgba(220,38,38,0.6), 0 0 12px rgba(220,38,38,0.16)",
+              }}
+            >
+              {p.devedor.nome}
+            </h3>
+            <span className="shrink-0 font-mono text-[12px] tracking-[0.04em] text-[var(--color-ivory-66)]">
+              {docLabel} {p.devedor.documento}
+            </span>
+          </div>
+          <p className="mt-1 truncate font-mono text-[13px] leading-snug">
+            <span className="text-[#FF9C41]">{p.credor.nome}</span>
+            <span className="text-[var(--color-ivory-66)]">
+              {" "}
+              · {advogado} · Recebido {formatTempoRelativo(p.recebido_em)}
+            </span>
+          </p>
         </div>
-      </div>
 
-      {/* ROW 4 — Rodape com botoes de busca (AcoesBuscaCardThemis inclui
-          "Ver Dossie Atual" no proprio rodape, entao sem duplicar). */}
-      <div className="border-t border-[var(--color-ivory-12)] pt-3">
+        {/* Ponta direita: valor da execução */}
+        <div className="col-span-2 border-t border-white/10 pt-2 text-left sm:col-span-1 sm:border-t-0 sm:pt-0 sm:text-right">
+          <p
+            className={`font-mono text-[17px] tabular-nums leading-tight ${
+              p.valor_credito_brl && p.valor_credito_brl > 0
+                ? "text-[var(--color-ivory)]"
+                : "text-[var(--color-ivory-40)]"
+            }`}
+          >
+            {p.valor_credito_brl && p.valor_credito_brl > 0
+              ? formatBRL(p.valor_credito_brl)
+              : "—"}
+          </p>
+          <p className="mt-0.5 font-mono text-[12px] uppercase tracking-[0.14em] text-[var(--color-ivory-66)]">
+            {p.valor_credito_brl && p.valor_credito_brl > 0
+              ? "Execução Atualizada"
+              : "Aguardando Robôs"}
+          </p>
+        </div>
+      </Link>
+
+      {/* Rodapé: botões de busca preservados (fora do Link). */}
+      <div className="mt-2 border-t border-white/10 px-5 pb-4 pt-3">
         <AcoesBuscaCardThemis
           devedorId={p.devedor.id}
           eu={eu ?? ""}
           jaRastreado={p.ja_rastreado}
         />
       </div>
-    </div>
+    </SpotlightCard>
   );
 }

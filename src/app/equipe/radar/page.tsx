@@ -6,7 +6,7 @@
 // "NOVO" = capturado depois da última visita (localStorage, por navegador).
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Radar as RadarIcon } from "lucide-react";
+import { SpotlightCard } from "@/components/ui/SpotlightCard";
 
 import { ehCliente } from "@/lib/perfis";
 import { perfilLogado } from "@/lib/perfis-server";
@@ -72,31 +72,32 @@ export default async function RadarPage({ searchParams }: Props) {
     `/equipe/radar?cat=${cat}&p=${p}${euQuery}`;
 
   return (
-    <main className="mx-auto max-w-[1100px] px-6 py-10 sm:px-10">
-      {/* ============ HEADER ============ */}
-      <header className="title-shield mb-8 text-center">
-        <div className="mx-auto mb-3 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)]">
-          <RadarIcon className="h-5 w-5 text-[var(--color-signal)]" />
-        </div>
-        <h1 className="font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
+    <main className="relative min-h-svh">
+      {/* Fundo: preto puro (padrão da cara nova). */}
+      <div aria-hidden="true" className="absolute inset-0 bg-black" />
+      <div className="relative z-10 mx-auto max-w-[1200px] px-6 py-12 sm:px-10">
+      {/* ============ HEADER (padrão Banco de Dossiês) ============ */}
+      <header className="mb-8 text-center">
+        <h1
+          className="font-serif text-[clamp(29px,4.2vw,52px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[#C97B2A]"
+          style={{ WebkitTextStroke: "1px rgba(255,255,255,0.65)" }}
+        >
           Radar de Movimentações
         </h1>
-        <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
-          Andamentos de Alto Sinal Capturados dos Tribunais
-        </p>
-        <p className="mx-auto mt-3 max-w-[680px] font-mono text-[13px] text-[var(--color-signal)]">
-          {listagem.erro
-            ? "Radar temporariamente indisponível."
-            : listagem.itens.length === 0
-              ? "Nenhum andamento de alto sinal encontrado."
-              : `${listagem.itens.length} andamentos nesta página · página ${listagem.pagina}${listagem.temMais ? " · há mais" : ""}`}
+        <p className="mt-3 font-mono text-[clamp(13px,1.6vw,20px)] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
+          Andamentos de Alto Sinal Capturados dos Tribunais.
         </p>
       </header>
 
-      {/* ============ CHIPS DE CATEGORIA ============ */}
+      {/* ============ CHIPS DE CATEGORIA (card de filtro verde) ===== */}
+      <SpotlightCard
+        local
+        degrade="linear-gradient(0deg, rgba(10,48,28,0.7), rgba(10,48,28,0.7))"
+        className="p-4 sm:p-5"
+      >
       <nav
         aria-label="Filtrar por categoria"
-        className="mb-8 flex flex-wrap justify-center gap-2"
+        className="flex flex-wrap justify-center gap-2"
       >
         <Link
           href={linkFiltro("todas")}
@@ -125,6 +126,16 @@ export default async function RadarPage({ searchParams }: Props) {
           </Link>
         ))}
       </nav>
+      </SpotlightCard>
+
+      {/* Contador vermelho (padrão do Banco). */}
+      <p className="mb-4 mt-4 font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-devedor)]">
+        {listagem.erro
+          ? "Radar temporariamente indisponível"
+          : listagem.itens.length === 0
+            ? "Nenhum andamento de alto sinal encontrado"
+            : `${listagem.itens.length} andamentos nesta página · página ${listagem.pagina}${listagem.temMais ? " · há mais" : ""}`}
+      </p>
 
       {/* ============ LISTA ============ */}
       {listagem.erro ? (
@@ -146,56 +157,87 @@ export default async function RadarPage({ searchParams }: Props) {
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           {listagem.itens.map((item) => {
             const cor = COR_CATEGORIA[item.categoria];
             return (
-              <article
+              <SpotlightCard
                 key={item.id}
-                className="glass-flat flex flex-col gap-3 p-5 sm:flex-row sm:items-start sm:justify-between"
+                blur={false}
+                local
+                claro
+                className="transition hover:shadow-[0_0_24px_-10px_rgba(60,255,138,0.3)]"
               >
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span
-                      className="inline-flex items-center rounded-full px-2.5 py-0.5 font-mono text-[12px] uppercase tracking-[0.16em]"
-                      style={{
-                        color: cor,
-                        backgroundColor: `color-mix(in srgb, ${cor} 14%, transparent)`,
-                        border: `1px solid color-mix(in srgb, ${cor} 45%, transparent)`,
-                      }}
-                    >
-                      {rotuloCategoria.get(item.categoria)}
-                    </span>
-                    <BadgeNovo capturadoEm={item.capturado_em} />
-                    <span className="font-mono text-[12px] uppercase tracking-[0.16em] text-[var(--color-ivory-66)]">
-                      {item.data_andamento
-                        ? formatData(item.data_andamento)
-                        : "sem data"}
-                      {item.tribunal ? ` · ${item.tribunal}` : ""}
-                    </span>
+                <article className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span
+                        className="inline-flex items-center rounded-full px-2.5 py-0.5 font-mono text-[12px] uppercase tracking-[0.16em]"
+                        style={{
+                          color: cor,
+                          backgroundColor: `color-mix(in srgb, ${cor} 14%, transparent)`,
+                          border: `1px solid color-mix(in srgb, ${cor} 45%, transparent)`,
+                        }}
+                      >
+                        {rotuloCategoria.get(item.categoria)}
+                      </span>
+                      <BadgeNovo capturadoEm={item.capturado_em} />
+                      <span className="font-mono text-[12px] uppercase tracking-[0.16em] text-[var(--color-ivory-66)]">
+                        {item.data_andamento
+                          ? formatData(item.data_andamento)
+                          : "sem data"}
+                        {item.tribunal ? ` · ${item.tribunal}` : ""}
+                      </span>
+                    </div>
+
+                    {/* Devedor CAIXA ALTA vermelho + processo + cliente
+                        laranja (padrão do Banco, reforma 25/08). */}
+                    <p className="mt-2 flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-0.5">
+                      <span
+                        className="max-w-full truncate text-[15px] font-semibold uppercase leading-snug text-[var(--color-devedor)]"
+                        style={{
+                          textShadow:
+                            "0 0 1px rgba(220,38,38,0.55), 0 0 10px rgba(220,38,38,0.14)",
+                        }}
+                      >
+                        {item.devedor?.nome ?? "Devedor não vinculado"}
+                      </span>
+                      <span className="font-mono text-[12px] text-[var(--color-ivory-66)]">
+                        {item.numero_processo || "processo não identificado"}
+                        {item.pasta_themis ? ` · Pasta ${item.pasta_themis}` : ""}
+                      </span>
+                      {item.credor_nome ? (
+                        <span className="font-mono text-[12px] uppercase tracking-[0.06em] text-[#FF9C41]">
+                          {item.credor_nome}
+                        </span>
+                      ) : null}
+                    </p>
+
+                    <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-[var(--color-ivory-88)]">
+                      {item.descricao}
+                    </p>
                   </div>
 
-                  <p className="mt-2 text-sm leading-relaxed text-ivory">
-                    {item.descricao}
-                  </p>
-
-                  <p className="mt-2 truncate font-mono text-[12px] tracking-wide text-[var(--color-ivory-66)]">
-                    {item.devedor ? `${item.devedor.nome} · ` : ""}
-                    {item.numero_processo || "processo não identificado"}
-                    {item.pasta_themis ? ` · Pasta ${item.pasta_themis}` : ""}
-                    {item.credor_nome ? ` · Cliente ${item.credor_nome}` : ""}
-                  </p>
-                </div>
-
-                {item.devedor && (
-                  <Link
-                    href={`/equipe/devedores/${item.devedor.id}${euDev ? `?eu=${encodeURIComponent(euDev)}` : ""}`}
-                    className="btn-neon-gold shrink-0 self-start"
-                  >
-                    Abrir Dossiê
-                  </Link>
-                )}
-              </article>
+                  <div className="flex shrink-0 flex-wrap gap-2 self-start">
+                    {item.caso_id ? (
+                      <Link
+                        href={`/equipe/themis/processo/${item.caso_id}${euDev ? `?eu=${encodeURIComponent(euDev)}` : ""}`}
+                        className="btn-neon-signal"
+                      >
+                        Ficha do Processo
+                      </Link>
+                    ) : null}
+                    {item.devedor && (
+                      <Link
+                        href={`/equipe/devedores/${item.devedor.id}${euDev ? `?eu=${encodeURIComponent(euDev)}` : ""}`}
+                        className="btn-neon-gold"
+                      >
+                        Abrir Dossiê
+                      </Link>
+                    )}
+                  </div>
+                </article>
+              </SpotlightCard>
             );
           })}
         </div>
@@ -230,6 +272,7 @@ export default async function RadarPage({ searchParams }: Props) {
           )}
         </nav>
       )}
+      </div>
     </main>
   );
 }
