@@ -329,7 +329,10 @@ export default async function InicioPage() {
         )}
 
         {/* ============ ÁREA PRINCIPAL ============ */}
-        <div className="grid min-h-0 flex-1 gap-5 lg:grid-cols-[480px_minmax(0,1fr)]">
+        {/* Coluna das Movimentações mais ESTREITA (ditado 25/08): bens e
+            APIs andam pra esquerda e sobra mais vão pra roda — que se
+            redimensiona sozinha via ResizeObserver quando o nav abre. */}
+        <div className="grid min-h-0 flex-1 gap-5 lg:grid-cols-[400px_minmax(0,1fr)]">
           {/* Coluna esquerda: Movimentações expandida na VERTICAL inteira;
               o Consumo de APIs foi pro topo-direita dela (ditado 24/08). */}
           <Painel className="flex min-h-0 flex-col p-5">
