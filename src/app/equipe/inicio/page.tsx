@@ -411,15 +411,17 @@ export default async function InicioPage() {
             {/* No lugar do Consumo de APIs (ditado 25/08): devedores que
                 AINDA faltam pesquisa, com credor e processo. Click leva
                 direto à ficha. O DonutCusto segue no código caso volte. */}
+            {/* Meio a meio na VERTICAL, ambos com rolagem interna
+                (ditado 25/08 — o Aguardando estava matando o de Bens). */}
             <div className="flex min-h-0 w-full shrink-0 flex-col gap-4 lg:max-w-[400px]">
-              <Painel className="shrink-0 p-5">
+              <Painel className="flex min-h-0 flex-1 basis-0 flex-col p-5">
                 <TituloPainel>Aguardando Pesquisa</TituloPainel>
                 {dados.pendentesPesquisa.length === 0 ? (
                   <p className="mt-3 text-sm text-[var(--color-ivory-66)]">
                     Todos os devedores ativos já têm pesquisa.
                   </p>
                 ) : (
-                  <ul className="sem-scrollbar mt-2 max-h-[200px] divide-y divide-white/5 overflow-y-auto">
+                  <ul className="sem-scrollbar mt-2 min-h-0 flex-1 divide-y divide-white/5 overflow-y-auto">
                     {dados.pendentesPesquisa.map((p) => (
                       <li key={p.devedorId}>
                         <Link
@@ -445,7 +447,7 @@ export default async function InicioPage() {
                 )}
               </Painel>
 
-              <Painel className="flex min-h-0 flex-1 flex-col p-5">
+              <Painel className="flex min-h-0 flex-1 basis-0 flex-col p-5">
                 <TituloPainel>Últimos Bens Localizados</TituloPainel>
                 {dados.ultimasLocalizacoes.length === 0 ? (
                   <p className="mt-3 text-sm text-[var(--color-ivory-66)]">
