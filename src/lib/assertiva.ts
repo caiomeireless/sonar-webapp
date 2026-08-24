@@ -18,6 +18,7 @@
 // assertiva_cache (migration 020); repetição sai de graça.
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { registrarCusto } from "@/lib/custos";
 
 if (typeof window !== "undefined") {
   throw new Error("lib/assertiva.ts e server-only.");
@@ -47,6 +48,10 @@ export const CUSTO_LOCALIZE_BRL =
   Number(process.env.ASSERTIVA_CUSTO_LOCALIZE_BRL ?? "0.203") || 0.203;
 export const CUSTO_VEICULOS_BRL =
   Number(process.env.ASSERTIVA_CUSTO_VEICULOS_BRL ?? "14.795") || 14.795;
+// Localize por NOME (nome-endereco) — preço a confirmar no contrato
+// Q-19312-1; até lá assume a faixa do Localize por documento.
+export const CUSTO_LOCALIZE_NOME_BRL =
+  Number(process.env.ASSERTIVA_CUSTO_NOME_BRL ?? "0.203") || 0.203;
 
 const ENDPOINT_CPF = process.env.ASSERTIVA_ENDPOINT_CPF || "/localize/v3/cpf";
 const ENDPOINT_CNPJ = process.env.ASSERTIVA_ENDPOINT_CNPJ || "/localize/v3/cnpj";
@@ -55,6 +60,12 @@ const ENDPOINT_CNPJ = process.env.ASSERTIVA_ENDPOINT_CNPJ || "/localize/v3/cnpj"
 // Atencao: o produto Veiculos usa o param "documento" (nao cpf/cnpj).
 const ENDPOINT_VEICULOS =
   process.env.ASSERTIVA_ENDPOINT_VEICULOS || "/veiculos/v3/historico-veiculos";
+// Localize por NOME (devedor sem documento):
+//   GET /localize/v3/nome-endereco?buscarPor=pessoas|empresas|ambas
+//       &nomeOuRazaoSocial=...&idFinalidade=N
+// Devolve pessoas/empresas vinculadas ao nome, cada uma com documento.
+const ENDPOINT_NOME =
+  process.env.ASSERTIVA_ENDPOINT_NOME || "/localize/v3/nome-endereco";
 
 // idFinalidade (obrigatório por LGPD): 4 = execução de contrato.
 const ID_FINALIDADE = Number(process.env.ASSERTIVA_ID_FINALIDADE ?? "4") || 4;
@@ -382,6 +393,211 @@ export function consultarLocalize(input: {
     custoBrl: CUSTO_LOCALIZE_BRL,
     ignorarCache: input.ignorarCache,
   });
+}
+
+// ---------------------------------------------------------------------------
+// Localize por NOME — devedor SEM documento cadastrado
+// ---------------------------------------------------------------------------
+// SEM cache: o cache (assertiva_cache) é chaveado por documento, e aqui o
+// documento é justamente o RESULTADO da busca. Toda chamada bem-sucedida
+// é paga e registrada direto na tabela custos.
+
+export type CandidatoNome = {
+  nome: string;
+  documento: string;
+  tipo: "cpf" | "cnpj";
+  cidade?: string | null;
+  uf?: string | null;
+  nascimento?: string | null;
+};
+
+export type ResultadoBuscaNome = {
+  ok: boolean;
+  status: number;
+  mensagem: string;
+  candidatos: CandidatoNome[];
+};
+
+function textoDe(v: unknown): string | null {
+  if (typeof v === "string" && v.trim() !== "") return v.trim();
+  if (typeof v === "number" && Number.isFinite(v)) return String(v);
+  return null;
+}
+
+// Parse DEFENSIVO da resposta do nome-endereco: o formato varia (listas em
+// "pessoas"/"empresas"/"lista"/"resposta.*"...). Percorre o JSON inteiro
+// (profundidade limitada) e coleta todo objeto que tenha nome + documento
+// com 11 ou 14 dígitos. Nunca lança — no pior caso devolve lista vazia.
+function extrairCandidatosNome(raiz: unknown): CandidatoNome[] {
+  const achados: CandidatoNome[] = [];
+  const vistos = new Set<string>();
+
+  const visitar = (no: unknown, profundidade: number): void => {
+    if (no == null || profundidade > 6 || achados.length >= 25) return;
+    if (Array.isArray(no)) {
+      for (const item of no) visitar(item, profundidade + 1);
+      return;
+    }
+    if (typeof no !== "object") return;
+    const obj = no as Record<string, unknown>;
+
+    const docBruto =
+      textoDe(obj?.cpf) ??
+      textoDe(obj?.cnpj) ??
+      textoDe(obj?.documento) ??
+      textoDe(obj?.cpfCnpj) ??
+      textoDe(obj?.numeroDocumento);
+    const doc = docBruto ? soDigitos(docBruto) : "";
+    const tipo = doc.length === 11 ? "cpf" : doc.length === 14 ? "cnpj" : null;
+    const nome =
+      textoDe(obj?.nome) ??
+      textoDe(obj?.razaoSocial) ??
+      textoDe(obj?.nomeRazaoSocial) ??
+      textoDe(obj?.nomeCompleto) ??
+      textoDe(obj?.nomeFantasia);
+
+    if (tipo && nome && !vistos.has(doc)) {
+      vistos.add(doc);
+      // Cidade/UF podem vir no próprio item ou num endereço aninhado.
+      const endereco = (
+        obj?.endereco ??
+        (Array.isArray(obj?.enderecos) ? obj.enderecos[0] : null)
+      ) as Record<string, unknown> | null | undefined;
+      achados.push({
+        nome,
+        documento: doc,
+        tipo,
+        cidade:
+          textoDe(obj?.cidade) ??
+          textoDe(obj?.municipio) ??
+          textoDe(endereco?.cidade) ??
+          textoDe(endereco?.municipio) ??
+          null,
+        uf:
+          textoDe(obj?.uf) ??
+          textoDe(obj?.estado) ??
+          textoDe(endereco?.uf) ??
+          textoDe(endereco?.estado) ??
+          null,
+        nascimento:
+          textoDe(obj?.dataNascimento) ??
+          textoDe(obj?.nascimento) ??
+          textoDe(obj?.dtNascimento) ??
+          null,
+      });
+    }
+
+    for (const valor of Object.values(obj)) visitar(valor, profundidade + 1);
+  };
+
+  try {
+    visitar(raiz, 0);
+  } catch {
+    /* parse defensivo — nunca derruba a busca */
+  }
+  return achados;
+}
+
+// Busca pessoas/empresas vinculadas a um NOME e devolve os candidatos com
+// documento — pra equipe escolher qual CPF/CNPJ aplicar na ficha.
+// email/devedorId/credorId (opcionais) alimentam o Monitor de Custos.
+export async function buscarPorNome(input: {
+  nome: string;
+  buscarPor?: "pessoas" | "empresas" | "ambas";
+  email?: string;
+  devedorId?: number | null;
+  credorId?: number | null;
+}): Promise<ResultadoBuscaNome> {
+  const nome = (input.nome ?? "").trim();
+  if (nome.length < 3) {
+    return {
+      ok: false,
+      status: 0,
+      mensagem: "Nome curto demais pra busca (mínimo 3 letras).",
+      candidatos: [],
+    };
+  }
+
+  // Teto mensal — mesma trava dura das consultas por documento.
+  const consumo = await consumoMensalAssertiva();
+  if (!consumo.podeConsultarMais) {
+    return {
+      ok: false,
+      status: 0,
+      mensagem: `Teto mensal de R$ ${TETO_MENSAL_BRL.toFixed(2)} atingido (R$ ${consumo.custoBrl.toFixed(2)} usados). Consulta bloqueada.`,
+      candidatos: [],
+    };
+  }
+
+  const tok = await obterToken();
+  if (!tok.ok) {
+    return { ok: false, status: tok.status, mensagem: tok.mensagem, candidatos: [] };
+  }
+
+  const params = new URLSearchParams({
+    buscarPor: input.buscarPor ?? "ambas",
+    nomeOuRazaoSocial: nome,
+    idFinalidade: String(ID_FINALIDADE),
+  });
+  const url = `${BASE_URL}${ENDPOINT_NOME}?${params.toString()}`;
+
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${tok.token}`, Accept: "application/json" },
+      cache: "no-store",
+    });
+  } catch (e) {
+    return {
+      ok: false,
+      status: 0,
+      mensagem: `Falha de rede: ${(e as Error).message}`,
+      candidatos: [],
+    };
+  }
+
+  const corpo = await res.text();
+  let json: unknown = null;
+  try {
+    json = JSON.parse(corpo);
+  } catch {
+    /* não-JSON */
+  }
+
+  if (!res.ok) {
+    return {
+      ok: false,
+      status: res.status,
+      mensagem: `Assertiva devolveu ${res.status} (${ENDPOINT_NOME}).`,
+      candidatos: [],
+    };
+  }
+
+  // Custo (produto "localize_nome") — tipo assertiva-busca já provisionado
+  // no Monitor ("Assertiva — busca por nome") e conta pro teto mensal
+  // (filtro like 'assertiva%'). Preço a confirmar no contrato Q-19312-1.
+  await registrarCusto({
+    email: input.email ?? "",
+    tipo: "assertiva-busca",
+    descricao: `Localize por nome (localize_nome): "${nome.slice(0, 120)}" — buscarPor=${input.buscarPor ?? "ambas"}`,
+    custo: CUSTO_LOCALIZE_NOME_BRL,
+    devedorId: input.devedorId ?? null,
+    credorId: input.credorId ?? null,
+  });
+
+  const candidatos = extrairCandidatosNome(json);
+  return {
+    ok: true,
+    status: res.status,
+    mensagem:
+      candidatos.length === 0
+        ? "A Assertiva não encontrou pessoas nem empresas com esse nome."
+        : candidatos.length === 1
+          ? "1 registro encontrado."
+          : `${candidatos.length} registros encontrados.`,
+    candidatos,
+  };
 }
 
 // Veículos: frota registrada no documento (placa, marca/modelo, ano).

@@ -27,6 +27,7 @@ import { devEuFromParam } from "@/lib/dev-auth";
 import { formatBRL, formatData } from "@/lib/format";
 import {
   CUSTO_LOCALIZE_BRL,
+  CUSTO_LOCALIZE_NOME_BRL,
   CUSTO_VEICULOS_BRL,
   temCredenciais,
 } from "@/lib/assertiva";
@@ -40,6 +41,7 @@ import { listarMandadosEndereco } from "@/lib/enderecos-mandados";
 import { listarIntimacoesEndereco } from "@/lib/enderecos-intimacoes";
 import { obterDadosDashboardCasoV2 } from "@/lib/dashboard-caso";
 import { PainelImoveisManual } from "./_components/PainelImoveisManual";
+import { CampoDocumentoEditavel } from "./_components/CampoDocumentoEditavel";
 import { PainelMandadosEndereco } from "./_components/PainelMandadosEndereco";
 import { PainelIntimacoesEndereco } from "./_components/PainelIntimacoesEndereco";
 import { DashboardCasoGrid } from "./dashboard/_components/DashboardCasoGrid";
@@ -240,10 +242,12 @@ export default async function DossieEquipePage({ params, searchParams }: Props) 
 
             <div className="mt-6 grid gap-5 md:grid-cols-2">
               <SecaoFicha titulo="Identificação">
-                <CampoFicha
-                  rotulo={devedor.tipo === "PF" ? "CPF" : "CNPJ"}
-                  valor={devedor.documento}
-                  origem={origemDoCampo(devedor.origem_campos, "documento", devedor.documento)}
+                <CampoDocumentoEditavel
+                  devedorId={devedor.id}
+                  tipo={devedor.tipo}
+                  documento={devedor.documento}
+                  credenciaisOk={temCredenciais()}
+                  custoNomeBrl={CUSTO_LOCALIZE_NOME_BRL}
                 />
                 <CampoFicha
                   rotulo={devedor.tipo === "PF" ? "RG" : "IE"}
