@@ -242,7 +242,8 @@ export default async function FichaDemoPage({ searchParams }: Props) {
             </SecaoFicha>
           </div>
 
-          {/* Intimação/Citação — exemplo preenchido */}
+          {/* Intimação/Citação — exemplo preenchido com PRÉVIA do AR
+              (embaçada, fictícia) + área de arrastar (ditado 25/08). */}
           <SpotlightCard local claro borda={BORDA_CADERNO} className="mt-5 p-6 sm:p-7">
             <h3 className="font-mono text-[15px] font-semibold uppercase tracking-[0.28em]" style={{ color: NEON.turquesa }}>
               Intimação / Citação no Endereço
@@ -253,7 +254,77 @@ export default async function FichaDemoPage({ searchParams }: Props) {
                 Citado pessoalmente na Rua das Palmeiras, 123 em 22/05/2026 —
                 AR positivo anexado.
               </span>
-              <ChipDemo label="AR-2026-0522.pdf" cor={NEON.ciano} />
+            </div>
+
+            <div className="mt-5 grid gap-4 sm:grid-cols-[280px_minmax(0,1fr)]">
+              {/* Prévia EMBAÇADA do AR (documento fictício desenhado). */}
+              <figure
+                className="overflow-hidden rounded-lg border"
+                style={{ borderColor: "rgba(45,212,191,0.4)" }}
+              >
+                <div className="relative h-40 select-none bg-[#f4f1e8] blur-[2.5px]">
+                  <div className="flex items-center justify-between border-b-2 border-[#1a1a1a] px-3 py-1.5">
+                    <span className="font-mono text-[10px] font-bold uppercase text-[#1a1a1a]">
+                      ◤ Aviso de Recebimento
+                    </span>
+                    <span className="font-serif text-[13px] font-bold italic text-[#1a1a1a]">
+                      Digital
+                    </span>
+                  </div>
+                  <div className="px-3 py-1.5">
+                    <p className="font-mono text-[8px] uppercase text-[#1a1a1a]">
+                      Destinatário: João da Silva — Rua das Palmeiras, 123
+                    </p>
+                    <p className="font-mono text-[11px] font-bold text-[#1a1a1a]">
+                      AR374679495VU
+                    </p>
+                    <div className="mt-1 flex h-6 items-stretch gap-[2px]">
+                      {[3, 1, 2, 1, 3, 2, 1, 3, 1, 2, 3, 1, 2, 2, 1, 3, 2, 1, 1, 3, 2, 3, 1, 2, 1, 3].map((w, i) => (
+                        <span
+                          key={i}
+                          className="bg-[#1a1a1a]"
+                          style={{ width: w * 1.6 }}
+                        />
+                      ))}
+                    </div>
+                    <p className="mt-1.5 font-mono text-[8px] uppercase text-[#1a1a1a]">
+                      Assinatura do recebedor: ______________
+                    </p>
+                  </div>
+                  {/* Carimbo dos Correios */}
+                  <div
+                    className="absolute right-3 top-9 flex h-16 w-16 rotate-[-12deg] items-center justify-center rounded-full border-2 text-center font-mono text-[7px] font-bold uppercase leading-tight"
+                    style={{ borderColor: "#4a4a8a", color: "#4a4a8a" }}
+                  >
+                    22 SET
+                    <br />
+                    Sorocaba
+                    <br />
+                    SP
+                  </div>
+                </div>
+                <figcaption className="bg-black/70 px-2 py-1.5 text-center font-mono text-[11px] text-[#2DD4BF]">
+                  AR-2026-0522.pdf · prévia embaçada (fictício)
+                </figcaption>
+              </figure>
+
+              {/* Área de arrastar — demonstrativa. */}
+              <div
+                className="flex min-h-[140px] flex-col items-center justify-center gap-2 rounded-lg border border-dashed px-4 text-center"
+                style={{
+                  borderColor: "rgba(45,212,191,0.45)",
+                  backgroundColor: "rgba(45,212,191,0.05)",
+                }}
+              >
+                <p className="font-mono text-[13px] uppercase tracking-[0.2em]" style={{ color: NEON.turquesa }}>
+                  Arraste o AR Aqui
+                </p>
+                <p className="max-w-[360px] text-[13px] leading-snug text-[var(--color-ivory-66)]">
+                  Nos casos reais, o advogado solta o PDF ou a foto do AR
+                  nesta área e o documento fica anexado ao endereço com
+                  prévia instantânea.
+                </p>
+              </div>
             </div>
           </SpotlightCard>
         </div>
@@ -411,6 +482,70 @@ export default async function FichaDemoPage({ searchParams }: Props) {
                   corFonte={NEON.turquesa}
                 />
               </div>
+
+              {/* Mandado de avaliação e penhora — prévia EMBAÇADA da
+                  certidão do oficial + área de arrastar (ditado 25/08). */}
+              <div className="mt-5 grid gap-4 sm:grid-cols-[240px_minmax(0,1fr)]">
+                <figure
+                  className="overflow-hidden rounded-lg border"
+                  style={{ borderColor: "rgba(45,212,191,0.4)" }}
+                >
+                  <div className="relative h-56 select-none bg-[#f6f4ee] px-4 py-3 blur-[2.5px]">
+                    <p className="text-center font-serif text-[9px] font-bold uppercase leading-tight text-[#1a1a1a]">
+                      Tribunal de Justiça do Estado de São Paulo
+                      <br />
+                      Comarca de Sorocaba — Ofício de Justiça
+                    </p>
+                    <p className="mt-2 text-center font-mono text-[8px] font-bold uppercase text-[#1a1a1a]">
+                      Certidão — Mandado Cumprido Positivo
+                    </p>
+                    <div className="mt-2 space-y-[5px]">
+                      {[100, 96, 98, 92, 97, 88, 95, 99, 90, 94, 85, 97, 91].map(
+                        (w, i) => (
+                          <div
+                            key={i}
+                            className="h-[4px] rounded-sm bg-[#3a3a3a]/70"
+                            style={{ width: `${w}%` }}
+                          />
+                        ),
+                      )}
+                    </div>
+                    <div
+                      className="absolute bottom-3 right-4 flex h-14 w-14 rotate-[8deg] items-center justify-center rounded-full border-2 text-center font-mono text-[6.5px] font-bold uppercase leading-tight"
+                      style={{ borderColor: "#6a4a8a", color: "#6a4a8a" }}
+                    >
+                      Oficial de
+                      <br />
+                      Justiça
+                      <br />
+                      Matr. 8.312
+                    </div>
+                    <p className="absolute bottom-3 left-4 font-serif text-[11px] italic text-[#2a2a2a]">
+                      André L. de Oliveira
+                    </p>
+                  </div>
+                  <figcaption className="bg-black/70 px-2 py-1.5 text-center font-mono text-[11px] text-[#2DD4BF]">
+                    certidao-mandado-2026.pdf · prévia embaçada (fictício)
+                  </figcaption>
+                </figure>
+
+                <div
+                  className="flex min-h-[140px] flex-col items-center justify-center gap-2 rounded-lg border border-dashed px-4 text-center"
+                  style={{
+                    borderColor: "rgba(45,212,191,0.45)",
+                    backgroundColor: "rgba(45,212,191,0.05)",
+                  }}
+                >
+                  <p className="font-mono text-[13px] uppercase tracking-[0.2em]" style={{ color: NEON.turquesa }}>
+                    Arraste a Certidão Aqui
+                  </p>
+                  <p className="max-w-[380px] text-[13px] leading-snug text-[var(--color-ivory-66)]">
+                    Nos casos reais, o advogado solta o PDF da certidão do
+                    oficial de justiça nesta área e registra o resultado do
+                    mandado (cumprido positivo ou negativo).
+                  </p>
+                </div>
+              </div>
             </CategoriaDemo>
 
             <CategoriaDemo Icone={Users2} cor={NEON.rosa} titulo="Vínculos Familiares" sub="2 itens encontrados">
@@ -458,10 +593,139 @@ export default async function FichaDemoPage({ searchParams }: Props) {
           </SpotlightCard>
         </div>
 
+        {/* ============ DASHBOARD ANALÍTICO (fake) ============ */}
+        <div className="mt-12">
+          <TituloSetor texto="Dashboard Analítico" />
+          <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-12">
+            {/* Score de recuperabilidade */}
+            <div className="col-span-1 md:col-span-4">
+              <DashCardDemo titulo="Score de Recuperabilidade" cor={NEON.verde}>
+                <div className="flex items-center justify-center gap-6 py-2">
+                  <svg viewBox="0 0 100 100" className="h-28 w-28">
+                    <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="10" />
+                    <circle
+                      cx="50" cy="50" r="42" fill="none"
+                      stroke={NEON.verde} strokeWidth="10" strokeLinecap="round"
+                      strokeDasharray={`${0.87 * 2 * Math.PI * 42} ${2 * Math.PI * 42}`}
+                      transform="rotate(-90 50 50)"
+                    />
+                    <text x="50" y="55" textAnchor="middle" fontSize="24" fontWeight="700" fill={NEON.verde}>87</text>
+                  </svg>
+                  <div>
+                    <p className="font-serif text-2xl text-ivory">Alta</p>
+                    <p className="mt-1 max-w-[160px] text-[13px] leading-snug text-[var(--color-ivory-66)]">
+                      Patrimônio livre supera 6x o valor da causa.
+                    </p>
+                  </div>
+                </div>
+              </DashCardDemo>
+            </div>
+
+            {/* Patrimônio localizado */}
+            <div className="col-span-1 md:col-span-4">
+              <DashCardDemo titulo="Patrimônio Localizado" cor="var(--color-gold)">
+                <p className="py-3 text-center font-serif text-[clamp(30px,2.6vw,42px)] leading-none text-[var(--color-gold)]">
+                  R$ 2.415.380
+                </p>
+                <p className="text-center font-mono text-[13px] uppercase tracking-[0.2em] text-[var(--color-ivory-66)]">
+                  12 bens mapeados neste devedor
+                </p>
+              </DashCardDemo>
+            </div>
+
+            {/* Concentração patrimonial */}
+            <div className="col-span-1 md:col-span-4">
+              <DashCardDemo titulo="Concentração Patrimonial" cor={NEON.ciano}>
+                <div className="flex items-center justify-center gap-6 py-2">
+                  <svg viewBox="0 0 100 100" className="h-28 w-28">
+                    <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="12" />
+                    <circle
+                      cx="50" cy="50" r="42" fill="none"
+                      stroke={NEON.ciano} strokeWidth="12"
+                      strokeDasharray={`${0.37 * 2 * Math.PI * 42} ${2 * Math.PI * 42}`}
+                      transform="rotate(-90 50 50)"
+                    />
+                    <text x="50" y="55" textAnchor="middle" fontSize="19" fontWeight="700" fill={NEON.ciano}>37%</text>
+                  </svg>
+                  <div>
+                    <p className="font-mono text-lg tabular-nums text-ivory">HHI 0,21</p>
+                    <p className="mt-1 max-w-[170px] text-[13px] leading-snug text-[var(--color-ivory-66)]">
+                      Diversificado: nenhum bem domina o patrimônio.
+                    </p>
+                  </div>
+                </div>
+              </DashCardDemo>
+            </div>
+
+            {/* Funil operacional */}
+            <div className="col-span-1 md:col-span-12">
+              <DashCardDemo titulo="Funil Operacional" cor={NEON.verde}>
+                <div className="space-y-3 py-2">
+                  {[
+                    { rotulo: "Tentativas", n: 6, pct: 100, cor: NEON.verde },
+                    { rotulo: "Positivas", n: 4, pct: 66, cor: "#1FAE5C" },
+                    { rotulo: "Penhoras Efetivadas", n: 2, pct: 33, cor: "var(--color-gold)" },
+                  ].map((f) => (
+                    <div key={f.rotulo} className="flex items-center gap-4">
+                      <span className="w-44 shrink-0 text-right font-mono text-[13px] uppercase tracking-[0.14em] text-[var(--color-ivory-66)]">
+                        {f.rotulo}
+                      </span>
+                      <div className="h-7 flex-1 overflow-hidden rounded-md bg-white/5">
+                        <div
+                          className="flex h-full items-center rounded-md pl-3 font-mono text-[13px] font-bold text-black"
+                          style={{ width: `${f.pct}%`, backgroundColor: f.cor }}
+                        >
+                          {f.n}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </DashCardDemo>
+            </div>
+          </div>
+        </div>
+
         <div className="mt-12">
           <AvisoFicticio />
         </div>
       </div>
     </main>
+  );
+}
+
+// Card fake do dashboard demo — mesmo vidro polido do DashboardCard real.
+function DashCardDemo({
+  titulo,
+  cor,
+  children,
+}: {
+  titulo: string;
+  cor: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <SpotlightCard
+      local
+      degrade={[
+        "linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.03) 38%, transparent 55%)",
+        "linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.06) 34%, rgba(255,255,255,0.13) 45%, rgba(255,255,255,0.05) 56%, transparent 72%)",
+      ].join(", ")}
+      borda="rgba(232, 228, 214, 0.25)"
+      className="h-full overflow-hidden p-6"
+    >
+      <div
+        className="flex items-center gap-2 font-mono text-[13px] font-semibold uppercase tracking-[0.26em]"
+        style={{ color: cor }}
+      >
+        <span
+          aria-hidden="true"
+          className="inline-block h-2 w-2 rounded-full"
+          style={{ backgroundColor: cor, boxShadow: `0 0 10px ${cor}` }}
+        />
+        {titulo}
+      </div>
+      <div className="mt-4">{children}</div>
+    </SpotlightCard>
   );
 }

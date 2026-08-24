@@ -402,22 +402,50 @@ export function PainelIntimacoesEndereco({
 
                   {m.anexos.length > 0 && (
                     <div className="mt-2.5 flex flex-wrap gap-2">
+                      {/* Visualização PRÉVIA do documento (ditado 25/08):
+                          imagem vira miniatura clicável; PDF vira moldura
+                          com ícone. O link abre o arquivo completo. */}
                       {m.anexos.map((a) =>
                         a.url ? (
-                          <a
-                            key={a.path}
-                            href={a.url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 font-mono text-[12px] tracking-wide text-[#2DD4BF] transition-colors hover:bg-[rgba(45,212,191,0.1)]"
-                            style={{ borderColor: "rgba(45,212,191,0.35)" }}
-                          >
-                            <FileText
-                              className="h-3.5 w-3.5"
-                              aria-hidden="true"
-                            />
-                            {a.nome}
-                          </a>
+                          a.contentType?.startsWith("image/") ? (
+                            <a
+                              key={a.path}
+                              href={a.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="group/prev block overflow-hidden rounded-lg border transition hover:brightness-110"
+                              style={{ borderColor: "rgba(45,212,191,0.35)" }}
+                              title={a.nome}
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={a.url}
+                                alt={`Prévia de ${a.nome}`}
+                                className="h-28 w-auto max-w-[220px] object-cover"
+                              />
+                              <span className="block truncate bg-black/70 px-2 py-1 text-center font-mono text-[11px] text-[#2DD4BF]">
+                                {a.nome}
+                              </span>
+                            </a>
+                          ) : (
+                            <a
+                              key={a.path}
+                              href={a.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="flex h-28 w-[160px] flex-col items-center justify-center gap-2 rounded-lg border transition hover:bg-[rgba(45,212,191,0.08)]"
+                              style={{ borderColor: "rgba(45,212,191,0.35)" }}
+                              title={a.nome}
+                            >
+                              <FileText
+                                className="h-8 w-8 text-[#2DD4BF]"
+                                aria-hidden="true"
+                              />
+                              <span className="max-w-[140px] truncate px-2 font-mono text-[11px] text-[#2DD4BF]">
+                                {a.nome}
+                              </span>
+                            </a>
+                          )
                         ) : (
                           <span
                             key={a.path}

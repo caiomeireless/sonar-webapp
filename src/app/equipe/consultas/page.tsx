@@ -7,7 +7,9 @@
 // (alta/média/baixa) e recomendação (recomendado/avaliar/não recomendado).
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Clock } from "lucide-react";
+import { TriangleAlert } from "lucide-react";
+import { BordaLiquidaMetal } from "@/components/ui/BordaLiquidaMetal";
+import { BORDA_CADERNO } from "@/app/_shared/dossie/SecaoFicha";
 import {
   listarConsultasPre,
   type ConsultaPreProcessual,
@@ -43,53 +45,55 @@ export default async function ConsultasPreEquipePage({ searchParams }: Props) {
   const custoTotal = consultas.reduce((s, c) => s + c.custoBrl, 0);
 
   return (
-    <main className="relative mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
-      {/* ============ HEADER CENTRALIZADO ============ */}
-      <header className="title-shield mb-6 flex flex-col items-center text-center">
-        {/* Icone Relogio dourado acima do titulo. */}
-        <div
-          className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--color-gold)]/45 bg-[var(--color-gold)]/10"
-          style={{
-            boxShadow:
-              "0 0 20px rgba(201,162,74,0.30), inset 0 0 12px rgba(201,162,74,0.10)",
-          }}
+    <main className="relative min-h-svh">
+      {/* Fundo: preto puro (padrão da cara nova). */}
+      <div aria-hidden="true" className="absolute inset-0 bg-black" />
+      <div className="relative z-10 mx-auto max-w-[1400px] px-6 py-12 sm:px-10">
+      {/* ============ HEADER (padrão Banco de Dossiês) ============ */}
+      <header className="mb-8 text-center">
+        <h1
+          className="font-serif text-[clamp(29px,4.2vw,52px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[#C97B2A]"
+          style={{ WebkitTextStroke: "1px rgba(255,255,255,0.65)" }}
         >
-          <Clock
-            className="h-7 w-7 text-[var(--color-gold)]"
-            style={{ filter: "drop-shadow(0 0 8px rgba(201,162,74,0.7))" }}
-            aria-hidden="true"
-          />
-        </div>
-        <p className="font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-signal)]">
-          Equipe · Análise de Efetividade
-        </p>
-        <h1 className="mt-3 font-serif text-[clamp(19px,2.75vw,34px)] font-medium uppercase leading-[1.05] tracking-[0.08em] text-[var(--color-gold)]">
           Avaliação Pré-Processual
         </h1>
-        <p className="mt-3 font-mono text-[13px] text-[var(--color-signal)]">
-          Antes de processar, descubra se o devedor é solvente.
+        <p className="mt-3 font-mono text-[clamp(13px,1.6vw,20px)] uppercase tracking-[0.28em] text-[var(--color-fg-muted)]">
+          Antes de Processar, Descubra se o Devedor É Solvente.
         </p>
-        {consultas.length > 0 ? (
-          <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-ivory-66)]">
-            {consultas.length}{" "}
-            {consultas.length === 1 ? "Consulta" : "Consultas"} ·{" "}
-            <span className="text-[var(--color-signal)]">{totalAlta} Alta</span> ·{" "}
-            <span className="text-[var(--color-gold)]">{totalMedia} Média</span> ·{" "}
-            <span className="text-[var(--color-devedor)]">{totalBaixa} Baixa</span>{" "}
-            · {formatBRL(custoTotal)} em consultas
-          </p>
-        ) : null}
+        <div className="mt-6 flex justify-center">
+          <BordaLiquidaMetal cor="signal" radius={14} className="inline-flex">
+            <Link
+              href={novaHref}
+              className="inline-flex h-full w-full items-center gap-2 rounded-[11px] bg-[var(--color-signal)]/85 px-6 py-3 text-sm font-semibold text-onyx transition hover:bg-[var(--color-tip-glow)]/90"
+            >
+              + Nova Consulta
+            </Link>
+          </BordaLiquidaMetal>
+        </div>
       </header>
 
-      {/* ============ AÇÃO PRINCIPAL ============ */}
-      <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-end">
-        <Link
-          href={novaHref}
-          className="inline-flex items-center gap-2 self-start rounded-xl bg-[var(--color-signal)]/85 px-6 py-3.5 text-base font-semibold text-onyx shadow-[0_4px_24px_rgba(60,255,138,0.28)] ring-1 ring-[var(--color-signal)]/60 backdrop-blur-md transition hover:bg-[var(--color-tip-glow)]/90"
-        >
-          + Nova Consulta
-        </Link>
+      {/* Aviso: os 3 cards são DEMONSTRAÇÃO (dados fictícios). */}
+      <div
+        className="mb-4 flex items-center justify-center gap-3 rounded-2xl border px-5 py-3.5"
+        style={{
+          borderColor: "rgba(255,217,61,0.55)",
+          backgroundColor: "rgba(255,217,61,0.10)",
+        }}
+      >
+        <TriangleAlert
+          className="h-5 w-5 shrink-0 text-[#FFD93D]"
+          aria-hidden="true"
+        />
+        <p className="font-mono text-[13px] font-semibold uppercase tracking-[0.22em] text-[#FFD93D]">
+          Demonstração — As Consultas Abaixo Usam Dados Fictícios
+        </p>
       </div>
+
+      <p className="mb-4 font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-devedor)]">
+        {consultas.length} {consultas.length === 1 ? "consulta" : "consultas"} ·{" "}
+        {totalAlta} alta · {totalMedia} média · {totalBaixa} baixa ·{" "}
+        {formatBRL(custoTotal)} em consultas
+      </p>
 
       {/* ============ LISTA ============ */}
       {consultas.length === 0 ? (
@@ -117,6 +121,7 @@ export default async function ConsultasPreEquipePage({ searchParams }: Props) {
           ))}
         </div>
       )}
+      </div>
     </main>
   );
 }
@@ -139,7 +144,12 @@ function CardConsulta({
       href={`/equipe/consultas/${consulta.id}${euQuery}`}
       className="group block cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-signal)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-onyx)]"
     >
-      <div className="glass flex h-full flex-col gap-5 p-7 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-[0_24px_48px_-12px_rgba(60,255,138,0.18)]">
+      <SpotlightCard
+        local
+        claro
+        borda={BORDA_CADERNO}
+        className="flex h-full flex-col gap-5 p-7 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-[0_24px_48px_-12px_rgba(60,255,138,0.18)]"
+      >
         {/* === EYEBROW + SCORE === */}
         <div className="flex items-start justify-between gap-3">
           <span className="font-mono text-[12px] uppercase tracking-[0.28em] text-[var(--color-signal)]">
@@ -150,7 +160,13 @@ function CardConsulta({
 
         {/* === IDENTIFICAÇÃO DO DEVEDOR === */}
         <header>
-          <h3 className="nome-devedor font-serif text-[26px] leading-[1.15] text-[var(--color-devedor)]">
+          <h3
+            className="nome-devedor font-serif text-[24px] uppercase leading-[1.15] tracking-[0.02em] text-[var(--color-devedor)]"
+            style={{
+              textShadow:
+                "0 0 1px rgba(220,38,38,0.6), 0 0 12px rgba(220,38,38,0.16)",
+            }}
+          >
             {devedor.nome}
           </h3>
 
@@ -209,7 +225,7 @@ function CardConsulta({
             {consulta.advogadoEmail}
           </div>
         </div>
-      </div>
+      </SpotlightCard>
     </Link>
   );
 }
