@@ -73,6 +73,8 @@ const COR_BASE_POR_RESULTADO: Record<ResultadoMedida, [number, number, number]> 
   parcial: [249, 115, 22],     // laranja
   negativo: [255, 91, 91],     // vermelho
   nao_aplica: [169, 169, 169], // cinza (caso entre no recorte no futuro)
+  indeferida: [251, 113, 133], // rosa — o juízo negou
+  abandonada: [142, 134, 111], // bege apagado — pedida e nunca decidida
 };
 
 function corCelula(

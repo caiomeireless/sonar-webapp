@@ -41,7 +41,10 @@ import {
 // Icone por tipo de medida — Lucide. Mapeamento centralizado pra timeline.
 // Os tipos "principais" (sisbajud/renajud/infojud/arisp/sniper) seguem o
 // brief do timeline; os demais reusam o vocabulario de icones do mesmo set.
-const TIPO_ICONE: Record<TipoMedida, LucideIcon> = {
+// Parcial de propósito: o vocabulário cresceu com a Análise de Autos
+// (migration 025) e nem toda espécie merece ícone próprio — o que faltar cai
+// no fallback neutro de `iconeDoTipo`.
+const TIPO_ICONE: Partial<Record<TipoMedida, LucideIcon>> = {
   sisbajud: Banknote,
   infojud: FileSearch,
   renajud: Car,
@@ -56,7 +59,44 @@ const TIPO_ICONE: Record<TipoMedida, LucideIcon> = {
   recurso: Undo2,
   cumprimento_sentenca: Gavel,
   outro: Activity,
+
+  // ---- vindas da Análise de Autos (migration 025) ----
+  citacao: FileSignature,
+  sisbajud_teimosinha: Banknote,
+  penhora_imovel: Building2,
+  penhora_faturamento: Banknote,
+  penhora_quotas: Building2,
+  penhora_credito: Banknote,
+  penhora_precatorio: FileText,
+  penhora_estoque_semovente: Building2,
+  penhora_rosto_autos: FileText,
+  cnib: Stamp,
+  protesto: Stamp,
+  oficial_justica_penhora: Gavel,
+  avaliacao: Search,
+  adjudicacao: Gavel,
+  alienacao_judicial: Gavel,
+  arresto: Gavel,
+  busca_apreensao: Crosshair,
+
+  // ---- atípicas (CPC 139, IV) ----
+  suspensao_cnh: Car,
+  apreensao_passaporte: Stamp,
+  bloqueio_cartoes: Banknote,
+  proibicao_licitar: FileSignature,
+  quebra_sigilo_fiscal: FileSearch,
+  quebra_sigilo_bancario: FileSearch,
+  idpj: Building2,
+  fraude_execucao: Crosshair,
+  grupo_economico: Building2,
+  astreintes: Gavel,
+  inclusao_cadastro_inadimplentes: Stamp,
 };
+
+/** Ícone da medida, com fallback para espécie sem ícone próprio. */
+function iconeDoTipo(tipo: TipoMedida): LucideIcon {
+  return TIPO_ICONE[tipo] ?? Activity;
+}
 
 // Cor + glow do resultado, mapeados nos tokens do design system.
 // dotGlow = halo do ponto sobre a linha (mais discreto).
@@ -83,6 +123,16 @@ const RESULTADO_TOKEN: Record<
   },
   aguardando: {
     cor: "var(--color-ivory-66)",
+    dotGlow: null,
+    pillGlow: null,
+  },
+  indeferida: {
+    cor: "#FB7185",
+    dotGlow: null,
+    pillGlow: null,
+  },
+  abandonada: {
+    cor: "#8E866F",
     dotGlow: null,
     pillGlow: null,
   },
@@ -436,7 +486,7 @@ function CardMedida({
   const tipoMeta = TIPO_META[medida.tipo];
   const resultadoMeta = RESULTADO_META[medida.resultado];
   const resToken = RESULTADO_TOKEN[medida.resultado];
-  const Icone = TIPO_ICONE[medida.tipo];
+  const Icone = iconeDoTipo(medida.tipo);
 
   return (
     <li className="relative mb-6 list-none last:mb-0">

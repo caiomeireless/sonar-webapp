@@ -8,6 +8,7 @@ import {
   BarChart3,
   Handshake,
   Briefcase,
+  FileSearch,
   FileSignature,
   Home,
   Radar,
@@ -26,6 +27,9 @@ const ICON_CLASS = "h-[18px] w-[18px]";
 export const NAV_EQUIPE: SidebarItem[] = [
   { href: "/equipe/inicio", label: "Início", icon: <Home className={ICON_CLASS} /> },
   { href: "/equipe/devedores", label: "Banco de Dossiês", icon: <Users className={ICON_CLASS} /> },
+  // 29/10: com a saída do Themis, o capa a capa jogado aqui passou a ser a
+  // porta de entrada dos dados — processo, devedor, medidas e débito.
+  { href: "/equipe/autos", label: "Análise de Autos", icon: <FileSearch className={ICON_CLASS} /> },
   { href: "/equipe/consultas", label: "Avaliação Pré-Processual", icon: <Search className={ICON_CLASS} /> },
   { href: "/equipe/themis", label: "Ficha das Execuções", icon: <Route className={ICON_CLASS} /> },
   // Abas novas 21/08: Radar (andamentos de alto sinal), Banco de Peças
