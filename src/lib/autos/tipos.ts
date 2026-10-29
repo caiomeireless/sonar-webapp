@@ -34,10 +34,7 @@ import {
  * texto livre quebra a deduplicação, a classificação típica/atípica e faz
  * tudo cair em 'outro' na hora de gravar. Aqui o enum obriga.
  */
-const ENUM_ESPECIE = {
-  type: "string",
-  enum: [...ESPECIES_TIPICAS, ...ESPECIES_ATIPICAS],
-} as const;
+const ENUM_ESPECIE = { type: "string" } as const;
 
 // ============================================================
 // PASSADA 0 — TRIAGEM (o que é peça e o que é anexo)
@@ -104,7 +101,6 @@ export interface IdentificacaoAutos {
   comarca: string | null;
   vara: string | null;
   classe: string | null;
-  assunto: string | null;
   valorCausaBrl: number | null;
   dataDistribuicao: string | null;
 }
@@ -114,13 +110,11 @@ export interface ParteExtraida {
   nome: string;
   documento: string | null;
   advogados: string[];
-  enderecos: string[];
   paginas: number[];
 }
 
 export interface MedidaExtraida {
   especie: EspecieMedida;
-  classe: ClasseMedida;
   titulo: string;
   requeridaEm: string | null;
   deferidaEm: string | null;
@@ -153,13 +147,6 @@ export interface ValorExtraido {
   trecho: string;
 }
 
-export interface PagamentoExtraido {
-  data: string | null;
-  valorBrl: number;
-  forma: string;
-  paginas: number[];
-}
-
 export interface BemExtraido {
   tipo: string;
   descricao: string;
@@ -170,11 +157,11 @@ export interface BemExtraido {
   paginas: number[];
 }
 
-export interface EventoExtraido {
+export interface MarcoPrescricional {
   data: string | null;
-  descricao: string;
-  /** O motor do art. 921: sem isto a linha do tempo é enfeite. */
-  efeitoPrescricional: EfeitoPrescricional;
+  ato: string;
+  /** Apenas os efeitos que mudam a contagem do art. 921. */
+  efeito: "interrompe" | "inicia_prazo" | "suspende";
   referencia: string | null;
   paginas: number[];
 }
@@ -184,15 +171,25 @@ export interface ResultadoExtracao {
   partes: ParteExtraida[];
   medidas: MedidaExtraida[];
   valores: ValorExtraido[];
-  pagamentos: PagamentoExtraido[];
   bens: BemExtraido[];
-  eventos: EventoExtraido[];
+  /** So os atos que mudam a contagem do art. 921. */
+  marcos: MarcoPrescricional[];
   lacunas: string[];
 }
 
 const PAGINAS = { type: "array", items: { type: "integer" } } as const;
-const TEXTO_OU_NULO = { type: ["string", "null"] } as const;
-const NUMERO_OU_NULO = { type: ["number", "null"] } as const;
+// SEM TIPO UNIÃO. A API recusa esquema com muitos campos anuláveis:
+//   "Schemas contains too many parameters with union types (23 parameters
+//    with type arrays or anyOf). This causes exponential compilation cost."
+// Então ausência vira SENTINELA, e normalizarAusentes() converte de volta
+// para null depois do parse, antes que o resto do app veja.
+/** Texto ausente = string vazia. */
+const TEXTO_OPCIONAL = { type: "string" } as const;
+/** Número ausente = -1 (valores do processo nunca são negativos). */
+const NUMERO_OPCIONAL = { type: "number" } as const;
+
+/** Sentinela de número ausente, compartilhada com o prompt. */
+export const SEM_VALOR = -1;
 
 export const SCHEMA_EXTRACAO = {
   type: "object",
@@ -204,7 +201,7 @@ export const SCHEMA_EXTRACAO = {
     "valores",
     "pagamentos",
     "bens",
-    "eventos",
+    "marcos",
     "lacunas",
   ],
   properties: {
@@ -218,21 +215,19 @@ export const SCHEMA_EXTRACAO = {
         "comarca",
         "vara",
         "classe",
-        "assunto",
         "valorCausaBrl",
         "dataDistribuicao",
       ],
       properties: {
         // NÃO transformar em anulável: enum com type ["string","null"] é 400.
         sistema: { type: "string", enum: [...SISTEMAS_AUTOS] },
-        numeroCnj: TEXTO_OU_NULO,
-        tribunal: TEXTO_OU_NULO,
-        comarca: TEXTO_OU_NULO,
-        vara: TEXTO_OU_NULO,
-        classe: TEXTO_OU_NULO,
-        assunto: TEXTO_OU_NULO,
-        valorCausaBrl: NUMERO_OU_NULO,
-        dataDistribuicao: TEXTO_OU_NULO,
+        numeroCnj: TEXTO_OPCIONAL,
+        tribunal: TEXTO_OPCIONAL,
+        comarca: TEXTO_OPCIONAL,
+        vara: TEXTO_OPCIONAL,
+        classe: TEXTO_OPCIONAL,
+        valorCausaBrl: NUMERO_OPCIONAL,
+        dataDistribuicao: TEXTO_OPCIONAL,
       },
     },
     partes: {
@@ -240,13 +235,12 @@ export const SCHEMA_EXTRACAO = {
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["polo", "nome", "documento", "advogados", "enderecos", "paginas"],
+        required: ["polo", "nome", "documento", "advogados", "paginas"],
         properties: {
           polo: { type: "string", enum: ["exequente", "executado", "terceiro"] },
           nome: { type: "string" },
-          documento: TEXTO_OU_NULO,
+          documento: TEXTO_OPCIONAL,
           advogados: { type: "array", items: { type: "string" } },
-          enderecos: { type: "array", items: { type: "string" } },
           paginas: PAGINAS,
         },
       },
@@ -258,7 +252,6 @@ export const SCHEMA_EXTRACAO = {
         additionalProperties: false,
         required: [
           "especie",
-          "classe",
           "titulo",
           "requeridaEm",
           "deferidaEm",
@@ -272,18 +265,17 @@ export const SCHEMA_EXTRACAO = {
         ],
         properties: {
           especie: ENUM_ESPECIE,
-          classe: { type: "string", enum: ["tipica", "atipica"] },
           titulo: { type: "string" },
-          requeridaEm: TEXTO_OU_NULO,
-          deferidaEm: TEXTO_OU_NULO,
-          cumpridaEm: TEXTO_OU_NULO,
+          requeridaEm: TEXTO_OPCIONAL,
+          deferidaEm: TEXTO_OPCIONAL,
+          cumpridaEm: TEXTO_OPCIONAL,
           resultado: {
             type: "string",
             enum: ["positivo", "negativo", "parcial", "pendente", "indeferida"],
           },
-          valorBloqueadoBrl: NUMERO_OU_NULO,
-          valorLiberadoBrl: NUMERO_OU_NULO,
-          bemAtingido: TEXTO_OU_NULO,
+          valorBloqueadoBrl: NUMERO_OPCIONAL,
+          valorLiberadoBrl: NUMERO_OPCIONAL,
+          bemAtingido: TEXTO_OPCIONAL,
           paginas: PAGINAS,
           trecho: { type: "string" },
         },
@@ -296,7 +288,7 @@ export const SCHEMA_EXTRACAO = {
         additionalProperties: false,
         required: ["data", "rubrica", "valorBrl", "origem", "paginas", "trecho"],
         properties: {
-          data: TEXTO_OU_NULO,
+          data: TEXTO_OPCIONAL,
           rubrica: {
             type: "string",
             enum: [
@@ -308,6 +300,9 @@ export const SCHEMA_EXTRACAO = {
               "honorarios_sucumbencia",
               "custas",
               "total",
+              "pagamento",
+              "levantamento",
+              "deposito",
               "indefinida",
             ],
           },
@@ -315,20 +310,6 @@ export const SCHEMA_EXTRACAO = {
           origem: { type: "string" },
           paginas: PAGINAS,
           trecho: { type: "string" },
-        },
-      },
-    },
-    pagamentos: {
-      type: "array",
-      items: {
-        type: "object",
-        additionalProperties: false,
-        required: ["data", "valorBrl", "forma", "paginas"],
-        properties: {
-          data: TEXTO_OU_NULO,
-          valorBrl: { type: "number" },
-          forma: { type: "string" },
-          paginas: PAGINAS,
         },
       },
     },
@@ -349,34 +330,28 @@ export const SCHEMA_EXTRACAO = {
         properties: {
           tipo: { type: "string" },
           descricao: { type: "string" },
-          identificador: TEXTO_OU_NULO,
-          titular: TEXTO_OU_NULO,
-          valorAvaliadoBrl: NUMERO_OU_NULO,
-          situacao: TEXTO_OU_NULO,
+          identificador: TEXTO_OPCIONAL,
+          titular: TEXTO_OPCIONAL,
+          valorAvaliadoBrl: NUMERO_OPCIONAL,
+          situacao: TEXTO_OPCIONAL,
           paginas: PAGINAS,
         },
       },
     },
-    eventos: {
+    marcos: {
       type: "array",
       items: {
         type: "object",
         additionalProperties: false,
-        required: [
-          "data",
-          "descricao",
-          "efeitoPrescricional",
-          "referencia",
-          "paginas",
-        ],
+        required: ["data", "ato", "efeito", "referencia", "paginas"],
         properties: {
-          data: TEXTO_OU_NULO,
-          descricao: { type: "string" },
-          efeitoPrescricional: {
+          data: TEXTO_OPCIONAL,
+          ato: { type: "string" },
+          efeito: {
             type: "string",
-            enum: [...EFEITOS_PRESCRICIONAIS],
+            enum: ["interrompe", "inicia_prazo", "suspende"],
           },
-          referencia: TEXTO_OU_NULO,
+          referencia: TEXTO_OPCIONAL,
           paginas: PAGINAS,
         },
       },
@@ -534,7 +509,8 @@ export interface FichaAutos {
   modoPecaRazao: string;
   prescricao: PrescricaoIntercorrente;
   vulnerabilidades: VulnerabilidadeApontada[];
-  auditoria: TesteAuditoria[];
+  /** Os dez testes rodam como raciocinio; o que falha vira vulnerabilidade. */
+  auditoria?: TesteAuditoria[];
   medidasRealizadas: MedidaConsolidada[];
   medidasFaltantes: MedidaFaltante[];
   debito: DebitoConsolidado;
@@ -603,12 +579,12 @@ export const SCHEMA_CONSOLIDACAO = {
         "demonstracao",
       ],
       properties: {
-        prazoAnos: NUMERO_OU_NULO,
-        prazoFundamento: TEXTO_OU_NULO,
-        marcoInicial: TEXTO_OU_NULO,
-        marcoInicialReferencia: TEXTO_OU_NULO,
-        suspensaoInicio: TEXTO_OU_NULO,
-        suspensaoFim: TEXTO_OU_NULO,
+        prazoAnos: NUMERO_OPCIONAL,
+        prazoFundamento: TEXTO_OPCIONAL,
+        marcoInicial: TEXTO_OPCIONAL,
+        marcoInicialReferencia: TEXTO_OPCIONAL,
+        suspensaoInicio: TEXTO_OPCIONAL,
+        suspensaoFim: TEXTO_OPCIONAL,
         interrupcoes: {
           type: "array",
           items: {
@@ -618,14 +594,14 @@ export const SCHEMA_CONSOLIDACAO = {
             properties: {
               data: { type: "string" },
               ato: { type: "string" },
-              referencia: TEXTO_OU_NULO,
+              referencia: TEXTO_OPCIONAL,
             },
           },
         },
-        dataEstimadaConsumacao: TEXTO_OU_NULO,
-        mesesRestantes: NUMERO_OU_NULO,
+        dataEstimadaConsumacao: TEXTO_OPCIONAL,
+        mesesRestantes: NUMERO_OPCIONAL,
         semaforo: { type: "string", enum: [...SEMAFOROS] },
-        divergenciaEntreCaminhos: TEXTO_OU_NULO,
+        divergenciaEntreCaminhos: TEXTO_OPCIONAL,
         demonstracao: { type: "string" },
       },
     },
@@ -667,7 +643,6 @@ export const SCHEMA_CONSOLIDACAO = {
         required: [
           "ordem",
           "especie",
-          "classe",
           "titulo",
           "requeridaEm",
           "deferidaEm",
@@ -682,11 +657,10 @@ export const SCHEMA_CONSOLIDACAO = {
         properties: {
           ordem: { type: "integer" },
           especie: ENUM_ESPECIE,
-          classe: { type: "string", enum: ["tipica", "atipica"] },
           titulo: { type: "string" },
-          requeridaEm: TEXTO_OU_NULO,
-          deferidaEm: TEXTO_OU_NULO,
-          cumpridaEm: TEXTO_OU_NULO,
+          requeridaEm: TEXTO_OPCIONAL,
+          deferidaEm: TEXTO_OPCIONAL,
+          cumpridaEm: TEXTO_OPCIONAL,
           estado: {
             type: "string",
             enum: [
@@ -698,11 +672,11 @@ export const SCHEMA_CONSOLIDACAO = {
               "abandonada",
             ],
           },
-          valorBloqueadoBrl: NUMERO_OU_NULO,
-          valorLiberadoBrl: NUMERO_OU_NULO,
-          bemAtingido: TEXTO_OU_NULO,
+          valorBloqueadoBrl: NUMERO_OPCIONAL,
+          valorLiberadoBrl: NUMERO_OPCIONAL,
+          bemAtingido: TEXTO_OPCIONAL,
           paginas: PAGINAS,
-          observacao: TEXTO_OU_NULO,
+          observacao: TEXTO_OPCIONAL,
         },
       },
     },
@@ -715,7 +689,6 @@ export const SCHEMA_CONSOLIDACAO = {
           "prioridade",
           "codigo",
           "especie",
-          "classe",
           "titulo",
           "porQueCabe",
           "fundamentoLegal",
@@ -724,14 +697,14 @@ export const SCHEMA_CONSOLIDACAO = {
         ],
         properties: {
           prioridade: { type: "integer" },
-          codigo: { type: "string", enum: [...CODIGOS_MEDIDA] },
+          codigo: { type: "string" },
           especie: ENUM_ESPECIE,
           classe: { type: "string", enum: ["tipica", "atipica"] },
           titulo: { type: "string" },
           porQueCabe: { type: "string" },
           fundamentoLegal: { type: "string" },
           prontaParaPedir: { type: "boolean" },
-          dependeDe: TEXTO_OU_NULO,
+          dependeDe: TEXTO_OPCIONAL,
         },
       },
     },
@@ -749,9 +722,9 @@ export const SCHEMA_CONSOLIDACAO = {
         "oQueFalta",
       ],
       properties: {
-        valorAtualizadoBrl: NUMERO_OU_NULO,
-        dataBase: TEXTO_OU_NULO,
-        fonte: TEXTO_OU_NULO,
+        valorAtualizadoBrl: NUMERO_OPCIONAL,
+        dataBase: TEXTO_OPCIONAL,
+        fonte: TEXTO_OPCIONAL,
         composicao: {
           type: "array",
           items: {
@@ -766,9 +739,9 @@ export const SCHEMA_CONSOLIDACAO = {
           },
         },
         amortizacoesBrl: { type: "number" },
-        saldoBrl: NUMERO_OU_NULO,
+        saldoBrl: NUMERO_OPCIONAL,
         fechaConta: { type: "boolean" },
-        oQueFalta: TEXTO_OU_NULO,
+        oQueFalta: TEXTO_OPCIONAL,
       },
     },
     satisfacao: {
@@ -784,7 +757,7 @@ export const SCHEMA_CONSOLIDACAO = {
         valorConstritoBrl: { type: "number" },
         valorSatisfeitoBrl: { type: "number" },
         valorPenhoradoNaoConvertidoBrl: { type: "number" },
-        percentualSobreSaldo: NUMERO_OU_NULO,
+        percentualSobreSaldo: NUMERO_OPCIONAL,
       },
     },
     etapa: {
@@ -837,7 +810,7 @@ export const SCHEMA_CONSOLIDACAO = {
       ],
       properties: {
         titulo: { type: "string" },
-        codigo: { type: "string", enum: [...CODIGOS_MEDIDA] },
+        codigo: { type: "string" },
         tipoPeca: { type: "string" },
         urgencia: { type: "string", enum: ["alta", "media", "baixa"] },
         fundamentos: { type: "array", items: { type: "string" } },
@@ -906,6 +879,36 @@ export interface AnaliseAutos {
   criado_em: string;
 }
 
+/**
+ * Converte as sentinelas de volta para `null`, recursivamente.
+ *
+ * O esquema enviado à API não pode ter campo anulável (tipo união estoura o
+ * limite de compilação dela), então o modelo devolve "" para texto ausente
+ * e -1 para número ausente. Aqui isso vira `null` de novo, e o resto do app
+ * — tipos, UI e banco — continua trabalhando com `string | null` e
+ * `number | null` como sempre.
+ *
+ * Só mexe em folhas: não toca em array vazio nem em objeto.
+ */
+export function normalizarAusentes<T>(valor: T): T {
+  if (valor === "" ) return null as unknown as T;
+  if (typeof valor === "number" && valor === SEM_VALOR) {
+    return null as unknown as T;
+  }
+  if (Array.isArray(valor)) {
+    return valor.map((v) => normalizarAusentes(v)) as unknown as T;
+  }
+  if (valor !== null && typeof valor === "object") {
+    const saida: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(valor as Record<string, unknown>)) {
+      // `paginas` e listas de texto livre não têm sentinela: preserve.
+      saida[k] = k === "paginas" ? v : normalizarAusentes(v);
+    }
+    return saida as T;
+  }
+  return valor;
+}
+
 /** A ficha que vale é a revisada pelo advogado, se existir. */
 export function fichaVigente(a: {
   ficha: FichaAutos | null;
@@ -913,3 +916,56 @@ export function fichaVigente(a: {
 }): FichaAutos | null {
   return a.ficha_revisada ?? a.ficha;
 }
+
+// ============================================================
+// RECORTES DA CONSOLIDAÇÃO
+// ============================================================
+// A API tem teto de tamanho de gramática para saída estruturada ("The
+// compiled grammar is too large"). A consolidação inteira não cabe — foi
+// medido. Então ela vira DUAS chamadas, o que também é melhor desenho: a
+// segunda raciocina sobre uma primeira já limpa, em vez de apurar e julgar
+// no mesmo fôlego.
+//
+// Só a consolidação se parte. A extração, que roda uma vez por lote, cabe
+// inteira — era lá que dobrar o custo doeria.
+
+function recorteConsolidacao(chaves: readonly string[]) {
+  const props = SCHEMA_CONSOLIDACAO.properties as Record<string, unknown>;
+  return {
+    type: "object",
+    additionalProperties: false,
+    required: [...chaves],
+    properties: Object.fromEntries(chaves.map((k) => [k, props[k]])),
+  };
+}
+
+/** Passada 2a: o que os autos DIZEM. */
+export const CHAVES_FATOS = [
+  "identificacao",
+  "partes",
+  "bens",
+  "medidasRealizadas",
+  "debito",
+  "satisfacao",
+  "etapa",
+  "etapaJustificativa",
+  "lacunas",
+] as const;
+
+/** Passada 2b: o que isso SIGNIFICA e o que fazer. */
+export const CHAVES_JUIZO = [
+  "perfilDevedor",
+  "perfilDevedorSinais",
+  "perfilJuizo",
+  "modoPeca",
+  "modoPecaRazao",
+  "prescricao",
+  "vulnerabilidades",
+  "medidasFaltantes",
+  "chanceExito",
+  "proximaMovimentacao",
+  "alertas",
+] as const;
+
+export const SCHEMA_CONSOLIDACAO_FATOS = recorteConsolidacao(CHAVES_FATOS);
+export const SCHEMA_CONSOLIDACAO_JUIZO = recorteConsolidacao(CHAVES_JUIZO);

@@ -27,6 +27,7 @@ import {
   EXEMPLOS_DO_ESCRITORIO,
 } from "./estilo-bp";
 import {
+  LISTA_ESPECIES,
   LISTA_VULNERABILIDADES,
   TEXTO_BASE_AUTORIZADA,
   MEDIDA_META,
@@ -136,7 +137,11 @@ const REGRAS = `## Regras invioláveis
    débito exequendo.
 9. DATAS em formato ISO (AAAA-MM-DD). Data é data de calendário: não aplique
    fuso e não converta.
-10. RACIOCÍNIO. Analise passo a passo internamente. No resultado, entregue
+10. AUSÊNCIA. Todo campo pedido deve vir preenchido. Quando o dado NÃO
+    CONSTA do material, use a marca de ausência em vez de inventar:
+    string vazia "" para texto, e -1 para número. Nunca chute um valor,
+    uma data ou um documento para preencher espaço.
+11. RACIOCÍNIO. Analise passo a passo internamente. No resultado, entregue
     as conclusões com referências.
 
 ## Base autorizada
@@ -291,15 +296,92 @@ Devolva somente a estrutura pedida.`;
 // PASSADA 2 — CONSOLIDAÇÃO (Fases 3.2 a 6)
 // ============================================================
 
-export function promptConsolidacao(args: {
+// ============================================================
+// PASSADA 2 — CONSOLIDAÇÃO, EM DUAS ETAPAS
+// ============================================================
+// A API recusa gramática grande demais para saída estruturada, e a
+// consolidação inteira não cabe (foi medido). Virou duas chamadas — o que
+// também é melhor desenho: a segunda raciocina sobre uma primeira já
+// limpa, em vez de apurar e julgar no mesmo fôlego.
+
+/** Cabeçalho comum às duas etapas. */
+function preambulo(args: {
+  totalPaginas: number;
+  totalLotes: number;
+  dataDeHoje: string;
+}): string {
+  return `Capa a capa de ${args.totalPaginas} páginas, lido em ${args.totalLotes} lotes. A DATA DE REFERÊNCIA é ${args.dataDeHoje}.`;
+}
+
+/** Passada 2a — o que os autos DIZEM. */
+export function promptConsolidacaoFatos(args: {
   totalPaginas: number;
   totalLotes: number;
   dataDeHoje: string;
   extracoesJson: string;
+}): string {
+  const { extracoesJson } = args;
+
+  return `${preambulo(args)}
+
+Abaixo estão as extrações dos lotes, em JSON. Você vê o processo inteiro
+pela primeira vez. Nesta etapa você APURA; a etapa seguinte julgará.
+
+${extracoesJson}
+
+## 1. Deduplicar e montar o caminho
+
+O mesmo ato aparece várias vezes (petição, decisão, certidão, resposta).
+Una em UMA medida, preservando todas as páginas de origem e a data mais
+precisa de cada estado. Ordene cronologicamente, numerando em "ordem", e
+classifique cada medida em um estado: positiva, negativa, parcial,
+pendente de resposta, indeferida, ou abandonada (requerida e nunca
+decidida há mais de 180 dias).
+
+Use a espécie do vocabulário: ${LISTA_ESPECIES}. Quando nada servir, use
+"outro". Marque "classe" como atipica apenas para as medidas do art. 139,
+IV (suspensão de CNH, passaporte, cartões, proibição de licitar, quebras
+de sigilo, IDPJ, fraude à execução, grupo econômico, astreintes, cadastro
+de inadimplentes); todas as demais são tipicas.
+
+## 2. Reconstruir o débito
+
+Parta do valor mais recente com origem confiável. Some correção, juros,
+multa e honorários conforme os autos. Abata pagamentos e levantamentos,
+imputando primeiro nos juros e depois no capital (CC, art. 354). Informe
+saldo, data-base e de onde veio cada número.
+
+Custas, preparo, porte de remessa, honorários contratuais, valor da causa
+e valor de contrato juntado como documento NÃO SÃO débito exequendo. Se os
+autos não permitirem fechar a conta, marque "fechaConta" como falso e diga
+em "oQueFalta" exatamente o que falta: NUNCA estime um valor sem base.
+
+## 3. Medir a satisfação
+
+Separe três coisas que sempre se confundem: valor bloqueado (constrito),
+valor efetivamente levantado pelo credor (satisfeito), e valor de bem
+penhorado ainda não convertido em dinheiro. Só o do meio abate dívida.
+
+## 4. Etapa do processo
+
+Enquadre e justifique com a referência do ato que sustenta o enquadramento.
+
+## 5. Lacunas
+
+O que os autos não respondem, o que está ilegível, e toda divergência
+entre duas fontes do mesmo dado.`;
+}
+
+/** Passada 2b — o que isso SIGNIFICA e o que fazer. */
+export function promptConsolidacaoJuizo(args: {
+  totalPaginas: number;
+  totalLotes: number;
+  dataDeHoje: string;
+  fatosJson: string;
+  marcosJson: string;
   dadosAssertiva?: string;
 }): string {
-  const { totalPaginas, totalLotes, dataDeHoje, extracoesJson, dadosAssertiva } =
-    args;
+  const { dataDeHoje, fatosJson, marcosJson, dadosAssertiva } = args;
 
   const blocoAssertiva = dadosAssertiva
     ? `O escritório já possui, de consultas cadastrais JÁ PAGAS (Assertiva Localize e Veículos), os dados abaixo. Use-os APENAS para dizer se uma medida ainda não tentada tem alvo concreto — por exemplo, recomendar RENAJUD porque há veículo conhecido. Nunca os trate como prova dos autos, nunca os cite como fundamento e nunca os reproduza no texto de uma peça: o contrato da Assertiva proíbe (cláusula 4.4). Eles orientam a estratégia, não instruem o processo.\n\n${dadosAssertiva}`
@@ -309,49 +391,44 @@ export function promptConsolidacao(args: {
     .map(([codigo, nome]) => `  ${codigo} — ${nome}`)
     .join("\n");
 
-  return `Abaixo estão as extrações dos ${totalLotes} lotes de um capa a capa de ${totalPaginas} páginas, em JSON. A DATA DE REFERÊNCIA é ${dataDeHoje}.
+  return `${preambulo(args)}
 
-${extracoesJson}
+Os fatos já foram apurados e estão abaixo. Agora você JULGA.
+
+FATOS CONSOLIDADOS:
+${fatosJson}
+
+MARCOS COM EFEITO PRESCRICIONAL, extraídos dos autos:
+${marcosJson}
 
 ${blocoAssertiva}
 
-Agora você vê o processo inteiro. Conclua.
+## 1. Auditar o que foi feito
 
-## 1. Deduplicar e montar o caminho
+No papel de ADVOGADO DO EXECUTADO, responda internamente, sim ou não:
+alcançou todos os executados, cada CPF/CNPJ com ordem própria? o valor
+estava atualizado, com data-base, multa e honorários? a abrangência foi
+máxima no sistema? a guia foi recolhida por sistema e por pessoa? o pedido
+invocou os artigos certos e o precedente disponível? a decisão enfrentou o
+precedente (art. 489, §1º, VI), e cabia agravo ou declaração? há nos autos
+a resposta do sistema ou a certidão? executado, cônjuge e terceiros
+obrigatórios foram intimados (arts. 799, 841, 842, 854, §2º, e 889)? houve
+conversão, transferência, averbação, avaliação e levantamento? quanto tempo
+passou até o pedido seguinte?
 
-O mesmo ato aparece várias vezes (petição, decisão, certidão, resposta). Una
-em UMA medida, preservando todas as páginas de origem e a data mais precisa
-de cada estado. Ordene cronologicamente e classifique cada medida como:
-positiva, negativa, parcial, pendente de resposta, indeferida, ou abandonada
-(requerida e nunca decidida há mais de 180 dias).
+Cada "não" relevante vira uma VULNERABILIDADE ou um ALERTA abaixo. Os
+testes são raciocínio, não saída.
 
-## 2. Auditar o que foi feito — dez testes
-
-No papel de ADVOGADO DO EXECUTADO, responda sim ou não, com motivo curto:
-1. Alcançou todos os executados, cada CPF/CNPJ com ordem própria?
-2. O valor estava atualizado, com data-base, multa e honorários?
-3. A abrangência foi máxima no sistema (investimentos e contas de pagamento
-   no SISBAJUD; circulação no RENAJUD)?
-4. A guia foi recolhida por sistema e por pessoa?
-5. O pedido invocou os artigos certos e o precedente disponível?
-6. A decisão enfrentou o precedente invocado (art. 489, §1º, VI)? Cabiam
-   embargos de declaração ou agravo, e foram usados?
-7. Há nos autos a resposta do sistema ou a certidão do cumprimento?
-8. Executado, cônjuge e terceiros obrigatórios foram intimados (arts. 799,
-   841, 842, 854, §2º, e 889)?
-9. Houve conversão, transferência, averbação, avaliação e levantamento?
-10. Quanto tempo passou até o pedido seguinte, e qual o risco prescricional?
-
-## 3. Matriz de vulnerabilidades
+## 2. Matriz de vulnerabilidades
 
 Verifique os vinte itens. Os marcados [DUPLA LEITURA] exigem duas
-verificações independentes sobre as extrações; se divergirem, adote a mais
-conservadora e registre a divergência. Reporte apenas os RELEVANTES, com a
+verificações independentes; se divergirem, adote a mais conservadora e
+registre a divergência na correção. Reporte apenas os RELEVANTES, com a
 consequência e a correção.
 
 ${LISTA_VULNERABILIDADES}
 
-## 4. Prescrição intercorrente — demonstre por extenso
+## 3. Prescrição intercorrente — demonstre por extenso
 
 1. Prazo da pretensão, igual ao da execução (Súmula 150/STF; CC, art. 206-A).
 2. Marco inicial: ciência da primeira tentativa infrutífera (art. 921, §4º).
@@ -365,43 +442,29 @@ ${LISTA_VULNERABILIDADES}
 8. Semáforo: verde acima de 24 meses; amarelo de 12 a 24; vermelho abaixo
    de 12.
 
-Calcule por DOIS caminhos independentes: da linha do tempo para a frente e
-da data de referência para trás. Se divergirem, adote a consumação mais
-próxima e registre a divergência.
+Calcule por DOIS caminhos independentes: dos marcos para a frente e da data
+de referência para trás. Se divergirem, adote a consumação mais próxima e
+diga a divergência em "divergenciaEntreCaminhos".
 
-## 5. Perfil do devedor e perfil do juízo
+## 4. Perfil do devedor e perfil do juízo
 
-Enquadre o devedor em uma classe (pf_assalariada, profissional_liberal,
-empresario_pf, pj_operacional, pj_fachada, devedor_blindado, ou indefinido)
-pelos sinais dos autos, e diga quais sinais sustentam o enquadramento.
+Enquadre o devedor (pf_assalariada, profissional_liberal, empresario_pf,
+pj_operacional, pj_fachada, devedor_blindado, ou indefinido) e diga quais
+sinais dos autos sustentam o enquadramento.
 
-Do perfil do juízo, extraia das decisões: exige guia prévia? defere em bloco
-ou um a um? posição sobre reiteração, Tema 1230, atípicas e CNIB? Isso
-decide se a peça será ESCALONADA (pedidos sucessivos e condicionados) ou
-SEQUENCIAL (um núcleo por peça).
+Do perfil do juízo, extraia das decisões: exige guia prévia? defere em
+bloco ou um a um? posição sobre reiteração, Tema 1230, atípicas e CNIB?
+Isso decide o modo da peça: ESCALONADA (pedidos sucessivos e condicionados)
+quando o juízo defere em bloco e o risco é amarelo ou vermelho; SEQUENCIAL
+quando recusa pedidos em bloco ou a medida seguinte depende de prova.
 
-## 6. Reconstruir o débito
+## 5. O que falta — plano até a satisfação
 
-Parta do valor mais recente com origem confiável. Some correção, juros,
-multa e honorários conforme os autos. Abata pagamentos e levantamentos,
-imputando primeiro nos juros e depois no capital (CC, art. 354). Informe
-saldo, data-base e de onde veio cada número. Se os autos não permitirem
-fechar a conta, diga exatamente o que falta: NUNCA estime um valor sem base.
-
-## 7. Medir a satisfação
-
-Separe três coisas que sempre se confundem: valor bloqueado, valor
-efetivamente levantado pelo credor, e valor de bem penhorado ainda não
-convertido em dinheiro. Só o segundo satisfaz débito.
-
-## 8. O que falta — plano até a satisfação
-
-Princípios, antes de olhar o caso: dinheiro primeiro, com reiteração; tudo
-que for típico é pedido como típico, fora do crivo do Tema 1137; cada
-resultado negativo vira prova documentada da subsidiariedade; atípicas e
-CNIB por último, com contraditório prévio e prazo certo; IDPJ e fraude só
-com prova já nos autos; risco vermelho prioriza a constrição de maior
-probabilidade imediata.
+Princípios: dinheiro primeiro, com reiteração; tudo que for típico é pedido
+como típico, fora do crivo do Tema 1137; cada resultado negativo vira prova
+documentada da subsidiariedade; atípicas e CNIB por último, com
+contraditório prévio e prazo certo; IDPJ e fraude só com prova já nos
+autos; risco vermelho prioriza a constrição de maior probabilidade imediata.
 
 Casos-limite, aplicados ANTES de tudo:
 - recuperação judicial ou falência: não pedir constrição sobre patrimônio
@@ -413,36 +476,33 @@ Casos-limite, aplicados ANTES de tudo:
 - crédito satisfeito: levantamento, quitação e extinção (arts. 924, II, e 925);
 - autos parciais: declarar a limitação e não concluir sobre o que não consta.
 
-Para cada medida faltante, informe o CÓDIGO do catálogo abaixo, por que cabe
-agora, o fundamento legal, o que o juízo precisa receber para deferir, e se
-está pronta para ser pedida ou depende de algo antes. Ordene por prioridade.
+Para cada medida faltante informe o CÓDIGO do catálogo, por que cabe agora,
+o fundamento legal, o que o juízo precisa receber para deferir, e se está
+pronta para ser pedida ou depende de algo antes. Ordene por prioridade.
 
 ${catalogo}
 
-## 9. Chance de êxito
+## 6. Chance de êxito
 
-Soma de fatores visíveis, nunca número solto. Cada fator traz nome, peso, se
-pesa a favor ou contra, e uma frase de explicação. Considere, entre outros
-que os autos revelarem: bens localizados e livres; resultado positivo
-anterior em bloqueio, ainda que parcial; devedor pessoa jurídica ativa;
-imóvel com matrícula sem ônus; sócios ou grupo econômico que viabilize IDPJ;
-e, contra: sequência de buscas negativas, inércia prolongada, suspensão do
-art. 921, risco de prescrição intercorrente, devedor falecido ou empresa
-baixada, indício de bem de família. Quem lê precisa conseguir discordar de
-um fator específico.
+Soma de fatores visíveis, nunca número solto. Cada fator traz nome, peso,
+se pesa a favor ou contra, e uma frase de explicação. Considere: bens
+localizados e livres; resultado positivo anterior em bloqueio, ainda que
+parcial; devedor pessoa jurídica ativa; imóvel com matrícula sem ônus;
+sócios ou grupo econômico que viabilize IDPJ; e, contra: sequência de
+buscas negativas, inércia prolongada, suspensão do art. 921, risco de
+prescrição intercorrente, devedor falecido ou empresa baixada, indício de
+bem de família. Quem lê precisa conseguir discordar de um fator específico.
 
-## 10. Próxima movimentação
+## 7. Próxima movimentação
 
 Uma só: a que destrava mais valor agora, com o código da medida, o tipo de
-peça, os fundamentos e os pedidos exatos que ela deve conter. Se houver
-prazo aberto para o exequente, a próxima movimentação é atendê-lo.
+peça, os fundamentos e os pedidos exatos. Se houver prazo aberto para o
+exequente, a próxima movimentação é atendê-lo.
 
-## 11. Alertas
+## 8. Alertas
 
 Prazo e risco, com destaque para prescrição intercorrente, penhora sem
-avaliação, bloqueio pendente de conversão e reiteração de SISBAJUD vencida.
-
-Onde a sua conclusão depender de algo que não está nos autos, diga.`;
+avaliação, bloqueio pendente de conversão e reiteração de SISBAJUD vencida.`;
 }
 
 // ============================================================

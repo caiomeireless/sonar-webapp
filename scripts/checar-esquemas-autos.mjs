@@ -1,5 +1,11 @@
-// Valida os JSON Schemas da Análise de Autos CONTRA A API, sem gastar
-// geração (usa count_tokens, que valida o esquema e não gera resposta).
+// Valida os JSON Schemas da Análise de Autos CONTRA A API.
+//
+// IMPORTANTE: usa messages.create de verdade, com max_tokens mínimo no
+// modelo mais barato. Não dá para usar count_tokens: ele confere a FORMA
+// do esquema mas NÃO o compila, e por isso deixou passar o erro de
+// "too many parameters with union types" — que só apareceu quando o
+// advogado já tinha esperado a leitura inteira do capa a capa. Custa
+// frações de centavo e é a única checagem que vale.
 //
 // Existe porque o tsc não enxerga esse tipo de erro: um esquema pode estar
 // perfeitamente tipado em TypeScript e ser rejeitado com 400 pela API. Foi
@@ -62,10 +68,14 @@ const claude = require(path.join(saida, "claude.js"));
 
 const cliente = new Anthropic({ apiKey, timeout: 120_000 });
 
+// Só os esquemas que REALMENTE vão à API. SCHEMA_CONSOLIDACAO não entra:
+// ele é apenas a fonte de onde os dois recortes são derivados, e sozinho
+// estoura a gramática — foi por isso que a consolidação virou duas etapas.
 const ALVOS = [
   ["SCHEMA_TRIAGEM", tipos.SCHEMA_TRIAGEM],
   ["SCHEMA_EXTRACAO", tipos.SCHEMA_EXTRACAO],
-  ["SCHEMA_CONSOLIDACAO", tipos.SCHEMA_CONSOLIDACAO],
+  ["SCHEMA_CONSOLIDACAO_FATOS", tipos.SCHEMA_CONSOLIDACAO_FATOS],
+  ["SCHEMA_CONSOLIDACAO_JUIZO", tipos.SCHEMA_CONSOLIDACAO_JUIZO],
   ["SCHEMA_PECA", claude.SCHEMA_PECA],
 ];
 
@@ -78,10 +88,14 @@ for (const [nome, schema] of ALVOS) {
     continue;
   }
   try {
-    await cliente.messages.countTokens({
+    await cliente.messages.create({
       model: "claude-haiku-5-5",
-      output_config: { format: { type: "json_schema", schema } },
-      messages: [{ role: "user", content: "oi" }],
+      max_tokens: 16,
+      output_config: {
+        effort: "low",
+        format: { type: "json_schema", schema },
+      },
+      messages: [{ role: "user", content: "Devolva a estrutura vazia." }],
     });
     console.log(`OK     ${nome}`);
   } catch (e) {

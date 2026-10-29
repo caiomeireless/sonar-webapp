@@ -9,7 +9,9 @@ import type { CustoTokens, ResultadoExtracao } from "@/lib/autos/tipos";
 import { exigirEquipeNaRota, respostaDeErro } from "../_auth";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 300;
+// Vercel Pro permite ate 800s. A extracao de um lote grande passa de 300s
+// com folga — foi medido.
+export const maxDuration = 800;
 
 export async function POST(req: NextRequest) {
   const auth = await exigirEquipeNaRota();
@@ -34,15 +36,18 @@ export async function POST(req: NextRequest) {
     }
 
     const hoje = new Date().toISOString().slice(0, 10);
-    const { ficha, custo } = await consolidar({
+    const { ficha, custos: custosConsolidacao } = await consolidar({
       extracoes,
       totalPaginas: corpo.totalPaginas ?? 0,
       dadosAssertiva: corpo.dadosAssertiva,
       hoje,
     });
 
-    // Custo total da análise inteira: os lotes + a triagem + esta passada.
-    const custos = somarCustos([...(corpo.custosAnteriores ?? []), custo]);
+    // Custo total da análise: triagem + lotes + as duas etapas daqui.
+    const custos = somarCustos([
+      ...(corpo.custosAnteriores ?? []),
+      ...custosConsolidacao,
+    ]);
     const custoBrl = custos.reduce((s, c) => s + custoEmReais(c), 0);
 
     if (corpo.analiseId) {

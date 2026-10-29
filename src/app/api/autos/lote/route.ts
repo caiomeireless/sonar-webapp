@@ -10,7 +10,9 @@ import { extrairLote, type PaginaTexto } from "@/lib/autos/claude";
 import { exigirEquipeNaRota, respostaDeErro } from "../_auth";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 300;
+// Vercel Pro permite ate 800s. A extracao de um lote grande passa de 300s
+// com folga — foi medido.
+export const maxDuration = 800;
 
 export async function POST(req: NextRequest) {
   const auth = await exigirEquipeNaRota();

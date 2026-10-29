@@ -307,3 +307,123 @@ export const BASE_AUTORIZADA: { ref: string; tese: string }[] = [
 export const TEXTO_BASE_AUTORIZADA = BASE_AUTORIZADA.map(
   (b) => `- ${b.ref}: ${b.tese}`,
 ).join("\n");
+
+// ============================================================
+// CANONICALIZAÇÃO
+// ============================================================
+// Os vocabulários GRANDES (32 espécies, 24 códigos M) não cabem como enum
+// no esquema: a API recusa com "The compiled grammar is too large". Então o
+// esquema aceita string livre, o prompt dita a lista, e a amarração
+// acontece AQUI, no código — que é onde ela é barata e confiável.
+//
+// Sem isto, o modelo devolve "Bloqueio via SISBAJUD" em vez de "sisbajud"
+// (aconteceu no primeiro teste real) e a deduplicação morre.
+
+function achatar(v: string): string {
+  return v
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+/** Apelidos que o modelo usa na prática para cada espécie canônica. */
+const APELIDOS_ESPECIE: Record<string, string[]> = {
+  sisbajud: ["bacenjud", "bloqueio de valores", "bloqueio online", "penhora online", "bloqueio de ativos", "ordem de bloqueio"],
+  sisbajud_teimosinha: ["teimosinha", "reiteracao automatica", "bloqueio permanente", "reiteracao sisbajud"],
+  renajud: ["restricao de veiculo", "restricao renajud", "bloqueio de veiculo"],
+  infojud: ["receita federal", "dirpf", "declaracao de imposto", "ecf"],
+  penhora_imovel: ["penhora de bem imovel", "termo de penhora de imovel", "arisp", "onr"],
+  penhora_faturamento: ["penhora sobre faturamento", "percentual do faturamento"],
+  penhora_quotas: ["penhora de cotas", "penhora de quotas sociais", "penhora de participacao societaria"],
+  penhora_credito: ["penhora de creditos", "penhora de recebiveis"],
+  penhora_precatorio: ["penhora de precatorio"],
+  penhora_rosto_autos: ["penhora no rosto dos autos"],
+  penhora_estoque_semovente: ["penhora de estoque", "penhora de semoventes"],
+  cnib: ["central nacional de indisponibilidade de bens", "indisponibilidade de bens"],
+  serasajud: ["serasa", "negativacao"],
+  protesto: ["protesto do titulo", "certidao para protesto"],
+  oficial_justica_penhora: ["oficial de justica", "mandado de penhora e avaliacao", "auto de penhora", "diligencia do oficial"],
+  avaliacao: ["laudo de avaliacao", "avaliacao do bem"],
+  adjudicacao: ["adjudicacao do bem"],
+  alienacao_judicial: ["leilao", "hasta publica", "praca", "alienacao por iniciativa particular"],
+  arresto: ["arresto executivo", "arresto eletronico"],
+  busca_apreensao: ["busca e apreensao"],
+  citacao: ["citacao do executado", "intimacao para pagamento", "mandado de citacao"],
+  suspensao_cnh: ["suspensao da cnh", "apreensao da cnh", "suspensao da habilitacao"],
+  apreensao_passaporte: ["suspensao do passaporte", "retencao de passaporte"],
+  bloqueio_cartoes: ["bloqueio de cartao de credito", "bloqueio de cartoes de credito"],
+  proibicao_licitar: ["proibicao de participar de licitacao"],
+  quebra_sigilo_fiscal: ["quebra do sigilo fiscal"],
+  quebra_sigilo_bancario: ["quebra do sigilo bancario"],
+  idpj: ["desconsideracao da personalidade juridica", "incidente de desconsideracao", "desconsideracao inversa"],
+  fraude_execucao: ["fraude a execucao"],
+  grupo_economico: ["responsabilizacao de grupo economico"],
+  astreintes: ["multa cominatoria", "multa diaria"],
+  inclusao_cadastro_inadimplentes: ["inclusao em cadastro de inadimplentes"],
+};
+
+const INDICE_ESPECIE = new Map<string, string>();
+for (const [canonico, apelidos] of Object.entries(APELIDOS_ESPECIE)) {
+  INDICE_ESPECIE.set(achatar(canonico), canonico);
+  for (const a of apelidos) INDICE_ESPECIE.set(achatar(a), canonico);
+}
+
+/**
+ * Traz a espécie devolvida pelo modelo para o vocabulário fechado.
+ * Devolve "outro" quando não reconhece — nunca derruba a gravação inteira.
+ */
+export function canonicalizarEspecie(bruto: string): string {
+  const chave = achatar(bruto ?? "");
+  if (!chave) return "outro";
+
+  const exata = INDICE_ESPECIE.get(chave);
+  if (exata) return exata;
+
+  // 1) Casamento por conteúdo: "ordem de bloqueio via SISBAJUD" contém
+  // "sisbajud". O apelido mais longo vence, para a teimosinha não virar
+  // sisbajud simples.
+  let porConteudo: { canonico: string; peso: number } | null = null;
+  for (const [apelido, canonico] of INDICE_ESPECIE) {
+    if (
+      chave.includes(apelido) &&
+      (!porConteudo || apelido.length > porConteudo.peso)
+    ) {
+      porConteudo = { canonico, peso: apelido.length };
+    }
+  }
+  if (porConteudo) return porConteudo.canonico;
+
+  // 2) Casamento por palavras soltas. É o que resolve o caso real que a
+  // etapa 1 não pega: "penhora de imóvel por matrícula" não CONTÉM
+  // "penhora imovel" (tem um "de" no meio), mas tem todas as palavras.
+  // Vence quem casar mais palavras, para penhora_credito não roubar
+  // penhora_imovel.
+  const palavras = new Set(chave.split(" ").filter(Boolean));
+  let porPalavras: { canonico: string; peso: number } | null = null;
+  for (const [apelido, canonico] of INDICE_ESPECIE) {
+    const alvo = apelido.split(" ").filter(Boolean);
+    if (alvo.length === 0) continue;
+    const todas = alvo.every((t) => palavras.has(t));
+    if (todas && (!porPalavras || alvo.length > porPalavras.peso)) {
+      porPalavras = { canonico, peso: alvo.length };
+    }
+  }
+  return porPalavras?.canonico ?? "outro";
+}
+
+/** Traz o código da medida para M1..M22; devolve null se não reconhecer. */
+export function canonicalizarCodigo(bruto: string): CodigoMedida | null {
+  const m = String(bruto ?? "")
+    .toUpperCase()
+    .match(/M\s*(\d{1,2})(?:\s*[.,]\s*(\d))?/);
+  if (!m) return null;
+  const codigo = m[2] ? `M${m[1]}.${m[2]}` : `M${m[1]}`;
+  return (CODIGOS_MEDIDA as readonly string[]).includes(codigo)
+    ? (codigo as CodigoMedida)
+    : null;
+}
+
+/** Lista para o prompt ditar o vocabulário que o esquema não consegue impor. */
+export const LISTA_ESPECIES = Object.keys(APELIDOS_ESPECIE).join(", ");

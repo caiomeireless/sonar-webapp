@@ -6,14 +6,19 @@
 // custa uma fração do que custa mandar a imagem de cada página).
 import Anthropic from "@anthropic-ai/sdk";
 
+import { canonicalizarCodigo, canonicalizarEspecie } from "./vocabulario";
 import {
+  ESPECIES_ATIPICAS,
   SISTEMA_ANALISE_AUTOS,
-  promptConsolidacao,
+  promptConsolidacaoFatos,
+  promptConsolidacaoJuizo,
   promptExtracao,
   promptRedacaoPeca,
 } from "./prompts";
 import {
-  SCHEMA_CONSOLIDACAO,
+  normalizarAusentes,
+  SCHEMA_CONSOLIDACAO_FATOS,
+  SCHEMA_CONSOLIDACAO_JUIZO,
   SCHEMA_EXTRACAO,
   SCHEMA_TRIAGEM,
   type CustoTokens,
@@ -166,7 +171,9 @@ function jsonDaResposta<T>(msg: Anthropic.Message, onde: string): T {
     throw new Error(`O modelo devolveu resposta vazia em ${onde}.`);
   }
   try {
-    return JSON.parse(texto) as T;
+    // As sentinelas ("" e -1) voltam a ser null aqui, antes que qualquer
+    // outra parte do app veja a resposta.
+    return normalizarAusentes(JSON.parse(texto)) as T;
   } catch {
     throw new Error(`O modelo devolveu JSON inválido em ${onde}.`);
   }
@@ -252,11 +259,17 @@ export async function extrairLote(args: {
 
   const stream = cliente().messages.stream({
     model: MODELO_ANALISE,
-    max_tokens: 32000,
+    // O teto inclui os tokens de RACIOCÍNIO, e no esforço máximo o modelo
+    // pensa muito: com 32000 a extração de 5 páginas já era cortada.
+    max_tokens: 96000,
     output_config: {
-      // Esforço MÁXIMO: foi pedido explicitamente e é onde se ganha a
-      // diferença entre "listou os atos" e "entendeu a execução".
-      effort: "max",
+      // Esforço ALTO, não máximo — e isto é medido, não palpite: a mesma
+      // extração de 5 páginas levou 414s e 49 mil tokens de saída em
+      // "max", quase tudo raciocínio, o que estoura o tempo de função da
+      // Vercel e multiplica o custo por lote. Extrair é trabalho mecânico
+      // (ler e ancorar na página); o esforço máximo fica onde há juízo de
+      // verdade, que é a consolidação.
+      effort: "high",
       format: { type: "json_schema", schema: SCHEMA_EXTRACAO },
     },
     system: [
@@ -282,51 +295,125 @@ export async function extrairLote(args: {
   });
 
   const msg = await stream.finalMessage();
-  return {
-    extracao: jsonDaResposta<ResultadoExtracao>(msg, "extração"),
-    custo: usoDe(MODELO_ANALISE, msg.usage),
-  };
+  const extracao = jsonDaResposta<ResultadoExtracao>(msg, "extração");
+
+  // O vocabulário de espécies não cabe como enum no esquema (estoura a
+  // gramática), então a amarração acontece aqui. No teste real o modelo
+  // devolveu "SISBAJUD" e "penhora de imóvel por matrícula" — corretos como
+  // português, inúteis como chave. E `classe` é derivada, não perguntada:
+  // se é atípica ou não decorre da própria espécie.
+  for (const m of extracao.medidas ?? []) {
+    m.especie = canonicalizarEspecie(m.especie) as typeof m.especie;
+  }
+
+  return { extracao, custo: usoDe(MODELO_ANALISE, msg.usage) };
 }
 
 // ============================================================
 // PASSADA 2 — CONSOLIDAÇÃO
 // ============================================================
 
+/** Uma chamada ao modelo pesado, com esquema, em esforço máximo. */
+async function passadaEstruturada<T>(args: {
+  prompt: string;
+  schema: unknown;
+  maxTokens: number;
+  onde: string;
+}): Promise<{ dados: T; custo: CustoTokens }> {
+  const stream = cliente().messages.stream({
+    model: MODELO_ANALISE,
+    max_tokens: args.maxTokens,
+    output_config: {
+      effort: "max",
+      format: {
+        type: "json_schema",
+        schema: args.schema as Record<string, unknown>,
+      },
+    },
+    system: SISTEMA_ANALISE_AUTOS,
+    messages: [{ role: "user", content: args.prompt }],
+  });
+
+  const msg = await stream.finalMessage();
+  return {
+    dados: jsonDaResposta<T>(msg, args.onde),
+    custo: usoDe(MODELO_ANALISE, msg.usage),
+  };
+}
+
+/**
+ * Consolida em DUAS etapas: primeiro o que os autos dizem, depois o que
+ * isso significa.
+ *
+ * O motivo imediato é teto da API: a gramática da consolidação inteira é
+ * grande demais para saída estruturada (medido — "The compiled grammar is
+ * too large"). Mas o desenho ficou melhor: a etapa de juízo raciocina
+ * sobre fatos já apurados e limpos, em vez de apurar e julgar no mesmo
+ * fôlego. Só a consolidação se parte; a extração, que roda uma vez por
+ * lote, cabe inteira — era lá que dobrar o custo doeria.
+ */
 export async function consolidar(args: {
   extracoes: ResultadoExtracao[];
   totalPaginas: number;
   dadosAssertiva?: string;
   hoje: string;
-}): Promise<{ ficha: FichaAutos; custo: CustoTokens }> {
+}): Promise<{ ficha: FichaAutos; custos: CustoTokens[] }> {
   const { extracoes, totalPaginas, dadosAssertiva, hoje } = args;
+  const comum = {
+    totalPaginas,
+    totalLotes: extracoes.length,
+    dataDeHoje: hoje,
+  };
 
-  const stream = cliente().messages.stream({
-    model: MODELO_ANALISE,
-    max_tokens: 48000,
-    output_config: {
-      effort: "max",
-      format: { type: "json_schema", schema: SCHEMA_CONSOLIDACAO },
-    },
-    system: SISTEMA_ANALISE_AUTOS,
-    messages: [
-      {
-        role: "user",
-        content: promptConsolidacao({
-          totalPaginas,
-          totalLotes: extracoes.length,
-          dataDeHoje: hoje,
-          extracoesJson: JSON.stringify(extracoes),
-          dadosAssertiva,
-        }),
-      },
-    ],
+  // Etapa 2a — os fatos.
+  const fatos = await passadaEstruturada<Partial<FichaAutos>>({
+    prompt: promptConsolidacaoFatos({
+      ...comum,
+      extracoesJson: JSON.stringify(extracoes),
+    }),
+    schema: SCHEMA_CONSOLIDACAO_FATOS,
+    maxTokens: 96000,
+    onde: "consolidação dos fatos",
   });
 
-  const msg = await stream.finalMessage();
-  return {
-    ficha: jsonDaResposta<FichaAutos>(msg, "consolidação"),
-    custo: usoDe(MODELO_ANALISE, msg.usage),
-  };
+  // Etapa 2b — o juízo. Recebe os fatos limpos e os marcos crus (que a
+  // etapa anterior não repassa, mas o cálculo do art. 921 precisa).
+  const marcos = extracoes.flatMap((e) => e.marcos ?? []);
+  const juizo = await passadaEstruturada<Partial<FichaAutos>>({
+    prompt: promptConsolidacaoJuizo({
+      ...comum,
+      fatosJson: JSON.stringify(fatos.dados),
+      marcosJson: JSON.stringify(marcos),
+      dadosAssertiva,
+    }),
+    schema: SCHEMA_CONSOLIDACAO_JUIZO,
+    maxTokens: 96000,
+    onde: "consolidação do juízo",
+  });
+
+  const ficha = { ...fatos.dados, ...juizo.dados } as FichaAutos;
+
+  // Mesma amarração da extração, agora sobre o resultado consolidado.
+  for (const m of ficha.medidasRealizadas ?? []) {
+    m.especie = canonicalizarEspecie(m.especie) as typeof m.especie;
+    m.classe = ESPECIES_ATIPICAS.includes(m.especie as never)
+      ? "atipica"
+      : "tipica";
+  }
+  for (const m of ficha.medidasFaltantes ?? []) {
+    m.especie = canonicalizarEspecie(m.especie) as typeof m.especie;
+    m.classe = ESPECIES_ATIPICAS.includes(m.especie as never)
+      ? "atipica"
+      : "tipica";
+    m.codigo = canonicalizarCodigo(m.codigo) ?? m.codigo;
+  }
+  if (ficha.proximaMovimentacao) {
+    ficha.proximaMovimentacao.codigo =
+      canonicalizarCodigo(ficha.proximaMovimentacao.codigo) ??
+      ficha.proximaMovimentacao.codigo;
+  }
+
+  return { ficha, custos: [fatos.custo, juizo.custo] };
 }
 
 // ============================================================
@@ -400,7 +487,7 @@ export async function redigirPeca(args: {
 
   const stream = cliente().messages.stream({
     model: MODELO_ANALISE,
-    max_tokens: 32000,
+    max_tokens: 64000,
     output_config: {
       effort: "high",
       format: { type: "json_schema", schema: SCHEMA_PECA },
