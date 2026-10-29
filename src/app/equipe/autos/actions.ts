@@ -14,8 +14,13 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import {
   atualizarAnalise,
   criarAnalise,
+  localizarRetomavel,
   obterAnalise,
+  obterParaConsolidar,
   promoverAnalise,
+  salvarTriagem,
+  type AnaliseRetomavel,
+  type TriagemSalva,
 } from "@/lib/autos/analises";
 import { fichaVigente, type FichaAutos } from "@/lib/autos/tipos";
 
@@ -64,6 +69,63 @@ export async function registrarErroAnalise(
     });
   } catch {
     // Se nem o registro do erro funcionar, não há o que fazer aqui.
+  }
+}
+
+/**
+ * O mesmo arquivo, arrastado de novo, encontra a análise que ficou pelo
+ * caminho — e o navegador pula a triagem e os lotes já lidos.
+ */
+export async function localizarAnaliseRetomavel(
+  hash: string,
+): Promise<AnaliseRetomavel | null> {
+  try {
+    await exigirEquipe();
+    if (!hash || hash.length > 200) return null;
+    return await localizarRetomavel(hash);
+  } catch {
+    return null;
+  }
+}
+
+/** Fecha a triagem no banco e abre a fase de lotes. */
+export async function gravarTriagem(
+  id: number,
+  triagem: TriagemSalva,
+): Promise<EstadoAutos> {
+  try {
+    await exigirEquipe();
+    await salvarTriagem(id, triagem);
+    return { ok: true, mensagem: "Triagem gravada." };
+  } catch (e) {
+    return {
+      ok: false,
+      mensagem: e instanceof Error ? e.message : "Falha ao gravar a triagem.",
+    };
+  }
+}
+
+export interface EstadoRetomada {
+  lotesLidos: number;
+  totalLotes: number;
+  temFatos: boolean;
+}
+
+/** Diz à tela o que falta para uma análise parada chegar à ficha. */
+export async function estadoRetomada(
+  id: number,
+): Promise<EstadoRetomada | null> {
+  try {
+    await exigirEquipe();
+    const a = await obterParaConsolidar(id);
+    if (!a) return null;
+    return {
+      lotesLidos: a.extracoes.length,
+      totalLotes: a.triagem?.totalLotes ?? a.extracoes.length,
+      temFatos: Array.isArray(a.ficha?.medidasRealizadas),
+    };
+  } catch {
+    return null;
   }
 }
 

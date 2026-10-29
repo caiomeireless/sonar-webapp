@@ -6,6 +6,11 @@
 // mandando um lote por requisição. Assim cada chamada ao servidor é curta
 // (cabe no tempo de função da Vercel), nada grande trafega, e o progresso
 // que aparece na tela é o progresso de verdade.
+//
+// Cada lote é gravado no banco assim que sai, e a consolidação roda em duas
+// requisições que leem do banco. Se qualquer etapa cair — rede, tempo de
+// função, API —, arrastar o MESMO arquivo de novo retoma de onde parou, sem
+// triar e sem reler o que já está gravado.
 import { useCallback, useRef, useState } from "react";
 import { FileText, Upload, X } from "lucide-react";
 
@@ -14,6 +19,7 @@ import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { BordaLiquidaMetal } from "@/components/ui/BordaLiquidaMetal";
 import type { PaginaTexto } from "@/lib/autos/claude";
 import {
+  impressaoDigital,
   lerPdf,
   montarLotes,
   montarLotesTriagem,
@@ -25,7 +31,12 @@ import type {
   ResultadoTriagem,
 } from "@/lib/autos/tipos";
 
-import { abrirAnalise, registrarErroAnalise } from "../actions";
+import {
+  abrirAnalise,
+  gravarTriagem,
+  localizarAnaliseRetomavel,
+  registrarErroAnalise,
+} from "../actions";
 import { FichaResultado } from "./FichaResultado";
 
 type Fase =
@@ -45,11 +56,16 @@ interface Progresso {
 
 const INICIAL: Progresso = { fase: "ocioso", rotulo: "", pct: 0 };
 
-async function postar<T>(url: string, corpo: unknown): Promise<T> {
+async function postar<T>(
+  url: string,
+  corpo: unknown,
+  sinal?: AbortSignal,
+): Promise<T> {
   const r = await fetch(url, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(corpo),
+    signal: sinal,
   });
   if (!r.ok) {
     const j = (await r.json().catch(() => null)) as { erro?: string } | null;
@@ -58,13 +74,26 @@ async function postar<T>(url: string, corpo: unknown): Promise<T> {
   return (await r.json()) as T;
 }
 
-export function Analisador({ credores }: { credores: { id: number; nome: string }[] }) {
+function cancelado(sinal: AbortSignal) {
+  if (sinal.aborted) throw new DOMException("Cancelado", "AbortError");
+}
+
+export function Analisador({
+  credores,
+}: {
+  credores: { id: number; nome: string }[];
+}) {
   const [prog, setProg] = useState<Progresso>(INICIAL);
   const [arrastando, setArrastando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [ficha, setFicha] = useState<FichaAutos | null>(null);
   const [analiseId, setAnaliseId] = useState<number | null>(null);
   const [custoBrl, setCustoBrl] = useState<number | null>(null);
+  const [retomada, setRetomada] = useState<{
+    id: number;
+    lidos: number;
+    total: number;
+  } | null>(null);
   const [resumoArquivo, setResumoArquivo] = useState<{
     nome: string;
     paginas: number;
@@ -85,8 +114,10 @@ export function Analisador({ credores }: { credores: { id: number; nome: string 
     setFicha(null);
     setCustoBrl(null);
     setResumoArquivo(null);
+    setRetomada(null);
 
     const controller = new AbortController();
+    const sinal = controller.signal;
     abortRef.current = controller;
     let idAnalise: number | null = null;
 
@@ -102,45 +133,94 @@ export function Analisador({ credores }: { credores: { id: number; nome: string 
             // a leitura vale os primeiros 25% da barra
             pct: Math.round((lidas / total) * 25),
           }),
-        controller.signal,
+        sinal,
       );
 
-      const aberta = await abrirAnalise(arquivo.name, totalPaginas);
-      if ("erro" in aberta) throw new Error(aberta.erro);
-      idAnalise = aberta.id;
-      setAnaliseId(aberta.id);
+      // ---------- 2. É O MESMO ARQUIVO DE UMA ANÁLISE PARADA? ----------
+      setProg({ fase: "triando", rotulo: "Reconhecendo o arquivo", pct: 25 });
+      const hash = await impressaoDigital(arquivo);
+      const anterior = await localizarAnaliseRetomavel(hash);
+      cancelado(sinal);
 
-      // ---------- 2. TRIAGEM (modelo barato) ----------
-      setProg({
-        fase: "triando",
-        rotulo: "Separando peças de anexos",
-        pct: 26,
-      });
+      let relevantes: number[];
+      let totalLotes: number;
+      const lotesLidos = new Set<number>();
 
-      const custos: CustoTokens[] = [];
-      const classePorPagina = new Map<number, number>();
-      const lotesTriagem = montarLotesTriagem(paginas);
+      if (anterior) {
+        // Pula a triagem e os lotes já gravados.
+        idAnalise = anterior.id;
+        setAnaliseId(anterior.id);
+        relevantes = anterior.triagem.relevantes;
+        totalLotes = anterior.triagem.totalLotes;
+        for (const i of anterior.lotesLidos) lotesLidos.add(i);
+        setRetomada({
+          id: anterior.id,
+          lidos: lotesLidos.size,
+          total: totalLotes,
+        });
+      } else {
+        const aberta = await abrirAnalise(arquivo.name, totalPaginas);
+        if ("erro" in aberta) throw new Error(aberta.erro);
+        idAnalise = aberta.id;
+        setAnaliseId(aberta.id);
 
-      for (const [i, lote] of lotesTriagem.entries()) {
-        const { triagem, custo } = await postar<{
-          triagem: ResultadoTriagem;
-          custo: CustoTokens;
-        }>("/api/autos/triagem", { paginas: lote });
-        custos.push(custo);
-        for (const p of triagem.paginas) classePorPagina.set(p.p, p.rel);
+        // ---------- 3. TRIAGEM (modelo barato) ----------
         setProg({
           fase: "triando",
-          rotulo: `Separando peças de anexos (${i + 1}/${lotesTriagem.length})`,
-          pct: 26 + Math.round(((i + 1) / lotesTriagem.length) * 9),
+          rotulo: "Separando peças de anexos",
+          pct: 26,
         });
+
+        const relPorPagina = new Map<number, number>();
+        const lotesTriagem = montarLotesTriagem(paginas);
+
+        for (const [i, lote] of lotesTriagem.entries()) {
+          cancelado(sinal);
+          const { triagem } = await postar<{
+            triagem: ResultadoTriagem;
+            custo: CustoTokens;
+          }>("/api/autos/triagem", { paginas: lote }, sinal);
+          for (const p of triagem.paginas) relPorPagina.set(p.p, p.rel);
+          setProg({
+            fase: "triando",
+            rotulo: `Separando peças de anexos (${i + 1}/${lotesTriagem.length})`,
+            pct: 26 + Math.round(((i + 1) / lotesTriagem.length) * 9),
+          });
+        }
+
+        // Guarda o que tem alguma relevância. Página não classificada entra
+        // por precaução: é melhor analisar demais que perder uma penhora.
+        relevantes = paginas
+          .filter((p) => {
+            const rel = relPorPagina.get(p.pagina);
+            return rel === undefined ? true : rel >= 1;
+          })
+          .map((p) => p.pagina);
+
+        if (relevantes.length === 0) {
+          throw new Error(
+            "A triagem não encontrou nenhuma peça processual neste arquivo.",
+          );
+        }
+
+        const porNumeroPrevia = new Map(paginas.map((p) => [p.pagina, p]));
+        totalLotes = montarLotes(
+          relevantes.map((n) => porNumeroPrevia.get(n)!),
+        ).length;
+
+        const gravada = await gravarTriagem(aberta.id, {
+          hash,
+          relevantes,
+          totalLotes,
+          semTexto: paginasSemTexto,
+        });
+        if (!gravada.ok) throw new Error(gravada.mensagem);
       }
 
-      // Guarda o que tem alguma relevância. Página não classificada entra
-      // por precaução: é melhor analisar demais que perder uma penhora.
-      const uteis: PaginaTexto[] = paginas.filter((p) => {
-        const rel = classePorPagina.get(p.pagina);
-        return rel === undefined ? true : rel >= 1;
-      });
+      const porNumero = new Map(paginas.map((p) => [p.pagina, p]));
+      const uteis: PaginaTexto[] = relevantes
+        .map((n) => porNumero.get(n))
+        .filter((p): p is PaginaTexto => Boolean(p));
 
       setResumoArquivo({
         nome: arquivo.name,
@@ -149,70 +229,80 @@ export function Analisador({ credores }: { credores: { id: number; nome: string 
         semTexto: paginasSemTexto.length,
       });
 
-      if (uteis.length === 0) {
-        throw new Error(
-          "A triagem não encontrou nenhuma peça processual neste arquivo.",
-        );
-      }
-
-      // ---------- 3. EXTRAÇÃO (Opus, esforço máximo, lote a lote) ----------
+      // ---------- 4. EXTRAÇÃO (Opus, lote a lote, gravando cada um) ----------
       const lotes = montarLotes(uteis);
-      const extracoes: ResultadoExtracao[] = [];
       let resumoAnterior: string | undefined;
+      const especiesVistas: string[] = [];
 
       for (const [i, lote] of lotes.entries()) {
+        if (lotesLidos.has(i)) continue;
+        cancelado(sinal);
+
         setProg({
           fase: "analisando",
           rotulo: `Analisando lote ${i + 1} de ${lotes.length} · páginas ${lote[0].pagina} a ${lote[lote.length - 1].pagina}`,
           pct: 35 + Math.round((i / lotes.length) * 50),
         });
 
-        const { extracao, custo } = await postar<{
+        const { extracao } = await postar<{
           extracao: ResultadoExtracao;
           custo: CustoTokens;
-        }>("/api/autos/lote", {
-          paginas: lote,
-          totalPaginas,
-          resumoAnterior,
-        });
-
-        extracoes.push(extracao);
-        custos.push(custo);
+          lotesLidos: number;
+        }>(
+          "/api/autos/lote",
+          {
+            analiseId: idAnalise,
+            indice: i,
+            totalLotes: lotes.length,
+            paginas: lote,
+            totalPaginas,
+            resumoAnterior,
+          },
+          sinal,
+        );
+        lotesLidos.add(i);
 
         // Passa adiante só o essencial, para o próximo lote não repetir a
         // identificação nem perder o fio da cronologia.
         const id = extracao.identificacao;
+        for (const m of extracao.medidas ?? []) {
+          if (!especiesVistas.includes(m.especie)) especiesVistas.push(m.especie);
+        }
         resumoAnterior = [
           id.numeroCnj ? `Processo ${id.numeroCnj}` : null,
           id.vara && id.comarca ? `${id.vara}, ${id.comarca}` : null,
-          extracoes.flatMap((e) => e.medidas).length > 0
-            ? `Medidas já vistas: ${extracoes
-                .flatMap((e) => e.medidas)
-                .map((m) => m.especie)
-                .join(", ")}`
+          especiesVistas.length > 0
+            ? `Medidas já vistas: ${especiesVistas.slice(0, 30).join(", ")}`
             : null,
         ]
           .filter(Boolean)
           .join(". ");
       }
 
-      // ---------- 4. CONSOLIDAÇÃO ----------
+      // ---------- 5. CONSOLIDAÇÃO, EM DUAS REQUISIÇÕES ----------
+      cancelado(sinal);
       setProg({
         fase: "consolidando",
-        rotulo: "Fechando a conta e montando o caminho",
+        rotulo: "Apurando os fatos: deduplicando atos e fechando a conta",
         pct: 88,
       });
+      await postar<{ ok: true }>(
+        "/api/autos/consolidar-fatos",
+        { analiseId: idAnalise },
+        sinal,
+      );
 
-      const final = await postar<{
-        ficha: FichaAutos;
-        custoBrl: number;
-      }>("/api/autos/consolidar", {
-        analiseId: idAnalise,
-        extracoes,
-        totalPaginas,
-        paginasUteis: uteis.length,
-        custosAnteriores: custos,
+      cancelado(sinal);
+      setProg({
+        fase: "consolidando",
+        rotulo: "Julgando: prescrição, vulnerabilidades e o que falta",
+        pct: 94,
       });
+      const final = await postar<{ ficha: FichaAutos; custoBrl: number }>(
+        "/api/autos/consolidar-juizo",
+        { analiseId: idAnalise },
+        sinal,
+      );
 
       setFicha(final.ficha);
       setCustoBrl(final.custoBrl);
@@ -291,7 +381,9 @@ export function Analisador({ credores }: { credores: { id: number; nome: string 
             </span>
             <span className="max-w-[560px] text-sm leading-relaxed text-[var(--color-ivory-66)]">
               O arquivo é lido aqui no seu navegador e não sai da sua máquina:
-              só o texto das peças sobe para análise.
+              só o texto das peças sobe para análise. Se uma análise parar no
+              meio, arraste o mesmo arquivo de novo que ela continua de onde
+              parou.
             </span>
           </button>
         </SpotlightCard>
@@ -317,15 +409,22 @@ export function Analisador({ credores }: { credores: { id: number; nome: string 
               />
             </div>
 
+            {retomada && (
+              <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-gold)]">
+                Retomando a análise #{retomada.id}: {retomada.lidos} de{" "}
+                {retomada.total} lotes já estavam gravados
+              </p>
+            )}
+
             <p className="max-w-[560px] text-sm leading-relaxed text-[var(--color-ivory-66)]">
               {prog.fase === "lendo" &&
                 "Lendo o arquivo no navegador, página por página."}
               {prog.fase === "triando" &&
                 "Separando as peças processuais dos anexos, para não gastar análise com procuração e comprovante."}
               {prog.fase === "analisando" &&
-                "Lendo as peças com atenção máxima: cada medida encontrada fica amarrada à página de onde saiu."}
+                "Lendo as peças com atenção: cada medida encontrada fica amarrada à página de onde saiu, e cada lote é gravado assim que termina."}
               {prog.fase === "consolidando" &&
-                "Juntando os lotes, deduplicando os atos repetidos e fechando a conta do débito."}
+                "Juntando os lotes, deduplicando os atos repetidos, fechando a conta do débito e calculando a prescrição."}
             </p>
 
             <button
@@ -349,6 +448,10 @@ export function Analisador({ credores }: { credores: { id: number; nome: string 
           <p className="mt-3 text-sm leading-relaxed text-[var(--color-ivory-88)]">
             {erro}
           </p>
+          <p className="mt-3 text-sm leading-relaxed text-[var(--color-ivory-66)]">
+            O que já foi lido ficou gravado. Arraste o mesmo arquivo de novo
+            para continuar de onde parou.
+          </p>
           <button
             type="button"
             onClick={() => {
@@ -357,7 +460,7 @@ export function Analisador({ credores }: { credores: { id: number; nome: string 
             }}
             className="mt-5 font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-gold)] hover:underline"
           >
-            Tentar outro arquivo
+            Tentar de novo
           </button>
         </SpotlightCard>
       )}
@@ -409,6 +512,7 @@ export function Analisador({ credores }: { credores: { id: number; nome: string 
               type="button"
               onClick={() => {
                 setFicha(null);
+                setAnaliseId(null);
                 setProg(INICIAL);
                 setResumoArquivo(null);
                 inputRef.current?.click();
@@ -428,7 +532,12 @@ export function Analisador({ credores }: { credores: { id: number; nome: string 
         type="file"
         accept="application/pdf"
         hidden
-        onChange={(e) => aoSoltar(e.target.files)}
+        onChange={(e) => {
+          aoSoltar(e.target.files);
+          // Permite arrastar o MESMO arquivo de novo (retomada): sem isto o
+          // input não dispara change para um arquivo igual ao anterior.
+          e.target.value = "";
+        }}
       />
     </div>
   );

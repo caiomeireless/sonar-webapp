@@ -5,19 +5,42 @@
 // caso e medidas de verdade). Essa separação é deliberada — agora que o
 // Themis saiu, este módulo virou a fonte de alimentação da base, e dado de
 // IA não entra na base oficial sem alguém olhar.
+//
+// Desde o primeiro capa a capa real: CADA LOTE é gravado assim que sai. A
+// versão anterior só gravava no fim da consolidação, e quando ela estourou
+// o tempo de função (504) perdeu-se uma extração inteira. Agora a falha de
+// uma etapa nunca apaga a etapa anterior, e a análise pode ser retomada.
 import { createAdminClient } from "@/lib/supabase/admin";
 
+import { custoEmReais, somarCustos } from "./claude";
 import type {
   AnaliseAutos,
   CustoTokens,
   FichaAutos,
   MedidaConsolidada,
   ResultadoExtracao,
-  ResultadoTriagem,
   StatusAnalise,
 } from "./tipos";
 
 const TABELA = "autos_analises";
+
+/** Um lote extraído, com a posição dele na fila — é o que permite retomar. */
+export interface LoteExtraido {
+  indice: number;
+  extracao: ResultadoExtracao;
+}
+
+/**
+ * O que fica da triagem no jsonb `triagem`: o suficiente para, se o mesmo
+ * arquivo for arrastado de novo, pular a triagem e os lotes já lidos. A
+ * partição em lotes é determinística a partir de `relevantes`.
+ */
+export interface TriagemSalva {
+  hash: string;
+  relevantes: number[];
+  totalLotes: number;
+  semTexto: number[];
+}
 
 /** Erro de "tabela não existe" do PostgREST: a migration 025 não rodou. */
 function faltaMigration(erro: { code?: string } | null): boolean {
@@ -60,9 +83,11 @@ export interface PatchAnalise {
   erro?: string | null;
   numero_processo?: string | null;
   paginas_uteis?: number;
-  triagem?: ResultadoTriagem;
-  extracoes?: ResultadoExtracao[];
-  ficha?: FichaAutos;
+  arquivo_hash?: string;
+  triagem?: TriagemSalva;
+  extracoes?: LoteExtraido[];
+  /** Parcial de propósito: depois da etapa de fatos, a ficha ainda não tem o juízo. */
+  ficha?: Partial<FichaAutos>;
   ficha_revisada?: FichaAutos;
   custo_tokens?: CustoTokens[];
   custo_brl?: number;
@@ -91,32 +116,145 @@ export async function obterAnalise(id: number): Promise<AnaliseAutos | null> {
   return data as unknown as AnaliseAutos;
 }
 
-/** Linhas cruas, inclusive as colunas pesadas — só para quem vai consolidar. */
-export async function obterAnaliseCompleta(id: number): Promise<{
-  total_paginas: number;
-  extracoes: ResultadoExtracao[] | null;
-  devedor_id: number | null;
-} | null> {
+/** Fecha a triagem e abre a fase de lotes. Zera as extrações: é um começo. */
+export async function salvarTriagem(
+  id: number,
+  triagem: TriagemSalva,
+): Promise<void> {
+  await atualizarAnalise(id, {
+    status: "analisando",
+    etapa_atual: `0 de ${triagem.totalLotes} lotes lidos`,
+    progresso_pct: 35,
+    erro: null,
+    arquivo_hash: triagem.hash,
+    triagem,
+    paginas_uteis: triagem.relevantes.length,
+    extracoes: [],
+  });
+}
+
+/**
+ * Grava a extração de UM lote assim que ela sai, somando o custo. Os lotes
+ * chegam em sequência (o navegador orquestra um por vez), então o
+ * lê-altera-grava aqui não disputa com ninguém.
+ */
+export async function anexarExtracao(args: {
+  id: number;
+  indice: number;
+  totalLotes: number;
+  extracao: ResultadoExtracao;
+  custo: CustoTokens;
+}): Promise<{ lotesLidos: number }> {
   const sb = createAdminClient();
   const { data, error } = await sb
     .from(TABELA)
-    .select("total_paginas, extracoes, devedor_id")
-    .eq("id", id)
+    .select("extracoes, custo_tokens")
+    .eq("id", args.id)
     .single();
-  if (error || !data) return null;
-  return data as unknown as {
-    total_paginas: number;
-    extracoes: ResultadoExtracao[] | null;
-    devedor_id: number | null;
+  if (error || !data) {
+    throw new Error("Análise não encontrada ao gravar o lote.");
+  }
+
+  const lotes = ((data.extracoes as LoteExtraido[] | null) ?? []).filter(
+    (l) => l.indice !== args.indice,
+  );
+  lotes.push({ indice: args.indice, extracao: args.extracao });
+  lotes.sort((a, b) => a.indice - b.indice);
+
+  const custos = somarCustos([
+    ...((data.custo_tokens as CustoTokens[] | null) ?? []),
+    args.custo,
+  ]);
+  const custoBrl = custos.reduce((s, c) => s + custoEmReais(c), 0);
+  const total = Math.max(1, args.totalLotes);
+  const completo = lotes.length >= total;
+
+  await atualizarAnalise(args.id, {
+    status: "analisando",
+    erro: null,
+    extracoes: lotes,
+    custo_tokens: custos,
+    custo_brl: Number(custoBrl.toFixed(4)),
+    etapa_atual: completo
+      ? "Leitura concluída; aguardando consolidação"
+      : `${lotes.length} de ${total} lotes lidos`,
+    progresso_pct: 35 + Math.round((lotes.length / total) * 50),
+  });
+
+  return { lotesLidos: lotes.length };
+}
+
+export interface AnaliseRetomavel {
+  id: number;
+  status: StatusAnalise;
+  triagem: TriagemSalva;
+  lotesLidos: number[];
+}
+
+/**
+ * O mesmo arquivo, arrastado de novo, encontra a análise que ficou pelo
+ * caminho — quebrada, interrompida ou parada na consolidação.
+ */
+export async function localizarRetomavel(
+  hash: string,
+): Promise<AnaliseRetomavel | null> {
+  const sb = createAdminClient();
+  const { data, error } = await sb
+    .from(TABELA)
+    .select("id, status, triagem, extracoes")
+    .eq("arquivo_hash", hash)
+    .in("status", ["analisando", "consolidando", "erro"])
+    .order("criado_em", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error || !data || !data.triagem) return null;
+
+  const lotes = (data.extracoes as LoteExtraido[] | null) ?? [];
+  return {
+    id: data.id as number,
+    status: data.status as StatusAnalise,
+    triagem: data.triagem as TriagemSalva,
+    lotesLidos: lotes.map((l) => l.indice),
   };
 }
 
+export interface AnaliseParaConsolidar {
+  id: number;
+  total_paginas: number;
+  triagem: TriagemSalva | null;
+  extracoes: LoteExtraido[];
+  ficha: Partial<FichaAutos> | null;
+  custo_tokens: CustoTokens[];
+}
+
+/** O que as rotas de consolidação leem do banco — nada grande trafega no corpo. */
+export async function obterParaConsolidar(
+  id: number,
+): Promise<AnaliseParaConsolidar | null> {
+  const sb = createAdminClient();
+  const { data, error } = await sb
+    .from(TABELA)
+    .select("id, total_paginas, triagem, extracoes, ficha, custo_tokens")
+    .eq("id", id)
+    .single();
+  if (error || !data) return null;
+  return {
+    id: data.id as number,
+    total_paginas: data.total_paginas as number,
+    triagem: (data.triagem as TriagemSalva | null) ?? null,
+    extracoes: (data.extracoes as LoteExtraido[] | null) ?? [],
+    ficha: (data.ficha as Partial<FichaAutos> | null) ?? null,
+    custo_tokens: (data.custo_tokens as CustoTokens[] | null) ?? [],
+  };
+}
+
+/** Lista leve: sem os jsonb pesados (ficha, extrações). */
 export async function listarAnalises(limite = 50): Promise<AnaliseAutos[]> {
   const sb = createAdminClient();
   const { data, error } = await sb
     .from(TABELA)
     .select(
-      "id, devedor_id, caso_id, arquivo_nome, numero_processo, total_paginas, paginas_uteis, status, etapa_atual, progresso_pct, erro, custo_brl, criado_por, criado_em, ficha, ficha_revisada",
+      "id, devedor_id, caso_id, arquivo_nome, numero_processo, total_paginas, paginas_uteis, status, etapa_atual, progresso_pct, erro, custo_brl, criado_por, criado_em",
     )
     .order("criado_em", { ascending: false })
     .limit(limite);

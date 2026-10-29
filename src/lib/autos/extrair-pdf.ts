@@ -198,3 +198,21 @@ export function montarLotesTriagem(
   }
   return lotes;
 }
+
+/**
+ * Impressão digital barata do arquivo, para reconhecer o MESMO capa a capa
+ * quando o advogado o arrasta de novo e retomar de onde parou — sem triar
+ * e sem reler os lotes que já estão no banco.
+ *
+ * Não precisa ser criptograficamente única: tamanho + SHA-256 dos
+ * primeiros 2 MB distinguem arquivos diferentes e reconhecem o mesmo, e
+ * custam nada mesmo num PDF de 500 MB.
+ */
+export async function impressaoDigital(arquivo: File): Promise<string> {
+  const fatia = await arquivo.slice(0, 2 * 1024 * 1024).arrayBuffer();
+  const digest = await crypto.subtle.digest("SHA-256", fatia);
+  const hex = Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  return `${arquivo.size}:${hex}`;
+}

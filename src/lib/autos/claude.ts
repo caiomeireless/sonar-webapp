@@ -23,6 +23,7 @@ import {
   SCHEMA_TRIAGEM,
   type CustoTokens,
   type FichaAutos,
+  type MarcoPrescricional,
   type ResultadoExtracao,
   type ResultadoTriagem,
 } from "./tipos";
@@ -324,7 +325,12 @@ async function passadaEstruturada<T>(args: {
     model: MODELO_ANALISE,
     max_tokens: args.maxTokens,
     output_config: {
-      effort: "max",
+      // "xhigh", não "max" — medido: em "max" a etapa de juízo passou de
+      // 96.000 tokens de raciocínio num caso de 5 páginas e foi CORTADA sem
+      // entregar nada. Dupla leitura e dois caminhos de cálculo, em esforço
+      // máximo, viram re-análise infinita. "xhigh" é o nível recomendado
+      // para trabalho analítico pesado — e termina.
+      effort: "xhigh",
       format: {
         type: "json_schema",
         schema: args.schema as Record<string, unknown>,
@@ -341,70 +347,94 @@ async function passadaEstruturada<T>(args: {
   };
 }
 
-/**
- * Consolida em DUAS etapas: primeiro o que os autos dizem, depois o que
- * isso significa.
- *
- * O motivo imediato é teto da API: a gramática da consolidação inteira é
- * grande demais para saída estruturada (medido — "The compiled grammar is
- * too large"). Mas o desenho ficou melhor: a etapa de juízo raciocina
- * sobre fatos já apurados e limpos, em vez de apurar e julgar no mesmo
- * fôlego. Só a consolidação se parte; a extração, que roda uma vez por
- * lote, cabe inteira — era lá que dobrar o custo doeria.
- */
-export async function consolidar(args: {
+// A consolidação é em DUAS etapas — e em duas REQUISIÇÕES.
+//
+// O motivo imediato é teto da API: a gramática da consolidação inteira é
+// grande demais para saída estruturada (medido — "The compiled grammar is
+// too large"). O segundo motivo veio do primeiro capa a capa real: as duas
+// etapas numa única requisição estouraram os 800s da Vercel (504), e cada
+// uma precisa do tempo de função inteiro. E o desenho ficou melhor: a etapa
+// de juízo raciocina sobre fatos já apurados e gravados, em vez de apurar e
+// julgar no mesmo fôlego. Só a consolidação se parte; a extração, que roda
+// uma vez por lote, cabe inteira — era lá que dobrar o custo doeria.
+
+function classeDaEspecie(especie: string): "tipica" | "atipica" {
+  return ESPECIES_ATIPICAS.includes(especie as never) ? "atipica" : "tipica";
+}
+
+/** Passada 2a — o que os autos DIZEM. */
+export async function consolidarFatos(args: {
   extracoes: ResultadoExtracao[];
   totalPaginas: number;
-  dadosAssertiva?: string;
   hoje: string;
-}): Promise<{ ficha: FichaAutos; custos: CustoTokens[] }> {
-  const { extracoes, totalPaginas, dadosAssertiva, hoje } = args;
-  const comum = {
-    totalPaginas,
-    totalLotes: extracoes.length,
-    dataDeHoje: hoje,
-  };
+}): Promise<{ fatos: Partial<FichaAutos>; custo: CustoTokens }> {
+  const { extracoes, totalPaginas, hoje } = args;
 
-  // Etapa 2a — os fatos.
-  const fatos = await passadaEstruturada<Partial<FichaAutos>>({
+  const r = await passadaEstruturada<Partial<FichaAutos>>({
     prompt: promptConsolidacaoFatos({
-      ...comum,
+      totalPaginas,
+      totalLotes: extracoes.length,
+      dataDeHoje: hoje,
       extracoesJson: JSON.stringify(extracoes),
     }),
     schema: SCHEMA_CONSOLIDACAO_FATOS,
-    maxTokens: 96000,
+    maxTokens: 128000,
     onde: "consolidação dos fatos",
   });
 
-  // Etapa 2b — o juízo. Recebe os fatos limpos e os marcos crus (que a
-  // etapa anterior não repassa, mas o cálculo do art. 921 precisa).
-  const marcos = extracoes.flatMap((e) => e.marcos ?? []);
-  const juizo = await passadaEstruturada<Partial<FichaAutos>>({
+  // Mesma amarração da extração, agora sobre o resultado consolidado.
+  for (const m of r.dados.medidasRealizadas ?? []) {
+    m.especie = canonicalizarEspecie(m.especie) as typeof m.especie;
+    m.classe = classeDaEspecie(m.especie);
+  }
+
+  return { fatos: r.dados, custo: r.custo };
+}
+
+/**
+ * Passada 2b — o que isso SIGNIFICA. Recebe os fatos já apurados (lidos do
+ * banco) e os marcos crus, que a etapa anterior não repassa mas o cálculo do
+ * art. 921 exige.
+ */
+export async function consolidarJuizo(args: {
+  fatos: Partial<FichaAutos>;
+  marcos: MarcoPrescricional[];
+  totalPaginas: number;
+  totalLotes: number;
+  hoje: string;
+  dadosAssertiva?: string;
+}): Promise<{ ficha: FichaAutos; custo: CustoTokens }> {
+  const { fatos, marcos, totalPaginas, totalLotes, hoje, dadosAssertiva } =
+    args;
+
+  const r = await passadaEstruturada<Partial<FichaAutos>>({
     prompt: promptConsolidacaoJuizo({
-      ...comum,
-      fatosJson: JSON.stringify(fatos.dados),
+      totalPaginas,
+      totalLotes,
+      dataDeHoje: hoje,
+      fatosJson: JSON.stringify(fatos),
       marcosJson: JSON.stringify(marcos),
       dadosAssertiva,
     }),
     schema: SCHEMA_CONSOLIDACAO_JUIZO,
-    maxTokens: 96000,
+    maxTokens: 128000,
     onde: "consolidação do juízo",
   });
 
-  const ficha = { ...fatos.dados, ...juizo.dados } as FichaAutos;
+  const ficha = { ...fatos, ...r.dados } as FichaAutos;
 
-  // Mesma amarração da extração, agora sobre o resultado consolidado.
-  for (const m of ficha.medidasRealizadas ?? []) {
+  // A tela não pode quebrar porque uma etapa devolveu lista a menos.
+  ficha.partes ??= [];
+  ficha.bens ??= [];
+  ficha.medidasRealizadas ??= [];
+  ficha.medidasFaltantes ??= [];
+  ficha.vulnerabilidades ??= [];
+  ficha.alertas ??= [];
+  ficha.lacunas ??= [];
+
+  for (const m of ficha.medidasFaltantes) {
     m.especie = canonicalizarEspecie(m.especie) as typeof m.especie;
-    m.classe = ESPECIES_ATIPICAS.includes(m.especie as never)
-      ? "atipica"
-      : "tipica";
-  }
-  for (const m of ficha.medidasFaltantes ?? []) {
-    m.especie = canonicalizarEspecie(m.especie) as typeof m.especie;
-    m.classe = ESPECIES_ATIPICAS.includes(m.especie as never)
-      ? "atipica"
-      : "tipica";
+    m.classe = classeDaEspecie(m.especie);
     m.codigo = canonicalizarCodigo(m.codigo) ?? m.codigo;
   }
   if (ficha.proximaMovimentacao) {
@@ -413,7 +443,7 @@ export async function consolidar(args: {
       ficha.proximaMovimentacao.codigo;
   }
 
-  return { ficha, custos: [fatos.custo, juizo.custo] };
+  return { ficha, custo: r.custo };
 }
 
 // ============================================================
