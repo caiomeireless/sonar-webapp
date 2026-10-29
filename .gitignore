@@ -41,3 +41,6 @@ next-env.d.ts
 
 # variaveis de ambiente / segredos
 .env*.local
+
+# saida temporaria do checar-esquemas
+.tmp-esquemas

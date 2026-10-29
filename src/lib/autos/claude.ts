@@ -105,6 +105,47 @@ function usoDe(
   };
 }
 
+/**
+ * Traduz a falha da API para algo que o advogado entenda — e, sobretudo,
+ * que diga de quem é o problema. Um 400 de esquema é defeito NOSSO, não
+ * dos autos, e mostrar o JSON cru da API faz o usuário achar que o PDF
+ * está errado. (Aconteceu em 29/10 com enum anulável.)
+ */
+export function traduzirErroApi(e: unknown): string {
+  if (!(e instanceof Anthropic.APIError)) {
+    return e instanceof Error ? e.message : "Falha inesperada na análise.";
+  }
+
+  const detalhe = String(e.message ?? "");
+
+  if (e instanceof Anthropic.AuthenticationError) {
+    return "A chave da API do Claude não foi aceita. Confira ANTHROPIC_API_KEY no ambiente.";
+  }
+  if (e instanceof Anthropic.PermissionDeniedError) {
+    return "A chave da API não tem permissão para este modelo.";
+  }
+  if (e instanceof Anthropic.RateLimitError) {
+    return "A API atingiu o limite de requisições. Espere um minuto e continue a análise.";
+  }
+  if (e.status === 529 || /overloaded/i.test(detalhe)) {
+    return "O modelo está sobrecarregado no momento. Tente de novo em alguns minutos.";
+  }
+  if (e instanceof Anthropic.BadRequestError) {
+    // Defeito de configuração do Sonar, não do arquivo.
+    if (/output_config|schema|format/i.test(detalhe)) {
+      return `Erro de configuração do Sonar (esquema de saída), não dos autos. Rode "npm run checar-esquemas". Detalhe técnico: ${detalhe.slice(0, 220)}`;
+    }
+    if (/credit|billing|quota/i.test(detalhe)) {
+      return "A conta da API está sem crédito ou fora da cota.";
+    }
+    return `A API recusou a requisição: ${detalhe.slice(0, 260)}`;
+  }
+  if (e.status && e.status >= 500) {
+    return "A API do Claude falhou momentaneamente. Tente de novo.";
+  }
+  return detalhe.slice(0, 300) || "Falha inesperada na análise.";
+}
+
 /** Junta os blocos de texto da resposta e devolve o JSON já parseado. */
 function jsonDaResposta<T>(msg: Anthropic.Message, onde: string): T {
   if (msg.stop_reason === "refusal") {

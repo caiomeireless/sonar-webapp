@@ -98,7 +98,7 @@ export type ResultadoExtraido =
 
 export interface IdentificacaoAutos {
   /** Define o formato da referência: fls. X (e-SAJ) x ev. X, doc. Y (eproc). */
-  sistema: SistemaAutos | null;
+  sistema: SistemaAutos;
   numeroCnj: string | null;
   tribunal: string | null;
   comarca: string | null;
@@ -223,7 +223,8 @@ export const SCHEMA_EXTRACAO = {
         "dataDistribuicao",
       ],
       properties: {
-        sistema: { type: ["string", "null"], enum: [...SISTEMAS_AUTOS, null] },
+        // NÃO transformar em anulável: enum com type ["string","null"] é 400.
+        sistema: { type: "string", enum: [...SISTEMAS_AUTOS] },
         numeroCnj: TEXTO_OU_NULO,
         tribunal: TEXTO_OU_NULO,
         comarca: TEXTO_OU_NULO,

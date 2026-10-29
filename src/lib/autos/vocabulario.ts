@@ -9,8 +9,20 @@
 // SISTEMA DOS AUTOS — muda o formato da referência
 // ============================================================
 
-/** e-SAJ cita "fls. X"; eproc cita "ev. X, doc. Y"; migrado soma os dois. */
-export const SISTEMAS_AUTOS = ["esaj", "eproc", "migrado"] as const;
+/**
+ * e-SAJ cita "fls. X"; eproc cita "ev. X, doc. Y"; migrado soma os dois.
+ *
+ * "indefinido" existe porque a API REJEITA enum anulável: um
+ * `{ type: ["string","null"], enum: [...] }` volta como 400 "Enum value
+ * 'esaj' does not match declared type". Todo enum destes vocabulários é
+ * não-anulável e carrega o próprio valor de ausência.
+ */
+export const SISTEMAS_AUTOS = [
+  "esaj",
+  "eproc",
+  "migrado",
+  "indefinido",
+] as const;
 export type SistemaAutos = (typeof SISTEMAS_AUTOS)[number];
 
 // ============================================================

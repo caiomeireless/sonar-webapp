@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "checar-esquemas": "node scripts/checar-esquemas-autos.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",

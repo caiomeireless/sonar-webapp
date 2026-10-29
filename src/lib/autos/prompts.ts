@@ -240,9 +240,10 @@ ${EXPRESSOES}
 
 Preencha:
 
-- identificacao: sistema dos autos (esaj, eproc ou migrado — o formato da
-  referência depende disso), número CNJ, tribunal, comarca, vara, classe,
-  assunto, valor da causa, data de distribuição. Só se aparecer.
+- identificacao: sistema dos autos (esaj, eproc, migrado, ou "indefinido"
+  quando não der para saber — o formato da referência depende disso),
+  número CNJ, tribunal, comarca, vara, classe, assunto, valor da causa,
+  data de distribuição. Os demais campos, só se aparecerem.
 - partes: polo (exequente, executado, terceiro interessado), nome, documento,
   advogados e endereços. Marque o polo com cuidado: NÓS SOMOS O CREDOR.
   Registre também, quando aparecerem, estado civil, regime de bens e cônjuge
