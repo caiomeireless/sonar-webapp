@@ -8,7 +8,24 @@
 // Os esquemas são escritos à mão em JSON Schema (sem zod) porque é o que a
 // API consome direto e porque o tsc não precisa inferir nada disso.
 
-import type { EspecieMedida } from "./prompts";
+import {
+  ESPECIES_ATIPICAS,
+  ESPECIES_TIPICAS,
+  type EspecieMedida,
+} from "./prompts";
+
+/**
+ * O vocabulário fechado, no esquema e não só no texto do prompt.
+ *
+ * Pedir "use o vocabulário fechado" na instrução NÃO basta: num teste real o
+ * modelo devolveu "Bloqueio via SISBAJUD" em vez de "sisbajud". Espécie em
+ * texto livre quebra a deduplicação, a classificação típica/atípica e faz
+ * tudo cair em 'outro' na hora de gravar. Aqui o enum obriga.
+ */
+const ENUM_ESPECIE = {
+  type: "string",
+  enum: [...ESPECIES_TIPICAS, ...ESPECIES_ATIPICAS],
+} as const;
 
 // ============================================================
 // PASSADA 0 — TRIAGEM (o que é peça e o que é anexo)
@@ -234,7 +251,7 @@ export const SCHEMA_EXTRACAO = {
           "trecho",
         ],
         properties: {
-          especie: { type: "string" },
+          especie: ENUM_ESPECIE,
           classe: { type: "string", enum: ["tipica", "atipica"] },
           titulo: { type: "string" },
           requeridaEm: TEXTO_OU_NULO,
@@ -497,7 +514,7 @@ export const SCHEMA_CONSOLIDACAO = {
         ],
         properties: {
           ordem: { type: "integer" },
-          especie: { type: "string" },
+          especie: ENUM_ESPECIE,
           classe: { type: "string", enum: ["tipica", "atipica"] },
           titulo: { type: "string" },
           requeridaEm: TEXTO_OU_NULO,
@@ -539,7 +556,7 @@ export const SCHEMA_CONSOLIDACAO = {
         ],
         properties: {
           prioridade: { type: "integer" },
-          especie: { type: "string" },
+          especie: ENUM_ESPECIE,
           classe: { type: "string", enum: ["tipica", "atipica"] },
           titulo: { type: "string" },
           porQueCabe: { type: "string" },
