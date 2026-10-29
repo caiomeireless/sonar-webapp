@@ -13,6 +13,18 @@ import {
   ESPECIES_TIPICAS,
   type EspecieMedida,
 } from "./prompts";
+import {
+  CODIGOS_MEDIDA,
+  EFEITOS_PRESCRICIONAIS,
+  PERFIS_DEVEDOR,
+  SEMAFOROS,
+  SISTEMAS_AUTOS,
+  type CodigoMedida,
+  type EfeitoPrescricional,
+  type PerfilDevedor,
+  type SemaforoPrescricao,
+  type SistemaAutos,
+} from "./vocabulario";
 
 /**
  * O vocabulário fechado, no esquema e não só no texto do prompt.
@@ -85,6 +97,8 @@ export type ResultadoExtraido =
   | "indeferida";
 
 export interface IdentificacaoAutos {
+  /** Define o formato da referência: fls. X (e-SAJ) x ev. X, doc. Y (eproc). */
+  sistema: SistemaAutos | null;
   numeroCnj: string | null;
   tribunal: string | null;
   comarca: string | null;
@@ -159,6 +173,9 @@ export interface BemExtraido {
 export interface EventoExtraido {
   data: string | null;
   descricao: string;
+  /** O motor do art. 921: sem isto a linha do tempo é enfeite. */
+  efeitoPrescricional: EfeitoPrescricional;
+  referencia: string | null;
   paginas: number[];
 }
 
@@ -195,6 +212,7 @@ export const SCHEMA_EXTRACAO = {
       type: "object",
       additionalProperties: false,
       required: [
+        "sistema",
         "numeroCnj",
         "tribunal",
         "comarca",
@@ -205,6 +223,7 @@ export const SCHEMA_EXTRACAO = {
         "dataDistribuicao",
       ],
       properties: {
+        sistema: { type: ["string", "null"], enum: [...SISTEMAS_AUTOS, null] },
         numeroCnj: TEXTO_OU_NULO,
         tribunal: TEXTO_OU_NULO,
         comarca: TEXTO_OU_NULO,
@@ -342,10 +361,21 @@ export const SCHEMA_EXTRACAO = {
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["data", "descricao", "paginas"],
+        required: [
+          "data",
+          "descricao",
+          "efeitoPrescricional",
+          "referencia",
+          "paginas",
+        ],
         properties: {
           data: TEXTO_OU_NULO,
           descricao: { type: "string" },
+          efeitoPrescricional: {
+            type: "string",
+            enum: [...EFEITOS_PRESCRICIONAIS],
+          },
+          referencia: TEXTO_OU_NULO,
           paginas: PAGINAS,
         },
       },
@@ -393,6 +423,8 @@ export interface MedidaConsolidada {
 
 export interface MedidaFaltante {
   prioridade: number;
+  /** Código do catálogo M1 a M22 — liga "o que falta" à peça que resolve. */
+  codigo: CodigoMedida;
   especie: EspecieMedida;
   classe: ClasseMedida;
   titulo: string;
@@ -441,6 +473,7 @@ export interface ChanceExito {
 
 export interface ProximaMovimentacao {
   titulo: string;
+  codigo: CodigoMedida;
   tipoPeca: string;
   urgencia: "alta" | "media" | "baixa";
   fundamentos: string[];
@@ -454,9 +487,53 @@ export interface AlertaAutos {
   descricao: string;
 }
 
+/** Demonstração da prescrição intercorrente (art. 921), passo a passo. */
+export interface PrescricaoIntercorrente {
+  /** Prazo da pretensão, em anos (Súmula 150/STF; CC, art. 206-A). */
+  prazoAnos: number | null;
+  prazoFundamento: string | null;
+  /** Ciência da PRIMEIRA tentativa infrutífera (art. 921, §4º). */
+  marcoInicial: string | null;
+  marcoInicialReferencia: string | null;
+  suspensaoInicio: string | null;
+  suspensaoFim: string | null;
+  /** Cada uma reinicia o prazo inteiro (art. 921, §4º-A). */
+  interrupcoes: { data: string; ato: string; referencia: string | null }[];
+  dataEstimadaConsumacao: string | null;
+  mesesRestantes: number | null;
+  semaforo: SemaforoPrescricao;
+  /** O cálculo foi conferido pelos dois caminhos; houve divergência? */
+  divergenciaEntreCaminhos: string | null;
+  demonstracao: string;
+}
+
+export interface VulnerabilidadeApontada {
+  item: number;
+  situacao: string;
+  consequencia: string;
+  correcao: string;
+}
+
+export interface TesteAuditoria {
+  numero: number;
+  pergunta: string;
+  atendido: boolean;
+  motivo: string;
+}
+
 export interface FichaAutos {
   identificacao: IdentificacaoAutos;
   partes: ParteExtraida[];
+  /** Enquadramento que calibra onde procurar bens. */
+  perfilDevedor: PerfilDevedor;
+  perfilDevedorSinais: string;
+  /** O que as decisões revelam sobre o juízo — decide o modo da peça. */
+  perfilJuizo: string;
+  modoPeca: "escalonada" | "sequencial";
+  modoPecaRazao: string;
+  prescricao: PrescricaoIntercorrente;
+  vulnerabilidades: VulnerabilidadeApontada[];
+  auditoria: TesteAuditoria[];
   medidasRealizadas: MedidaConsolidada[];
   medidasFaltantes: MedidaFaltante[];
   debito: DebitoConsolidado;
@@ -476,6 +553,14 @@ export const SCHEMA_CONSOLIDACAO = {
   required: [
     "identificacao",
     "partes",
+    "perfilDevedor",
+    "perfilDevedorSinais",
+    "perfilJuizo",
+    "modoPeca",
+    "modoPecaRazao",
+    "prescricao",
+    "vulnerabilidades",
+    "auditoria",
     "medidasRealizadas",
     "medidasFaltantes",
     "debito",
@@ -492,6 +577,87 @@ export const SCHEMA_CONSOLIDACAO = {
     identificacao: SCHEMA_EXTRACAO.properties.identificacao,
     partes: SCHEMA_EXTRACAO.properties.partes,
     bens: SCHEMA_EXTRACAO.properties.bens,
+
+    perfilDevedor: { type: "string", enum: [...PERFIS_DEVEDOR] },
+    perfilDevedorSinais: { type: "string" },
+    perfilJuizo: { type: "string" },
+    modoPeca: { type: "string", enum: ["escalonada", "sequencial"] },
+    modoPecaRazao: { type: "string" },
+
+    prescricao: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "prazoAnos",
+        "prazoFundamento",
+        "marcoInicial",
+        "marcoInicialReferencia",
+        "suspensaoInicio",
+        "suspensaoFim",
+        "interrupcoes",
+        "dataEstimadaConsumacao",
+        "mesesRestantes",
+        "semaforo",
+        "divergenciaEntreCaminhos",
+        "demonstracao",
+      ],
+      properties: {
+        prazoAnos: NUMERO_OU_NULO,
+        prazoFundamento: TEXTO_OU_NULO,
+        marcoInicial: TEXTO_OU_NULO,
+        marcoInicialReferencia: TEXTO_OU_NULO,
+        suspensaoInicio: TEXTO_OU_NULO,
+        suspensaoFim: TEXTO_OU_NULO,
+        interrupcoes: {
+          type: "array",
+          items: {
+            type: "object",
+            additionalProperties: false,
+            required: ["data", "ato", "referencia"],
+            properties: {
+              data: { type: "string" },
+              ato: { type: "string" },
+              referencia: TEXTO_OU_NULO,
+            },
+          },
+        },
+        dataEstimadaConsumacao: TEXTO_OU_NULO,
+        mesesRestantes: NUMERO_OU_NULO,
+        semaforo: { type: "string", enum: [...SEMAFOROS] },
+        divergenciaEntreCaminhos: TEXTO_OU_NULO,
+        demonstracao: { type: "string" },
+      },
+    },
+
+    vulnerabilidades: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["item", "situacao", "consequencia", "correcao"],
+        properties: {
+          item: { type: "integer" },
+          situacao: { type: "string" },
+          consequencia: { type: "string" },
+          correcao: { type: "string" },
+        },
+      },
+    },
+
+    auditoria: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["numero", "pergunta", "atendido", "motivo"],
+        properties: {
+          numero: { type: "integer" },
+          pergunta: { type: "string" },
+          atendido: { type: "boolean" },
+          motivo: { type: "string" },
+        },
+      },
+    },
     medidasRealizadas: {
       type: "array",
       items: {
@@ -546,6 +712,7 @@ export const SCHEMA_CONSOLIDACAO = {
         additionalProperties: false,
         required: [
           "prioridade",
+          "codigo",
           "especie",
           "classe",
           "titulo",
@@ -556,6 +723,7 @@ export const SCHEMA_CONSOLIDACAO = {
         ],
         properties: {
           prioridade: { type: "integer" },
+          codigo: { type: "string", enum: [...CODIGOS_MEDIDA] },
           especie: ENUM_ESPECIE,
           classe: { type: "string", enum: ["tipica", "atipica"] },
           titulo: { type: "string" },
@@ -659,6 +827,7 @@ export const SCHEMA_CONSOLIDACAO = {
       additionalProperties: false,
       required: [
         "titulo",
+        "codigo",
         "tipoPeca",
         "urgencia",
         "fundamentos",
@@ -667,6 +836,7 @@ export const SCHEMA_CONSOLIDACAO = {
       ],
       properties: {
         titulo: { type: "string" },
+        codigo: { type: "string", enum: [...CODIGOS_MEDIDA] },
         tipoPeca: { type: "string" },
         urgencia: { type: "string", enum: ["alta", "media", "baixa"] },
         fundamentos: { type: "array", items: { type: "string" } },

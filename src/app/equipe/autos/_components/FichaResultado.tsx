@@ -21,6 +21,7 @@ import {
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { BordaLiquidaMetal } from "@/components/ui/BordaLiquidaMetal";
 import { formatBRL, formatData } from "@/lib/format";
+import { PERFIL_DEVEDOR_META } from "@/lib/autos/vocabulario";
 import type {
   EstadoCaminho,
   EtapaExecucao,
@@ -213,12 +214,21 @@ export function FichaResultado({
 
   const executado = ficha.partes.find((p) => p.polo === "executado");
   const exequente = ficha.partes.find((p) => p.polo === "exequente");
-  const { debito, satisfacao, chanceExito, proximaMovimentacao } = ficha;
+  const { debito, satisfacao, chanceExito, proximaMovimentacao, prescricao } =
+    ficha;
 
   const corChance =
     chanceExito.faixa === "alta"
       ? "var(--color-signal)"
       : chanceExito.faixa === "media"
+        ? "#F4C542"
+        : "#FF5B5B";
+
+  // Semáforo do art. 921: vermelho abaixo de 12 meses até a consumação.
+  const corSemaforo =
+    prescricao.semaforo === "verde"
+      ? "var(--color-signal)"
+      : prescricao.semaforo === "amarelo"
         ? "#F4C542"
         : "#FF5B5B";
 
@@ -259,6 +269,9 @@ export function FichaResultado({
           )}
           <span className="inline-flex items-center rounded-full border border-[rgba(60,255,138,0.45)] bg-[rgba(60,255,138,0.10)] px-3 py-1 font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-signal)]">
             {ETAPA_LABEL[ficha.etapa]}
+          </span>
+          <span className="inline-flex items-center rounded-full border border-[rgba(192,132,252,0.45)] bg-[rgba(192,132,252,0.12)] px-3 py-1 font-mono text-[12px] uppercase tracking-[0.22em] text-[#C084FC]">
+            {PERFIL_DEVEDOR_META[ficha.perfilDevedor].label}
           </span>
         </div>
         {exequente && (
@@ -306,6 +319,150 @@ export function FichaResultado({
           cor={corChance}
         />
       </section>
+
+      {/* ============ PRESCRIÇÃO INTERCORRENTE (art. 921) ============ */}
+      <section className="flex flex-col gap-6">
+        <TituloSetor texto="Prescrição Intercorrente" />
+        <SpotlightCard
+          local
+          claro
+          borda={`color-mix(in srgb, ${corSemaforo} 45%, transparent)`}
+          className="p-6 sm:p-8"
+        >
+          <div className="flex flex-wrap items-center gap-4">
+            <span
+              className="flex h-12 w-12 items-center justify-center rounded-full border"
+              style={{
+                borderColor: `color-mix(in srgb, ${corSemaforo} 55%, transparent)`,
+                background: `color-mix(in srgb, ${corSemaforo} 14%, transparent)`,
+                color: corSemaforo,
+                boxShadow: `0 0 18px color-mix(in srgb, ${corSemaforo} 35%, transparent)`,
+              }}
+            >
+              <Clock className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <div>
+              <p
+                className="font-mono text-[13px] uppercase tracking-[0.28em]"
+                style={{ color: corSemaforo }}
+              >
+                Risco {prescricao.semaforo}
+              </p>
+              <p className="mt-1 text-[15px] text-ivory">
+                {prescricao.mesesRestantes !== null
+                  ? `${prescricao.mesesRestantes} ${prescricao.mesesRestantes === 1 ? "mês" : "meses"} até a consumação`
+                  : "Prazo não calculável com os autos recebidos"}
+                {prescricao.dataEstimadaConsumacao
+                  ? ` · estimada em ${formatData(prescricao.dataEstimadaConsumacao)}`
+                  : ""}
+              </p>
+            </div>
+          </div>
+
+          <dl className="mt-6 grid gap-x-8 gap-y-4 sm:grid-cols-2">
+            <div className="border-b border-[rgba(201,162,74,0.16)] pb-3">
+              <dt className="font-mono text-[12px] uppercase tracking-[0.24em] text-[var(--color-gold)]/80">
+                Marco inicial (art. 921, §4º)
+              </dt>
+              <dd className="mt-1 text-[15px] text-ivory">
+                {prescricao.marcoInicial
+                  ? formatData(prescricao.marcoInicial)
+                  : "—"}
+                {prescricao.marcoInicialReferencia && (
+                  <span className="ml-2 font-mono text-[12px] text-[var(--color-ivory-40)]">
+                    {prescricao.marcoInicialReferencia}
+                  </span>
+                )}
+              </dd>
+            </div>
+            <div className="border-b border-[rgba(201,162,74,0.16)] pb-3">
+              <dt className="font-mono text-[12px] uppercase tracking-[0.24em] text-[var(--color-gold)]/80">
+                Prazo da pretensão
+              </dt>
+              <dd className="mt-1 text-[15px] text-ivory">
+                {prescricao.prazoAnos ? `${prescricao.prazoAnos} anos` : "—"}
+                {prescricao.prazoFundamento && (
+                  <span className="ml-2 text-[13px] text-[var(--color-ivory-66)]">
+                    {prescricao.prazoFundamento}
+                  </span>
+                )}
+              </dd>
+            </div>
+          </dl>
+
+          {prescricao.interrupcoes.length > 0 && (
+            <div className="mt-5">
+              <p className="font-mono text-[12px] uppercase tracking-[0.24em] text-[var(--color-signal)]">
+                Interrupções (art. 921, §4º-A) — cada uma reinicia o prazo
+              </p>
+              <ul className="mt-3 flex flex-col gap-1.5">
+                {prescricao.interrupcoes.map((i, n) => (
+                  <li key={n} className="text-sm text-[var(--color-ivory-88)]">
+                    {formatData(i.data)} · {i.ato}
+                    {i.referencia && (
+                      <span className="ml-2 font-mono text-[12px] text-[var(--color-gold)]/80">
+                        {i.referencia}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {prescricao.demonstracao && (
+            <p className="mt-5 whitespace-pre-line border-t border-[rgba(201,162,74,0.16)] pt-5 text-sm leading-relaxed text-[var(--color-ivory-66)]">
+              {prescricao.demonstracao}
+            </p>
+          )}
+
+          {prescricao.divergenciaEntreCaminhos && (
+            <p className="mt-4 flex items-start gap-2 text-sm leading-relaxed text-[#F4C542]">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              Os dois caminhos de cálculo divergiram:{" "}
+              {prescricao.divergenciaEntreCaminhos}
+            </p>
+          )}
+        </SpotlightCard>
+      </section>
+
+      {/* ============ VULNERABILIDADES ============ */}
+      {ficha.vulnerabilidades.length > 0 && (
+        <section className="flex flex-col gap-6">
+          <TituloSetor texto="Vulnerabilidades a Sanar" />
+          <p className="text-center text-sm text-[var(--color-ivory-66)]">
+            Pontos onde a execução está exposta a nulidade ou a perda de
+            eficácia, lidos com o advogado do executado no ombro.
+          </p>
+          <div className="flex flex-col gap-3">
+            {ficha.vulnerabilidades.map((v) => (
+              <SpotlightCard
+                key={v.item}
+                local
+                claro
+                borda="rgba(244,197,66,0.32)"
+                className="p-5 sm:p-6"
+              >
+                <div className="flex items-start gap-4">
+                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[rgba(244,197,66,0.45)] bg-[rgba(244,197,66,0.10)] font-mono text-[12px] text-[#F4C542]">
+                    {v.item}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[15px] text-ivory">{v.situacao}</p>
+                    <p className="mt-1.5 text-sm leading-relaxed text-[var(--color-ivory-66)]">
+                      {v.consequencia}
+                    </p>
+                    <p className="mt-2 flex items-start gap-2 text-sm leading-relaxed text-[var(--color-signal)]">
+                      <ArrowRight className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                      {v.correcao}
+                    </p>
+                  </div>
+                </div>
+              </SpotlightCard>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ============ POR QUE ESSA CHANCE ============ */}
       <section className="flex flex-col gap-6">
@@ -401,7 +558,7 @@ export function FichaResultado({
                 >
                   <div className="flex items-start justify-between gap-3">
                     <span className="font-mono text-[12px] uppercase tracking-[0.22em] text-[var(--color-ivory-40)]">
-                      Prioridade {m.prioridade}
+                      {m.codigo} · Prioridade {m.prioridade}
                     </span>
                     <span
                       className="inline-flex rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.22em]"
@@ -457,6 +614,9 @@ export function FichaResultado({
           className="p-6 sm:p-8"
         >
           <div className="flex flex-wrap items-center gap-3">
+            <span className="inline-flex items-center rounded-full border border-[rgba(201,162,74,0.45)] bg-[rgba(201,162,74,0.10)] px-3 py-1 font-mono text-[12px] uppercase tracking-[0.2em] text-[var(--color-gold)]">
+              {proximaMovimentacao.codigo}
+            </span>
             <h3 className="font-serif text-2xl text-ivory">
               {proximaMovimentacao.titulo}
             </h3>
